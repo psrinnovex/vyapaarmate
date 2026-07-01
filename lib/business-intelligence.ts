@@ -1,6 +1,27 @@
 export type IntelligenceConfidence = "Low" | "Medium" | "High";
 export type IntelligenceSource = "database" | "demo";
 export type IntelligenceTimeSlot = "morning" | "afternoon" | "evening" | "night";
+export type IntelligenceEngineType = "rules_engine" | "trained_ml" | "hybrid_rules_plus_ml";
+
+export type IntelligenceEngineModelSummary = {
+  modelType: "demand" | "retention" | "payment_risk";
+  status: "needs_data" | "ready_for_training" | "training" | "trained" | "failed" | "disabled";
+  latestVersion: string | null;
+  lastTrainedAt: string | null;
+  trainingRows: number | null;
+  validationRows: number | null;
+  metrics: unknown;
+  missingRequirements: string[];
+};
+
+export type IntelligenceEnginePayloadSummary = {
+  type: IntelligenceEngineType;
+  dataSource: "first_party_database";
+  externalDatasets: "none";
+  syntheticProductionData: "none";
+  trainedModelInUse: boolean;
+  modelStatuses: IntelligenceEngineModelSummary[];
+};
 
 export type IntelligenceProduct = {
   id: string | null;
@@ -186,6 +207,7 @@ export type BusinessIntelligencePayload = {
   generatedAt: string;
   dataWindow: string;
   business: BusinessIntelligenceDataset["business"];
+  engine?: IntelligenceEnginePayloadSummary;
   tomorrowDemandForecast: DemandForecastResult[];
   customerRetentionAlerts: {
     count: number;

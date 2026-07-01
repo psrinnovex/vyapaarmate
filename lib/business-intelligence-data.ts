@@ -258,7 +258,7 @@ function buildDemoBusinessIntelligenceDataset({
   };
 }
 
-async function getBusinessIntelligenceDataset(businessId: string): Promise<BusinessIntelligenceDataset> {
+export async function getBusinessIntelligenceDataset(businessId: string): Promise<BusinessIntelligenceDataset> {
   const now = new Date();
   const historyStart = daysAgo(45);
   const paymentStart = daysAgo(14);

@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { getBusinessIntelligenceArtifacts } from "@/lib/business-intelligence-data";
+import { refreshBusinessMlIntelligence } from "@/lib/intelligence/ml/prediction-service";
 import { prisma } from "@/lib/prisma";
 import type {
   BusinessIntelligenceArtifacts,
@@ -32,6 +33,7 @@ export type BusinessIntelligenceRefreshResult = {
   businessId: string;
   source: BusinessIntelligencePayload["source"];
   generatedAt: string;
+  ml: Awaited<ReturnType<typeof refreshBusinessMlIntelligence>>;
   persisted: {
     aiInsights: number;
     healthSnapshots: number;
@@ -261,10 +263,13 @@ export async function refreshBusinessIntelligenceForBusiness(businessId: string)
     if (plan.paymentPriorities.length) await tx.paymentPriority.createMany({ data: plan.paymentPriorities });
   });
 
+  const ml = await refreshBusinessMlIntelligence(businessId);
+
   return {
     businessId,
     source: artifacts.payload.source,
     generatedAt: artifacts.payload.generatedAt,
+    ml,
     persisted: {
       aiInsights: plan.aiInsights.length,
       healthSnapshots: 1,

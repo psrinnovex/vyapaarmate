@@ -14,6 +14,8 @@ import {
   buildIntelligenceSummary,
   buildRevenueOpportunities
 } from "@/lib/business-intelligence-api";
+import { evaluateBusinessIntelligenceAccuracy } from "@/lib/business-intelligence-accuracy";
+import { buildBusinessIntelligenceGovernanceReport } from "@/lib/business-intelligence-governance";
 import { buildBusinessIntelligenceMaterializationPlan } from "@/lib/business-intelligence-materialization";
 
 const referenceDate = new Date("2026-07-01T08:00:00+05:30");
@@ -324,4 +326,39 @@ test("business intelligence materialization plan maps payload outputs to persist
   assert.equal(plan.customerScores.length, liveDataset.customers.length);
   assert.equal(plan.demandForecasts.length, artifacts.payload.tomorrowDemandForecast.length);
   assert.equal(plan.paymentPriorities.length, artifacts.payload.paymentPriorities.length);
+});
+
+test("business intelligence accuracy report backtests forecast output against historical orders", () => {
+  const report = evaluateBusinessIntelligenceAccuracy({
+    dataset: liveDataset,
+    backtestDays: 7,
+    includeSamples: true
+  });
+
+  assert.equal(report.business.id, liveDataset.business.id);
+  assert.equal(report.demandForecastAccuracy.summary.backtestDays, 7);
+  assert.ok(report.demandForecastAccuracy.summary.evaluatedSamples > 0);
+  assert.ok(report.demandForecastAccuracy.summary.meanAbsoluteError >= 0);
+  assert.ok(report.demandForecastAccuracy.byConfidence.length > 0);
+  assert.ok(report.maintenance.recommendations.length > 0);
+});
+
+test("business intelligence governance report documents data sources and model readiness", () => {
+  const report = buildBusinessIntelligenceGovernanceReport(liveDataset);
+
+  assert.equal(report.currentEngine.type, "rules_engine");
+  assert.equal(report.currentEngine.trainedModelInUse, false);
+  assert.equal(report.currentEngine.usesExternalDatasets, false);
+  assert.equal(report.currentEngine.externalDatasets, "none");
+  assert.equal(report.currentEngine.syntheticProductionData, "none");
+  assert.equal(report.datasetProfile.source, "database");
+  assert.equal(report.datasetProfile.orderHistory.linkedOrderItemRate, 100);
+  assert.ok(report.dataSources.some((source) => source.storage === "Order, OrderItem" && source.trainingRole === "future_training_label"));
+  assert.ok(report.dataSources.some((source) => source.storage === "Customer" && source.containsPersonalData));
+  assert.equal(report.readiness.gates.find((gate) => gate.id === "owner_recommendations")?.status, "ready");
+  assert.equal(report.readiness.gates.find((gate) => gate.id === "custom_ml_training")?.status, "needs_data");
+  assert.ok(report.modelStatus.every((model) => model.status === "needs_data"));
+  assert.equal(report.trainingPlan.currentTrainingStatus, "not_training");
+  assert.equal(report.trainingPlan.externalDatasets.length, 0);
+  assert.ok(report.maintenance.recommendedActions.length > 0);
 });

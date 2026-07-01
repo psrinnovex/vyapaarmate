@@ -289,6 +289,9 @@ model Business {
   customerIntelligenceScores  CustomerIntelligenceScore[]
   demandForecasts             DemandForecast[]
   paymentPriorities           PaymentPriority[]
+  intelligenceModelArtifacts   IntelligenceModelArtifact[]
+  intelligenceTrainingRuns     IntelligenceTrainingRun[]
+  intelligencePredictions      IntelligencePrediction[]
   createdAt                   DateTime                    @default(now())
   updatedAt                   DateTime                    @updatedAt
 
@@ -605,6 +608,70 @@ model PaymentPriority {
   @@index([businessId, priorityScore, createdAt])
   @@index([customerId])
   @@index([orderId])
+}
+
+model IntelligenceModelArtifact {
+  id                String    @id @default(cuid())
+  businessId        String
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  modelType         String
+  version           String
+  status            String
+  algorithm         String
+  featuresJson      Json
+  weightsJson       Json?
+  artifactJson      Json?
+  metricsJson       Json?
+  trainedAt         DateTime?
+  trainingDataStart DateTime?
+  trainingDataEnd   DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([businessId, modelType, version])
+  @@index([businessId, modelType])
+  @@index([businessId, modelType, status])
+  @@index([businessId, status, createdAt])
+  @@index([businessId, createdAt])
+}
+
+model IntelligenceTrainingRun {
+  id             String    @id @default(cuid())
+  businessId     String
+  business       Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  modelType      String
+  status         String
+  rowsUsed       Int       @default(0)
+  trainRows      Int       @default(0)
+  validationRows Int       @default(0)
+  metricsJson    Json?
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  errorMessage   String?   @db.Text
+
+  @@index([businessId, modelType])
+  @@index([businessId, modelType, status])
+  @@index([businessId, status, startedAt])
+  @@index([businessId, startedAt])
+}
+
+model IntelligencePrediction {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  modelType       String
+  entityType      String
+  entityId        String
+  predictionJson  Json
+  confidence      Float    @default(0)
+  explanationJson Json
+  modelVersion    String?
+  createdAt       DateTime @default(now())
+
+  @@index([businessId, modelType])
+  @@index([businessId, modelType, createdAt])
+  @@index([businessId, modelType, entityType, entityId])
+  @@index([businessId, createdAt])
 }
 
 model BusinessWalletEntry {

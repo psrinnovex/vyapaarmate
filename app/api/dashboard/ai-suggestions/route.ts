@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireBusinessSession } from "@/lib/api-session";
 import { getBusinessIntelligencePayload } from "@/lib/business-intelligence-data";
+import { buildEngineSummary } from "@/lib/intelligence/ml/model-registry";
+import { getIntelligenceModelStatuses } from "@/lib/intelligence/ml/training-service";
 import { LiveDataNotFoundError, liveStream } from "@/lib/live-data";
 import type { LiveChangePayload } from "@/lib/postgres-live-events";
 
@@ -19,13 +21,24 @@ const aiSuggestionTables = new Set([
   "Order",
   "OrderItem",
   "Payment",
-  "PaymentPriority"
+  "PaymentPriority",
+  "IntelligenceModelArtifact",
+  "IntelligenceTrainingRun",
+  "IntelligencePrediction"
 ]);
 
 function aiSuggestionChangeMatches(businessId: string, change: LiveChangePayload) {
   if (!aiSuggestionTables.has(change.table)) return false;
   if (change.global) return true;
   return change.businessId === businessId;
+}
+
+async function getAiSuggestionsPayload(businessId: string) {
+  const [payload, statuses] = await Promise.all([getBusinessIntelligencePayload(businessId), getIntelligenceModelStatuses(businessId)]);
+  return {
+    ...payload,
+    engine: buildEngineSummary(statuses)
+  };
 }
 
 export async function GET(request: Request) {
@@ -38,7 +51,7 @@ export async function GET(request: Request) {
 
   if (stream) {
     return new Response(
-      liveStream("ai-suggestions", () => getBusinessIntelligencePayload(session.businessId), request.signal, {
+      liveStream("ai-suggestions", () => getAiSuggestionsPayload(session.businessId), request.signal, {
         sendInitialPayload: !skipInitial,
         refreshIntervalMs: 30000,
         changeFilter: (change) => aiSuggestionChangeMatches(session.businessId, change)
@@ -55,7 +68,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    return NextResponse.json(await getBusinessIntelligencePayload(session.businessId));
+    return NextResponse.json(await getAiSuggestionsPayload(session.businessId));
   } catch (error) {
     if (error instanceof LiveDataNotFoundError) {
       return NextResponse.json({ error: "Business not found" }, { status: 404 });

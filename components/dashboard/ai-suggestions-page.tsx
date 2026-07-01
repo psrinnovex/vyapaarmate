@@ -102,6 +102,70 @@ function formatGeneratedAt(value: string) {
   });
 }
 
+function engineLabel(type: NonNullable<BusinessIntelligencePayload["engine"]>["type"]) {
+  if (type === "trained_ml") return "Trained ML";
+  if (type === "hybrid_rules_plus_ml") return "Hybrid";
+  return "Rules";
+}
+
+function modelLabel(modelType: NonNullable<BusinessIntelligencePayload["engine"]>["modelStatuses"][number]["modelType"]) {
+  if (modelType === "demand") return "Demand";
+  if (modelType === "retention") return "Retention";
+  return "Payment";
+}
+
+function modelStatusVariant(status: NonNullable<BusinessIntelligencePayload["engine"]>["modelStatuses"][number]["status"]) {
+  if (status === "trained") return "emerald";
+  if (status === "ready_for_training" || status === "training") return "blue";
+  if (status === "failed") return "red";
+  if (status === "disabled") return "neutral";
+  return "amber";
+}
+
+function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload["engine"] }) {
+  if (!engine) return null;
+
+  return (
+    <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.03 }}>
+      <Card className="mb-5 bg-white">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={engine.trainedModelInUse ? "emerald" : "amber"}>
+                <BrainCircuit className="size-3" />
+                {engineLabel(engine.type)}
+              </Badge>
+              <Badge variant="neutral">First-party database</Badge>
+              <Badge variant="neutral">No external datasets</Badge>
+              <Badge variant="neutral">No synthetic production data</Badge>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              {engine.type === "rules_engine"
+                ? "ML models need more real business history; rules/statistical recommendations are active."
+                : engine.type === "trained_ml"
+                  ? "All model families have trained first-party artifacts."
+                  : "Trained models are active where ready; rules/statistical recommendations fill the remaining gaps."}
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[440px]">
+            {engine.modelStatuses.map((model) => (
+              <div key={model.modelType} className="rounded-lg border border-line bg-mist p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-bold text-ink">{modelLabel(model.modelType)}</p>
+                  <Badge variant={modelStatusVariant(model.status)}>{model.status.replaceAll("_", " ")}</Badge>
+                </div>
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  {model.lastTrainedAt ? `Trained ${formatGeneratedAt(model.lastTrainedAt)}` : model.missingRequirements[0] ?? "Waiting for first-party history."}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
 async function fetchAiSuggestions() {
   const response = await fetch("/api/dashboard/ai-suggestions", {
     cache: "no-store",
@@ -329,6 +393,8 @@ export function AiSuggestionsPage() {
         }
       />
 
+      <EngineReadinessPanel engine={data.engine} />
+
       <motion.div {...sectionMotion}>
         <GlassPanel className="mb-5 overflow-hidden border border-white bg-[linear-gradient(135deg,rgba(13,19,33,0.96),rgba(18,70,160,0.88)_48%,rgba(17,166,106,0.78))] text-white">
           <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -336,7 +402,7 @@ export function AiSuggestionsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="border-white/20 bg-white/10 text-white" variant="outline">
                   <BrainCircuit className="size-3" />
-                  VyapaarMate Intelligence Engine
+                  Bhojzo Intelligence Engine
                 </Badge>
                 <Badge className="border-white/20 bg-white/10 text-white" variant="outline">
                   {data.dataWindow}
