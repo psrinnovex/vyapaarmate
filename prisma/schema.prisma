@@ -1,0 +1,860 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  SUPPORT_AGENT
+  OWNER
+  CUSTOMER
+  MANAGER
+  KITCHEN_STAFF
+  DELIVERY_STAFF
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PRO
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum BusinessKycStatus {
+  PAYMENT_PENDING
+  DOCUMENTS_PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum BusinessKycDocumentType {
+  BUSINESS_REGISTRATION
+  OWNER_ID
+  ADDRESS_PROOF
+  BANK_PROOF
+}
+
+enum FoodType {
+  VEG
+  NON_VEG
+  EGG
+  NOT_APPLICABLE
+}
+
+enum OrderStatus {
+  NEW
+  ACCEPTED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum OrderType {
+  PICKUP
+  DELIVERY
+  DINE_IN
+  SERVICE_AT_LOCATION
+}
+
+enum PaymentProvider {
+  RAZORPAY
+  CASHFREE
+  UPI
+  CASH
+}
+
+enum WalletEntryType {
+  ORDER_PAYMENT_CREDIT
+  PAYOUT_DEBIT
+  REFUND_DEBIT
+  ADJUSTMENT_CREDIT
+  ADJUSTMENT_DEBIT
+}
+
+enum WalletEntryStatus {
+  PENDING_PROVIDER_SETTLEMENT
+  AVAILABLE
+  PROCESSING_PAYOUT
+  SETTLED
+  CANCELLED
+}
+
+enum CouponDiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum BusinessPayoutStatus {
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum BusinessPayoutMethod {
+  UPI
+  BANK_TRANSFER
+}
+
+enum WhatsappStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_REVIEW
+  WAITING_ON_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketSource {
+  CHATBOT
+  ADMIN
+  PAYMENT_DESK
+  EMAIL
+}
+
+enum SupportTicketMessageSender {
+  CUSTOMER
+  BOT
+  AGENT
+  SYSTEM
+}
+
+model User {
+  id                       String                    @id @default(cuid())
+  name                     String
+  email                    String                    @unique
+  phone                    String?                   @unique
+  passwordHash             String
+  role                     Role
+  emailVerifiedAt          DateTime?
+  phoneVerifiedAt          DateTime?
+  businessId               String?
+  business                 Business?                 @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  registrationVerification RegistrationVerification?
+  passwordResetTokens      PasswordResetToken[]
+  auditLogs                AuditLog[]
+  requestedSupportTickets  SupportTicket[]           @relation("SupportRequester")
+  assignedSupportTickets   SupportTicket[]           @relation("SupportAssignee")
+  supportTicketMessages    SupportTicketMessage[]    @relation("SupportMessageAuthor")
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+
+  @@index([businessId])
+  @@index([role])
+}
+
+model RegistrationVerification {
+  userId             String   @id
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailCodeHash      String
+  emailCodeExpiresAt DateTime
+  resendAvailableAt  DateTime
+  attempts           Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([emailCodeExpiresAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+  @@index([usedAt])
+}
+
+model PlatformPaymentSettings {
+  id               String   @id @default("platform")
+  directUpiEnabled Boolean  @default(false)
+  upiId            String?
+  upiName          String   @default("PSHR INNOVEX PRIVATE LIMITED")
+  updatedByUserId  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Business {
+  id                          String                      @id @default(cuid())
+  name                        String
+  slug                        String                      @unique
+  ownerName                   String
+  phone                       String                      @unique
+  email                       String                      @unique
+  address                     String
+  city                        String
+  state                       String
+  logoUrl                     String?
+  logoImage                   BusinessImage?
+  businessType                String
+  businessServiceTypeId       String?
+  businessServiceType         BusinessServiceType?        @relation(fields: [businessServiceTypeId], references: [id], onDelete: SetNull)
+  whatsappDisplayPhone        String?
+  whatsappPhoneNumberId       String?                     @unique
+  whatsappWabaId              String?
+  whatsappAccessTokenEnc      String?
+  whatsappConnected           Boolean                     @default(false)
+  whatsappLiveEnabled         Boolean                     @default(false)
+  whatsappApprovedAt          DateTime?
+  subscriptionPlan            SubscriptionPlan            @default(STARTER)
+  subscriptionStatus          SubscriptionStatus          @default(TRIAL)
+  kycStatus                   BusinessKycStatus           @default(PAYMENT_PENDING)
+  kycSubmittedAt              DateTime?
+  kycReviewedAt               DateTime?
+  kycReviewedByUserId         String?
+  kycRejectionReason          String?
+  isVerified                  Boolean                     @default(false)
+  isActive                    Boolean                     @default(true)
+  isOpen                      Boolean                     @default(true)
+  businessHours               String                      @default("Open today")
+  minimumOrder                Decimal                     @default(0) @db.Decimal(10, 2)
+  deliveryFee                 Decimal                     @default(0) @db.Decimal(10, 2)
+  latitude                    Decimal?                    @db.Decimal(9, 6)
+  longitude                   Decimal?                    @db.Decimal(9, 6)
+  serviceRadiusKm             Decimal                     @default(0) @db.Decimal(7, 2)
+  acceptsPickup               Boolean                     @default(true)
+  acceptsDineIn               Boolean                     @default(true)
+  acceptsServiceAtLocation    Boolean                     @default(false)
+  allowsPayLater              Boolean                     @default(true)
+  paymentUpiId                String?
+  paymentUpiName              String?
+  payoutMethod                BusinessPayoutMethod        @default(UPI)
+  payoutUpiId                 String?
+  payoutUpiName               String?
+  payoutAccountHolderName     String?
+  payoutBankName              String?
+  payoutBankAccountNumber     String?
+  payoutBankIfsc              String?
+  cashfreePayoutBeneficiaryId String?                     @unique
+  setupCompletedAt            DateTime?
+  razorpayLinkedAccountId     String?                     @unique
+  razorpayRouteEnabled        Boolean                     @default(false)
+  cashfreeVendorId            String?                     @unique
+  cashfreeSplitEnabled        Boolean                     @default(false)
+  platformFeeBps              Int                         @default(0)
+  users                       User[]
+  categories                  MenuCategory[]
+  menuItems                   MenuItem[]
+  customers                   Customer[]
+  orders                      Order[]
+  payments                    Payment[]
+  walletEntries               BusinessWalletEntry[]
+  payouts                     BusinessPayout[]
+  coupons                     BusinessCoupon[]
+  whatsappMessages            WhatsappMessage[]
+  subscriptions               Subscription[]
+  kycDocuments                BusinessKycDocument[]
+  auditLogs                   AuditLog[]
+  supportTickets              SupportTicket[]
+  aiInsights                  AIInsight[]
+  businessHealthSnapshots     BusinessHealthSnapshot[]
+  customerIntelligenceScores  CustomerIntelligenceScore[]
+  demandForecasts             DemandForecast[]
+  paymentPriorities           PaymentPriority[]
+  createdAt                   DateTime                    @default(now())
+  updatedAt                   DateTime                    @updatedAt
+
+  @@index([city, state])
+  @@index([businessServiceTypeId])
+  @@index([subscriptionPlan, subscriptionStatus])
+  @@index([kycStatus])
+  @@index([isActive, isVerified])
+  @@index([isActive, isVerified, kycStatus])
+  @@index([isActive, isVerified, isOpen, name])
+  @@index([whatsappDisplayPhone])
+  @@index([whatsappConnected, whatsappLiveEnabled])
+  @@index([setupCompletedAt])
+  @@index([payoutMethod])
+}
+
+model BusinessImage {
+  businessId String   @id
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  data       Bytes
+  mimeType   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model BusinessKycDocument {
+  id               String                  @id @default(cuid())
+  businessId       String
+  business         Business                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  type             BusinessKycDocumentType
+  fileName         String
+  contentType      String
+  fileSize         Int
+  data             Bytes
+  uploadedByUserId String?
+  uploadedAt       DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  @@unique([businessId, type])
+  @@index([businessId, uploadedAt])
+  @@index([type])
+}
+
+model BusinessServiceType {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String     @unique
+  description String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  businesses  Business[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model MenuCategory {
+  id         String     @id @default(cuid())
+  businessId String
+  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String
+  sortOrder  Int        @default(0)
+  items      MenuItem[]
+
+  @@unique([businessId, name])
+  @@index([businessId, sortOrder])
+}
+
+model MenuItem {
+  id              String           @id @default(cuid())
+  businessId      String
+  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  categoryId      String
+  category        MenuCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name            String
+  description     String
+  price           Decimal          @db.Decimal(10, 2)
+  imageUrl        String?
+  image           MenuItemImage?
+  foodType        FoodType         @default(VEG)
+  isAvailable     Boolean          @default(true)
+  isBestSeller    Boolean          @default(false)
+  orderItems      OrderItem[]
+  demandForecasts DemandForecast[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([businessId, categoryId])
+  @@index([businessId, isAvailable])
+  @@index([businessId, isBestSeller, updatedAt])
+}
+
+model MenuItemImage {
+  menuItemId String   @id
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  data       Bytes
+  mimeType   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Customer {
+  id                 String                      @id @default(cuid())
+  businessId         String
+  business           Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name               String
+  phone              String
+  email              String?
+  address            String?
+  whatsappOptIn      Boolean                     @default(false)
+  marketingOptIn     Boolean                     @default(false)
+  totalOrders        Int                         @default(0)
+  totalSpent         Decimal                     @default(0) @db.Decimal(12, 2)
+  lastOrderAt        DateTime?
+  orders             Order[]
+  messages           WhatsappMessage[]
+  intelligenceScores CustomerIntelligenceScore[]
+  paymentPriorities  PaymentPriority[]
+  createdAt          DateTime                    @default(now())
+
+  @@unique([businessId, phone])
+  @@index([businessId, lastOrderAt])
+  @@index([businessId, lastOrderAt, createdAt])
+  @@index([businessId, totalOrders])
+  @@index([businessId, email])
+}
+
+model Order {
+  id                 String            @id @default(cuid())
+  publicToken        String            @unique @default(uuid())
+  invoiceNumber      String?           @unique
+  invoiceIssuedAt    DateTime?
+  invoiceEmailSentAt DateTime?
+  businessId         String
+  business           Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerId         String
+  customer           Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  orderNumber        String
+  status             OrderStatus       @default(NEW)
+  paymentStatus      PaymentStatus     @default(PENDING)
+  subtotal           Decimal           @db.Decimal(10, 2)
+  deliveryFee        Decimal           @default(0) @db.Decimal(10, 2)
+  discountAmount     Decimal           @default(0) @db.Decimal(10, 2)
+  taxableAmount      Decimal           @default(0) @db.Decimal(10, 2)
+  gstRateBps         Int               @default(1800)
+  gstAmount          Decimal           @default(0) @db.Decimal(10, 2)
+  couponCode         String?
+  couponId           String?
+  coupon             BusinessCoupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  totalAmount        Decimal           @db.Decimal(10, 2)
+  orderType          OrderType
+  deliveryAddress    String?
+  customerLatitude   Decimal?          @db.Decimal(9, 6)
+  customerLongitude  Decimal?          @db.Decimal(9, 6)
+  distanceKm         Decimal?          @db.Decimal(7, 2)
+  notes              String?
+  items              OrderItem[]
+  payment            Payment?
+  paymentPriorities  PaymentPriority[]
+  whatsappMessages   WhatsappMessage[]
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@unique([businessId, orderNumber])
+  @@index([businessId, status, paymentStatus])
+  @@index([businessId, createdAt])
+  @@index([customerId])
+  @@index([couponId])
+  @@index([invoiceEmailSentAt])
+}
+
+model OrderItem {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String?
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+  itemName   String
+  quantity   Int
+  price      Decimal   @db.Decimal(10, 2)
+  total      Decimal   @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([menuItemId])
+}
+
+model Payment {
+  id                          String               @id @default(cuid())
+  businessId                  String
+  business                    Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orderId                     String               @unique
+  order                       Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider                    PaymentProvider
+  razorpayPaymentLinkId       String?
+  razorpayPaymentId           String?              @unique
+  razorpayTransferId          String?              @unique
+  razorpayTransferStatus      String?
+  razorpayTransferAmount      Decimal?             @db.Decimal(10, 2)
+  razorpayPlatformFee         Decimal?             @db.Decimal(10, 2)
+  razorpayTransferError       String?
+  razorpayTransferUpdatedAt   DateTime?
+  cashfreeOrderId             String?              @unique
+  cashfreeCfOrderId           String?              @unique
+  cashfreePaymentSessionId    String?
+  cashfreePaymentId           String?              @unique
+  cashfreeOrderStatus         String?
+  manualVerificationReference String?              @unique
+  manualVerifiedByUserId      String?
+  manualVerifiedAt            DateTime?
+  paymentRequestUrl           String?
+  paymentRequestExpiresAt     DateTime?
+  paymentReminderSentAt       DateTime?
+  amount                      Decimal              @db.Decimal(10, 2)
+  status                      PaymentStatus        @default(PENDING)
+  paidAt                      DateTime?
+  walletEntry                 BusinessWalletEntry?
+  createdAt                   DateTime             @default(now())
+
+  @@index([businessId, status])
+  @@index([businessId, createdAt])
+  @@index([businessId, status, createdAt])
+  @@index([status, paymentRequestExpiresAt])
+  @@index([status, razorpayTransferStatus])
+  @@index([status, cashfreeOrderStatus])
+  @@index([provider, status, createdAt])
+}
+
+model AIInsight {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  type            String
+  title           String
+  description     String   @db.Text
+  severity        String   @default("info")
+  confidence      Float    @default(0)
+  suggestedAction String?  @db.Text
+  sourceData      Json?
+  createdAt       DateTime @default(now())
+
+  @@index([businessId, type, createdAt])
+  @@index([businessId, severity, createdAt])
+}
+
+model BusinessHealthSnapshot {
+  id                  String   @id @default(cuid())
+  businessId          String
+  business            Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  score               Int
+  salesTrend          Float    @default(0)
+  repeatRate          Float    @default(0)
+  pendingPaymentRisk  Float    @default(0)
+  activeCustomerRatio Float    @default(0)
+  explanation         String   @db.Text
+  createdAt           DateTime @default(now())
+
+  @@index([businessId, createdAt])
+  @@index([businessId, score])
+}
+
+model CustomerIntelligenceScore {
+  id                String   @id @default(cuid())
+  businessId        String
+  business          Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerId        String
+  customer          Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  repeatScore       Int
+  churnRisk         Int      @default(0)
+  preferredCategory String?
+  recommendedAction String   @db.Text
+  lastCalculatedAt  DateTime @default(now())
+
+  @@unique([businessId, customerId])
+  @@index([businessId, repeatScore])
+  @@index([businessId, churnRisk])
+  @@index([customerId])
+}
+
+model DemandForecast {
+  id                String    @id @default(cuid())
+  businessId        String
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  productId         String?
+  product           MenuItem? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName       String
+  forecastDate      DateTime
+  timeSlot          String
+  predictedQuantity Int
+  confidence        Float     @default(0)
+  reason            String    @db.Text
+  createdAt         DateTime  @default(now())
+
+  @@unique([businessId, productId, forecastDate, timeSlot])
+  @@index([businessId, forecastDate, timeSlot])
+  @@index([productId])
+}
+
+model PaymentPriority {
+  id               String   @id @default(cuid())
+  businessId       String
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerId       String
+  customer         Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountPending    Decimal  @db.Decimal(10, 2)
+  daysOverdue      Int
+  priorityScore    Int
+  suggestedMessage String   @db.Text
+  createdAt        DateTime @default(now())
+
+  @@unique([businessId, customerId, orderId])
+  @@index([businessId, priorityScore, createdAt])
+  @@index([customerId])
+  @@index([orderId])
+}
+
+model BusinessWalletEntry {
+  id                           String            @id @default(cuid())
+  businessId                   String
+  business                     Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  paymentId                    String?           @unique
+  payment                      Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  payoutId                     String?
+  payout                       BusinessPayout?   @relation(fields: [payoutId], references: [id], onDelete: SetNull)
+  type                         WalletEntryType
+  status                       WalletEntryStatus @default(PENDING_PROVIDER_SETTLEMENT)
+  provider                     PaymentProvider?
+  amount                       Decimal           @db.Decimal(10, 2)
+  grossAmount                  Decimal           @default(0) @db.Decimal(10, 2)
+  platformFee                  Decimal           @default(0) @db.Decimal(10, 2)
+  description                  String?
+  providerSettlementEligibleAt DateTime?
+  providerSettledAt            DateTime?
+  settledAt                    DateTime?
+  metadata                     Json?
+  createdAt                    DateTime          @default(now())
+  updatedAt                    DateTime          @updatedAt
+
+  @@index([businessId, status, createdAt])
+  @@index([businessId, type, status])
+  @@index([payoutId])
+  @@index([status, providerSettlementEligibleAt])
+}
+
+model BusinessPayout {
+  id                        String                @id @default(cuid())
+  businessId                String
+  business                  Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  amount                    Decimal               @db.Decimal(10, 2)
+  status                    BusinessPayoutStatus  @default(PAID)
+  method                    String                @default("BANK_TRANSFER")
+  reference                 String?
+  notes                     String?
+  autoInitiated             Boolean               @default(false)
+  provider                  String?
+  providerTransferId        String?               @unique
+  providerReferenceId       String?               @unique
+  providerBeneficiaryId     String?
+  providerStatus            String?
+  providerStatusCode        String?
+  providerStatusDescription String?
+  providerUtr               String?
+  providerAcknowledged      Boolean               @default(false)
+  providerRequestedAt       DateTime?
+  providerCompletedAt       DateTime?
+  providerFailedAt          DateTime?
+  providerUpdatedAt         DateTime?
+  providerMetadata          Json?
+  paidAt                    DateTime?
+  walletEntries             BusinessWalletEntry[]
+  createdAt                 DateTime              @default(now())
+  updatedAt                 DateTime              @updatedAt
+
+  @@index([businessId, status, createdAt])
+  @@index([autoInitiated, status, createdAt])
+  @@index([provider, providerStatus])
+  @@index([status, providerRequestedAt])
+}
+
+model BusinessCoupon {
+  id                 String             @id @default(cuid())
+  businessId         String
+  business           Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  code               String
+  description        String?
+  discountType       CouponDiscountType
+  discountValue      Decimal            @db.Decimal(10, 2)
+  maxDiscountAmount  Decimal?           @db.Decimal(10, 2)
+  minimumOrderAmount Decimal            @default(0) @db.Decimal(10, 2)
+  redemptionLimit    Int?
+  redeemedCount      Int                @default(0)
+  startsAt           DateTime?
+  expiresAt          DateTime?
+  isActive           Boolean            @default(true)
+  orders             Order[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@unique([businessId, code])
+  @@index([businessId, isActive])
+  @@index([businessId, expiresAt])
+}
+
+model PlatformSubscriptionCoupon {
+  id                String             @id @default(cuid())
+  code              String             @unique
+  description       String?
+  discountType      CouponDiscountType
+  discountValue     Decimal            @db.Decimal(10, 2)
+  maxDiscountAmount Decimal?           @db.Decimal(10, 2)
+  minimumAmount     Decimal            @default(0) @db.Decimal(10, 2)
+  plan              SubscriptionPlan?
+  redemptionLimit   Int?
+  redeemedCount     Int                @default(0)
+  startsAt          DateTime?
+  expiresAt         DateTime?
+  isActive          Boolean            @default(true)
+  subscriptions     Subscription[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([isActive, expiresAt])
+  @@index([plan, isActive])
+}
+
+model WhatsappMessage {
+  id                String         @id @default(cuid())
+  businessId        String
+  business          Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerId        String?
+  customer          Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  orderId           String?
+  order             Order?         @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  providerMessageId String?        @unique
+  templateName      String
+  phone             String
+  status            WhatsappStatus @default(QUEUED)
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  failedAt          DateTime?
+  errorMessage      String?
+
+  @@index([businessId, status])
+  @@index([customerId])
+  @@index([orderId])
+}
+
+model Subscription {
+  id                          String                      @id @default(cuid())
+  invoiceNumber               String?                     @unique
+  businessId                  String
+  business                    Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  plan                        SubscriptionPlan
+  subtotalAmount              Decimal                     @default(0) @db.Decimal(10, 2)
+  discountAmount              Decimal                     @default(0) @db.Decimal(10, 2)
+  upgradeCreditAmount         Decimal                     @default(0) @db.Decimal(10, 2)
+  upgradedFromSubscriptionId  String?
+  taxableAmount               Decimal                     @default(0) @db.Decimal(10, 2)
+  gstRateBps                  Int                         @default(1800)
+  gstAmount                   Decimal                     @default(0) @db.Decimal(10, 2)
+  billingGstin                String?
+  couponCode                  String?
+  subscriptionCouponId        String?
+  subscriptionCoupon          PlatformSubscriptionCoupon? @relation(fields: [subscriptionCouponId], references: [id], onDelete: SetNull)
+  amount                      Decimal                     @db.Decimal(10, 2)
+  status                      SubscriptionStatus
+  paymentStatus               PaymentStatus               @default(PENDING)
+  paymentProvider             PaymentProvider             @default(CASHFREE)
+  razorpayPaymentLinkId       String?
+  razorpayPaymentId           String?
+  cashfreeOrderId             String?                     @unique
+  cashfreeCfOrderId           String?                     @unique
+  cashfreePaymentSessionId    String?
+  cashfreePaymentId           String?                     @unique
+  cashfreeOrderStatus         String?
+  manualVerificationReference String?                     @unique
+  manualVerifiedByUserId      String?
+  manualVerifiedAt            DateTime?
+  paymentRequestUrl           String?
+  paymentRequestExpiresAt     DateTime?
+  paidAt                      DateTime?
+  startDate                   DateTime
+  endDate                     DateTime
+  createdAt                   DateTime                    @default(now())
+
+  @@index([businessId, status])
+  @@index([businessId, createdAt])
+  @@index([razorpayPaymentLinkId])
+  @@index([subscriptionCouponId])
+  @@index([upgradedFromSubscriptionId])
+  @@index([status, cashfreeOrderStatus])
+  @@index([paymentProvider, paymentStatus, createdAt])
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  businessId String?
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  action     String
+  entity     String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime  @default(now())
+
+  @@index([businessId, createdAt])
+  @@index([userId, createdAt])
+  @@index([entity, entityId])
+}
+
+model SupportTicket {
+  id                    String                 @id @default(cuid())
+  code                  String                 @unique
+  subject               String
+  description           String                 @db.Text
+  priority              SupportTicketPriority  @default(MEDIUM)
+  status                SupportTicketStatus    @default(OPEN)
+  source                SupportTicketSource    @default(CHATBOT)
+  intent                String                 @default("handoff")
+  portal                String                 @default("public")
+  sessionId             String?
+  path                  String?
+  businessId            String?
+  business              Business?              @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  requesterUserId       String?
+  requester             User?                  @relation("SupportRequester", fields: [requesterUserId], references: [id], onDelete: SetNull)
+  assignedToUserId      String?
+  assignedTo            User?                  @relation("SupportAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  requesterName         String?
+  requesterEmail        String?
+  requesterPhone        String?
+  requesterBusinessName String?
+  orderReference        String?
+  paymentReference      String?
+  lastMessage           String                 @db.Text
+  safeHandlingNote      String                 @db.Text
+  metadata              Json?
+  firstResponseDueAt    DateTime?
+  lastMessageAt         DateTime               @default(now())
+  assignedAt            DateTime?
+  resolvedAt            DateTime?
+  messages              SupportTicketMessage[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([status, priority, createdAt])
+  @@index([sessionId, status, updatedAt])
+  @@index([businessId, status, updatedAt])
+  @@index([assignedToUserId, status, updatedAt])
+  @@index([intent, createdAt])
+}
+
+model SupportTicketMessage {
+  id           String                     @id @default(cuid())
+  ticketId     String
+  ticket       SupportTicket              @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender       SupportTicketMessageSender
+  body         String                     @db.Text
+  authorUserId String?
+  author       User?                      @relation("SupportMessageAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+  metadata     Json?
+  createdAt    DateTime                   @default(now())
+
+  @@index([ticketId, createdAt])
+  @@index([authorUserId, createdAt])
+}
