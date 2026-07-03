@@ -1,7 +1,8 @@
 import type { PaymentProvider, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { safeLog } from "@/lib/security/safe-logger";
 import { sendBusinessPayoutEmail } from "@/services/business-payout-email";
-import { sendPaidOrderInvoiceEmail } from "@/services/order-invoice-email";
+import { sendPaidOrderInvoiceEmail, sendRefundedOrderInvoiceEmail } from "@/services/order-invoice-email";
 import {
   cashfreeRefundIdForPayment,
   createCashfreeOrderRefund,
@@ -193,7 +194,7 @@ async function sendBusinessPayoutEmailSafely(payoutId: string) {
   try {
     return await sendBusinessPayoutEmail(payoutId, { actorUserId: null });
   } catch (error) {
-    console.error("Automatic business payout email failed", error);
+    safeLog("error", "Automatic business payout email failed", { error, payoutId });
     return { status: "failed" as const, to: "", reason: error instanceof Error ? error.message : "Payout email failed." };
   }
 }
@@ -202,8 +203,17 @@ async function sendInvoiceEmailAfterPayment(orderId: string) {
   try {
     return await sendPaidOrderInvoiceEmail(orderId);
   } catch (error) {
-    console.error("Paid invoice email failed", error);
+    safeLog("error", "Paid invoice email failed", { error, orderId });
     return { status: "failed" as const, reason: error instanceof Error ? error.message : "Invoice email failed." };
+  }
+}
+
+async function sendRefundInvoiceEmailAfterRefund(orderId: string) {
+  try {
+    return await sendRefundedOrderInvoiceEmail(orderId);
+  } catch (error) {
+    safeLog("error", "Refund invoice email failed", { error, orderId });
+    return { status: "failed" as const, reason: error instanceof Error ? error.message : "Refund invoice email failed." };
   }
 }
 
@@ -319,7 +329,7 @@ export async function completeGatewayOrderPayment(input: CompleteGatewayPaymentI
         note: "Order cancelled after payment"
       });
     } catch (error) {
-      console.error("Cashfree refund for cancelled order failed", error);
+      safeLog("error", "Cashfree refund for cancelled order failed", { error, paymentId: refundCandidate.id });
       return {
         updated: false,
         walletCredited: false,
@@ -427,7 +437,11 @@ export async function completeGatewayOrderPayment(input: CompleteGatewayPaymentI
   });
 
   if (result.updated && "orderId" in result && typeof result.orderId === "string") {
-    return { ...result, invoiceEmail: await sendInvoiceEmailAfterPayment(result.orderId) };
+    const invoiceEmail =
+      "refunded" in result && result.refunded
+        ? await sendRefundInvoiceEmailAfterRefund(result.orderId)
+        : await sendInvoiceEmailAfterPayment(result.orderId);
+    return { ...result, invoiceEmail };
   }
 
   return result;
@@ -670,7 +684,7 @@ export async function cancelOrderPaymentForBusinessCancellation(input: {
     }
   }
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const order = await tx.order.findFirst({
       where: { id: input.orderId, businessId: input.businessId },
       select: { id: true, status: true, paymentStatus: true, payment: true }
@@ -784,6 +798,15 @@ export async function cancelOrderPaymentForBusinessCancellation(input: {
       providerTerminationError
     };
   });
+
+  if (result?.paymentAction === "refunded") {
+    return {
+      ...result,
+      refundInvoiceEmail: await sendRefundInvoiceEmailAfterRefund(result.order.id)
+    };
+  }
+
+  return result;
 }
 
 export async function creditMissingGatewayWalletEntries(limit = 100) {

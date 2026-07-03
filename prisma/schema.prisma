@@ -421,40 +421,41 @@ model Customer {
 }
 
 model Order {
-  id                 String            @id @default(cuid())
-  publicToken        String            @unique @default(uuid())
-  invoiceNumber      String?           @unique
-  invoiceIssuedAt    DateTime?
-  invoiceEmailSentAt DateTime?
-  businessId         String
-  business           Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customerId         String
-  customer           Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  orderNumber        String
-  status             OrderStatus       @default(NEW)
-  paymentStatus      PaymentStatus     @default(PENDING)
-  subtotal           Decimal           @db.Decimal(10, 2)
-  deliveryFee        Decimal           @default(0) @db.Decimal(10, 2)
-  discountAmount     Decimal           @default(0) @db.Decimal(10, 2)
-  taxableAmount      Decimal           @default(0) @db.Decimal(10, 2)
-  gstRateBps         Int               @default(1800)
-  gstAmount          Decimal           @default(0) @db.Decimal(10, 2)
-  couponCode         String?
-  couponId           String?
-  coupon             BusinessCoupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
-  totalAmount        Decimal           @db.Decimal(10, 2)
-  orderType          OrderType
-  deliveryAddress    String?
-  customerLatitude   Decimal?          @db.Decimal(9, 6)
-  customerLongitude  Decimal?          @db.Decimal(9, 6)
-  distanceKm         Decimal?          @db.Decimal(7, 2)
-  notes              String?
-  items              OrderItem[]
-  payment            Payment?
-  paymentPriorities  PaymentPriority[]
-  whatsappMessages   WhatsappMessage[]
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  id                       String            @id @default(cuid())
+  publicToken              String            @unique @default(uuid())
+  invoiceNumber            String?           @unique
+  invoiceIssuedAt          DateTime?
+  invoiceEmailSentAt       DateTime?
+  refundInvoiceEmailSentAt DateTime?
+  businessId               String
+  business                 Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customerId               String
+  customer                 Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  orderNumber              String
+  status                   OrderStatus       @default(NEW)
+  paymentStatus            PaymentStatus     @default(PENDING)
+  subtotal                 Decimal           @db.Decimal(10, 2)
+  deliveryFee              Decimal           @default(0) @db.Decimal(10, 2)
+  discountAmount           Decimal           @default(0) @db.Decimal(10, 2)
+  taxableAmount            Decimal           @default(0) @db.Decimal(10, 2)
+  gstRateBps               Int               @default(1800)
+  gstAmount                Decimal           @default(0) @db.Decimal(10, 2)
+  couponCode               String?
+  couponId                 String?
+  coupon                   BusinessCoupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  totalAmount              Decimal           @db.Decimal(10, 2)
+  orderType                OrderType
+  deliveryAddress          String?
+  customerLatitude         Decimal?          @db.Decimal(9, 6)
+  customerLongitude        Decimal?          @db.Decimal(9, 6)
+  distanceKm               Decimal?          @db.Decimal(7, 2)
+  notes                    String?
+  items                    OrderItem[]
+  payment                  Payment?
+  paymentPriorities        PaymentPriority[]
+  whatsappMessages         WhatsappMessage[]
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
 
   @@unique([businessId, orderNumber])
   @@index([businessId, status, paymentStatus])
@@ -462,6 +463,7 @@ model Order {
   @@index([customerId])
   @@index([couponId])
   @@index([invoiceEmailSentAt])
+  @@index([refundInvoiceEmailSentAt])
 }
 
 model OrderItem {

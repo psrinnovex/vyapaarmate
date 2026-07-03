@@ -1,5 +1,6 @@
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
+import { safeLog } from "@/lib/security/safe-logger";
 import { completeGatewayOrderPayment, failGatewayOrderPayment } from "@/services/business-wallet";
 import {
   getCashfreeOrderStatus,
@@ -289,7 +290,7 @@ export async function reconcileAbandonedCashfreePayments(input: { now?: Date; li
       else if ("paymentState" in result && result.paymentState === "FAILED" && result.updated) summary.ordersFailed += 1;
       else summary.pending += 1;
     } catch (error) {
-      console.error("Cashfree order payment reconciliation failed", error);
+      safeLog("error", "Cashfree order payment reconciliation failed", { error, paymentId: payment.id });
       summary.errors += 1;
     }
   }
@@ -324,7 +325,7 @@ export async function reconcileAbandonedCashfreePayments(input: { now?: Date; li
         }
       });
     } catch (error) {
-      console.error("Cashfree subscription reconciliation failed", error);
+      safeLog("error", "Cashfree subscription reconciliation failed", { error, subscriptionId: subscription.id });
       summary.errors += 1;
     }
   }

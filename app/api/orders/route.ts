@@ -15,6 +15,7 @@ import { buildOrderCouponBreakdown, validateBusinessCoupon } from "@/lib/coupons
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { parseJsonRequest } from "@/lib/security/validation";
 import { orderSubmissionSchema } from "@/lib/validations";
 import { formatINR } from "@/lib/utils";
 import { businessWhatsappConfig } from "@/services/business-whatsapp";
@@ -161,11 +162,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Too many requests. Try again shortly." }, { status: 429 });
   }
 
-  const body = await request.json();
-  const parsed = orderSubmissionSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, orderSubmissionSchema);
+  if (parsed.response) return parsed.response;
 
   const customerProfileResult = await getVerifiedCustomerProfile({
     businessSlug: parsed.data.businessSlug,
