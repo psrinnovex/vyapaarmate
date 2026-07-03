@@ -25,31 +25,68 @@ loadLocalEnv();
 
 const errors = [];
 const warnings = [];
-const required = (name, minimumLength = 1) => {
+const docsHint = "See docs/production-env-setup.md for where to get each value.";
+const productionPlaceholders = [
+  "your-",
+  "replace-",
+  "placeholder",
+  "changeme",
+  "change-me",
+  "example",
+  "todo",
+  "undefined",
+  "null",
+  "YOUR-",
+  "YOUR_"
+];
+
+function looksLikePlaceholderValue(value) {
+  const normalized = value.trim();
+  if (!normalized) return false;
+  const lower = normalized.toLowerCase();
+  return productionPlaceholders.some((placeholder) => lower.includes(placeholder.toLowerCase()));
+}
+
+const required = (name, minimumLength = 1, hint = "") => {
   const value = process.env[name]?.trim();
   if (!value || value.length < minimumLength) {
-    errors.push(`${name} must be set${minimumLength > 1 ? ` and at least ${minimumLength} characters` : ""}.`);
+    errors.push(`${name} must be set${minimumLength > 1 ? ` and at least ${minimumLength} characters` : ""}.${hint ? ` ${hint}` : ""}`);
+  } else if (looksLikePlaceholderValue(value)) {
+    errors.push(`${name} still looks like a placeholder. Replace it with the real production value.${hint ? ` ${hint}` : ""}`);
   }
   return value;
 };
 const optional = (name) => process.env[name]?.trim() || "";
+const requiredOneOf = (names, hint = "") => {
+  const configured = names.filter((name) => optional(name));
+  if (configured.length === 0) {
+    errors.push(`Set one of ${names.join(", ")}.${hint ? ` ${hint}` : ""}`);
+    return [];
+  }
 
-const appUrl = required("NEXT_PUBLIC_APP_URL");
-required("JWT_SECRET", 32);
-required("ENCRYPTION_KEY", 32);
-required("CRON_SECRET", 32);
-const databaseUrl = required("DATABASE_URL");
-const directUrl = required("DIRECT_URL");
-const redisRestUrl = required("UPSTASH_REDIS_REST_URL");
-required("UPSTASH_REDIS_REST_TOKEN", 20);
-if (!optional("GOOGLE_PLACES_API_KEY") && !optional("GOOGLE_MAPS_API_KEY")) {
-  errors.push("Set GOOGLE_PLACES_API_KEY or GOOGLE_MAPS_API_KEY for Google Places location search.");
-}
-required("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY");
+  for (const name of configured) {
+    if (looksLikePlaceholderValue(process.env[name])) {
+      errors.push(`${name} still looks like a placeholder. Replace it with the real production value.${hint ? ` ${hint}` : ""}`);
+    }
+  }
 
-required("EMAIL_FROM");
+  return configured;
+};
+
+const appUrl = required("NEXT_PUBLIC_APP_URL", 1, "Use the deployed HTTPS app origin, for example https://vyapaarmate.com.");
+required("JWT_SECRET", 32, "Generate a random 32+ character value and keep it server-only.");
+required("ENCRYPTION_KEY", 32, "Generate a random 32+ character value for server-side encrypted fields.");
+required("CRON_SECRET", 32, "Generate a random 32+ character bearer secret for Vercel Cron/job routes.");
+const databaseUrl = required("DATABASE_URL", 1, "Use the Supabase Transaction Pooler URL on port 6543 with sslmode=require, pgbouncer=true, connection_limit, and pool_timeout.");
+const directUrl = required("DIRECT_URL", 1, "Use the Supabase Session Pooler URL on port 5432 or the direct database host, without pgbouncer=true.");
+const redisRestUrl = required("UPSTASH_REDIS_REST_URL", 1, "Create an Upstash Redis database and copy the REST URL.");
+required("UPSTASH_REDIS_REST_TOKEN", 20, "Create an Upstash Redis database and copy the REST token.");
+requiredOneOf(["GOOGLE_PLACES_API_KEY", "GOOGLE_MAPS_API_KEY"], "Create a server-restricted Google Maps Platform key with Places API enabled for location search.");
+required("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY", 1, "Create a browser-restricted Google Maps JavaScript API key for the production domain.");
+
+required("EMAIL_FROM", 1, "Use a verified sender/domain in your email provider.");
 if (!optional("RESEND_API_KEY") && !optional("EMAIL_API_KEY")) {
-  errors.push("Set RESEND_API_KEY (or the EMAIL_API_KEY compatibility alias) for registration email verification.");
+  errors.push("Set RESEND_API_KEY (or the EMAIL_API_KEY compatibility alias) for registration email verification. Create it in Resend or your configured email provider.");
 }
 const smsVerificationEnabled = optional("SMS_VERIFICATION_ENABLED") === "true";
 if (smsVerificationEnabled) {
@@ -140,6 +177,10 @@ if (optional("RATE_LIMIT_FAIL_OPEN").toLowerCase() === "true") {
 }
 
 for (const origin of optional("TRUSTED_ORIGINS").split(",").map((value) => value.trim()).filter(Boolean)) {
+  if (looksLikePlaceholderValue(origin)) {
+    errors.push(`TRUSTED_ORIGINS contains a placeholder origin: ${origin}`);
+    continue;
+  }
   try {
     const url = new URL(origin);
     if (url.protocol !== "https:") errors.push(`TRUSTED_ORIGINS entry must use https: ${origin}`);
@@ -148,14 +189,14 @@ for (const origin of optional("TRUSTED_ORIGINS").split(",").map((value) => value
   }
 }
 
-required("PAYMENT_RECEIVER_NAME");
+required("PAYMENT_RECEIVER_NAME", 1, "Use the legal receiver name shown to customers for platform payments.");
 
 const cashfreeKeys = ["CASHFREE_APP_ID", "CASHFREE_SECRET_KEY"];
 const configuredCashfreeKeys = cashfreeKeys.filter((name) => process.env[name]?.trim());
 if (configuredCashfreeKeys.length > 0 && configuredCashfreeKeys.length !== cashfreeKeys.length) {
   errors.push("Cashfree requires CASHFREE_APP_ID and CASHFREE_SECRET_KEY together.");
 }
-for (const name of cashfreeKeys) required(name);
+for (const name of cashfreeKeys) required(name, 1, "Create production credentials in the Cashfree dashboard after KYC is approved.");
 if (optional("CASHFREE_ENV").toLowerCase() !== "production") {
   warnings.push("Cashfree is not in production mode. Set CASHFREE_ENV=production before accepting real payments.");
 }
@@ -171,7 +212,7 @@ if (configuredCashfreePayoutKeys.length > 0 && configuredCashfreePayoutKeys.leng
 }
 if (cashfreePayoutsEnabled) {
   for (const name of cashfreePayoutKeys) required(name);
-  required("CASHFREE_PAYOUTS_WEBHOOK_SECRET", 16);
+  required("CASHFREE_PAYOUTS_WEBHOOK_SECRET", 16, "Use a random webhook secret configured in Cashfree Payouts.");
   if (optional("CASHFREE_PAYOUTS_ENV").toLowerCase() !== "production") {
     warnings.push("Cashfree Payouts is not in production mode. Set CASHFREE_PAYOUTS_ENV=production before real business payouts.");
   }
@@ -216,11 +257,14 @@ if (minimumPayoutAmount) {
 const whatsappLiveSendsEnabled = process.env.WHATSAPP_LIVE_SENDS_ENABLED === "true";
 if (whatsappLiveSendsEnabled) {
   required("WHATSAPP_ACCESS_TOKEN", 20);
-  required("WHATSAPP_PHONE_NUMBER_ID");
-  const whatsappVerifyToken = required("WHATSAPP_WEBHOOK_VERIFY_TOKEN", 16);
-  required("WHATSAPP_APP_SECRET", 16);
+  required("WHATSAPP_PHONE_NUMBER_ID", 1, "Copy the production phone number ID from Meta WhatsApp Cloud API.");
+  const whatsappVerifyToken = required("WHATSAPP_WEBHOOK_VERIFY_TOKEN", 16, "Generate a random token and configure it in the Meta webhook callback.");
+  required("WHATSAPP_APP_SECRET", 16, "Copy the Meta app secret for webhook signature verification.");
   if (whatsappVerifyToken === "local-dev-only") {
     errors.push("WHATSAPP_WEBHOOK_VERIFY_TOKEN must be a production random token, not local-dev-only.");
+  }
+  if (!optional("WHATSAPP_BUSINESS_PHONE_MAP") && !optional("WHATSAPP_DEFAULT_BUSINESS_SLUG")) {
+    warnings.push("WhatsApp inbound routing relies on business.whatsappPhoneNumberId records. Set WHATSAPP_BUSINESS_PHONE_MAP or WHATSAPP_DEFAULT_BUSINESS_SLUG if using a shared/single WhatsApp number.");
   }
 } else if (!optional("WHATSAPP_APP_SECRET")) {
   warnings.push("WhatsApp live sends are disabled. Production WhatsApp webhooks will reject POST requests until WHATSAPP_APP_SECRET is set.");
@@ -245,6 +289,7 @@ if (!gtmId && !gaMeasurementId) {
 for (const warning of warnings) console.warn(`WARNING: ${warning}`);
 if (errors.length) {
   for (const error of errors) console.error(`ERROR: ${error}`);
+  console.error(`NEXT STEP: ${docsHint}`);
   process.exitCode = 1;
 } else {
   console.log("Production environment looks ready.");
