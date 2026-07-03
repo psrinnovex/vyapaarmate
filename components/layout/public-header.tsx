@@ -129,7 +129,7 @@ export function PublicHeader({
     }
 
     function handleResize() {
-      if (window.innerWidth >= 1024) setMobileMenuOpen(false);
+      if (window.innerWidth >= 1280) setMobileMenuOpen(false);
     }
 
     document.addEventListener("mousedown", handlePointerDown);
@@ -159,10 +159,10 @@ export function PublicHeader({
           isScrolled ? "border-white/10 bg-black/95 shadow-[0_18px_55px_rgba(0,0,0,0.28)]" : "border-line bg-white/95"
         )}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3">
+        <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <Link
             href="/"
-            className={cn("flex min-w-0 items-center gap-2 font-bold transition-colors", isScrolled ? "text-white" : "text-ink")}
+            className={cn("flex min-w-0 items-center gap-2 justify-self-start font-bold transition-colors", isScrolled ? "text-white" : "text-ink")}
           >
             <span
               className={cn(
@@ -175,7 +175,12 @@ export function PublicHeader({
             <span className="hidden sm:inline">{company.product}</span>
           </Link>
           {!isCustomer && (
-            <div className={cn("hidden items-center gap-6 text-sm font-semibold transition-colors lg:flex", isScrolled ? "text-white/75" : "text-slate-600")}>
+            <div
+              className={cn(
+                "hidden min-w-0 items-center justify-center gap-4 text-[13px] font-semibold transition-colors xl:flex 2xl:gap-6 2xl:text-sm",
+                isScrolled ? "text-white/75" : "text-slate-600"
+              )}
+            >
               {links.map((link) => (
                 <Link
                   key={`${link.href}-${link.label}`}
@@ -202,7 +207,7 @@ export function PublicHeader({
               </Link>
             </div>
           )}
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center justify-self-end gap-2">
             {!isCustomer && (
               <button
                 ref={mobileButtonRef}
@@ -210,9 +215,10 @@ export function PublicHeader({
                 aria-label={mobileMenuOpen ? "Close site navigation" : "Open site navigation"}
                 aria-expanded={mobileMenuOpen}
                 aria-controls="public-mobile-navigation"
+                aria-haspopup="dialog"
                 onClick={() => setMobileMenuOpen((value) => !value)}
                 className={cn(
-                  "relative grid size-10 shrink-0 place-items-center rounded-lg border transition duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 lg:hidden",
+                  "relative grid size-10 shrink-0 place-items-center rounded-lg border transition duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 xl:hidden",
                   isScrolled
                     ? "border-white/15 bg-white/10 text-white shadow-[0_16px_40px_rgba(0,0,0,0.24)] hover:border-white/35 focus:ring-white/15"
                     : "border-line bg-white text-ink shadow-sm hover:border-emerald/40 hover:text-emerald focus:ring-emerald/15"
@@ -243,7 +249,7 @@ export function PublicHeader({
           </div>
         </div>
         {!isCustomer && mobileMenuOpen && (
-          <div className="fixed inset-x-0 bottom-0 top-16 z-50 lg:hidden">
+          <div className="fixed inset-x-0 bottom-0 top-16 z-50 xl:hidden">
             <button
               type="button"
               aria-label="Close site navigation"
@@ -253,7 +259,9 @@ export function PublicHeader({
             <div
               ref={mobilePanelRef}
               id="public-mobile-navigation"
-              className="safe-bottom relative mx-3 mt-3 max-h-[calc(100svh-5.5rem)] overflow-y-auto rounded-lg border border-white/75 bg-white shadow-[0_28px_90px_rgba(13,19,33,0.24)] motion-safe:animate-[public-mobile-panel-in_260ms_cubic-bezier(0.22,1,0.36,1)] sm:mx-6"
+              role="dialog"
+              aria-modal="true"
+              className="safe-bottom relative mx-3 mt-3 max-h-[calc(100svh-5.5rem)] overflow-y-auto rounded-lg border border-white/75 bg-white shadow-[0_28px_90px_rgba(13,19,33,0.24)] motion-safe:animate-[public-mobile-panel-in_260ms_cubic-bezier(0.22,1,0.36,1)] sm:ml-auto sm:mr-6 sm:max-w-sm"
             >
               <div className="grid gap-2 px-3 py-3">
                 {links.map((link, index) => (

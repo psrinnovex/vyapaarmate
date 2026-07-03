@@ -98,7 +98,7 @@ export function useSupportAssignmentAlertFeed({
 
     refresh();
 
-    const events = new EventSource("/api/admin/support?stream=1&skipInitial=1");
+    const events = new EventSource("/api/admin/support?stream=1&skipInitial=1", { withCredentials: true });
     events.addEventListener("support", refresh);
     events.addEventListener("sync-error", refresh);
     events.onerror = () => undefined;

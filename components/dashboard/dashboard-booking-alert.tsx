@@ -339,7 +339,7 @@ export function DashboardBookingAlert({
             </div>
             <h2 className="mt-2 break-words text-xl font-extrabold text-ink">New {copy.transactionSingular.toLowerCase()} needs a decision</h2>
             <p className="mt-2 break-words text-sm leading-6 text-slate-600">
-              <span className="font-bold text-ink">{primaryOrder.orderNumber}</span> from {primaryOrder.customer} for {formatINR(primaryOrder.amount)}
+              <span className="font-bold text-ink">{primaryOrder.orderNumber}</span> from <span className="font-bold text-ink">{primaryOrder.customer}</span> for {formatINR(primaryOrder.amount)}
             </p>
             <p className="mt-1 break-words text-sm text-slate-500">{primaryOrder.items}</p>
             {alertSound.soundBlocked && (

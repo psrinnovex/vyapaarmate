@@ -24,6 +24,7 @@ export function ActionNotice({
   onClose: () => void;
 }) {
   const noticeKey = notice ? `${notice.tone}:${notice.message}` : null;
+  const noticeTone = notice?.tone ?? null;
   const [leavingNoticeKey, setLeavingNoticeKey] = useState<string | null>(null);
   const autoCloseTimerRef = useRef<number | null>(null);
   const exitTimerRef = useRef<number | null>(null);
@@ -48,7 +49,7 @@ export function ActionNotice({
   }, []);
 
   const dismissNotice = useCallback(() => {
-    if (!notice || !noticeKey || leavingRef.current) return;
+    if (!noticeKey || leavingRef.current) return;
 
     clearTimers();
     leavingRef.current = true;
@@ -60,18 +61,18 @@ export function ActionNotice({
       setLeavingNoticeKey(null);
       onCloseRef.current();
     }, noticeExitAnimationMs);
-  }, [clearTimers, notice, noticeKey]);
+  }, [clearTimers, noticeKey]);
 
   useEffect(() => {
     clearTimers();
     leavingRef.current = false;
 
-    if (notice) {
-      autoCloseTimerRef.current = window.setTimeout(dismissNotice, noticeAutoCloseMsByTone[notice.tone]);
+    if (noticeTone) {
+      autoCloseTimerRef.current = window.setTimeout(dismissNotice, noticeAutoCloseMsByTone[noticeTone]);
     }
 
     return clearTimers;
-  }, [clearTimers, dismissNotice, notice?.message, notice?.tone]);
+  }, [clearTimers, dismissNotice, noticeKey, noticeTone]);
 
   if (!notice) return null;
 

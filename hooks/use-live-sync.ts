@@ -194,15 +194,17 @@ export function useDashboardLive() {
 }
 
 export function useDashboardOrderAlertLive() {
+  const pathname = usePathname();
   const dashboardLive = useDashboardLive();
-
-  return useLiveResource<LiveDashboardPayload>({
+  const alertLive = useLiveResource<LiveDashboardPayload>({
     eventName: "dashboard",
     url: "/api/dashboard/live?scope=orders",
     getInitialPayload: () => dashboardLive.data,
     hasInitialPayload: true,
     skipInitialStreamPayload: false
   });
+
+  return dashboardLiveScope(pathname) === "orders" ? dashboardLive : alertLive;
 }
 
 export function useAdminLive() {

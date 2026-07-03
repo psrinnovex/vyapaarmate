@@ -297,14 +297,6 @@ function PaymentStatusPanel({
     <section id="payment" className={cn("payment-state-enter print:hidden", focused ? "mx-auto mt-6 max-w-[calc(100vw-4.5rem)] sm:max-w-2xl" : "mt-5 rounded-[1.75rem] border border-line bg-white p-5 shadow-sm sm:p-7")}>
       {paymentFailed ? (
         <>
-          <div className={cn("flex gap-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-800", focused ? "flex-col items-center text-center sm:flex-row sm:items-start sm:text-left" : "items-start")}>
-            <OrderStepAnimation kind="paymentFailed" icon={XCircle} label="Payment was not completed" loop={false} className="payment-failure-icon size-12 rounded-full bg-red-100 text-red-700" iconClassName="size-7" lottieClassName="payment-failure-lottie" />
-            <div className={cn(focused && "min-w-0 max-w-[16rem] sm:max-w-xl")}>
-              <h2 className="text-lg font-bold">Payment was not completed</h2>
-              <p className="mt-1 break-words text-sm leading-6 text-red-700">{order.paymentFailureReason ?? "The payment could not be completed."}</p>
-              {order.paymentFailedAt && <p className="mt-2 text-xs font-semibold text-red-600">Updated {dateTime(order.paymentFailedAt)}</p>}
-            </div>
-          </div>
           {activePaymentQr ? (
             <>
               <PaymentQr order={order} retry />
@@ -447,6 +439,12 @@ function PaymentOnlyPage({
                   ? "This request failed, expired, or was cancelled. This payment link cannot be reused."
                   : "Only the payment step is shown now. Once payment is verified, your paid invoice downloads and progress will appear here."}
               </p>
+              {paymentFailed && (order.paymentFailureReason || order.paymentFailedAt) && (
+                <div className="mx-auto mt-3 max-w-[16.5rem] space-y-1 break-words text-sm leading-6 sm:mx-0 sm:max-w-xl">
+                  {order.paymentFailureReason && <p className="font-semibold text-red-700">{order.paymentFailureReason}</p>}
+                  {order.paymentFailedAt && <p className="text-xs font-bold uppercase tracking-[0.12em] text-red-500">Updated {dateTime(order.paymentFailedAt)}</p>}
+                </div>
+              )}
             </div>
           </div>
 

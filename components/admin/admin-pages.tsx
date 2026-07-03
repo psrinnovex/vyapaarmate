@@ -56,6 +56,7 @@ import { cn, formatINR, formatCompact } from "@/lib/utils";
 import { downloadCsv } from "@/lib/client-export";
 import { formChecked, formNumber, formOptionalNumber, formString } from "@/lib/form-data";
 import { supportBotGuardrails, supportChatbotIntents, supportEscalationRules, supportReplyWordLimit } from "@/lib/support-chatbot";
+import { maskEmail, maskPhone } from "@/lib/privacy";
 import { PasswordChangeCard } from "@/components/auth/password-change-card";
 import { ActionDialog, ActionNotice, type ActionNoticeState } from "@/components/ui/action-feedback";
 import { Button } from "@/components/ui/button";
@@ -1082,7 +1083,7 @@ export function AdminPaymentsPage() {
                   <tr key={payment.id}>
                     <td className="px-4 py-4"><a href={payment.orderUrl} target="_blank" rel="noreferrer" className="font-bold text-ocean">{payment.orderNumber}</a></td>
                     <td className="px-4 py-4 font-semibold text-ink">{payment.businessName}</td>
-                    <td className="px-4 py-4 text-slate-600"><p>{payment.customerName}</p><p className="mt-1 text-xs">{payment.customerPhone}</p></td>
+                    <td className="px-4 py-4 text-slate-600"><p>{payment.customerName}</p><p className="mt-1 text-xs">{maskPhone(payment.customerPhone)}</p></td>
                     <td className="px-4 py-4 font-bold">{formatINR(payment.amount)}</td>
                     <td className="px-4 py-4 text-slate-600">{new Date(payment.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
                     <td className="px-4 py-4">
@@ -1337,7 +1338,7 @@ export function AdminSubscriptionsPage() {
                   <tr key={subscription.id}>
                     <td className="px-4 py-4 font-bold text-ocean">{subscription.reference}</td>
                     <td className="px-4 py-4 font-semibold text-ink">{subscription.businessName}</td>
-                    <td className="px-4 py-4 text-slate-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{subscription.ownerPhone}</p></td>
+                    <td className="px-4 py-4 text-slate-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{maskPhone(subscription.ownerPhone)}</p></td>
                     <td className="px-4 py-4"><Badge variant={subscription.plan === "PRO" ? "purple" : "blue"}>{subscription.plan}</Badge></td>
                     <td className="px-4 py-4 text-slate-600">{subscription.paymentProviderLabel}</td>
                     <td className="px-4 py-4 font-bold">{formatINR(subscription.amount)}</td>
@@ -1388,7 +1389,7 @@ export function AdminSubscriptionsPage() {
                   <tr key={subscription.id}>
                     <td className="px-4 py-4 font-bold text-ocean">{subscription.reference}</td>
                     <td className="px-4 py-4 font-semibold text-ink">{subscription.businessName}</td>
-                    <td className="px-4 py-4 text-slate-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{subscription.ownerPhone}</p></td>
+                    <td className="px-4 py-4 text-slate-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{maskPhone(subscription.ownerPhone)}</p></td>
                     <td className="px-4 py-4"><Badge variant={subscription.plan === "PRO" ? "purple" : "blue"}>{subscription.plan}</Badge></td>
                     <td className="px-4 py-4 font-bold">{formatINR(subscription.amount)}</td>
                     <td className="px-4 py-4 text-slate-600">{new Date(subscription.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
@@ -2193,7 +2194,7 @@ export function AdminSupportPage({
               <div className="min-w-0 rounded-lg border border-line p-2.5 sm:p-3">
                 <p className="text-xs font-bold uppercase text-slate-500">Requester</p>
                 <p className="mt-1 break-words text-sm font-semibold text-ink">{selectedTicket.requesterName ?? selectedTicket.requesterBusinessName ?? "Unknown"}</p>
-                <p className="mt-1 break-words text-xs leading-5 text-slate-500">{selectedTicket.requesterEmail ?? "No email"} · {selectedTicket.requesterPhone ?? "No phone"}</p>
+                <p className="mt-1 break-words text-xs leading-5 text-slate-500">{maskEmail(selectedTicket.requesterEmail)} · {maskPhone(selectedTicket.requesterPhone)}</p>
               </div>
               <div className="min-w-0 rounded-lg border border-line p-2.5 sm:p-3">
                 <p className="text-xs font-bold uppercase text-slate-500">References</p>
@@ -3439,7 +3440,7 @@ export function AdminCouponsPage() {
                       </td>
                       <td className="border-b border-line px-3 py-3">
                         <p className="font-semibold text-ink">{coupon.business.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">{coupon.business.ownerName} · {coupon.business.phone}</p>
+                        <p className="mt-1 text-xs text-slate-500">{coupon.business.ownerName} · {maskPhone(coupon.business.phone)}</p>
                       </td>
                       <td className="border-b border-line px-3 py-3">
                         <Badge variant={coupon.isActive ? "emerald" : "neutral"}>{coupon.isActive ? "Active" : "Inactive"}</Badge>
@@ -3913,7 +3914,7 @@ function BusinessTable({
                   </div>
                 </div>
               </td>
-              <td className={mutedCellClassName}>{business.phone}</td>
+              <td className={mutedCellClassName}>{maskPhone(business.phone)}</td>
               {!compact && <td className={mutedCellClassName}>{business.city}</td>}
               <td className={cellClassName}><Badge variant={business.plan === "Pro" ? "blue" : "neutral"}>{business.plan}</Badge></td>
               <td className={cellClassName}><StatusPill status={business.status} /></td>

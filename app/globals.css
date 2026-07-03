@@ -19,6 +19,10 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @supports (overflow: clip) {
   html,
   body {
@@ -36,6 +40,19 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+main section[id] {
+  scroll-margin-top: 5rem;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(17, 166, 106, 0.65);
+  outline-offset: 2px;
 }
 
 button,
@@ -321,6 +338,32 @@ select {
   animation: admin-mobile-drawer-scan 1.15s cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
 }
 
+.dashboard-mobile-drawer {
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 251, 0.98)),
+    linear-gradient(90deg, rgba(18, 70, 160, 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(17, 166, 106, 0.045) 1px, transparent 1px);
+  background-size: auto, 38px 38px, 38px 38px;
+}
+
+.dashboard-mobile-drawer::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 18%, rgba(18, 70, 160, 0.08) 38%, rgba(17, 166, 106, 0.1) 49%, transparent 68%);
+  opacity: 0;
+  transform: translateX(-120%);
+  animation: admin-mobile-drawer-scan 1.15s cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+
+.dashboard-mobile-drawer > * {
+  position: relative;
+  z-index: 1;
+}
+
 @keyframes skeleton-shimmer {
   100% {
     transform: translateX(100%);
@@ -476,6 +519,7 @@ select {
   .coupon-mode-switch button[data-active="true"] .coupon-mode-icon,
   .coupon-view-panel,
   .admin-mobile-drawer::before,
+  .dashboard-mobile-drawer::before,
   .invoice-mode-switch::before,
   .invoice-mode-switch button[data-active="true"] .invoice-mode-icon,
   .invoice-view-panel,
@@ -1030,6 +1074,15 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .payment-state-enter,
   .payment-qr-scanline,
   .payment-pulse-dot,

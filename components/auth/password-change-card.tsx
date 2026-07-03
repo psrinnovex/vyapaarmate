@@ -156,11 +156,11 @@ export function PasswordChangeCard({
         )}
         {error && <p className="rounded-lg bg-red-50 p-3 text-sm leading-6 text-red-700">{error}</p>}
 
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-          <Button type="submit" disabled={loading} variant="emerald" icon={<KeyRound className="size-4" />}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button className="w-full" type="submit" disabled={loading} variant="emerald" icon={<KeyRound className="size-4" />}>
             {loading ? "Updating" : "Update Password"}
           </Button>
-          <ButtonLink href={authPath("/forgot-password", portal)} variant="secondary" icon={<Mail className="size-4" />}>
+          <ButtonLink className="w-full" href={authPath("/forgot-password", portal)} variant="secondary" icon={<Mail className="size-4" />}>
             Forgot Password
           </ButtonLink>
         </div>

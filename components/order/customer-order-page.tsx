@@ -920,9 +920,10 @@ export function CustomerOrderPage({
               </div>
             </div>
 
-            <div className="mt-4 grid min-w-0 grid-cols-2 items-stretch gap-3 sm:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] sm:gap-4">
+            <div className="mt-4 -mx-1 grid min-w-0 grid-cols-2 items-stretch gap-2.5 sm:mx-0 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] sm:gap-4 lg:grid-cols-[repeat(auto-fill,minmax(12rem,1fr))]">
               {menuPagination.pageItems.map((item) => {
                 const quantity = cart[item.id]?.quantity ?? 0;
+                const showFoodMarker = item.foodType !== "NOT_APPLICABLE";
                 return (
                   <article key={item.id} className="public-service-card flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-white/[0.85] bg-white/[0.94] p-2.5 shadow-[0_18px_52px_rgba(13,19,33,0.08)] backdrop-blur sm:p-3">
                     <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-md bg-slate-100">
@@ -931,7 +932,7 @@ export function CustomerOrderPage({
                           src={item.imageUrl}
                           alt={item.name}
                           fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 20vw, (max-width: 1536px) 16vw, 150px"
+                          sizes="(max-width: 640px) 52vw, (max-width: 1024px) 30vw, (max-width: 1536px) 18vw, 210px"
                           className="object-cover transition duration-300 hover:scale-[1.03]"
                         />
                       ) : (
@@ -942,19 +943,18 @@ export function CustomerOrderPage({
                       {item.isBestSeller && <span className="absolute left-1.5 top-1.5 max-w-[calc(100%-0.75rem)] truncate rounded-full border border-white/70 bg-[#fff7df] px-2 py-0.5 text-[9px] font-extrabold text-[#6f4610] shadow-sm sm:left-2 sm:top-2 sm:px-2.5 sm:py-1 sm:text-[10px]">Best seller</span>}
                     </div>
                   <div className="flex min-w-0 flex-1 flex-col pt-2.5">
-                    <div className="flex min-w-0 items-start justify-between gap-1.5">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          {item.foodType !== "NOT_APPLICABLE" && (
+                    {(showFoodMarker || !item.isAvailable) && (
+                      <div className="flex min-w-0 items-start justify-between gap-1.5">
+                        <div className="min-w-0 flex-1">
+                          {showFoodMarker && (
                             <span className={cn("grid size-3.5 shrink-0 place-items-center rounded-sm border", item.foodType === "NON_VEG" ? "border-red-600" : item.foodType === "EGG" ? "border-amber-600" : "border-emerald")}>
                               <span className={cn("size-1.5 rounded-full", item.foodType === "NON_VEG" ? "bg-red-600" : item.foodType === "EGG" ? "bg-amber-600" : "bg-emerald")} />
                             </span>
                           )}
-                          <p className="truncate text-[11px] font-bold text-emerald sm:text-xs">{item.category}</p>
                         </div>
+                        {!item.isAvailable && <Badge variant="red" className="px-2 py-0.5 text-[10px]">Unavailable</Badge>}
                       </div>
-                      {!item.isAvailable && <Badge variant="red" className="px-2 py-0.5 text-[10px]">Unavailable</Badge>}
-                    </div>
+                    )}
                     <h2 className="mt-1 line-clamp-2 break-words text-[13px] font-extrabold leading-[1.18] text-ink sm:text-[15px]">{item.name}</h2>
                     <ServiceDescriptionPreview item={item} onReadMore={setDescriptionModalItem} />
                     <div className="grid gap-2 pt-2">
@@ -1108,8 +1108,14 @@ export function CustomerOrderPage({
                   {selectionClearLabel}
                 </Button>
               )}
-              <button type="button" className="ml-2 grid size-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-ink" onClick={() => setCartOpen(false)}>
-                <X className="size-5" />
+              <button
+                type="button"
+                aria-label="Close selected services"
+                title="Close"
+                className="ml-2 grid size-11 shrink-0 place-items-center rounded-lg border border-red-100 bg-red-50 text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+                onClick={() => setCartOpen(false)}
+              >
+                <X className="size-6 stroke-[2.4]" />
               </button>
             </div>
             {checkoutStep === "selection" ? (

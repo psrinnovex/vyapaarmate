@@ -104,8 +104,8 @@ export function BusinessHoursDisclosure({
       <div className="flex items-start gap-2">
         {icon}
         <div className="min-w-0 flex-1">
-          <p className={cn("text-sm font-semibold leading-5", isHero ? "text-white/80" : "text-slate-700")}>{primary}</p>
-          {secondary && <p className={cn("mt-0.5 text-xs font-semibold leading-5", isHero ? "text-white/55" : "text-slate-500")}>{secondary}</p>}
+          <p className={cn("text-sm font-semibold leading-5", isHero ? "text-emerald-100" : "text-emerald-700")}>{primary}</p>
+          {secondary && <p className={cn("mt-0.5 text-xs font-semibold leading-5", isHero ? "text-emerald-200/85" : "text-emerald-600")}>{secondary}</p>}
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Activity, ArrowRight, BrainCircuit, CreditCard, LineChart, MessageCircle, ShieldCheck, UsersRound } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 const modules = [
   {
@@ -42,13 +43,13 @@ export function IntelligenceEngineSection() {
   return (
     <section id="intelligence-engine" className="border-y border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-start">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.55, ease: "easeOut" }}
-            className="lg:sticky lg:top-24"
+            className="min-w-0 lg:sticky lg:top-24"
           >
             <Badge variant="emerald" className="gap-1.5">
               <BrainCircuit className="size-3.5" />
@@ -81,7 +82,7 @@ export function IntelligenceEngineSection() {
             </div>
           </motion.div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid min-w-0 gap-4 md:auto-rows-fr md:grid-cols-2">
             {modules.map(({ title, body, Icon, tone }, index) => (
               <motion.article
                 key={title}
@@ -89,13 +90,20 @@ export function IntelligenceEngineSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.48, delay: index * 0.06, ease: "easeOut" }}
-                className="min-h-[13rem] rounded-lg border border-line bg-[linear-gradient(135deg,#ffffff,rgba(245,248,251,0.92))] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-soft"
+                className={cn(
+                  "rounded-lg border border-line bg-[linear-gradient(135deg,#ffffff,rgba(245,248,251,0.92))] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-soft",
+                  index === modules.length - 1
+                    ? "min-h-[11rem] md:col-span-2 md:grid md:grid-cols-[auto_minmax(0,1fr)] md:items-start md:gap-5"
+                    : "min-h-[13rem]"
+                )}
               >
                 <div className={`grid size-12 place-items-center rounded-lg ${tone}`}>
                   <Icon className="size-6" />
                 </div>
-                <h3 className="mt-5 text-lg font-bold text-ink">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+                <div className={cn(index === modules.length - 1 ? "mt-5 md:mt-0 md:max-w-2xl" : "mt-5")}>
+                  <h3 className="text-lg font-bold text-ink">{title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+                </div>
               </motion.article>
             ))}
           </div>

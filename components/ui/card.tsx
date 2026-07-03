@@ -6,14 +6,17 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card"
-      className={cn("rounded-xl border border-line bg-white p-5 text-sm text-slate-700 shadow-sm", className)}
+      className={cn(
+        "rounded-lg border border-line bg-white p-5 text-sm text-slate-700 shadow-[0_16px_48px_rgba(13,19,33,0.06)] transition-shadow duration-200",
+        className
+      )}
       {...props}
     />
   )
 }
 
 function GlassPanel({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="glass-panel" className={cn("glass rounded-xl p-5", className)} {...props} />
+  return <div data-slot="glass-panel" className={cn("glass rounded-lg p-5", className)} {...props} />
 }
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {

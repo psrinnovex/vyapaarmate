@@ -74,6 +74,7 @@ import { Badge } from "@/components/ui/badge";
 import { PaginationControls, usePaginatedItems } from "@/components/ui/pagination";
 import { OrderStatusAnimation } from "@/components/ui/order-status-animation";
 import { PaymentStatusAnimation } from "@/components/ui/payment-status-animation";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const selectClassName = "h-11 w-full rounded-lg border border-line bg-white px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
 const campaignTemplates = [
@@ -398,6 +399,15 @@ function DashboardOrderLane({
   );
 }
 
+function OrderDetailItem({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
+  return (
+    <div className={cn("min-w-0 rounded-lg bg-white p-3", className)}>
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{label}</p>
+      <div className="mt-1 break-words text-sm font-semibold text-slate-700 [overflow-wrap:anywhere]">{children}</div>
+    </div>
+  );
+}
+
 type OrdersPageView = "operations" | "history";
 
 export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = {}) {
@@ -618,7 +628,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
 
       {selected && (
         <div className="fixed inset-0 z-50 grid place-items-end bg-ink/40 p-4 sm:place-items-center">
-          <div className="w-full max-w-lg rounded-lg bg-white p-5 shadow-soft">
+          <div className="w-full max-w-2xl rounded-lg bg-white p-5 shadow-soft">
             <div className="flex items-start justify-between">
               <div className="flex min-w-0 items-start gap-3">
                 <OrderStatusAnimation
@@ -630,13 +640,55 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                 />
                 <div className="min-w-0">
                   <h2 className="truncate text-xl font-bold text-ink">{selected.orderNumber}</h2>
-                  <p className="mt-1 text-sm text-slate-500">{selected.customer} - {selected.time}</p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    <span className="font-bold text-ink">{selected.customer}</span> - {selected.time}
+                  </p>
                 </div>
               </div>
               <button type="button" className="text-sm font-bold text-ocean" onClick={closeSelectedOrder}>Close</button>
             </div>
             <div className="mt-5 grid gap-3">
-              <p className="rounded-lg bg-mist p-3 text-sm text-slate-700">{selected.items}</p>
+              <section className="rounded-lg border border-line bg-mist/60 p-4" aria-labelledby="selected-order-details-title">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p id="selected-order-details-title" className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                      {copy.transactionSingular} details
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-600">
+                      Complete {copy.transactionSingular.toLowerCase()} summary for this {copy.customerSingular.toLowerCase()}.
+                    </p>
+                  </div>
+                  <StatusPill status={selected.status} label={statusPillLabel(selected.status, selected.orderType)} className="whitespace-normal text-left leading-5" />
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <OrderDetailItem label={copy.itemPlural} className="sm:col-span-2">
+                    {selected.items}
+                  </OrderDetailItem>
+                  <OrderDetailItem label={copy.customerSingular}>
+                    <span className="font-extrabold text-ink">{selected.customer}</span>
+                  </OrderDetailItem>
+                  <OrderDetailItem label="Phone">
+                    {selected.customerPhone}
+                  </OrderDetailItem>
+                  <OrderDetailItem label="Amount">
+                    {formatINR(selected.amount)}
+                  </OrderDetailItem>
+                  <OrderDetailItem label="Payment">
+                    <StatusPill status={selected.paymentStatus} className="px-2 py-0.5 text-[11px]" />
+                  </OrderDetailItem>
+                  <OrderDetailItem label="Channel">
+                    {selected.channel}
+                  </OrderDetailItem>
+                  <OrderDetailItem label="Received">
+                    {selected.time}
+                  </OrderDetailItem>
+                  {selected.notes && (
+                    <OrderDetailItem label="Notes" className="sm:col-span-2">
+                      {selected.notes}
+                    </OrderDetailItem>
+                  )}
+                </div>
+              </section>
               <div className="grid gap-2 sm:grid-cols-2">
                 {["ACCEPTED", "PREPARING", "READY", "DELIVERED", "CANCELLED"].map((status) => {
                   const targetStatus = status as LiveOrderStatus;
@@ -3315,9 +3367,56 @@ function ResponsiveOrderTable({
     resetKey: `${orders.length}-${orders[0]?.id ?? "empty"}-${orders.at(-1)?.id ?? "empty"}`
   });
 
+  if (orders.length === 0) {
+    return (
+      <EmptyState
+        title={`No ${transactionLabel.toLowerCase()} rows yet`}
+        body={`New ${transactionLabel.toLowerCase()} activity will appear here as customers place requests.`}
+        className="mt-4"
+      />
+    );
+  }
+
   return (
     <>
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-4 grid gap-3 md:hidden">
+        {orderPagination.pageItems.map((order) => (
+          <div key={`${order.id}-mobile`} className="rounded-lg border border-line bg-white p-3 shadow-sm">
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="truncate font-bold text-ink">{order.orderNumber}</p>
+                <p className="mt-1 truncate text-sm text-slate-600">{order.customer}</p>
+              </div>
+              <p className="shrink-0 font-bold text-ink">{formatINR(order.amount)}</p>
+            </div>
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{order.items}</p>
+            <div className="mt-3 grid gap-2">
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <span className="text-xs font-semibold uppercase text-slate-400">Status</span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <OrderStatusAnimation
+                    status={order.status}
+                    businessType={businessType}
+                    orderType={order.orderType}
+                    label={getOrderTrackingStatusLabel(businessType, order.orderType, order.status)}
+                    className="size-7"
+                  />
+                  <StatusPill status={order.status} label={getOrderTrackingStatusLabel(businessType, order.orderType, order.status)} className="px-2 py-0.5 text-[11px]" />
+                </div>
+              </div>
+              <div className="flex min-w-0 items-center justify-between gap-3">
+                <span className="text-xs font-semibold uppercase text-slate-400">Payment</span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <PaymentStatusAnimation status={order.paymentStatus} label={`${order.paymentStatus.toLowerCase()} payment`} className="size-7" />
+                  <StatusPill status={order.paymentStatus} className="px-2 py-0.5 text-[11px]" />
+                </div>
+              </div>
+              <p className="text-xs font-semibold text-slate-500">{order.time}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="text-xs uppercase text-slate-500">
             <tr>{[transactionLabel, "Customer", "Items", "Amount", "Status", "Payment", "Time"].map((head) => <th key={head} className="px-3 py-3">{head}</th>)}</tr>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Role } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, X } from "lucide-react";
@@ -132,6 +132,8 @@ export function DashboardShell({
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
   const copy = getBusinessConsoleCopy(business.businessType);
   const icons = getBusinessConsoleIcons(business.businessType);
   const StorefrontIcon = icons.businessIcon;
@@ -152,6 +154,76 @@ export function DashboardShell({
   const planLine = `${titleCase(business.subscriptionPlan)} plan - ${titleCase(business.subscriptionStatus)}`;
   const isSeededDemoUser = user.email.toLowerCase() === "owner@demo.com";
   const approvalNotice = user.role === "OWNER" ? businessAccessNotice(business) : null;
+  const mobileQuickNav = navItems
+    .filter((item) =>
+      ["/dashboard", "/dashboard/orders", "/dashboard/menu", "/dashboard/payments", "/dashboard/settings"].includes(item.href)
+    )
+    .slice(0, 5);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function closeMobileNav({ restoreFocus = true }: { restoreFocus?: boolean } = {}) {
+      setMobileNavOpen(false);
+      if (restoreFocus) window.requestAnimationFrame(() => mobileButtonRef.current?.focus());
+    }
+
+    function handlePointerDown(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+      if (mobilePanelRef.current?.contains(target) || mobileButtonRef.current?.contains(target)) return;
+      closeMobileNav();
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closeMobileNav();
+        return;
+      }
+
+      if (event.key !== "Tab" || !mobilePanelRef.current) return;
+
+      const focusableItems = Array.from(
+        mobilePanelRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (!focusableItems.length) return;
+
+      const firstItem = focusableItems[0];
+      const lastItem = focusableItems[focusableItems.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstItem) {
+        event.preventDefault();
+        lastItem.focus();
+      } else if (!event.shiftKey && document.activeElement === lastItem) {
+        event.preventDefault();
+        firstItem.focus();
+      }
+    }
+
+    function handleResize() {
+      if (window.innerWidth >= 1024) closeMobileNav({ restoreFocus: false });
+    }
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleResize);
+    window.requestAnimationFrame(() => {
+      mobilePanelRef.current?.querySelector<HTMLElement>("a[href], button:not([disabled])")?.focus();
+    });
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [mobileNavOpen]);
 
   async function logout() {
     setLoggingOut(true);
@@ -204,10 +276,13 @@ export function DashboardShell({
         <header className="z-30 flex h-16 shrink-0 items-center justify-between border-b border-line bg-white/90 px-4 backdrop-blur-xl lg:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
+              ref={mobileButtonRef}
               type="button"
               aria-label="Open navigation"
-              className="grid size-10 place-items-center rounded-lg border border-line bg-white lg:hidden"
-              onClick={() => setMobileNavOpen(true)}
+              aria-expanded={mobileNavOpen}
+              aria-controls="dashboard-mobile-navigation"
+              className="grid size-10 place-items-center rounded-lg border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
+              onClick={() => setMobileNavOpen((value) => !value)}
             >
               <Menu className="size-5" />
             </button>
@@ -233,8 +308,18 @@ export function DashboardShell({
           </div>
         </header>
         {mobileNavOpen && (
-          <div className="fixed inset-0 z-50 bg-ink/40 p-4 lg:hidden">
-            <div className="flex max-h-full min-h-0 w-full max-w-sm flex-col rounded-lg bg-white p-4 shadow-soft">
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <button
+              type="button"
+              aria-label="Close navigation"
+              className="absolute inset-0 bg-ink/45 backdrop-blur-md motion-safe:animate-[admin-mobile-backdrop-in_180ms_ease-out]"
+              onClick={() => setMobileNavOpen(false)}
+            />
+            <div
+              ref={mobilePanelRef}
+              id="dashboard-mobile-navigation"
+              className="dashboard-mobile-drawer safe-bottom relative flex h-full max-h-[100svh] w-[min(88vw,22.5rem)] flex-col overflow-hidden border-r border-line bg-white p-4 shadow-[34px_0_90px_rgba(13,19,33,0.24)] motion-safe:animate-[admin-mobile-drawer-in_340ms_cubic-bezier(0.22,1,0.36,1)]"
+            >
               <div className="flex shrink-0 items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
                   <span className="grid size-9 place-items-center rounded-lg bg-white text-ink">VM</span>
@@ -243,7 +328,7 @@ export function DashboardShell({
                 <button
                   type="button"
                   aria-label="Close navigation"
-                  className="grid size-10 place-items-center rounded-lg border border-line bg-white text-slate-600"
+                  className="grid size-10 place-items-center rounded-lg border border-line bg-white text-slate-600 transition hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
                   onClick={() => setMobileNavOpen(false)}
                 >
                   <X className="size-5" />
@@ -256,14 +341,17 @@ export function DashboardShell({
                     <Link
                       key={item.href}
                       href={item.href}
+                      aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition",
-                        active ? "bg-ocean text-white" : "text-slate-600 hover:bg-mist hover:text-ink"
+                        "flex h-12 min-w-0 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
+                        active ? "bg-ocean text-white shadow-[0_18px_42px_rgba(18,70,160,0.16)]" : "text-slate-600 hover:bg-mist hover:text-ink"
                       )}
                       onClick={() => setMobileNavOpen(false)}
                     >
-                      <item.icon className="size-4" />
-                      {item.label}
+                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", active ? "bg-white/15 text-white" : "bg-mist text-slate-500")}>
+                        <item.icon className="size-4" />
+                      </span>
+                      <span className="min-w-0 truncate">{item.label}</span>
                     </Link>
                   );
                 })}
@@ -276,7 +364,7 @@ export function DashboardShell({
           </div>
         )}
         <DashboardLiveProvider initialPayload={initialLivePayload} initialPayloadIsComplete={initialLivePayloadIsComplete}>
-          <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-24 pt-6 sm:pb-6 lg:px-6">
+          <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-32 pt-6 sm:pb-6 lg:px-6">
             {approvalNotice && <ApprovalNotice notice={approvalNotice} />}
             <DashboardBookingAlert
               canReviewOrders={hasPermission(user.role, "business:orders:read")}
@@ -284,6 +372,30 @@ export function DashboardShell({
             />
             {children}
           </main>
+          {mobileQuickNav.length > 0 && (
+            <nav
+              className="safe-bottom fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-lg border border-line bg-white/95 p-1 shadow-[0_20px_60px_rgba(13,19,33,0.18)] backdrop-blur-xl lg:hidden"
+              aria-label="Dashboard quick navigation"
+            >
+              {mobileQuickNav.map((item) => {
+                const active = isNavItemActive(item.href);
+                return (
+                  <Link
+                    key={`${item.href}-quick`}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] font-bold leading-none transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
+                      active ? "bg-ink text-white" : "text-slate-500 hover:bg-mist hover:text-ink"
+                    )}
+                  >
+                    <item.icon className="size-4" />
+                    <span className="max-w-full truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
         </DashboardLiveProvider>
       </div>
     </div>
