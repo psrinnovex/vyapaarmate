@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { homePathForRole } from "@/lib/auth-portal";
 import { cookieName, verifySessionToken } from "@/lib/session";
 
 const unsafeMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -22,6 +23,10 @@ function redirectToLogin(request: NextRequest, clearSession = false) {
   }
 
   return response;
+}
+
+function redirectToPath(request: NextRequest, path: string) {
+  return NextResponse.redirect(new URL(path, request.url));
 }
 
 function configuredTrustedOrigins(request: NextRequest) {
@@ -134,6 +139,28 @@ export async function proxy(request: NextRequest) {
   const session = await verifySessionToken(token);
   if (!session) {
     return redirectToLogin(request, true);
+  }
+
+  if (isAdminPath && session.role !== "SUPER_ADMIN") {
+    return redirectToPath(request, homePathForRole(session.role));
+  }
+
+  if (isSupportPath && session.role !== "SUPPORT_AGENT") {
+    return redirectToPath(request, homePathForRole(session.role));
+  }
+
+  if (isUserPath && session.role !== "CUSTOMER") {
+    return redirectToPath(request, homePathForRole(session.role));
+  }
+
+  if (isDashboardPath) {
+    if (session.role === "SUPER_ADMIN" || session.role === "SUPPORT_AGENT" || session.role === "CUSTOMER") {
+      return redirectToPath(request, homePathForRole(session.role));
+    }
+
+    if (!session.businessId) {
+      return redirectToLogin(request);
+    }
   }
 
   const requestHeaders = new Headers(request.headers);

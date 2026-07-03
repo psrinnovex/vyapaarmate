@@ -1,5 +1,6 @@
 import type { Role } from "@prisma/client";
 import type { SessionUser } from "./session";
+import { assertAllowedRole, assertTenantAccess } from "@/lib/security/authz";
 
 const rolePermissions: Record<Role, string[]> = {
   SUPER_ADMIN: ["platform:*"],
@@ -27,14 +28,9 @@ export function hasPermission(role: Role, permission: string) {
 }
 
 export function assertBusinessAccess(user: SessionUser, businessId: string) {
-  if (user.role === "SUPER_ADMIN") return;
-  if (!user.businessId || user.businessId !== businessId) {
-    throw new Error("Forbidden: cross-tenant access is not allowed.");
-  }
+  assertTenantAccess(user, businessId);
 }
 
 export function assertRole(user: SessionUser, roles: Role[]) {
-  if (!roles.includes(user.role)) {
-    throw new Error("Forbidden: insufficient role.");
-  }
+  assertAllowedRole(user, roles);
 }

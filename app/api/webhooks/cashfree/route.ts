@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
+import { apiError } from "@/lib/security/api-response";
+import { safeLog } from "@/lib/security/safe-logger";
 import { isCashfreeFailedStatus, isCashfreePaidStatus, verifyCashfreeWebhookSignature } from "@/services/cashfree";
 import { completeGatewayOrderPayment, failGatewayOrderPayment } from "@/services/business-wallet";
 import { sendOrderWhatsappUpdate } from "@/services/order-whatsapp";
@@ -56,14 +58,19 @@ export async function POST(request: Request) {
   const verification = verifyCashfreeWebhookSignature(payload, signature, timestamp);
 
   if (!verification.verified) {
-    return NextResponse.json({ error: "Invalid webhook signature", verification }, { status: 400 });
+    safeLog("warn", "Rejected Cashfree webhook signature", {
+      reason: verification.reason,
+      hasSignature: Boolean(signature),
+      hasTimestamp: Boolean(timestamp)
+    });
+    return apiError("Invalid webhook signature", 401);
   }
 
   let event: Record<string, unknown>;
   try {
     event = asRecord(JSON.parse(payload)) ?? {};
   } catch {
-    return NextResponse.json({ error: "Invalid Cashfree webhook payload" }, { status: 400 });
+    return apiError("Invalid Cashfree webhook payload", 400);
   }
 
   const webhook = cashfreeWebhookData(event);

@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { refreshBusinessIntelligence } from "@/lib/business-intelligence-materialization";
+import { requireCronRequest } from "@/lib/security/cron";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-function isAuthorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return process.env.NODE_ENV !== "production";
-  return request.headers.get("authorization") === `Bearer ${secret}`;
-}
 
 function boundedLimit(value: string | null) {
   const parsed = Number(value ?? 100);
@@ -17,9 +12,8 @@ function boundedLimit(value: string | null) {
 }
 
 async function handleIntelligenceRefresh(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const unauthorized = requireCronRequest(request);
+  if (unauthorized) return unauthorized;
 
   const url = new URL(request.url);
   const result = await refreshBusinessIntelligence({

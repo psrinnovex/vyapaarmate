@@ -5,6 +5,7 @@ import { createSessionToken, sessionCookie } from "@/lib/session";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit";
+import { parseJsonRequest } from "@/lib/security/validation";
 import { smsVerificationEnabled } from "@/services/sms";
 
 export async function POST(request: Request) {
@@ -14,11 +15,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Too many login attempts. Try again shortly." }, { status: 429 });
   }
 
-  const body = await request.json();
-  const parsed = loginSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, loginSchema);
+  if (parsed.response) return parsed.response;
 
   const user = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
   if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) {

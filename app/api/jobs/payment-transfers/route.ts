@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireCronRequest } from "@/lib/security/cron";
 import {
   creditMissingGatewayWalletEntries,
   processAutomaticCashfreePayouts,
@@ -8,16 +9,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function isAuthorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return process.env.NODE_ENV !== "production";
-  return request.headers.get("authorization") === `Bearer ${secret}`;
-}
-
 async function handleWalletReconciliation(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const unauthorized = requireCronRequest(request);
+  if (unauthorized) return unauthorized;
 
   const [credits, releases] = await Promise.all([
     creditMissingGatewayWalletEntries(),

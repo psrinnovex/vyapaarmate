@@ -127,10 +127,7 @@ async function resolveBusiness(message: WhatsAppInboundMessage) {
   const defaultBusiness = await findConfiguredBusiness(process.env.WHATSAPP_DEFAULT_BUSINESS_SLUG);
   if (defaultBusiness) return defaultBusiness;
 
-  return prisma.business.findFirst({
-    where: { isActive: true, isVerified: true },
-    orderBy: { updatedAt: "desc" }
-  });
+  return null;
 }
 
 async function upsertWhatsAppCustomer(business: Business, message: WhatsAppInboundMessage) {

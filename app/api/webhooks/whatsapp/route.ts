@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { apiError } from "@/lib/security/api-response";
+import { safeLog } from "@/lib/security/safe-logger";
 import { handleWhatsAppCommerceMessages } from "@/services/whatsapp-commerce";
 import {
   extractWhatsAppInboundMessages,
@@ -24,14 +26,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const rawBody = await request.text();
   if (!verifyWhatsAppWebhookSignature(rawBody, request.headers.get("x-hub-signature-256"))) {
-    return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
+    safeLog("warn", "Rejected WhatsApp webhook signature", {
+      hasSignature: request.headers.has("x-hub-signature-256")
+    });
+    return apiError("Invalid webhook signature", 401);
   }
 
   let payload: unknown;
   try {
     payload = JSON.parse(rawBody);
   } catch {
-    return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
+    return apiError("Invalid webhook payload", 400);
   }
 
   const statusUpdates = extractWhatsAppStatusUpdates(payload);

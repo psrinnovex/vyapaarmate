@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { safeLog } from "@/lib/security/safe-logger";
 
 type Bucket = {
   count: number;
@@ -84,7 +85,7 @@ export async function rateLimit(key: string, limit = 10, windowMs = 60_000): Pro
   try {
     return await redisRateLimit(key, limit, windowMs);
   } catch (error) {
-    console.error("Distributed rate limiter unavailable", error);
+    safeLog("error", "Distributed rate limiter unavailable", { error });
     if (process.env.RATE_LIMIT_FAIL_OPEN === "true") {
       return memoryRateLimit(key, limit, windowMs);
     }

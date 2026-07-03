@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireCronRequest } from "@/lib/security/cron";
 import { formatINR } from "@/lib/utils";
 import { businessWhatsappConfig } from "@/services/business-whatsapp";
 import { paymentCheckoutExpiresInMinutes } from "@/services/cashfree";
@@ -23,20 +24,13 @@ function qrExpiryMinutes() {
   return paymentCheckoutExpiresInMinutes();
 }
 
-function isAuthorized(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return process.env.NODE_ENV !== "production";
-  return request.headers.get("authorization") === `Bearer ${secret}`;
-}
-
 function appUrl() {
   return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
 async function handlePaymentReminders(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const unauthorized = requireCronRequest(request);
+  if (unauthorized) return unauthorized;
 
   const now = new Date();
   const reminderMinutes = reminderAfterMinutes();
