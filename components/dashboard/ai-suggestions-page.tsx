@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -245,6 +246,19 @@ function HealthFactorBar({ label, value, tone = "ocean" }: { label: string; valu
 }
 
 export function AiSuggestionsPage() {
+  const pathname = usePathname();
+  const isProtected = useMemo(() => {
+    if (!pathname) return false;
+    return (
+      pathname === "/dashboard" ||
+      pathname.startsWith("/dashboard/") ||
+      pathname === "/admin" ||
+      pathname.startsWith("/admin/") ||
+      pathname === "/support" ||
+      pathname.startsWith("/support/")
+    );
+  }, [pathname]);
+
   const [data, setData] = useState<BusinessIntelligencePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -736,9 +750,11 @@ export function AiSuggestionsPage() {
         <p>
           These are explainable decision-support suggestions from local rules and business data. They do not guarantee outcomes, and owners should verify stock, staff, pricing, and customer consent before acting.
         </p>
-        <ButtonLink className="w-full sm:w-auto" href="/technology-innovation" variant="secondary" icon={<IndianRupee className="size-4" />}>
-          See Technology
-        </ButtonLink>
+        {!isProtected && (
+          <ButtonLink className="w-full sm:w-auto" href="/technology-innovation" variant="secondary" icon={<IndianRupee className="size-4" />}>
+            See Technology
+          </ButtonLink>
+        )}
       </div>
     </>
   );
