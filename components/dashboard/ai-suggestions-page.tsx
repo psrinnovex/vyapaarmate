@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -27,7 +26,7 @@ import type { BusinessIntelligencePayload, IntelligenceConfidence, PaymentPriori
 import { cn, formatINR } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card, GlassPanel } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/section";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
@@ -35,11 +34,6 @@ import { Progress } from "@/components/ui/progress";
 type PaymentSort = "priority" | "amount" | "overdue" | "repeat";
 
 const chartColors = ["#1246a0", "#11a66a", "#6c3df4", "#f59e0b", "#0d1321", "#e11d48", "#0891b2", "#7c3aed"];
-const sectionMotion = {
-  initial: { opacity: 0, y: 14 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, ease: "easeOut" }
-} as const;
 
 function confidenceVariant(confidence: IntelligenceConfidence) {
   if (confidence === "High") return "emerald";
@@ -126,43 +120,43 @@ function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload
   if (!engine) return null;
 
   return (
-    <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.03 }}>
-      <Card className="mb-5 bg-white">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={engine.trainedModelInUse ? "emerald" : "amber"}>
-                <BrainCircuit className="size-3" />
-                {engineLabel(engine.type)}
-              </Badge>
-              <Badge variant="neutral">First-party database</Badge>
-              <Badge variant="neutral">No external datasets</Badge>
-              <Badge variant="neutral">No synthetic production data</Badge>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              {engine.type === "rules_engine"
-                ? "ML models need more real business history; rules/statistical recommendations are active."
-                : engine.type === "trained_ml"
-                  ? "All model families have trained first-party artifacts."
-                  : "Trained models are active where ready; rules/statistical recommendations fill the remaining gaps."}
-            </p>
+    <Card className="mb-4 p-4">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:items-start">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={engine.trainedModelInUse ? "emerald" : "amber"}>
+              <BrainCircuit className="size-3" />
+              {engineLabel(engine.type)}
+            </Badge>
+            <Badge variant="neutral">Rules</Badge>
+            <Badge variant="neutral">First-party database</Badge>
+            <Badge variant="neutral">No external datasets</Badge>
+            <Badge variant="neutral">No synthetic production data</Badge>
           </div>
-          <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[440px]">
-            {engine.modelStatuses.map((model) => (
-              <div key={model.modelType} className="rounded-lg border border-line bg-mist p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-bold text-ink">{modelLabel(model.modelType)}</p>
-                  <Badge variant={modelStatusVariant(model.status)}>{model.status.replaceAll("_", " ")}</Badge>
-                </div>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  {model.lastTrainedAt ? `Trained ${formatGeneratedAt(model.lastTrainedAt)}` : model.missingRequirements[0] ?? "Waiting for first-party history."}
-                </p>
-              </div>
-            ))}
-          </div>
+          <h2 className="mt-3 text-base font-bold text-ink">Model readiness</h2>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            {engine.type === "rules_engine"
+              ? "ML models need more real business history; rules/statistical recommendations are active."
+              : engine.type === "trained_ml"
+                ? "All model families have trained first-party artifacts."
+                : "Trained models are active where ready; rules/statistical recommendations fill the remaining gaps."}
+          </p>
         </div>
-      </Card>
-    </motion.div>
+        <div className="grid min-w-0 gap-2 sm:grid-cols-3">
+          {engine.modelStatuses.map((model) => (
+            <div key={model.modelType} className="min-w-0 rounded-lg border border-line bg-mist/80 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-bold text-ink">{modelLabel(model.modelType)}</p>
+                <Badge variant={modelStatusVariant(model.status)}>{model.status.replaceAll("_", " ")}</Badge>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-slate-600">
+                {model.lastTrainedAt ? `Trained ${formatGeneratedAt(model.lastTrainedAt)}` : model.missingRequirements[0] ?? "Waiting for first-party history."}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
   );
 }
 
@@ -188,31 +182,31 @@ function AiPageSkeleton() {
         body="Demand forecasts, repeat-customer opportunities, payment priorities, health score, and next best owner actions."
         action={<Skeleton className="h-10 w-32 rounded-lg" />}
       />
-      <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <Card className="min-h-80">
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <Card className="p-4">
           <Skeleton className="h-5 w-52" />
-          <div className="mt-6 grid gap-3">
+          <div className="mt-4 grid gap-3">
             {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} className="h-16 rounded-lg" />
+              <Skeleton key={index} className="h-14 rounded-lg" />
             ))}
           </div>
-          <Skeleton className="mt-6 h-48 rounded-lg" />
+          <Skeleton className="mt-4 h-44 rounded-lg" />
         </Card>
-        <Card className="min-h-80">
+        <Card className="p-4">
           <Skeleton className="h-5 w-48" />
-          <SkeletonText className="mt-5" lines={4} />
-          <div className="mt-6 grid gap-3">
+          <SkeletonText className="mt-4" lines={3} />
+          <div className="mt-4 grid gap-3">
             {Array.from({ length: 4 }, (_, index) => (
               <Skeleton key={index} className="h-14 rounded-lg" />
             ))}
           </div>
         </Card>
       </div>
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-3">
         {Array.from({ length: 3 }, (_, index) => (
-          <Card key={index}>
+          <Card key={index} className="p-4">
             <Skeleton className="h-5 w-40" />
-            <SkeletonText className="mt-5" lines={5} />
+            <SkeletonText className="mt-4" lines={4} />
           </Card>
         ))}
       </div>
@@ -222,7 +216,7 @@ function AiPageSkeleton() {
 
 function EmptyState({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-line bg-mist p-5 text-sm leading-6 text-slate-600">
+    <div className="rounded-lg border border-dashed border-line bg-mist/80 p-4 text-sm leading-6 text-slate-600">
       <p className="font-bold text-ink">{title}</p>
       <p className="mt-1">{body}</p>
     </div>
@@ -381,12 +375,12 @@ export function AiSuggestionsPage() {
         title="AI Suggestions"
         body="Low-cost owner intelligence from orders, bookings, customers, payments, and catalog data."
         action={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
             <Badge variant={data.source === "demo" ? "amber" : "emerald"}>
               {data.source === "demo" ? "Demo fallback data" : "Live business data"}
             </Badge>
             <Badge variant={connected ? "blue" : "amber"}>{connected ? "Live sync on" : "Sync reconnecting"}</Badge>
-            <Button variant="secondary" icon={<RefreshCw className="size-4" />} onClick={() => void refreshData()}>
+            <Button className="w-full sm:w-auto" variant="secondary" icon={<RefreshCw className="size-4" />} onClick={() => void refreshData()}>
               Refresh
             </Button>
           </div>
@@ -395,39 +389,33 @@ export function AiSuggestionsPage() {
 
       <EngineReadinessPanel engine={data.engine} />
 
-      <motion.div {...sectionMotion}>
-        <GlassPanel className="mb-5 overflow-hidden border border-white bg-[linear-gradient(135deg,rgba(13,19,33,0.96),rgba(18,70,160,0.88)_48%,rgba(17,166,106,0.78))] text-white">
-          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="border-white/20 bg-white/10 text-white" variant="outline">
-                  <BrainCircuit className="size-3" />
-                  Bhojzo Intelligence Engine
-                </Badge>
-                <Badge className="border-white/20 bg-white/10 text-white" variant="outline">
-                  {data.dataWindow}
-                </Badge>
-                <Badge className="border-white/20 bg-white/10 text-white" variant="outline">
-                  No paid AI APIs
-                </Badge>
-              </div>
-              <h2 className="mt-4 max-w-3xl text-2xl font-bold leading-tight sm:text-3xl">
-                {data.business.name} has a {health.score}/100 business health score.
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-white/75">
-                {health.explanation} Generated {formatGeneratedAt(data.generatedAt)} without paid AI API calls.
-              </p>
+      <Card className="mb-4 overflow-hidden border-ocean/15 bg-[linear-gradient(135deg,#f8fbff_0%,#eef7f2_54%,#ffffff_100%)] p-4 shadow-[0_18px_54px_rgba(13,19,33,0.08)]">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="blue">
+                <BrainCircuit className="size-3" />
+                Bhojzo Intelligence Engine
+              </Badge>
+              <Badge variant="secondary">{data.dataWindow}</Badge>
+              <Badge variant="neutral">No paid AI APIs</Badge>
             </div>
-            <div className="grid size-28 place-items-center rounded-lg border border-white/15 bg-white/10 text-center shadow-glow">
-              <p className="text-4xl font-extrabold">{health.score}</p>
-              <p className="text-xs font-bold uppercase text-white/70">Grade {health.grade}</p>
-            </div>
+            <h2 className="mt-3 max-w-3xl text-xl font-bold leading-tight text-ink sm:text-2xl">
+              {data.business.name} has a {health.score}/100 business health score.
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
+              {health.explanation} Generated {formatGeneratedAt(data.generatedAt)} without paid AI API calls.
+            </p>
           </div>
-        </GlassPanel>
-      </motion.div>
+          <div className="grid min-h-24 min-w-24 place-items-center rounded-lg border border-ocean/15 bg-white p-4 text-center shadow-[0_14px_36px_rgba(18,70,160,0.10)]">
+            <p className="text-4xl font-extrabold leading-none text-ink">{health.score}</p>
+            <p className="mt-2 text-xs font-bold uppercase text-slate-500">Grade {health.grade}</p>
+          </div>
+        </div>
+      </Card>
 
-      <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.05 }} className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-        <Card className="min-w-0 overflow-hidden bg-white">
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+        <Card className="min-w-0 overflow-hidden p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <Badge variant="blue">Tomorrow by time slot</Badge>
@@ -439,13 +427,13 @@ export function AiSuggestionsPage() {
 
           {data.tomorrowDemandForecast.length ? (
             <>
-              <div className="mt-5 grid gap-3">
+              <div className="mt-4 grid gap-3">
                 {data.tomorrowDemandForecast.slice(0, 3).map((forecast) => (
-                  <div key={`${forecast.productName}-${forecast.timeSlot}-${forecast.forecastDate}`} className="rounded-lg border border-line bg-mist p-4">
+                  <div key={`${forecast.productName}-${forecast.timeSlot}-${forecast.forecastDate}`} className="rounded-lg border border-line bg-mist/80 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
+                      <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-bold text-ink">{forecast.productName}</p>
+                          <p className="min-w-0 font-bold text-ink">{forecast.productName}</p>
                           <Badge variant="neutral">{slotLabel(forecast.timeSlot)}</Badge>
                         </div>
                         <p className="mt-1 text-sm text-slate-600">{forecast.reason}</p>
@@ -453,7 +441,7 @@ export function AiSuggestionsPage() {
                           Weekday-slot avg {forecast.explainability.weekdaySlotAverage} · Recent-slot avg {forecast.explainability.recentSlotAverage} · Trend x{forecast.explainability.trendAdjustment}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-2">
                         <Badge variant={confidenceVariant(forecast.confidence)}>{forecast.confidence}</Badge>
                         <span className="text-xl font-extrabold text-ink">{forecast.predictedQuantity}</span>
                       </div>
@@ -461,7 +449,7 @@ export function AiSuggestionsPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-5 h-64 rounded-lg border border-line bg-white p-3">
+              <div className="mt-4 h-56 rounded-lg border border-line bg-white p-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demandChartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#dce6f1" />
@@ -478,13 +466,13 @@ export function AiSuggestionsPage() {
               </div>
             </>
           ) : (
-            <div className="mt-5">
+            <div className="mt-4">
               <EmptyState title="No demand forecast yet" body="Add a few days of orders to generate product-level demand forecasts." />
             </div>
           )}
         </Card>
 
-        <Card className="bg-white">
+        <Card className="p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <Badge variant="emerald">Repeat customers</Badge>
@@ -493,7 +481,7 @@ export function AiSuggestionsPage() {
             </div>
             <Target className="size-6 text-emerald" />
           </div>
-          <div className="mt-5 rounded-lg bg-mist p-4">
+          <div className="mt-4 rounded-lg bg-mist/80 p-3">
             <p className="text-3xl font-extrabold text-ink">{data.repeatCustomerOpportunities.count}</p>
             <p className="mt-1 text-sm text-slate-600">{data.repeatCustomerOpportunities.eligibleCount} customers have marketing consent.</p>
           </div>
@@ -521,19 +509,19 @@ export function AiSuggestionsPage() {
             )}
           </div>
           {data.repeatCustomerOpportunities.eligibleCount > 0 ? (
-            <ButtonLink href="/dashboard/campaigns?source=ai-suggestions&segment=repeat-opportunities" className="mt-5 w-full" variant="emerald" icon={<MessageCircle className="size-4" />}>
+            <ButtonLink href="/dashboard/campaigns?source=ai-suggestions&segment=repeat-opportunities" className="mt-4 w-full" variant="emerald" icon={<MessageCircle className="size-4" />}>
               Create WhatsApp Reminder
             </ButtonLink>
           ) : (
-            <Button className="mt-5 w-full" variant="neutral" icon={<MessageCircle className="size-4" />} disabled>
+            <Button className="mt-4 w-full" variant="neutral" icon={<MessageCircle className="size-4" />} disabled>
               Add Consent Before Campaign
             </Button>
           )}
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.1 }} className="mt-5 grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-        <Card className="bg-white">
+      <div className="mt-4 grid items-start gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <Card className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <Badge variant="amber">Payment risk</Badge>
@@ -554,7 +542,7 @@ export function AiSuggestionsPage() {
                 type="button"
                 onClick={() => setPaymentSort(id as PaymentSort)}
                 className={cn(
-                  "h-9 rounded-lg border px-3 text-xs font-bold transition",
+                  "h-9 rounded-lg border px-3 text-xs font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald/60",
                   paymentSort === id ? "border-ocean bg-ocean text-white" : "border-line bg-white text-slate-600 hover:bg-mist"
                 )}
               >
@@ -565,7 +553,7 @@ export function AiSuggestionsPage() {
           <div className="mt-4 grid gap-3">
             {sortedPayments.length ? (
               sortedPayments.slice(0, 5).map((payment) => (
-                <div key={payment.paymentId} className="rounded-lg border border-line bg-mist p-4">
+                <div key={payment.paymentId} className="rounded-lg border border-line bg-mist/80 p-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-bold text-ink">{payment.customerName}</p>
@@ -590,7 +578,7 @@ export function AiSuggestionsPage() {
           </div>
         </Card>
 
-        <Card className="bg-white">
+        <Card className="p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <Badge variant="purple">Business health</Badge>
@@ -602,7 +590,7 @@ export function AiSuggestionsPage() {
               <span className="-mt-1 text-sm font-extrabold">{health.score}</span>
             </div>
           </div>
-          <div className="mt-5 grid gap-4">
+          <div className="mt-4 grid gap-4">
             {health.factors.map((factor) => (
               <div key={factor.label}>
                 <HealthFactorBar
@@ -617,10 +605,10 @@ export function AiSuggestionsPage() {
               </div>
             ))}
           </div>
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
-            <div className="rounded-lg bg-emerald/5 p-4">
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border border-emerald/15 bg-emerald/5 p-3">
               <p className="font-bold text-emerald">Strengths</p>
-              <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+              <ul className="mt-2 grid gap-2 text-sm leading-6 text-slate-600">
                 {health.strengths.slice(0, 3).map((strength) => (
                   <li key={strength} className="flex gap-2">
                     <CheckCircle2 className="mt-1 size-4 shrink-0 text-emerald" />
@@ -629,9 +617,9 @@ export function AiSuggestionsPage() {
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg bg-amber-50 p-4">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
               <p className="font-bold text-amber-800">Risks</p>
-              <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-600">
+              <ul className="mt-2 grid gap-2 text-sm leading-6 text-slate-600">
                 {(health.risks.length ? health.risks : ["No urgent risk flagged by current rules."]).slice(0, 3).map((risk) => (
                   <li key={risk} className="flex gap-2">
                     <AlertTriangle className="mt-1 size-4 shrink-0 text-amber-600" />
@@ -642,10 +630,10 @@ export function AiSuggestionsPage() {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.15 }} className="mt-5 grid gap-5 lg:grid-cols-3">
-        <Card className="bg-white">
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-3">
+        <Card className="p-4">
           <Badge variant="blue">
             <LineChart className="size-3" />
             Top product trend
@@ -657,23 +645,23 @@ export function AiSuggestionsPage() {
             </div>
             {trendIcon(data.topProductTrend.trendDirection)}
           </div>
-          <div className="mt-5 grid grid-cols-3 gap-3">
-            <div className="rounded-lg bg-mist p-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg bg-mist/80 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Units</p>
               <p className="mt-2 text-xl font-extrabold text-ink">{data.topProductTrend.unitsSold}</p>
             </div>
-            <div className="rounded-lg bg-mist p-3">
+            <div className="rounded-lg bg-mist/80 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Repeat buyers</p>
               <p className="mt-2 text-xl font-extrabold text-ink">{data.topProductTrend.repeatBuyers}</p>
             </div>
-            <div className="rounded-lg bg-mist p-3">
+            <div className="rounded-lg bg-mist/80 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Trend</p>
               <p className="mt-2 text-xl font-extrabold text-ink">{formatSignedPercent(data.topProductTrend.changePercent)}</p>
             </div>
           </div>
         </Card>
 
-        <Card className="bg-white">
+        <Card className="p-4">
           <Badge variant="purple">
             <Megaphone className="size-3" />
             Smart campaigns
@@ -681,9 +669,9 @@ export function AiSuggestionsPage() {
           <h2 className="mt-4 text-xl font-bold text-ink">{data.campaignRecommendation.title}</h2>
           <div className="mt-4 grid gap-3 text-sm leading-6">
             {data.campaignRecommendations.slice(0, 2).map((campaign) => (
-              <div key={campaign.id} className="rounded-lg border border-line bg-mist p-3">
+              <div key={campaign.id} className="rounded-lg border border-line bg-mist/80 p-3">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-bold text-ink">{campaign.title}</p>
                     <p className="mt-1 text-xs leading-5 text-slate-500">{campaign.reason}</p>
                   </div>
@@ -715,7 +703,7 @@ export function AiSuggestionsPage() {
           )}
         </Card>
 
-        <Card className="bg-white">
+        <Card className="p-4">
           <Badge variant="emerald">
             <Sparkles className="size-3" />
             Next best actions
@@ -724,13 +712,13 @@ export function AiSuggestionsPage() {
           <div className="mt-4 grid gap-3">
             {data.nextBestActions.length ? (
               data.nextBestActions.map((action, index) => (
-                <div key={`${action.title}-${index}`} className="rounded-lg border border-line bg-mist p-3">
+                <div key={`${action.title}-${index}`} className="rounded-lg border border-line bg-mist/80 p-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-bold text-ink">{action.title}</p>
                       <p className="mt-1 text-sm leading-6 text-slate-600">{action.description}</p>
                     </div>
-                    <Badge variant={action.priority === "High" ? "red" : action.priority === "Medium" ? "amber" : "neutral"}>{action.priority}</Badge>
+                    <Badge className="shrink-0" variant={action.priority === "High" ? "red" : action.priority === "Medium" ? "amber" : "neutral"}>{action.priority}</Badge>
                   </div>
                 </div>
               ))
@@ -739,19 +727,19 @@ export function AiSuggestionsPage() {
             )}
           </div>
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.2 }} className="mt-5 grid gap-4 rounded-lg border border-line bg-white p-5 text-sm leading-6 text-slate-600 lg:grid-cols-[auto_1fr_auto] lg:items-center">
-        <div className="grid size-12 place-items-center rounded-lg bg-ocean/10 text-ocean">
+      <div className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_16px_48px_rgba(13,19,33,0.05)] lg:grid-cols-[auto_1fr_auto] lg:items-center">
+        <div className="grid size-10 place-items-center rounded-lg bg-ocean/10 text-ocean">
           <Info className="size-5" />
         </div>
         <p>
           These are explainable decision-support suggestions from local rules and business data. They do not guarantee outcomes, and owners should verify stock, staff, pricing, and customer consent before acting.
         </p>
-        <ButtonLink href="/technology-innovation" variant="secondary" icon={<IndianRupee className="size-4" />}>
+        <ButtonLink className="w-full sm:w-auto" href="/technology-innovation" variant="secondary" icon={<IndianRupee className="size-4" />}>
           See Technology
         </ButtonLink>
-      </motion.div>
+      </div>
     </>
   );
 }

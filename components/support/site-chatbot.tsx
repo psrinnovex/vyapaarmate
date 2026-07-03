@@ -80,7 +80,7 @@ const launcherAnimationPath = "/lottie/hello-chat-bot.json";
 const customerSupportAlertPath = "/audio/support-agent-alert.mp3";
 const customerSupportAlertGain = 2;
 const storageKey = "vyapaarmate_chat_session";
-const hiddenPathPrefixes = ["/login", "/register", "/forgot-password", "/admin", "/support", "/b/", "/order/"];
+const hiddenPathPrefixes = ["/login", "/register", "/forgot-password", "/dashboard", "/admin", "/support", "/b/", "/order/"];
 const defaultChatHighlightTerms = [
   "VyapaarBot",
   `${company.product} Support`,

@@ -68,6 +68,7 @@ const routes = [
   { group: "public", path: "/register" },
   { group: "public", path: "/b/sri-sai-tiffins" },
   { group: "owner", path: "/dashboard" },
+  { group: "owner", path: "/dashboard/ai-suggestions" },
   { group: "owner", path: "/dashboard/orders" },
   { group: "owner", path: "/dashboard/menu" },
   { group: "owner", path: "/dashboard/payments" },
