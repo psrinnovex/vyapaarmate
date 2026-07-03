@@ -1,12 +1,12 @@
 import { resolveTxt } from "node:dns/promises";
 
-const requestedOrigin = process.argv[2] || process.env.NEXT_PUBLIC_APP_URL || "https://vyapaarmate.com";
+const requestedOrigin = process.argv[2] || process.env.NEXT_PUBLIC_APP_URL || "https://www.vyapaarmate.com";
 
 let origin;
 try {
   origin = new URL(requestedOrigin).origin;
 } catch {
-  console.error("ERROR: Pass a valid HTTPS origin, for example https://vyapaarmate.com.");
+  console.error("ERROR: Pass a valid HTTPS origin, for example https://www.vyapaarmate.com.");
   process.exit(1);
 }
 

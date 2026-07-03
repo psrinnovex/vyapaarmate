@@ -16,6 +16,7 @@ The project should not be described as fully secure or unhackable. Remaining ris
 - `.env.example`
 - `lib/session.ts`, `lib/api-session.ts`, `lib/rbac.ts`
 - `lib/security/authz.ts`, `lib/security/cron.ts`, `lib/security/safe-logger.ts`
+- `lib/chatbot/*`, `lib/support-chatbot.ts`, `lib/support-tickets.ts`, `lib/support-chat.ts`, `lib/support-agent-queue.ts`
 - `app/api/webhooks/cashfree/route.ts`, `app/api/webhooks/whatsapp/route.ts`
 - `app/api/jobs/*/route.ts`
 - `app/api/business-images/[businessId]/route.ts`, `app/api/menu-images/[itemId]/route.ts`
@@ -128,13 +129,29 @@ Status: warning
 
 Evidence:
 - `lib/security/safe-logger.ts` masks emails, phones, tokens, signatures, passwords, UPI/account/IFSC-like values.
+- `lib/chatbot/chatbot-redaction.ts` masks chatbot/support transcript emails, phones, bearer tokens, JWTs, card-like values, UPI IDs, IFSC-like references, and OTP/CVV/password/API-key style values.
 - Admin UI uses `maskEmail` and `maskPhone` in reviewed support/admin code.
 - `.env.example` no longer contains concrete Cashfree payout credentials.
+- Chatbot raw transcript storage is opt-in through `CHATBOT_STORE_RAW_MESSAGES=true`; default storage is redacted.
 
 Issues:
 - Public order receipt URLs expose customer/order details to anyone holding an unguessable token; this is acceptable only if documented and tokens remain high entropy.
 - Postgres live notification payloads include customer phone/email for server-side filtering; raw PII exists in DB notification payloads even if not browser-exposed.
 - Account deletion is handled by support instruction, not an in-app flow.
+
+## Chatbot And Support Handoff
+
+Status: warning with stronger baseline
+
+Evidence:
+- `/api/chatbot` now builds a server-derived chatbot security context, applies prompt-injection and data-leak guardrails before classification, gates intents by mode/role, and uses safe logging.
+- The current chatbot remains rules-based; `AI_PROVIDER_ENABLED=false` is documented as the default.
+- Support handoff uses a server-side helper with stricter rate limits and audit logging. The bot can request handoff but cannot select an agent from raw output.
+- `lib/support-agent-queue.ts` writes assignment audit events with ticket ID, business ID, assigned agent, assigned by, reason, timestamp, and source.
+- Support-agent queue payloads are scoped to assigned or authorized open tickets and mask contact fields for non-super-admin viewers.
+
+Remaining risk:
+- Live browser journeys for public customer handoff, signed-in customer handoff, support-agent accept/reply, and super-admin override still need manual verification.
 
 ## Security Headers
 
@@ -154,6 +171,7 @@ Issue:
 - Removed unsafe WhatsApp fallback to the latest verified business.
 - Added tenant-aware authorization to non-public stored image routes.
 - Added a production warning for ambiguous WhatsApp inbound routing.
+- Added chatbot policy, guardrail, redaction, tool allowlist, provider fallback, audited handoff, and support assignment source logging.
 - Added the top-level `npm test` release gate.
 - Added clearer production env documentation/check output without allowing placeholders to pass.
 - Added responsive audit DB preflight so signed-cookie browser checks use real users in the connected database.

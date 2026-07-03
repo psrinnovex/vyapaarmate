@@ -73,7 +73,7 @@ const requiredOneOf = (names, hint = "") => {
   return configured;
 };
 
-const appUrl = required("NEXT_PUBLIC_APP_URL", 1, "Use the deployed HTTPS app origin, for example https://vyapaarmate.com.");
+const appUrl = required("NEXT_PUBLIC_APP_URL", 1, "Use the deployed HTTPS app origin, for example https://www.vyapaarmate.com.");
 required("JWT_SECRET", 32, "Generate a random 32+ character value and keep it server-only.");
 required("ENCRYPTION_KEY", 32, "Generate a random 32+ character value for server-side encrypted fields.");
 required("CRON_SECRET", 32, "Generate a random 32+ character bearer secret for Vercel Cron/job routes.");
@@ -174,6 +174,19 @@ if (redisRestUrl) {
 }
 if (optional("RATE_LIMIT_FAIL_OPEN").toLowerCase() === "true") {
   errors.push("RATE_LIMIT_FAIL_OPEN must not be true in production.");
+}
+
+const chatbotRetentionDays = optional("CHATBOT_TRANSCRIPT_RETENTION_DAYS") || "30";
+if (!/^\d+$/.test(chatbotRetentionDays) || Number(chatbotRetentionDays) < 1 || Number(chatbotRetentionDays) > 365) {
+  errors.push("CHATBOT_TRANSCRIPT_RETENTION_DAYS must be a whole number from 1 to 365.");
+}
+if (optional("CHATBOT_STORE_RAW_MESSAGES").toLowerCase() === "true") {
+  warnings.push("CHATBOT_STORE_RAW_MESSAGES=true stores raw chatbot/support transcripts. Keep this disabled unless privacy/legal approval and retention controls are in place.");
+}
+if (optional("AI_PROVIDER_ENABLED").toLowerCase() === "true") {
+  if (!optional("AI_PROVIDER_NAME")) warnings.push("AI_PROVIDER_ENABLED=true but AI_PROVIDER_NAME is empty.");
+  if (!optional("AI_PROVIDER_MODEL")) warnings.push("AI_PROVIDER_ENABLED=true but AI_PROVIDER_MODEL is empty.");
+  warnings.push("The current chatbot is rules-based unless an allowlisted provider implementation is added. Do not send private customer/business data to an external AI provider without review.");
 }
 
 for (const origin of optional("TRUSTED_ORIGINS").split(",").map((value) => value.trim()).filter(Boolean)) {

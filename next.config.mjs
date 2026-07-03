@@ -60,20 +60,14 @@ const nextConfig = {
     return [
       {
         source: "/:path*",
-        has: [{ type: "host", value: "www.vyapaarmate.com" }],
-        destination: "https://vyapaarmate.com/:path*",
-        permanent: true
-      },
-      {
-        source: "/:path*",
         has: [{ type: "host", value: "vypaarmate.com" }],
-        destination: "https://vyapaarmate.com/:path*",
+        destination: "https://www.vyapaarmate.com/:path*",
         permanent: true
       },
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.vypaarmate.com" }],
-        destination: "https://vyapaarmate.com/:path*",
+        destination: "https://www.vyapaarmate.com/:path*",
         permanent: true
       }
     ];

@@ -6,7 +6,7 @@ export const company = {
   address: "India"
 };
 
-const fallbackOrigin = "https://vyapaarmate.com";
+const fallbackOrigin = "https://www.vyapaarmate.com";
 
 export const siteConfig = {
   name: company.product,

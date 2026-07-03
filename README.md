@@ -243,7 +243,7 @@ Configure the Cashfree webhook callback as `https://your-domain.com/api/webhooks
 Configure Cashfree Payouts callback separately as `https://your-domain.com/api/webhooks/cashfree-payouts` and enable transfer success, failure, reversed, and acknowledged events.
 For live Cashfree Payouts API calls, use either Cashfree IP whitelisting or set `CASHFREE_PAYOUTS_PUBLIC_KEY` so the app can generate the required `x-cf-signature` header from serverless environments.
 
-The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes the Bhojzo Intelligence Engine outputs into the AI insight, health snapshot, customer score, demand forecast, and payment priority tables, checks first-party ML readiness, trains when enough real business data exists and no recent valid model is available, generates ML predictions, and falls back to rules/statistical recommendations when data is insufficient. `vercel.json` schedules payment jobs every 10 minutes and intelligence refresh hourly; use a Vercel plan that supports this cadence or call the protected job endpoints from an external cron. In production, requests must include `Authorization: Bearer $CRON_SECRET`.
+The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes the Bhojzo Intelligence Engine outputs into the AI insight, health snapshot, customer score, demand forecast, and payment priority tables, checks first-party ML readiness, trains when enough real business data exists and no recent valid model is available, generates ML predictions, and falls back to rules/statistical recommendations when data is insufficient. Production cron is handled by the external scheduler, so the Vercel deployment keeps these as protected job endpoints instead of defining Vercel Cron schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`.
 
 Bhojzo uses a hybrid intelligence engine. Where sufficient real business history exists, trained first-party ML models generate forecasts and risk scores. Where data is insufficient, Bhojzo falls back to explainable rules/statistical recommendations and marks the model as `needs_data`. Production ML trains only from `Business`, `MenuItem`, `MenuCategory`, `Order`, `OrderItem`, `Customer`, and `Payment`; no external datasets or synthetic production data are used.
 
@@ -315,7 +315,7 @@ The latest migrations also revoke Supabase generated Data API grants for app tab
 
 Create a Vercel project with the repository root as the Root Directory. Vercel detects Next.js automatically; keep the default install and build commands. Node `22.x` is pinned in `package.json`, and `postinstall` generates Prisma Client.
 
-`vercel.json` schedules payment reminder and wallet transfer jobs every 10 minutes, plus `/api/jobs/intelligence-refresh` hourly. Use a Vercel plan that supports this cadence, or keep the endpoints protected and call them from an external scheduler with `Authorization: Bearer $CRON_SECRET`.
+This deployment uses an external scheduler for cron. Keep the job endpoints protected and call them from cron-job.org or another scheduler with `Authorization: Bearer $CRON_SECRET`. The payment reminder and wallet transfer jobs should run every 10 minutes; `/api/jobs/intelligence-refresh` should run hourly.
 
 Set these variables for the Production environment:
 
@@ -332,7 +332,7 @@ For Vercel's serverless runtime, use the Supabase Transaction Pooler URL on port
 postgresql://postgres.PROJECT:PASSWORD@aws-REGION.pooler.supabase.com:6543/postgres?schema=public&sslmode=require&pgbouncer=true&connection_limit=5&pool_timeout=30
 ```
 
-Set `NEXT_PUBLIC_APP_URL` to the final HTTPS origin without a trailing slash, for example `https://vyapaarmate.com`. Generate a different random value for each secret; do not copy local or demo secrets into production.
+Set `NEXT_PUBLIC_APP_URL` to the final HTTPS origin without a trailing slash, for example `https://www.vyapaarmate.com`. Generate a different random value for each secret; do not copy local or demo secrets into production.
 
 Before deploying, validate the production values locally using a temporary production `.env`:
 

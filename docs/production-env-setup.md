@@ -6,7 +6,7 @@ Status: required before deployment
 
 ## Core App
 
-- `NEXT_PUBLIC_APP_URL`: deployed HTTPS origin, for example `https://vyapaarmate.com`.
+- `NEXT_PUBLIC_APP_URL`: deployed HTTPS origin, for example `https://www.vyapaarmate.com`.
 - `JWT_SECRET`: random 32+ character server-only secret used to sign app session cookies.
 - `ENCRYPTION_KEY`: random 32+ character server-only secret for encrypted fields.
 - `TRUSTED_ORIGINS`: comma-separated extra HTTPS origins allowed for unsafe API requests, if any.
@@ -36,6 +36,18 @@ Create an Upstash Redis database for shared rate limiting.
 - `UPSTASH_REDIS_REST_URL`: Upstash REST URL.
 - `UPSTASH_REDIS_REST_TOKEN`: Upstash REST token.
 - `RATE_LIMIT_FAIL_OPEN`: keep `false` in production.
+
+## Chatbot And AI Provider
+
+The production chatbot is rules-based unless an allowlisted provider implementation is deliberately added.
+
+- `AI_PROVIDER_ENABLED=false`: keep disabled by default.
+- `AI_PROVIDER_NAME`: optional provider label for future reviewed integrations.
+- `AI_PROVIDER_MODEL`: optional model label for future reviewed integrations.
+- `CHATBOT_STORE_RAW_MESSAGES=false`: default redacted transcript storage. Set `true` only after explicit privacy/legal approval.
+- `CHATBOT_TRANSCRIPT_RETENTION_DAYS=30`: retention target for chatbot/support transcripts. Use 1-365 days.
+
+Do not send secrets, full database rows, payment/KYC/bank data, or broad customer/business records to any external AI provider.
 
 ## Google Maps And Places
 
