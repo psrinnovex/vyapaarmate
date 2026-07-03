@@ -56,7 +56,10 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   try {
     if (parsed.data.assignedToUserId) {
-      await assignSupportTicketToAgent(existing.id, parsed.data.assignedToUserId, session.id);
+      await assignSupportTicketToAgent(existing.id, parsed.data.assignedToUserId, session.id, {
+        source: session.role === "SUPER_ADMIN" ? "admin" : "manual",
+        reason: "support_ticket_patch"
+      });
     }
   } catch (error) {
     if (error instanceof SupportAgentBusyError) return NextResponse.json({ error: error.message }, { status: 409 });
@@ -71,10 +74,18 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   if (parsed.data.status === "RESOLVED" || parsed.data.status === "CLOSED") {
-    await autoAssignSupportQueue(existing.assignedToUserId);
-    await autoAssignSupportQueue();
+    await autoAssignSupportQueue(existing.assignedToUserId, {
+      source: "system",
+      reason: "ticket_closed_queue_rotation"
+    });
+    await autoAssignSupportQueue(null, {
+      source: "system",
+      reason: "ticket_closed_queue_rotation"
+    });
   } else if (parsed.data.assignedToUserId === null) {
     await autoAssignSupportQueue(null, existing.assignedToUserId ? {
+      source: "system",
+      reason: "ticket_unassigned_queue_rotation",
       skipTicketIdsByAgentId: {
         [existing.assignedToUserId]: [existing.id]
       }
@@ -99,6 +110,26 @@ export async function PATCH(request: Request, context: RouteContext) {
       assignedToUserId: updated.assignedToUserId
     }
   });
+
+  if (parsed.data.assignedToUserId === null && existing.assignedToUserId) {
+    await writeAuditLog({
+      userId: session.id,
+      businessId: existing.businessId,
+      action: "SUPPORT_TICKET_UNASSIGNED",
+      entity: "SupportTicket",
+      entityId: existing.id,
+      metadata: {
+        ticketId: existing.id,
+        code: existing.code,
+        businessId: existing.businessId,
+        assignedAgentId: existing.assignedToUserId,
+        assignedBy: session.id,
+        reason: "manual_unassignment",
+        timestamp: new Date().toISOString(),
+        source: session.role === "SUPER_ADMIN" ? "admin" : "manual"
+      }
+    });
+  }
 
   return NextResponse.json({ updated: true, ticketId: updated.id, code: updated.code });
 }

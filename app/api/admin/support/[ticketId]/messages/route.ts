@@ -3,6 +3,7 @@ import type { SupportTicketStatus } from "@prisma/client";
 import { z } from "zod";
 import { getSupportSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
+import { storedChatbotMessageBody } from "@/lib/chatbot/chatbot-redaction";
 import { prisma } from "@/lib/prisma";
 import { assignSupportTicketToAgent, autoAssignSupportQueue, SupportAgentBusyError } from "@/lib/support-agent-queue";
 
@@ -39,7 +40,10 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (!ticket.assignedToUserId) {
     try {
-      await assignSupportTicketToAgent(ticket.id, session.id, session.id);
+      await assignSupportTicketToAgent(ticket.id, session.id, session.id, {
+        source: session.role === "SUPER_ADMIN" ? "admin" : "manual",
+        reason: "agent_reply_claim"
+      });
     } catch (error) {
       if (error instanceof SupportAgentBusyError) return NextResponse.json({ error: error.message }, { status: 409 });
       throw error;
@@ -48,12 +52,13 @@ export async function POST(request: Request, context: RouteContext) {
 
   const now = new Date();
   const nextStatus = statusAfterAgentReply(ticket.status, parsed.data.status);
+  const body = storedChatbotMessageBody(parsed.data.body);
   await prisma.$transaction([
     prisma.supportTicketMessage.create({
       data: {
         ticketId: ticket.id,
         sender: "AGENT",
-        body: parsed.data.body,
+        body,
         authorUserId: session.id
       }
     }),
@@ -63,7 +68,7 @@ export async function POST(request: Request, context: RouteContext) {
         status: nextStatus,
         assignedToUserId: ticket.assignedToUserId ?? session.id,
         assignedAt: ticket.assignedToUserId ? ticket.assignedAt : now,
-        lastMessage: parsed.data.body,
+        lastMessage: body,
         lastMessageAt: now,
         resolvedAt: nextStatus === "RESOLVED" ? (ticket.resolvedAt ?? now) : null
       }
@@ -71,8 +76,14 @@ export async function POST(request: Request, context: RouteContext) {
   ]);
 
   if (nextStatus === "RESOLVED") {
-    await autoAssignSupportQueue(ticket.assignedToUserId ?? session.id);
-    await autoAssignSupportQueue();
+    await autoAssignSupportQueue(ticket.assignedToUserId ?? session.id, {
+      source: "system",
+      reason: "ticket_resolved_queue_rotation"
+    });
+    await autoAssignSupportQueue(null, {
+      source: "system",
+      reason: "ticket_resolved_queue_rotation"
+    });
   }
 
   await writeAuditLog({

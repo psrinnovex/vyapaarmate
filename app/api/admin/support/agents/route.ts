@@ -6,6 +6,7 @@ import { hashPassword } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 import { createPasswordResetToken, passwordResetUrl, sendSupportAgentInviteEmail } from "@/lib/password-reset";
 import { prisma } from "@/lib/prisma";
+import { safeLog } from "@/lib/security/safe-logger";
 import { emptySupportAgentRatingStats, getSupportAgentRatingStats, type SupportAgentRatingStats } from "@/lib/support-agent-ratings";
 import { adminSupportAgentInviteSchema } from "@/lib/validations";
 
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
         devInviteUrl: process.env.NODE_ENV !== "production" && delivery.status === "placeholder" ? inviteUrl : undefined
       };
     } catch (error) {
-      console.error("Support agent invite email delivery failed", error);
+      safeLog("error", "Support agent invite email delivery failed", { error });
       invite = {
         status: "failed",
         error: "Support agent account was created, but the invite email could not be sent. Ask them to use Forgot password."

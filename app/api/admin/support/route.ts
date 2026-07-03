@@ -4,6 +4,7 @@ import { getSupportSession } from "@/lib/api-session";
 import { liveStream } from "@/lib/live-data";
 import type { LiveChangePayload } from "@/lib/postgres-live-events";
 import { prisma } from "@/lib/prisma";
+import { maskEmail, maskPhone } from "@/lib/privacy";
 import { emptySupportAgentRatingStats, getSupportAgentRatingStats } from "@/lib/support-agent-ratings";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const stream = url.searchParams.get("stream") === "1";
   const skipInitial = url.searchParams.get("skipInitial") === "1";
-  const payload = () => getSupportPayload(url);
+  const payload = () => getSupportPayload(url, session);
 
   if (!stream) return NextResponse.json(await payload());
 
@@ -49,16 +50,27 @@ export async function GET(request: Request) {
   );
 }
 
-async function getSupportPayload(url: URL) {
+async function getSupportPayload(url: URL, session: NonNullable<Awaited<ReturnType<typeof getSupportSession>>>) {
   const includeClosed = url.searchParams.get("includeClosed") === "1";
   const status = url.searchParams.get("status");
-  const where: Prisma.SupportTicketWhereInput = {};
+  const filters: Prisma.SupportTicketWhereInput[] = [];
 
   if (status && isSupportTicketStatus(status)) {
-    where.status = status;
+    filters.push({ status });
   } else if (!includeClosed) {
-    where.status = { not: "CLOSED" };
+    filters.push({ status: { not: "CLOSED" } });
   }
+
+  if (session.role === "SUPPORT_AGENT") {
+    filters.push({
+      OR: [
+        { assignedToUserId: session.id },
+        { assignedToUserId: null, status: "OPEN" }
+      ]
+    });
+  }
+
+  const where: Prisma.SupportTicketWhereInput = filters.length > 0 ? { AND: filters } : {};
 
   const [tickets, agents] = await Promise.all([
     prisma.supportTicket.findMany({
@@ -80,12 +92,12 @@ async function getSupportPayload(url: URL) {
   const agentRatingStats = await getSupportAgentRatingStats(agents.map((agent) => agent.id));
   const now = Date.now();
   return {
-    tickets: tickets.map((ticket) => serializeSupportTicket(ticket, now)),
+    tickets: tickets.map((ticket) => serializeSupportTicket(ticket, now, session.role)),
     agents: agents.map((agent) => ({
       id: agent.id,
       name: agent.name,
-      email: agent.email,
-      phone: agent.phone,
+      email: session.role === "SUPER_ADMIN" ? agent.email : maskEmail(agent.email),
+      phone: session.role === "SUPER_ADMIN" ? agent.phone : maskPhone(agent.phone),
       role: agent.role,
       createdAt: agent.createdAt.toISOString(),
       rating: agentRatingStats.get(agent.id) ?? emptySupportAgentRatingStats()
@@ -106,9 +118,11 @@ function supportChangeMatches(change: LiveChangePayload) {
 
 type SupportTicketForPayload = Prisma.SupportTicketGetPayload<{ include: typeof supportTicketInclude }>;
 
-function serializeSupportTicket(ticket: SupportTicketForPayload, now = Date.now()) {
+function serializeSupportTicket(ticket: SupportTicketForPayload, now = Date.now(), viewerRole = "SUPPORT_AGENT") {
   const active = activeStatuses.includes(ticket.status);
   const dueAt = ticket.firstResponseDueAt?.toISOString() ?? null;
+  const maskContacts = viewerRole !== "SUPER_ADMIN";
+
   return {
     id: ticket.id,
     code: ticket.code,
@@ -122,11 +136,11 @@ function serializeSupportTicket(ticket: SupportTicketForPayload, now = Date.now(
     path: ticket.path,
     businessId: ticket.businessId,
     businessName: ticket.business?.name ?? ticket.requesterBusinessName ?? "Unknown business",
-    businessPhone: ticket.business?.phone ?? null,
-    businessEmail: ticket.business?.email ?? null,
+    businessPhone: maskContacts ? maskPhone(ticket.business?.phone) : ticket.business?.phone ?? null,
+    businessEmail: maskContacts ? maskEmail(ticket.business?.email) : ticket.business?.email ?? null,
     requesterName: ticket.requester?.name ?? ticket.requesterName,
-    requesterEmail: ticket.requester?.email ?? ticket.requesterEmail,
-    requesterPhone: ticket.requester?.phone ?? ticket.requesterPhone,
+    requesterEmail: maskContacts ? maskEmail(ticket.requester?.email ?? ticket.requesterEmail) : ticket.requester?.email ?? ticket.requesterEmail,
+    requesterPhone: maskContacts ? maskPhone(ticket.requester?.phone ?? ticket.requesterPhone) : ticket.requester?.phone ?? ticket.requesterPhone,
     requesterBusinessName: ticket.requesterBusinessName,
     orderReference: ticket.orderReference,
     paymentReference: ticket.paymentReference,
@@ -149,7 +163,7 @@ function serializeSupportTicket(ticket: SupportTicketForPayload, now = Date.now(
       sender: message.sender,
       body: message.body,
       authorName: message.author?.name ?? null,
-      authorEmail: message.author?.email ?? null,
+      authorEmail: maskContacts ? maskEmail(message.author?.email) : message.author?.email ?? null,
       createdAt: message.createdAt.toISOString()
     }))
   };

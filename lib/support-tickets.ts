@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import type { SessionUser } from "@/lib/session";
 import type { SupportChatbotReply } from "@/lib/support-chatbot";
 import { sanitizeSupportMessage, supportReplyWordLimit } from "@/lib/support-chatbot";
+import { redactChatbotText, shouldStoreRawChatbotMessages, storedChatbotMessageBody } from "@/lib/chatbot/chatbot-redaction";
 
 const activeTicketStatuses: SupportTicketStatus[] = ["OPEN", "IN_REVIEW", "WAITING_ON_CUSTOMER"];
 const priorityRank: Record<SupportTicketPriority, number> = {
@@ -39,17 +40,19 @@ export async function upsertSupportTicketFromChat(input: {
   session?: SessionUser | null;
   reply: SupportChatbotReply;
 }): Promise<ChatSupportTicketResult | null> {
-  const message = sanitizeSupportMessage(input.message);
-  if (!message) return null;
+  const rawMessage = sanitizeSupportMessage(input.message);
+  if (!rawMessage) return null;
 
-  const details = extractSupportTicketDetails(message);
+  const message = storedChatbotMessageBody(rawMessage);
+  const details = extractSupportTicketDetails(rawMessage);
+  const storedDetails = redactSupportTicketDetails(details);
   const priority = priorityForSupportTicket(input.reply.intent, message);
   const now = new Date();
   const businessId = input.session?.businessId ?? null;
   const requesterUserId = input.session?.id ?? null;
   const requesterName = input.session?.name ?? null;
   const requesterEmail = input.session?.email ?? null;
-  const subject = subjectForSupportTicket(input.reply.intent, details, message);
+  const subject = subjectForSupportTicket(input.reply.intent, storedDetails, message);
   const safeHandlingNote = safeHandlingNoteForIntent(input.reply.intent);
   const firstResponseDueAt = dueAtForPriority(priority, now);
   const metadata: Prisma.InputJsonObject = {
@@ -58,6 +61,7 @@ export async function upsertSupportTicketFromChat(input: {
     chatbotPortal: input.reply.portal,
     chatbotSafe: input.reply.safe,
     chatbotEscalate: input.reply.escalate,
+    chatbotRawMessageStored: shouldStoreRawChatbotMessages(),
     path: input.path ?? null
   };
 
@@ -77,7 +81,7 @@ export async function upsertSupportTicketFromChat(input: {
         where: { id: existing.id },
         data: {
           subject: shouldReplaceSubject(existing.subject) ? subject : existing.subject,
-          description: mergeDescription(existing.description, details.issue ?? message),
+          description: mergeDescription(existing.description, storedDetails.issue ?? message),
           priority: higherPriority(existing.priority, priority),
           lastMessage: message,
           safeHandlingNote,
@@ -109,7 +113,7 @@ export async function upsertSupportTicketFromChat(input: {
 
     const created = await createSupportTicketWithRetry(tx, {
       subject,
-      description: details.issue ?? message,
+      description: storedDetails.issue ?? message,
       priority,
       status: "OPEN",
       source: "CHATBOT",
@@ -142,7 +146,10 @@ export async function upsertSupportTicketFromChat(input: {
     };
   });
 
-  await autoAssignSupportQueue();
+  await autoAssignSupportQueue(null, {
+    source: "chatbot",
+    reason: "chatbot_support_handoff"
+  });
 
   const ticket = await prisma.supportTicket.findUnique({
     where: { id: ticketResult.ticketId },
@@ -239,7 +246,7 @@ function ticketMessagesForChat(ticketId: string, message: string, botReply: stri
     {
       ticketId,
       sender: "BOT" as const,
-      body: botReply,
+      body: redactChatbotText(botReply),
       metadata
     }
   ];
@@ -265,6 +272,16 @@ function extractLabeledValue(message: string, labels: string[]) {
 
 function compactDetails(details: SupportTicketDetails): SupportTicketDetails {
   return Object.fromEntries(Object.entries(details).filter(([, value]) => Boolean(value))) as SupportTicketDetails;
+}
+
+function redactSupportTicketDetails(details: SupportTicketDetails): SupportTicketDetails {
+  return compactDetails({
+    issue: details.issue ? redactChatbotText(details.issue) : undefined,
+    requesterBusinessName: details.requesterBusinessName ? redactChatbotText(details.requesterBusinessName) : undefined,
+    requesterPhone: details.requesterPhone ? redactChatbotText(details.requesterPhone) : undefined,
+    orderReference: details.orderReference ? redactChatbotText(details.orderReference) : undefined,
+    paymentReference: details.paymentReference ? redactChatbotText(details.paymentReference) : undefined
+  });
 }
 
 function hasSupportIntakeDetails(details: SupportTicketDetails) {

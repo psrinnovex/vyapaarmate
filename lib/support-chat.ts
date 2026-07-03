@@ -3,6 +3,7 @@ import { autoAssignSupportQueue, getSupportQueuePosition } from "@/lib/support-a
 import type { LiveChangePayload } from "@/lib/postgres-live-events";
 import { prisma } from "@/lib/prisma";
 import type { SessionUser } from "@/lib/session";
+import { storedChatbotMessageBody } from "@/lib/chatbot/chatbot-redaction";
 import { sanitizeSupportMessage } from "@/lib/support-chatbot";
 import { initials } from "@/lib/utils";
 
@@ -38,7 +39,10 @@ export async function getSupportChatPayload(input: {
   sessionId?: string | null;
   session?: SessionUser | null;
 }) {
-  await autoAssignSupportQueue();
+  await autoAssignSupportQueue(null, {
+    source: "system",
+    reason: "support_chat_payload_queue_assignment"
+  });
 
   const ticket = await prisma.supportTicket.findUnique({
     where: { id: input.ticketId },
@@ -57,8 +61,9 @@ export async function createCustomerSupportMessage(input: {
   sessionId?: string | null;
   session?: SessionUser | null;
 }) {
-  const body = sanitizeSupportMessage(input.body);
-  if (!body) return null;
+  const sanitizedBody = sanitizeSupportMessage(input.body);
+  if (!sanitizedBody) return null;
+  const body = storedChatbotMessageBody(sanitizedBody);
 
   const ticket = await prisma.supportTicket.findUnique({
     where: { id: input.ticketId },
@@ -88,7 +93,10 @@ export async function createCustomerSupportMessage(input: {
     })
   ]);
 
-  await autoAssignSupportQueue();
+  await autoAssignSupportQueue(null, {
+    source: "system",
+    reason: "customer_support_message_queue_assignment"
+  });
   return getSupportChatPayload(input);
 }
 
@@ -109,7 +117,7 @@ export async function submitSupportChatFeedback(input: {
 
   const feedback = {
     rating: Math.max(1, Math.min(5, Math.round(input.rating))),
-    comment: sanitizeSupportMessage(input.comment ?? "").slice(0, 500) || null,
+    comment: storedChatbotMessageBody(sanitizeSupportMessage(input.comment ?? "").slice(0, 500)) || null,
     submittedAt: new Date().toISOString()
   };
   const metadata = mergeMetadata(ticket.metadata, { agentFeedback: feedback });

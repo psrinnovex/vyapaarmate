@@ -4,6 +4,7 @@ import { getAdminSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
 import { createPasswordResetToken, passwordResetUrl, sendSupportAgentInviteEmail } from "@/lib/password-reset";
 import { prisma } from "@/lib/prisma";
+import { safeLog } from "@/lib/security/safe-logger";
 import { autoAssignSupportQueue } from "@/lib/support-agent-queue";
 import { adminSupportAgentUpdateSchema } from "@/lib/validations";
 
@@ -95,7 +96,7 @@ export async function POST(_request: Request, context: RouteContext) {
       }
     });
   } catch (error) {
-    console.error("Support agent invite email delivery failed", error);
+    safeLog("error", "Support agent invite email delivery failed", { error });
     return NextResponse.json({ error: "Support agent invite email could not be sent right now." }, { status: 503 });
   }
 }
@@ -115,7 +116,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
     }),
     prisma.user.delete({ where: { id: agent.id } })
   ]);
-  await autoAssignSupportQueue();
+  await autoAssignSupportQueue(null, {
+    source: "admin",
+    assignedByUserId: session.id,
+    reason: "support_agent_deleted_queue_reassignment"
+  });
   await writeAuditLog({
     userId: session.id,
     action: "SUPPORT_AGENT_DELETED",

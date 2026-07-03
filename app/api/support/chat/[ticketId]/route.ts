@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSessionUser } from "@/lib/api-session";
+import { chatbotLimits } from "@/lib/chatbot/chatbot-policy";
 import { liveStream } from "@/lib/live-data";
+import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import {
   createCustomerSupportMessage,
   getSupportChatPayload,
@@ -62,6 +64,14 @@ export async function POST(request: Request, context: RouteContext) {
 
   try {
     const session = await getSessionUser();
+    const senderKey = session?.id ?? parsed.data.sessionId ?? getClientIp(request);
+    const bucket = await rateLimit(
+      `support-chat:message:${ticketId}:${senderKey}`,
+      chatbotLimits.ticketMessagesPerMinute,
+      60_000
+    );
+    if (!bucket.allowed) return json({ error: "Too many support messages. Please wait a minute." }, 429);
+
     const payload = await createCustomerSupportMessage({
       ticketId,
       body: parsed.data.body,

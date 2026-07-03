@@ -2,8 +2,12 @@ import { Prisma, type Role, type SupportTicketPriority, type SupportTicketStatus
 import { prisma } from "@/lib/prisma";
 
 type PrismaExecutor = Prisma.TransactionClient | typeof prisma;
+export type SupportAssignmentSource = "chatbot" | "manual" | "admin" | "system";
 type AutoAssignSupportQueueOptions = {
   skipTicketIdsByAgentId?: Record<string, string[]>;
+  source?: SupportAssignmentSource;
+  assignedByUserId?: string | null;
+  reason?: string;
 };
 
 const agentRoles: Role[] = ["SUPPORT_AGENT", "SUPER_ADMIN"];
@@ -54,19 +58,24 @@ export async function autoAssignSupportQueue(preferredAgentId?: string | null, o
     const ticket = await findNextQueuedTicket(prisma, options.skipTicketIdsByAgentId?.[agent.id] ?? []);
     if (!ticket) break;
 
-    const assignment = await claimQueuedTicket(ticket.id, agent.id);
+    const assignment = await claimQueuedTicket(ticket.id, agent.id, options);
     if (assignment) assignments.push(assignment);
   }
 
   return assignments;
 }
 
-export async function assignSupportTicketToAgent(ticketId: string, agentId: string, assignedByUserId?: string | null) {
+export async function assignSupportTicketToAgent(
+  ticketId: string,
+  agentId: string,
+  assignedByUserId?: string | null,
+  options: { source?: SupportAssignmentSource; reason?: string } = {}
+) {
   return prisma.$transaction(async (tx) => {
     const [ticket, agent] = await Promise.all([
       tx.supportTicket.findUnique({
         where: { id: ticketId },
-        select: { id: true, status: true, assignedToUserId: true, assignedAt: true }
+        select: { id: true, code: true, businessId: true, status: true, assignedToUserId: true, assignedAt: true }
       }),
       tx.user.findFirst({
         where: { id: agentId, role: { in: agentRoles } },
@@ -96,11 +105,22 @@ export async function assignSupportTicketToAgent(ticketId: string, agentId: stri
           sender: "SYSTEM",
           body: `Agent ${agent.name} connected to you.`,
           metadata: {
-            assignment: "manual",
+            assignment: options.source ?? "manual",
             agentId: agent.id,
-            assignedByUserId: assignedByUserId ?? null
+            assignedByUserId: assignedByUserId ?? null,
+            reason: options.reason ?? "manual_assignment"
           }
         }
+      });
+      await createSupportAssignmentAudit(tx, {
+        ticketId: ticket.id,
+        ticketCode: ticket.code,
+        businessId: ticket.businessId,
+        assignedAgentId: agent.id,
+        assignedByUserId,
+        source: options.source ?? "manual",
+        reason: options.reason ?? "manual_assignment",
+        timestamp: now
       });
     }
 
@@ -136,12 +156,12 @@ export function isSupportConversationActive(status: SupportTicketStatus) {
   return activeConversationStatuses.includes(status);
 }
 
-async function claimQueuedTicket(ticketId: string, agentId: string) {
+async function claimQueuedTicket(ticketId: string, agentId: string, options: AutoAssignSupportQueueOptions = {}) {
   return prisma.$transaction(async (tx) => {
     const [ticket, agent] = await Promise.all([
       tx.supportTicket.findUnique({
         where: { id: ticketId },
-        select: { id: true, status: true, assignedToUserId: true }
+        select: { id: true, code: true, businessId: true, status: true, assignedToUserId: true }
       }),
       tx.user.findFirst({
         where: { id: agentId, role: { in: agentRoles } },
@@ -169,13 +189,58 @@ async function claimQueuedTicket(ticketId: string, agentId: string) {
         sender: "SYSTEM",
         body: `Agent ${agent.name} connected to you.`,
         metadata: {
-          assignment: "automatic",
-          agentId: agent.id
+          assignment: options.source ?? "system",
+          agentId: agent.id,
+          reason: options.reason ?? "queue_auto_assignment"
         }
       }
     });
+    await createSupportAssignmentAudit(tx, {
+      ticketId: ticket.id,
+      ticketCode: ticket.code,
+      businessId: ticket.businessId,
+      assignedAgentId: agent.id,
+      assignedByUserId: options.assignedByUserId ?? null,
+      source: options.source ?? "system",
+      reason: options.reason ?? "queue_auto_assignment",
+      timestamp: new Date()
+    });
 
     return { ticketId: ticket.id, agentId: agent.id, agentName: agent.name };
+  });
+}
+
+async function createSupportAssignmentAudit(
+  tx: Prisma.TransactionClient,
+  input: {
+    ticketId: string;
+    ticketCode: string;
+    businessId: string | null;
+    assignedAgentId: string;
+    assignedByUserId?: string | null;
+    source: SupportAssignmentSource;
+    reason: string;
+    timestamp: Date;
+  }
+) {
+  await tx.auditLog.create({
+    data: {
+      userId: input.assignedByUserId ?? undefined,
+      businessId: input.businessId ?? undefined,
+      action: "SUPPORT_TICKET_ASSIGNED",
+      entity: "SupportTicket",
+      entityId: input.ticketId,
+      metadata: {
+        ticketId: input.ticketId,
+        code: input.ticketCode,
+        businessId: input.businessId,
+        assignedAgentId: input.assignedAgentId,
+        assignedBy: input.assignedByUserId ?? "system",
+        reason: input.reason,
+        timestamp: input.timestamp.toISOString(),
+        source: input.source
+      }
+    }
   });
 }
 
