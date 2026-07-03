@@ -351,7 +351,7 @@ export function BusinessesPage({
 
                   <Link
                     href={`/b/${business.slug}`}
-                    className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-ocean"
+                    className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-black/90"
                   >
                     <span>{cardActionLabel(copy.catalogNavLabel)}</span>
                     <ArrowRight className="size-5" variant="Bold" />

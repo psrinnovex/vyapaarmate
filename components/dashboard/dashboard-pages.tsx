@@ -2468,7 +2468,7 @@ export function BillingPage() {
                   className={`mt-4 inline-flex h-10 w-full min-w-0 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
                     disabled
                       ? "cursor-not-allowed bg-slate-200 text-slate-500"
-                      : "cursor-pointer bg-ink text-white hover:bg-ocean"
+                      : "cursor-pointer bg-black text-white hover:bg-black/90"
                   }`}
                 >
                   {uploading ? <LoaderCircle className="size-4 shrink-0 animate-spin" /> : <UploadCloud className="size-4 shrink-0" />}
@@ -2581,8 +2581,8 @@ const settingsSectionAccentClasses: Record<
   }
 > = {
   ocean: {
-    arrowOpen: "border-ocean/25 bg-ocean text-white shadow-[0_10px_28px_rgba(18,70,160,0.26)]",
-    arrowHover: "group-hover:border-ocean/25 group-hover:bg-ocean group-hover:text-white",
+    arrowOpen: "border-black/10 bg-black text-white shadow-[0_10px_28px_rgba(0,0,0,0.18)]",
+    arrowHover: "group-hover:border-black/10 group-hover:bg-black group-hover:text-white",
     icon: "text-ocean",
     iconShell: "border-ocean/15 bg-ocean/10",
     signal: "bg-ocean",

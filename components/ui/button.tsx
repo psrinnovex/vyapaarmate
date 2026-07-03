@@ -10,9 +10,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-ocean text-white shadow-sm hover:bg-ocean/90 focus-visible:ring-ocean/20",
-        primary: "bg-ocean text-white shadow-sm hover:bg-ocean/90 focus-visible:ring-ocean/20",
-        blue: "bg-ocean text-white shadow-sm hover:bg-ocean/90 focus-visible:ring-ocean/20",
+        default: "bg-black text-white shadow-sm hover:bg-black/90 focus-visible:ring-black/20",
+        primary: "bg-black text-white shadow-sm hover:bg-black/90 focus-visible:ring-black/20",
+        blue: "bg-black text-white shadow-sm hover:bg-black/90 focus-visible:ring-black/20",
         emerald: "bg-emerald text-white shadow-sm hover:bg-emerald/90 focus-visible:ring-emerald/20",
         purple: "bg-violet text-white shadow-sm hover:bg-violet/90 focus-visible:ring-violet/20",
         amber: "bg-amber-500 text-white shadow-sm hover:bg-amber-600 focus-visible:ring-amber-500/20",

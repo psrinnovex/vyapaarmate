@@ -466,7 +466,7 @@ function PaymentOnlyPage({
           <h2 className="font-extrabold text-ink">Need help?</h2>
           <p className="mx-auto mt-2 max-w-[18rem] break-words text-sm leading-6 text-slate-600 sm:mx-0 sm:max-w-none">Contact {order.business.name} if the payment is not updating.</p>
           <div className="mx-auto mt-4 grid w-full max-w-[17rem] gap-2 sm:mx-0 sm:max-w-none sm:grid-cols-2">
-            <a href={`tel:${order.business.phone}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-bold text-white transition hover:bg-ocean"><Phone className="size-4" /> Call {order.business.phone}</a>
+            <a href={`tel:${order.business.phone}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-bold text-white transition hover:bg-black/90"><Phone className="size-4" /> Call {order.business.phone}</a>
             <ButtonLink href={businessHref} variant="secondary" icon={<CalendarCheck2 className="size-4" />} className="w-full">
               {helpActionLabel}
             </ButtonLink>
@@ -747,7 +747,7 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
               <h2 className="font-extrabold text-ink">Need help?</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">Contact {order.business.name} about this {tracking.transactionLabel}.</p>
               <div className="mt-4 grid gap-2">
-                <a href={`tel:${order.business.phone}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-bold text-white transition hover:bg-ocean"><Phone className="size-4" /> Call {order.business.phone}</a>
+                <a href={`tel:${order.business.phone}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-bold text-white transition hover:bg-black/90"><Phone className="size-4" /> Call {order.business.phone}</a>
                 <ButtonLink href={businessHref} variant="secondary" icon={<CalendarCheck2 className="size-4" />} className="w-full">
                   {customerReturnLabel}
                 </ButtonLink>

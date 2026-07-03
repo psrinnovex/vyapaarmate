@@ -716,7 +716,7 @@ export function CustomerOrderPage({
               href={confirmedOrder.paymentUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-ocean"
+              className="mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-black/90"
             >
               <Wallet className="size-4" />
               <span>{confirmedOrder.paymentQrImageUrl ? "Open Payment QR" : "Open Secure Payment"}</span>

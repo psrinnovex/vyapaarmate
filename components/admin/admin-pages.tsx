@@ -4547,7 +4547,7 @@ function BusinessKycReviewDialog({
                   href={document.downloadUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-white px-3 text-sm font-semibold text-ocean transition hover:bg-ocean hover:text-white"
+                  className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-white px-3 text-sm font-semibold text-ink transition hover:bg-black hover:text-white"
                 >
                   Open <ExternalLink className="size-4" />
                 </a>
