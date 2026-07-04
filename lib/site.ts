@@ -20,8 +20,10 @@ export const siteConfig = {
   themeColor: "#0f172a",
   market: "India",
   language: "en-IN",
+  alternateNames: ["Vyapaar Mate", "vyapaarmate", "vyapaar mate"] as readonly string[],
   keywords: [
     "VyapaarMate",
+    "Vyapaar Mate",
     "PSHR INNOVEX PRIVATE LIMITED",
     "Indian small business software",
     "local business software India",

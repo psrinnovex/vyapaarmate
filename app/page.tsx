@@ -31,6 +31,7 @@ function homeStructuredData() {
       "@type": "SoftwareApplication",
       "@id": softwareId,
       name: siteConfig.name,
+      alternateName: siteConfig.alternateNames,
       applicationCategory: "BusinessApplication",
       applicationSubCategory: "Local commerce, WhatsApp CRM, UPI payment management",
       operatingSystem: "Web",

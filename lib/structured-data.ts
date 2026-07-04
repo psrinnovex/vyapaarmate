@@ -48,8 +48,10 @@ export function organizationNode() {
     },
     brand: {
       "@type": "Brand",
-      name: siteConfig.name
+      name: siteConfig.name,
+      alternateName: siteConfig.alternateNames
     },
+    alternateName: siteConfig.alternateNames,
     logo: absoluteUrl("/icon.svg"),
     image: absoluteUrl("/opengraph-image"),
     contactPoint
@@ -61,6 +63,7 @@ export function websiteNode() {
     "@type": "WebSite",
     "@id": websiteId,
     name: siteConfig.name,
+    alternateName: siteConfig.alternateNames,
     url: absoluteUrl("/"),
     inLanguage: siteConfig.language,
     publisher: {

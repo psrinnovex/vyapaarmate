@@ -147,7 +147,7 @@ const chargeRules = [
 export const faqItems = [
   [
     "Is VyapaarMate only for restaurants?",
-    "No. The updated product supports food, retail, service, appointment, home-visit, and local membership businesses."
+    "No. VyapaarMate (also written as Vyapaar Mate) supports food, retail, service, appointment, home-visit, and local membership businesses across India."
   ],
   [
     "Do customers need to use a website?",
@@ -207,6 +207,7 @@ export function LandingPage() {
             </Badge>
             <h1 className="mt-4 max-w-full break-words text-[clamp(2rem,6.2vw,4rem)] font-extrabold leading-[0.96] text-ink">
               VyapaarMate
+              <span className="sr-only"> (Vyapaar Mate)</span>
             </h1>
             <p className="mt-4 max-w-full text-base font-semibold leading-7 text-ink sm:max-w-[560px] sm:text-xl">
               Take website orders and bookings, collect payment, send WhatsApp updates, and run daily operations from one owner dashboard.

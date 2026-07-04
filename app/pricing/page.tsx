@@ -56,7 +56,8 @@ function pricingStructuredData() {
       description: pricingDescription,
       brand: {
         "@type": "Brand",
-        name: siteConfig.name
+        name: siteConfig.name,
+        alternateName: siteConfig.alternateNames
       },
       category: "Business software",
       manufacturer: {
