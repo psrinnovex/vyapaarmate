@@ -37,7 +37,7 @@ Set these in Vercel's encrypted environment settings; do not paste real values i
 | Variable | Scope | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | Preview and Production | Supabase transaction pooler, port `6543`, for serverless application traffic |
-| `DIRECT_URL` | Trusted migration runner | Supabase session pooler/direct connection, port `5432`, for Prisma migrations |
+| `DIRECT_URL` | Production build and trusted migration runner | Supabase session pooler/direct connection, port `5432`, for Prisma migrations |
 | `CRON_SECRET` | Production | Random 32+ character bearer secret automatically sent to protected Vercel Cron routes |
 | `INTELLIGENCE_ML_DISABLED` | Optional emergency control | Set to `1` to disable training while rules fallback continues |
 
@@ -72,7 +72,7 @@ Optional bounded-training controls have conservative defaults and hard ceilings:
    npx prisma migrate status
    ```
 
-3. Apply committed migrations:
+3. Apply committed migrations when validating from a trusted runner:
 
    ```bash
    npm run db:deploy
@@ -81,6 +81,8 @@ Optional bounded-training controls have conservative defaults and hard ceilings:
 4. Run `npx prisma migrate status` again. It must report that the schema is up to date.
 
 Migration `20260717160000_ml_production_lifecycle` is additive. It records payment resolution update time, lifecycle/evaluation/drift fields, converts the newest legacy trained artifact per business/model to `active`, retires older ones, closes abandoned training rows, and creates concurrency/lifecycle indexes.
+
+The Vercel production build also runs `prisma migrate deploy` before `next build`. It first verifies that `DATABASE_URL` and `DIRECT_URL` use the expected Supabase pooler modes and identify the same project/database. Preview and local builds never run migrations. A target mismatch, missing secret, or failed migration stops the new deployment before it can replace the current production deployment.
 
 ## 4. Preview deployment
 
@@ -123,10 +125,10 @@ Manual rollback body:
 
 ## 5. Production release
 
-1. Confirm the production migration is complete.
-2. Confirm `DATABASE_URL`, `DIRECT_URL`, and `CRON_SECRET` are set in the correct secret scopes.
-3. Merge the reviewed release branch and wait for the Production deployment to finish.
-4. Check the deployment logs for Prisma, route, timeout, or database pool errors.
+1. Confirm a restorable production database backup exists.
+2. Confirm `DATABASE_URL`, `DIRECT_URL`, and `CRON_SECRET` are set in the Production secret scope.
+3. Merge the reviewed release branch and wait for the Production deployment to finish. The build verifies the database target, applies pending Prisma migrations, and only then builds the application.
+4. Check the deployment logs for the successful migration and for route, timeout, or database pool errors. A failed migration must leave the previous deployment serving.
 5. Call the production job once with `limit=1`, then expand only after the first result is healthy.
 
 `vercel.json` schedules `/api/jobs/intelligence-refresh` daily at `02:00 UTC` (`07:30 IST`) with the route's default five-business batch. The route allows at most 25 businesses per call, rotates through the least recently refreshed active businesses, and stops admitting more businesses when its 270-second work budget cannot safely cover another worst-case training cycle. Deferred IDs are returned for the next protected invocation. The Vercel function has a 300-second duration. Other payment and payout jobs continue to use their existing external schedules.

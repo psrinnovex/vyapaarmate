@@ -2,6 +2,8 @@
 -- existing artifact JSON compatible for rollback while introducing explicit
 -- shadow/active promotion, monitoring, and training leases.
 
+BEGIN;
+
 -- Resolution time is required for leakage-safe payment outcome labels. The
 -- application already updates Payment rows whenever provider state changes.
 ALTER TABLE "Payment"
@@ -78,3 +80,5 @@ CREATE INDEX "IntelligenceModelArtifact_businessId_driftStatus_lastDriftCheckedA
 
 CREATE INDEX "IntelligenceTrainingRun_status_leaseExpiresAt_idx"
   ON "IntelligenceTrainingRun"("status", "leaseExpiresAt");
+
+COMMIT;
