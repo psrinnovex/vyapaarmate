@@ -1,17 +1,38 @@
-import type { ClassificationMetrics, RegressionMetrics } from "@/lib/intelligence/ml/metrics";
-import { calculateClassificationMetrics, calculateRegressionMetrics, clamp, dot, round, sigmoid } from "@/lib/intelligence/ml/metrics";
+import type {
+  ClassificationMetrics,
+  ModelEvaluation,
+  ProbabilityCalibration,
+  RegressionMetrics
+} from "@/lib/intelligence/ml/metrics";
+import {
+  applyProbabilityCalibration,
+  calculateClassificationMetrics,
+  calculateRegressionMetrics,
+  clamp,
+  classificationPromotionDecision,
+  dot,
+  fitPlattCalibration,
+  regressionPromotionDecision,
+  round,
+  selectClassificationThreshold,
+  sigmoid,
+  sparseDot
+} from "@/lib/intelligence/ml/metrics";
 
 export const intelligenceModelTypes = ["demand", "retention", "payment_risk"] as const;
 export type IntelligenceModelType = (typeof intelligenceModelTypes)[number];
 
 export const intelligenceFeatureSchemaVersions: Record<IntelligenceModelType, number> = {
-  demand: 2,
-  retention: 2,
-  payment_risk: 2
+  demand: 3,
+  retention: 3,
+  payment_risk: 3
 };
 
-export const intelligenceModelStatuses = ["needs_data", "ready_for_training", "training", "trained", "failed", "disabled"] as const;
+export const intelligenceModelStatuses = ["needs_data", "ready_for_training", "training", "shadow", "trained", "failed", "disabled"] as const;
 export type IntelligenceModelStatus = (typeof intelligenceModelStatuses)[number];
+
+export const intelligenceArtifactLifecycleStatuses = ["shadow", "active", "retired", "rolled_back"] as const;
+export type IntelligenceArtifactLifecycleStatus = (typeof intelligenceArtifactLifecycleStatuses)[number];
 
 export type IntelligenceEngineType = "rules_engine" | "trained_ml" | "hybrid_rules_plus_ml";
 
@@ -21,6 +42,8 @@ export type FeatureExample = {
   entityId: string;
   entityType: string;
   label?: number;
+  labelAvailableAt?: Date;
+  baselinePrediction?: number;
   features: FeatureMap;
   observedAt: Date;
   metadata: Record<string, string | number | boolean | null>;
@@ -37,6 +60,21 @@ export type VectorModelArtifact = {
   intercept: number;
   targetMean?: number;
   targetStd?: number;
+  decisionThreshold?: number;
+  calibration?: ProbabilityCalibration;
+  referenceMeans?: number[];
+  referenceStds?: number[];
+  evaluation?: ModelEvaluation;
+  trainingBounds?: {
+    rowsConsidered: number;
+    rowsUsed: number;
+    maximumTrainRows: number;
+    maximumValidationRows: number;
+    maximumFeatures: number;
+    batchSize: number;
+    iterationsCompleted: number;
+    bounded: boolean;
+  };
   trainedAt: string;
   trainingRows: number;
   validationRows: number;
@@ -49,6 +87,11 @@ export type ModelTrainingResult = {
   trainRows: number;
   validationRows: number;
   rowsUsed: number;
+  rowsConsidered: number;
+  embargoRows: number;
+  iterationsCompleted: number;
+  bounded: boolean;
+  evaluation: ModelEvaluation;
 };
 
 export type ModelReadinessGate = {
@@ -82,6 +125,13 @@ export type PersistedModelStatus = ModelReadiness & {
   latestRunStartedAt: string | null;
   latestRunCompletedAt: string | null;
   latestRunError: string | null;
+  lifecycleStatus: IntelligenceArtifactLifecycleStatus | null;
+  promotionEligible: boolean;
+  baselineMetrics: RegressionMetrics | ClassificationMetrics | Record<string, unknown> | null;
+  evaluation: ModelEvaluation | Record<string, unknown> | null;
+  driftStatus: string | null;
+  driftScore: number | null;
+  lastDriftCheckedAt: string | null;
 };
 
 export type IntelligenceEngineSummary = {
@@ -98,6 +148,10 @@ export type IntelligenceEngineSummary = {
     trainingRows: number | null;
     validationRows: number | null;
     metrics: PersistedModelStatus["latestMetrics"];
+    lifecycleStatus: PersistedModelStatus["lifecycleStatus"];
+    promotionEligible: boolean;
+    driftStatus: string | null;
+    driftScore: number | null;
     missingRequirements: string[];
   }>;
 };
@@ -115,7 +169,25 @@ export function isIntelligenceModelType(value: unknown): value is IntelligenceMo
 export function isCompatibleModelArtifact(value: unknown, modelType: IntelligenceModelType): value is VectorModelArtifact {
   if (!value || typeof value !== "object") return false;
   const artifact = value as Partial<VectorModelArtifact>;
-  return artifact.modelType === modelType && artifact.featureSchemaVersion === intelligenceFeatureSchemaVersions[modelType];
+  const featureCount = artifact.featureNames?.length ?? -1;
+  return (
+    artifact.modelType === modelType &&
+    artifact.featureSchemaVersion === intelligenceFeatureSchemaVersions[modelType] &&
+    typeof artifact.algorithm === "string" &&
+    Array.isArray(artifact.featureNames) &&
+    artifact.featureNames.every((name) => typeof name === "string") &&
+    Array.isArray(artifact.means) &&
+    artifact.means.length === featureCount &&
+    artifact.means.every(Number.isFinite) &&
+    Array.isArray(artifact.stds) &&
+    artifact.stds.length === featureCount &&
+    artifact.stds.every((value) => Number.isFinite(value) && value > 0) &&
+    Array.isArray(artifact.weights) &&
+    artifact.weights.length === featureCount &&
+    artifact.weights.every(Number.isFinite) &&
+    typeof artifact.intercept === "number" &&
+    Number.isFinite(artifact.intercept)
+  );
 }
 
 export function modelTypesForRequest(value: unknown): IntelligenceModelType[] | null {
@@ -152,6 +224,10 @@ export function buildEngineSummary(statuses: PersistedModelStatus[]): Intelligen
       trainingRows: status.latestTrainingRows,
       validationRows: status.latestValidationRows,
       metrics: status.latestMetrics,
+      lifecycleStatus: status.lifecycleStatus,
+      promotionEligible: status.promotionEligible,
+      driftStatus: status.driftStatus,
+      driftScore: status.driftScore,
       missingRequirements: status.missingRequirements
     }))
   };
@@ -171,9 +247,13 @@ export function predictLinearValue(artifact: VectorModelArtifact, features: Feat
   return scaled * (artifact.targetStd || 1) + (artifact.targetMean || 0);
 }
 
-export function predictLogisticProbability(artifact: VectorModelArtifact, features: FeatureMap) {
+export function predictRawLogisticProbability(artifact: VectorModelArtifact, features: FeatureMap) {
   const normalized = vectorizeFeatureMap(features, artifact);
   return sigmoid(artifact.intercept + dot(artifact.weights, normalized));
+}
+
+export function predictLogisticProbability(artifact: VectorModelArtifact, features: FeatureMap) {
+  return applyProbabilityCalibration(predictRawLogisticProbability(artifact, features), artifact.calibration);
 }
 
 export function featureCoverage(artifact: VectorModelArtifact, features: FeatureMap) {
@@ -182,45 +262,84 @@ export function featureCoverage(artifact: VectorModelArtifact, features: Feature
   return present / artifact.featureNames.length;
 }
 
-function featureNamesFromExamples(examples: FeatureExample[]) {
-  const names = new Set<string>();
+function featureNamesFromExamples(examples: FeatureExample[], maximumFeatures: number) {
+  const frequencies = new Map<string, number>();
   examples.forEach((example) => {
-    Object.keys(example.features).forEach((name) => names.add(name));
+    Object.keys(example.features).forEach((name) => frequencies.set(name, (frequencies.get(name) ?? 0) + 1));
   });
 
-  return Array.from(names).sort();
+  const numeric = Array.from(frequencies.keys()).filter((name) => !name.includes(":")).sort();
+  const categorical = Array.from(frequencies.keys())
+    .filter((name) => name.includes(":"))
+    .sort((first, second) => (frequencies.get(second) ?? 0) - (frequencies.get(first) ?? 0) || first.localeCompare(second));
+  return [...numeric, ...categorical].slice(0, Math.max(1, maximumFeatures));
 }
 
 function buildStandardization(examples: FeatureExample[], featureNames: string[]) {
-  const means = featureNames.map((name) => {
-    const sum = examples.reduce((total, example) => total + (example.features[name] ?? 0), 0);
-    return sum / Math.max(1, examples.length);
+  const indexes = new Map(featureNames.map((name, index) => [name, index]));
+  const sums = new Float64Array(featureNames.length);
+  const squares = new Float64Array(featureNames.length);
+  examples.forEach((example) => {
+    Object.entries(example.features).forEach(([name, value]) => {
+      const index = indexes.get(name);
+      if (index === undefined) return;
+      sums[index] += value;
+      squares[index] += value * value;
+    });
   });
-  const stds = featureNames.map((name, index) => {
-    const mean = means[index] ?? 0;
-    const variance =
-      examples.reduce((total, example) => {
-        const delta = (example.features[name] ?? 0) - mean;
-        return total + delta * delta;
-      }, 0) / Math.max(1, examples.length);
+
+  const divisor = Math.max(1, examples.length);
+  const referenceMeans = featureNames.map((_, index) => sums[index]! / divisor);
+  const referenceStds = featureNames.map((_, index) => {
+    const mean = referenceMeans[index] ?? 0;
+    const variance = Math.max(0, squares[index]! / divisor - mean * mean);
     const std = Math.sqrt(variance);
     return std > 0.000001 ? std : 1;
   });
+  const means = featureNames.map((name, index) => (name.includes(":") ? 0 : referenceMeans[index] ?? 0));
+  const stds = featureNames.map((name, index) => (name.includes(":") ? 1 : referenceStds[index] ?? 1));
 
-  return { means, stds };
+  return { means, stds, referenceMeans, referenceStds };
 }
 
 function labelsFromExamples(examples: FeatureExample[]) {
   return examples.map((example) => example.label ?? 0);
 }
 
-function vectorizeExamples(examples: FeatureExample[], artifact: Pick<VectorModelArtifact, "featureNames" | "means" | "stds">) {
-  return examples.map((example) => vectorizeFeatureMap(example.features, artifact));
+function sparseExamples(
+  examples: FeatureExample[],
+  artifact: Pick<VectorModelArtifact, "featureNames" | "means" | "stds">
+) {
+  const indexes = new Map(artifact.featureNames.map((name, index) => [name, index]));
+  const denseIndexes = artifact.featureNames
+    .map((name, index) => ({ name, index }))
+    .filter(({ name }) => !name.includes(":"));
+
+  return examples.map((example) => {
+    const row: Array<readonly [number, number]> = denseIndexes.map(({ name, index }) => {
+      const value = ((example.features[name] ?? 0) - (artifact.means[index] ?? 0)) / (artifact.stds[index] || 1);
+      return [index, value] as const;
+    });
+    Object.entries(example.features).forEach(([name, value]) => {
+      if (!name.includes(":")) return;
+      const index = indexes.get(name);
+      if (index === undefined || Math.abs(value) <= 0.000001) return;
+      row.push([index, value / (artifact.stds[index] || 1)] as const);
+    });
+    return row;
+  });
 }
 
-function initializeWeights(size: number) {
-  return Array.from({ length: size }, () => 0);
-}
+type TrainingRuntimeOptions = {
+  rowsConsidered?: number;
+  embargoRows?: number;
+  validationStart?: Date | null;
+  maximumTrainRows?: number;
+  maximumValidationRows?: number;
+  maximumFeatures?: number;
+  batchSize?: number;
+  maximumTrainingMs?: number;
+};
 
 export function trainLinearRegressionModel({
   modelType,
@@ -228,8 +347,10 @@ export function trainLinearRegressionModel({
   validationExamples,
   algorithm,
   learningRate = 0.035,
-  iterations = 320,
-  l2 = 0.002
+  iterations = 180,
+  l2 = 0.002,
+  baselinePredictions,
+  runtime = {}
 }: {
   modelType: IntelligenceModelType;
   trainExamples: FeatureExample[];
@@ -238,42 +359,51 @@ export function trainLinearRegressionModel({
   learningRate?: number;
   iterations?: number;
   l2?: number;
+  baselinePredictions?: number[];
+  runtime?: TrainingRuntimeOptions;
 }): ModelTrainingResult {
   if (trainExamples.length < 2) {
     throw new Error(`${modelLabels[modelType]} needs at least 2 training examples after the validation split.`);
   }
 
-  const featureNames = featureNamesFromExamples(trainExamples);
-  const { means, stds } = buildStandardization(trainExamples, featureNames);
+  const maximumFeatures = runtime.maximumFeatures ?? 512;
+  const batchSize = Math.max(64, Math.min(runtime.batchSize ?? 8192, trainExamples.length));
+  const deadlineAt = Date.now() + Math.max(1_000, runtime.maximumTrainingMs ?? 45_000);
+  const featureNames = featureNamesFromExamples(trainExamples, maximumFeatures);
+  const { means, stds, referenceMeans, referenceStds } = buildStandardization(trainExamples, featureNames);
   const baseArtifact = { featureNames, means, stds };
-  const x = vectorizeExamples(trainExamples, baseArtifact);
+  const x = sparseExamples(trainExamples, baseArtifact);
   const labels = labelsFromExamples(trainExamples);
   const targetMean = labels.reduce((sum, label) => sum + label, 0) / Math.max(1, labels.length);
   const targetVariance = labels.reduce((sum, label) => sum + (label - targetMean) * (label - targetMean), 0) / Math.max(1, labels.length);
   const targetStd = Math.sqrt(targetVariance) > 0.000001 ? Math.sqrt(targetVariance) : 1;
   const y = labels.map((label) => (label - targetMean) / targetStd);
-  const weights = initializeWeights(featureNames.length);
+  const weights = new Float64Array(featureNames.length);
   let intercept = 0;
+  let iterationsCompleted = 0;
 
   for (let iteration = 0; iteration < iterations; iteration += 1) {
-    const gradient = initializeWeights(weights.length);
+    const gradient = new Float64Array(weights.length);
     let interceptGradient = 0;
+    const batchStart = (iteration * batchSize) % x.length;
 
-    for (let row = 0; row < x.length; row += 1) {
-      const prediction = intercept + dot(weights, x[row] ?? []);
+    for (let offset = 0; offset < batchSize; offset += 1) {
+      const row = (batchStart + offset) % x.length;
+      const sparseRow = x[row] ?? [];
+      const prediction = intercept + sparseDot(weights, sparseRow);
       const error = prediction - (y[row] ?? 0);
       interceptGradient += error;
-      for (let column = 0; column < weights.length; column += 1) {
-        gradient[column] = (gradient[column] ?? 0) + error * ((x[row] ?? [])[column] ?? 0);
-      }
+      sparseRow.forEach(([column, value]) => { gradient[column] += error * value; });
     }
 
-    const scale = 1 / Math.max(1, x.length);
+    const scale = 1 / batchSize;
     intercept -= learningRate * interceptGradient * scale;
     for (let column = 0; column < weights.length; column += 1) {
-      const penalty = l2 * (weights[column] ?? 0);
-      weights[column] = (weights[column] ?? 0) - learningRate * ((gradient[column] ?? 0) * scale + penalty);
+      const penalty = l2 * weights[column]!;
+      weights[column] -= learningRate * (gradient[column]! * scale + penalty);
     }
+    iterationsCompleted = iteration + 1;
+    if (iterationsCompleted >= 20 && iterationsCompleted % 5 === 0 && Date.now() >= deadlineAt) break;
   }
 
   const artifact: VectorModelArtifact = {
@@ -283,27 +413,66 @@ export function trainLinearRegressionModel({
     featureNames,
     means,
     stds,
-    weights: weights.map((weight) => round(weight, 8)),
+    referenceMeans,
+    referenceStds,
+    weights: Array.from(weights, (weight) => round(weight, 8)),
     intercept: round(intercept, 8),
     targetMean: round(targetMean, 8),
     targetStd: round(targetStd, 8),
     trainedAt: new Date().toISOString(),
     trainingRows: trainExamples.length,
     validationRows: validationExamples.length,
-    metrics: { mae: 0, rmse: 0, mape: null, evaluatedRows: 0 }
+    metrics: { mae: 0, rmse: 0, mape: null, wape: null, evaluatedRows: 0 }
   };
 
   const validationPredictions = validationExamples.map((example) => Math.max(0, predictLinearValue(artifact, example.features)));
   const validationLabels = labelsFromExamples(validationExamples);
   const metrics = calculateRegressionMetrics(validationPredictions, validationLabels);
+  const baselineMetrics = calculateRegressionMetrics(
+    baselinePredictions?.length === validationExamples.length
+      ? baselinePredictions
+      : validationExamples.map(() => targetMean),
+    validationLabels
+  );
+  const promotion = regressionPromotionDecision(metrics, baselineMetrics);
+  const rowsConsidered = runtime.rowsConsidered ?? trainExamples.length + validationExamples.length + (runtime.embargoRows ?? 0);
+  const rowsUsed = trainExamples.length + validationExamples.length;
+  const evaluation: ModelEvaluation = {
+    split: {
+      rowsConsidered,
+      trainRows: trainExamples.length,
+      validationRows: validationExamples.length,
+      embargoRows: runtime.embargoRows ?? 0,
+      validationStart: runtime.validationStart?.toISOString() ?? null
+    },
+    candidateMetrics: metrics,
+    baselineMetrics,
+    promotion
+  };
   artifact.metrics = metrics;
+  artifact.evaluation = evaluation;
+  artifact.trainingBounds = {
+    rowsConsidered,
+    rowsUsed,
+    maximumTrainRows: runtime.maximumTrainRows ?? trainExamples.length,
+    maximumValidationRows: runtime.maximumValidationRows ?? validationExamples.length,
+    maximumFeatures,
+    batchSize,
+    iterationsCompleted,
+    bounded: rowsUsed < rowsConsidered || iterationsCompleted < iterations
+  };
 
   return {
     artifact,
     metrics,
     trainRows: trainExamples.length,
     validationRows: validationExamples.length,
-    rowsUsed: trainExamples.length + validationExamples.length
+    rowsUsed,
+    rowsConsidered,
+    embargoRows: runtime.embargoRows ?? 0,
+    iterationsCompleted,
+    bounded: artifact.trainingBounds.bounded,
+    evaluation
   };
 }
 
@@ -313,8 +482,9 @@ export function trainLogisticRegressionModel({
   validationExamples,
   algorithm,
   learningRate = 0.045,
-  iterations = 420,
-  l2 = 0.003
+  iterations = 220,
+  l2 = 0.003,
+  runtime = {}
 }: {
   modelType: IntelligenceModelType;
   trainExamples: FeatureExample[];
@@ -323,38 +493,51 @@ export function trainLogisticRegressionModel({
   learningRate?: number;
   iterations?: number;
   l2?: number;
+  runtime?: TrainingRuntimeOptions;
 }): ModelTrainingResult {
   if (trainExamples.length < 2) {
     throw new Error(`${modelLabels[modelType]} needs at least 2 training examples after the validation split.`);
   }
 
-  const featureNames = featureNamesFromExamples(trainExamples);
-  const { means, stds } = buildStandardization(trainExamples, featureNames);
+  const maximumFeatures = runtime.maximumFeatures ?? 512;
+  const batchSize = Math.max(64, Math.min(runtime.batchSize ?? 8192, trainExamples.length));
+  const deadlineAt = Date.now() + Math.max(1_000, runtime.maximumTrainingMs ?? 45_000);
+  const featureNames = featureNamesFromExamples(trainExamples, maximumFeatures);
+  const { means, stds, referenceMeans, referenceStds } = buildStandardization(trainExamples, featureNames);
   const baseArtifact = { featureNames, means, stds };
-  const x = vectorizeExamples(trainExamples, baseArtifact);
+  const x = sparseExamples(trainExamples, baseArtifact);
   const y = labelsFromExamples(trainExamples).map((label) => (label >= 0.5 ? 1 : 0));
-  const weights = initializeWeights(featureNames.length);
+  const positiveRows = y.filter(Boolean).length;
+  const negativeRows = y.length - positiveRows;
+  const positiveWeight = positiveRows ? y.length / (2 * positiveRows) : 1;
+  const negativeWeight = negativeRows ? y.length / (2 * negativeRows) : 1;
+  const weights = new Float64Array(featureNames.length);
   let intercept = 0;
+  let iterationsCompleted = 0;
 
   for (let iteration = 0; iteration < iterations; iteration += 1) {
-    const gradient = initializeWeights(weights.length);
+    const gradient = new Float64Array(weights.length);
     let interceptGradient = 0;
+    const batchStart = (iteration * batchSize) % x.length;
 
-    for (let row = 0; row < x.length; row += 1) {
-      const probability = sigmoid(intercept + dot(weights, x[row] ?? []));
-      const error = probability - (y[row] ?? 0);
+    for (let offset = 0; offset < batchSize; offset += 1) {
+      const row = (batchStart + offset) % x.length;
+      const sparseRow = x[row] ?? [];
+      const probability = sigmoid(intercept + sparseDot(weights, sparseRow));
+      const rowWeight = y[row] ? positiveWeight : negativeWeight;
+      const error = (probability - (y[row] ?? 0)) * rowWeight;
       interceptGradient += error;
-      for (let column = 0; column < weights.length; column += 1) {
-        gradient[column] = (gradient[column] ?? 0) + error * ((x[row] ?? [])[column] ?? 0);
-      }
+      sparseRow.forEach(([column, value]) => { gradient[column] += error * value; });
     }
 
-    const scale = 1 / Math.max(1, x.length);
+    const scale = 1 / batchSize;
     intercept -= learningRate * interceptGradient * scale;
     for (let column = 0; column < weights.length; column += 1) {
-      const penalty = l2 * (weights[column] ?? 0);
-      weights[column] = (weights[column] ?? 0) - learningRate * ((gradient[column] ?? 0) * scale + penalty);
+      const penalty = l2 * weights[column]!;
+      weights[column] -= learningRate * (gradient[column]! * scale + penalty);
     }
+    iterationsCompleted = iteration + 1;
+    if (iterationsCompleted >= 20 && iterationsCompleted % 5 === 0 && Date.now() >= deadlineAt) break;
   }
 
   const artifact: VectorModelArtifact = {
@@ -364,7 +547,9 @@ export function trainLogisticRegressionModel({
     featureNames,
     means,
     stds,
-    weights: weights.map((weight) => round(weight, 8)),
+    referenceMeans,
+    referenceStds,
+    weights: Array.from(weights, (weight) => round(weight, 8)),
     intercept: round(intercept, 8),
     trainedAt: new Date().toISOString(),
     trainingRows: trainExamples.length,
@@ -375,6 +560,9 @@ export function trainLogisticRegressionModel({
       recall: 0,
       f1: 0,
       auc: null,
+      prAuc: null,
+      brierScore: 0,
+      expectedCalibrationError: 0,
       threshold: 0.5,
       evaluatedRows: 0,
       positiveRows: 0,
@@ -382,17 +570,63 @@ export function trainLogisticRegressionModel({
     }
   };
 
+  const rawTrainingProbabilities = trainExamples.map((example) => predictRawLogisticProbability(artifact, example.features));
+  const calibration = fitPlattCalibration(rawTrainingProbabilities, y);
+  artifact.calibration = calibration;
+  const calibratedTrainingProbabilities = rawTrainingProbabilities.map((probability) => applyProbabilityCalibration(probability, calibration));
+  const decisionThreshold = selectClassificationThreshold(calibratedTrainingProbabilities, y);
+  artifact.decisionThreshold = decisionThreshold;
   const validationProbabilities = validationExamples.map((example) => predictLogisticProbability(artifact, example.features));
   const validationLabels = labelsFromExamples(validationExamples);
-  const metrics = calculateClassificationMetrics(validationProbabilities, validationLabels);
+  const metrics = calculateClassificationMetrics(validationProbabilities, validationLabels, decisionThreshold);
+  const prevalence = y.reduce<number>((sum, label) => sum + label, 0) / Math.max(1, y.length);
+  const baselineMetrics = calculateClassificationMetrics(
+    validationExamples.map(() => prevalence),
+    validationLabels,
+    0.5
+  );
+  const validationPrevalence = validationLabels.reduce((sum, label) => sum + (label ? 1 : 0), 0) / Math.max(1, validationLabels.length);
+  baselineMetrics.prAuc = round(validationPrevalence);
+  const promotion = classificationPromotionDecision(metrics, baselineMetrics);
+  const rowsConsidered = runtime.rowsConsidered ?? trainExamples.length + validationExamples.length + (runtime.embargoRows ?? 0);
+  const rowsUsed = trainExamples.length + validationExamples.length;
+  const evaluation: ModelEvaluation = {
+    split: {
+      rowsConsidered,
+      trainRows: trainExamples.length,
+      validationRows: validationExamples.length,
+      embargoRows: runtime.embargoRows ?? 0,
+      validationStart: runtime.validationStart?.toISOString() ?? null
+    },
+    candidateMetrics: metrics,
+    baselineMetrics,
+    promotion,
+    calibration
+  };
   artifact.metrics = metrics;
+  artifact.evaluation = evaluation;
+  artifact.trainingBounds = {
+    rowsConsidered,
+    rowsUsed,
+    maximumTrainRows: runtime.maximumTrainRows ?? trainExamples.length,
+    maximumValidationRows: runtime.maximumValidationRows ?? validationExamples.length,
+    maximumFeatures,
+    batchSize,
+    iterationsCompleted,
+    bounded: rowsUsed < rowsConsidered || iterationsCompleted < iterations
+  };
 
   return {
     artifact,
     metrics,
     trainRows: trainExamples.length,
     validationRows: validationExamples.length,
-    rowsUsed: trainExamples.length + validationExamples.length
+    rowsUsed,
+    rowsConsidered,
+    embargoRows: runtime.embargoRows ?? 0,
+    iterationsCompleted,
+    bounded: artifact.trainingBounds.bounded,
+    evaluation
   };
 }
 

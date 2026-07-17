@@ -8,7 +8,8 @@ import {
   type ModelTrainingResult,
   type VectorModelArtifact
 } from "@/lib/intelligence/ml/model-registry";
-import { clamp, round, trainValidationSplit } from "@/lib/intelligence/ml/metrics";
+import { clamp, round } from "@/lib/intelligence/ml/metrics";
+import { prepareChronologicalTraining } from "@/lib/intelligence/ml/training-policy";
 
 export type DemandForecastPrediction = {
   modelType: "demand";
@@ -34,17 +35,18 @@ export function demandTrainingExamples(data: FirstPartyTrainingData) {
 }
 
 export function trainDemandForecastModel(examples: FeatureExample[]): ModelTrainingResult {
-  const sorted = examples.slice().sort((first, second) => first.observedAt.getTime() - second.observedAt.getTime());
-  const { trainRows, validationRows } = trainValidationSplit(sorted, 0.2);
+  const prepared = prepareChronologicalTraining(examples, "demand");
 
   return trainLinearRegressionModel({
     modelType: "demand",
-    trainExamples: trainRows,
-    validationExamples: validationRows,
-    algorithm: "regularized_linear_regression_gradient_descent",
+    trainExamples: prepared.trainExamples,
+    validationExamples: prepared.validationExamples,
+    baselinePredictions: prepared.validationExamples.map((example) => example.baselinePrediction ?? 0),
+    algorithm: "regularized_linear_regression_sparse_minibatch",
     learningRate: 0.035,
-    iterations: 340,
-    l2: 0.002
+    iterations: 180,
+    l2: 0.002,
+    runtime: prepared.runtime
   });
 }
 

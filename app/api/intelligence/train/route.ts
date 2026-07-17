@@ -6,6 +6,7 @@ import { trainIntelligenceModels } from "@/lib/intelligence/ml/training-service"
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 type TrainRequestBody = {
   businessId?: unknown;

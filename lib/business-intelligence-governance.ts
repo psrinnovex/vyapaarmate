@@ -88,7 +88,7 @@ export type BusinessIntelligenceGovernanceReport = {
   };
   modelStatus: Array<{
     modelType: "demand" | "retention" | "payment_risk";
-    status: "needs_data" | "ready_for_training" | "training" | "trained" | "failed" | "disabled";
+    status: "needs_data" | "ready_for_training" | "training" | "shadow" | "trained" | "failed" | "disabled";
     latestVersion: string | null;
     trainedAt: string | null;
     trainingRows: number | null;
@@ -257,7 +257,7 @@ function buildDataSources(dataset: BusinessIntelligenceDataset, profile: Intelli
       storage: "Payment",
       sourceType: "first_party_operational",
       recordCount: profile.payments.total,
-      fieldsUsed: ["amount", "status", "provider", "createdAt", "paidAt", "orderId"],
+      fieldsUsed: ["amount", "status", "provider", "createdAt", "paidAt", "updatedAt", "orderId"],
       usedFor: ["payment risk", "collection priority", "business health"],
       containsPersonalData: false,
       trainingRole: "future_training_label",
@@ -504,7 +504,14 @@ function fallbackModelStatuses(): PersistedModelStatus[] {
     latestRunStatus: null,
     latestRunStartedAt: null,
     latestRunCompletedAt: null,
-    latestRunError: null
+    latestRunError: null,
+    lifecycleStatus: null,
+    promotionEligible: false,
+    baselineMetrics: null,
+    evaluation: null,
+    driftStatus: null,
+    driftScore: null,
+    lastDriftCheckedAt: null
   }));
 }
 
@@ -606,9 +613,9 @@ export function buildBusinessIntelligenceGovernanceReport(
           useCase: "Repeat-customer and churn prediction"
         },
         {
-          label: "Payment cleared within target time",
-          builtFrom: "Payment.createdAt, Payment.paidAt, Payment.status, provider, and amount",
-          useCase: "Payment delay and collection priority"
+          label: "Payment resolved successfully or failed",
+          builtFrom: "Payment.createdAt, Payment.paidAt, Payment.updatedAt, Payment.status, provider, and amount",
+          useCase: "Advisory payment failure and collection risk"
         }
       ],
       privacyControls: [

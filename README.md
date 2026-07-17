@@ -244,11 +244,11 @@ Configure the Cashfree webhook callback as `https://your-domain.com/api/webhooks
 Configure Cashfree Payouts callback separately as `https://your-domain.com/api/webhooks/cashfree-payouts` and enable transfer success, failure, reversed, and acknowledged events.
 For live Cashfree Payouts API calls, use either Cashfree IP whitelisting or set `CASHFREE_PAYOUTS_PUBLIC_KEY` so the app can generate the required `x-cf-signature` header from serverless environments.
 
-The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes VyapaarMate Intelligence outputs into the AI insight, health snapshot, customer score, demand forecast, and payment priority tables, checks first-party ML readiness, trains when every data-quality gate passes and no recent compatible model is available, generates ML predictions, and falls back to rules/statistical recommendations when data is insufficient. Production cron is handled by the external scheduler, so the Vercel deployment keeps these as protected job endpoints instead of defining Vercel Cron schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`.
+The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes VyapaarMate Intelligence outputs, checks first-party ML readiness, trains bounded shadow candidates, promotes only candidates that beat their baselines, monitors drift, generates active-model predictions, and preserves rules fallback. `vercel.json` runs this protected intelligence job daily; other job endpoints retain their existing external schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`. Vercel production builds verify that the runtime and migration URLs target the same Supabase project, apply pending Prisma migrations, and stop before promotion if migration fails; preview and local builds do not modify a database.
 
 VyapaarMate uses a hybrid intelligence engine. Production ML reads only training-eligible first-party records from approved origins. Registered external datasets are isolated to offline evaluation and never affect tenant training, readiness, health scores, predictions, or owner actions. When any model gate fails, VyapaarMate falls back to explainable rules/statistical recommendations and marks that model `needs_data`.
 
-Intelligence data lineage and model readiness can be reviewed from `/api/intelligence/data-sources`. Owner/admin model status is available at `/api/intelligence/model-status?businessId=...`, training can be started with `POST /api/intelligence/train`, and predictions are available at `/api/intelligence/predictions?businessId=...`. Intelligence accuracy can be reviewed from `/api/intelligence/accuracy?days=14`. See `docs/intelligence-data-sources-and-model-readiness.md` for the source/training policy and `docs/intelligence-accuracy-maintenance.md` for the metrics, quality gates, and maintenance workflow.
+Intelligence data lineage and model readiness can be reviewed from `/api/intelligence/data-sources`. Owner/admin model status is available at `/api/intelligence/model-status?businessId=...`, training can be started with `POST /api/intelligence/train`, rollback uses `POST /api/intelligence/rollback`, and predictions are available at `/api/intelligence/predictions?businessId=...`. Intelligence accuracy can be reviewed from `/api/intelligence/accuracy?days=14`. See `docs/intelligence-data-sources-and-model-readiness.md`, `docs/intelligence-accuracy-maintenance.md`, and `docs/ml-production-deployment.md`.
 
 Order invoices are available at the opaque `/order/[publicToken]` URL and refresh automatically while online payment is pending. Authenticated business subscription invoices are available from `/dashboard/billing`. Cash orders remain pending until the business selects **Mark Paid** on `/dashboard/payments`.
 
@@ -298,7 +298,7 @@ npm run build
 
 ## Deployment
 
-The recommended production setup is Vercel for Next.js and Supabase for PostgreSQL. The current `vercel.json` places server functions in Vercel's Seoul region (`icn1`) because the configured Supabase project is in AWS `ap-northeast-2`.
+The recommended production setup is Vercel for Next.js and Supabase for PostgreSQL. The current `vercel.json` places server functions in Vercel's Mumbai region (`bom1`); keep the Supabase project close to that runtime where practical.
 
 ### 1. Prepare the database
 
@@ -316,7 +316,7 @@ The latest migrations also revoke Supabase generated Data API grants for app tab
 
 Create a Vercel project with the repository root as the Root Directory. Vercel detects Next.js automatically; keep the default install and build commands. Node `22.x` is pinned in `package.json`, and `postinstall` generates Prisma Client.
 
-This deployment uses an external scheduler for cron. Keep the job endpoints protected and call them from cron-job.org or another scheduler with `Authorization: Bearer $CRON_SECRET`. The payment reminder and wallet transfer jobs should run every 10 minutes; `/api/jobs/intelligence-refresh` should run hourly.
+Keep all job endpoints protected with `Authorization: Bearer $CRON_SECRET`. The payment reminder and wallet transfer jobs retain their external 10-minute schedules. `vercel.json` runs `/api/jobs/intelligence-refresh` daily at 02:00 UTC with a default five-business batch; preview deployments do not run this schedule. See `docs/ml-production-deployment.md` for migration, preview, promotion, monitoring, and rollback checks.
 
 Set these variables for the Production environment:
 

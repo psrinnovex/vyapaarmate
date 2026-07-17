@@ -36,7 +36,7 @@ Use grades as trend signals, not guarantees. A small shop with low order volume 
 
 - Review weekly for active businesses.
 - Review immediately after menu changes, price changes, working-hour changes, delivery-area changes, or campaign bursts.
-- Keep the hourly `/api/jobs/intelligence-refresh` job running so recommendations and persisted intelligence tables stay current.
+- Keep the daily Vercel `/api/jobs/intelligence-refresh` job running so recommendations, drift checks, and persisted intelligence tables stay current. It defaults to five businesses; use an explicit protected invocation for urgent refreshes.
 - Use `/api/intelligence/accuracy?days=14` for a steadier review window when volume is low.
 
 ## How To Improve Accuracy

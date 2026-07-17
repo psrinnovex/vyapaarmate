@@ -137,7 +137,7 @@ function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload
           <h2 className="mt-3 text-base font-bold text-ink">Model readiness</h2>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
             {engine.type === "rules_engine"
-              ? "ML models need more real business history; rules/statistical recommendations are active."
+              ? "No promoted ML model is active yet; rules/statistical recommendations remain active while data gates and shadow candidates are evaluated."
               : engine.type === "trained_ml"
                 ? "All model families have trained first-party artifacts."
                 : "Trained models are active where ready; rules/statistical recommendations fill the remaining gaps."}
@@ -151,7 +151,9 @@ function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload
                 <Badge variant={modelStatusVariant(model.status)}>{model.status.replaceAll("_", " ")}</Badge>
               </div>
               <p className="mt-2 text-xs leading-5 text-slate-600">
-                {model.lastTrainedAt ? `Trained ${formatGeneratedAt(model.lastTrainedAt)}` : model.missingRequirements[0] ?? "Waiting for first-party history."}
+                {model.lastTrainedAt
+                  ? `${model.status === "shadow" ? "Shadow candidate" : "Trained"} ${formatGeneratedAt(model.lastTrainedAt)}`
+                  : model.missingRequirements[0] ?? "Waiting for first-party history."}
               </p>
             </div>
           ))}

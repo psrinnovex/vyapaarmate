@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { businessServiceTypeOptions } from "@/lib/business-service-types";
 import { buildBusinessIntelligencePayload, type BusinessIntelligenceDataset } from "@/lib/business-intelligence";
 import { buildBusinessIntelligenceGovernanceReport } from "@/lib/business-intelligence-governance";
 import { intelligenceBenchmarkDatasets } from "@/lib/intelligence/benchmark-datasets";
 import { canManageIntelligenceModels } from "@/lib/intelligence/ml/access";
+import { supportedIntelligenceBusinessProfiles } from "@/lib/intelligence/ml/business-profiles";
 import { demandTrainingExamples, predictDemandForecasts, trainDemandForecastModel } from "@/lib/intelligence/ml/demand-forecast-model";
+import { assessModelDrift } from "@/lib/intelligence/ml/drift";
 import {
   buildDemandTrainingExamples,
   buildPaymentRiskTrainingExamples,
@@ -16,8 +19,10 @@ import {
   intelligenceFeatureSchemaVersions,
   intelligenceModelTypes,
   isCompatibleModelArtifact,
+  type FeatureExample,
   type PersistedModelStatus
 } from "@/lib/intelligence/ml/model-registry";
+import { chronologicalEvaluationSplit } from "@/lib/intelligence/ml/metrics";
 import { trainPaymentRiskModel, predictPaymentRisk } from "@/lib/intelligence/ml/payment-risk-model";
 import { buildFallbackPredictionResponse } from "@/lib/intelligence/ml/prediction-service";
 import { predictRetention, trainRetentionModel } from "@/lib/intelligence/ml/retention-model";
@@ -179,11 +184,33 @@ function trainedStatuses(): PersistedModelStatus[] {
     lastTrainedAt: now.toISOString(),
     latestTrainingRows: 400,
     latestValidationRows: 100,
-    latestMetrics: modelType === "demand" ? { mae: 1, rmse: 1.2, mape: 8, evaluatedRows: 100 } : { accuracy: 0.8, precision: 0.75, recall: 0.7, f1: 0.72, auc: 0.81 },
+    latestMetrics: modelType === "demand"
+      ? { mae: 1, rmse: 1.2, mape: 8, wape: 7, evaluatedRows: 100 }
+      : {
+          accuracy: 0.8,
+          precision: 0.75,
+          recall: 0.7,
+          f1: 0.72,
+          auc: 0.81,
+          prAuc: 0.76,
+          brierScore: 0.16,
+          expectedCalibrationError: 0.08,
+          threshold: 0.5,
+          evaluatedRows: 100,
+          positiveRows: 40,
+          negativeRows: 60
+        },
     latestRunStatus: "trained",
     latestRunStartedAt: baseDate.toISOString(),
     latestRunCompletedAt: now.toISOString(),
-    latestRunError: null
+    latestRunError: null,
+    lifecycleStatus: "active",
+    promotionEligible: true,
+    baselineMetrics: null,
+    evaluation: null,
+    driftStatus: "stable",
+    driftScore: 0.05,
+    lastDriftCheckedAt: now.toISOString()
   }));
 }
 
@@ -234,18 +261,33 @@ test("demand and retention readiness require every volume, history, maturity, an
 test("payment training excludes unresolved/refunded outcomes and does not leak final status features", () => {
   const data = syntheticTrainingData();
   const seed = data.payments[0]!;
+  const firstCreatedAt = seed.createdAt;
   data.payments = [
-    { ...seed, id: "paid", status: "COMPLETED" },
-    { ...seed, id: "failed", status: "FAILED", createdAt: addDays(seed.createdAt, 1) },
-    { ...seed, id: "pending", status: "PENDING", createdAt: addDays(seed.createdAt, 2) },
-    { ...seed, id: "refunded", status: "REFUNDED", createdAt: addDays(seed.createdAt, 3) }
+    { ...seed, id: "paid", status: "COMPLETED", createdAt: firstCreatedAt, resolvedAt: firstCreatedAt },
+    {
+      ...seed,
+      id: "failed_future_resolution",
+      status: "FAILED",
+      createdAt: addDays(firstCreatedAt, 1),
+      resolvedAt: addDays(firstCreatedAt, 4)
+    },
+    {
+      ...seed,
+      id: "candidate",
+      status: "FAILED",
+      createdAt: addDays(firstCreatedAt, 2),
+      resolvedAt: addDays(firstCreatedAt, 2)
+    },
+    { ...seed, id: "pending", status: "PENDING", createdAt: addDays(firstCreatedAt, 3) },
+    { ...seed, id: "refunded", status: "REFUNDED", createdAt: addDays(firstCreatedAt, 4) }
   ];
 
   const examples = buildPaymentRiskTrainingExamples(data);
   const featureNames = new Set(examples.flatMap((example) => Object.keys(example.features)));
 
-  assert.deepEqual(examples.map((example) => example.entityId), ["paid", "failed"]);
-  assert.deepEqual(examples.map((example) => example.label), [0, 1]);
+  assert.deepEqual(examples.map((example) => example.entityId), ["paid", "failed_future_resolution", "candidate"]);
+  assert.deepEqual(examples.map((example) => example.label), [0, 1, 1]);
+  assert.equal(examples.find((example) => example.entityId === "candidate")?.features.priorFailedCount, 0);
   assert.equal(Array.from(featureNames).some((feature) => /paymentStatus|orderStatus/i.test(feature)), false);
 });
 
@@ -255,7 +297,7 @@ test("training creates real model artifacts and trained models return prediction
 
   assert.equal(demandResult.artifact.modelType, "demand");
   assert.equal(demandResult.artifact.featureSchemaVersion, intelligenceFeatureSchemaVersions.demand);
-  assert.equal(demandResult.artifact.algorithm, "regularized_linear_regression_gradient_descent");
+  assert.equal(demandResult.artifact.algorithm, "regularized_linear_regression_sparse_minibatch");
   assert.ok(demandResult.trainRows > 0);
   assert.ok(demandResult.validationRows > 0);
   assert.ok(demandResult.artifact.featureNames.length > 0);
@@ -283,8 +325,8 @@ test("retention and payment risk train logistic models from first-party-shaped h
   const retentionResult = trainRetentionModel(retentionExamples);
   const paymentResult = trainPaymentRiskModel(paymentExamples);
 
-  assert.equal(retentionResult.artifact.algorithm, "regularized_logistic_regression_gradient_descent");
-  assert.equal(paymentResult.artifact.algorithm, "regularized_logistic_regression_gradient_descent");
+  assert.equal(retentionResult.artifact.algorithm, "calibrated_regularized_logistic_regression_sparse_minibatch");
+  assert.equal(paymentResult.artifact.algorithm, "calibrated_regularized_logistic_regression_sparse_minibatch");
   assert.ok(predictRetention({ artifact: retentionResult.artifact, data }).length > 0);
   assert.ok(predictPaymentRisk({ artifact: paymentResult.artifact, data }).length > 0);
 });
@@ -333,4 +375,90 @@ test("owner/admin access checks block cross-business model operations", () => {
   assert.equal(canManageIntelligenceModels({ role: "OWNER", businessId: "business_a" }, "business_b"), false);
   assert.equal(canManageIntelligenceModels({ role: "MANAGER", businessId: "business_a" }, "business_a"), false);
   assert.equal(canManageIntelligenceModels({ role: "SUPER_ADMIN", businessId: null }, "business_b"), true);
+});
+
+test("all 15 supported business types have an explicit intelligence family and horizon", () => {
+  assert.equal(businessServiceTypeOptions.length, 15);
+  assert.equal(supportedIntelligenceBusinessProfiles.length, 15);
+  assert.deepEqual(
+    supportedIntelligenceBusinessProfiles.map((profile) => profile.businessType).sort(),
+    businessServiceTypeOptions.map((option) => option.name).sort()
+  );
+  assert.ok(supportedIntelligenceBusinessProfiles.every((profile) => profile.retentionHorizonDays >= 30));
+  assert.deepEqual(
+    new Set(supportedIntelligenceBusinessProfiles.map((profile) => profile.family)),
+    new Set(["food", "retail", "appointment", "service_job"])
+  );
+});
+
+test("future validation embargo removes labels that were unavailable at the cutoff", () => {
+  const rows = Array.from({ length: 10 }, (_, index) => ({
+    observedAt: addDays(baseDate, index),
+    labelAvailableAt: addDays(baseDate, index + 4),
+    index
+  }));
+  const split = chronologicalEvaluationSplit(rows, { validationRatio: 0.2, minimumValidationRows: 2 });
+
+  assert.equal(split.validationStart?.getTime(), addDays(baseDate, 8).getTime());
+  assert.deepEqual(split.validationRows.map((row) => row.index), [8, 9]);
+  assert.deepEqual(split.trainRows.map((row) => row.index), [0, 1, 2, 3, 4]);
+  assert.deepEqual(split.embargoRows.map((row) => row.index), [5, 6, 7]);
+});
+
+test("classification artifacts carry calibration, baseline evaluation, and promotion evidence", () => {
+  const result = trainRetentionModel(buildRetentionTrainingExamples(syntheticTrainingData()));
+
+  assert.equal(result.artifact.calibration?.method, "platt");
+  assert.ok((result.artifact.calibration?.fittedRows ?? 0) > 0);
+  assert.ok((result.artifact.decisionThreshold ?? 0) >= 0.1);
+  assert.ok((result.artifact.decisionThreshold ?? 1) <= 0.9);
+  assert.equal(result.evaluation.calibration?.method, "platt");
+  assert.equal(typeof result.evaluation.promotion.passed, "boolean");
+  assert.equal(result.evaluation.promotion.primaryMetric, "pr_auc_and_brier");
+  assert.ok("prAuc" in result.evaluation.baselineMetrics);
+});
+
+test("bounded training handles 108,070 chronological rows and critical drift requires two checks", () => {
+  const origin = Date.parse("2020-01-01T00:00:00.000Z");
+  const rows: FeatureExample[] = Array.from({ length: 108_070 }, (_, index) => {
+    const observedAt = new Date(origin + index * 60_000);
+    return {
+      entityId: `stress_${index}`,
+      entityType: "menu_item",
+      label: 10 + (index % 7) * 2 + index / 100_000,
+      labelAvailableAt: new Date(observedAt.getTime() + 60_000),
+      baselinePrediction: 10 + (index % 7) * 2,
+      observedAt,
+      features: {
+        dayOfWeek: index % 7,
+        trend: index / 100_000,
+        "item:hstress": 1
+      },
+      metadata: {}
+    };
+  });
+  const trained = trainDemandForecastModel(rows);
+  assert.equal(trained.rowsConsidered, 108_070);
+  assert.ok(trained.rowsUsed <= 60_000);
+  assert.equal(trained.bounded, true);
+
+  const shiftedRows: FeatureExample[] = Array.from({ length: 20 }, (_, index) => ({
+    entityId: `shifted_${index}`,
+    entityType: "menu_item",
+    observedAt: new Date(origin + index * 60_000),
+    features: Object.fromEntries(
+      trained.artifact.featureNames.map((name, featureIndex) => [
+        name,
+        (trained.artifact.referenceMeans?.[featureIndex] ?? 0) +
+          10 * (trained.artifact.referenceStds?.[featureIndex] ?? 1)
+      ])
+    ),
+    metadata: {}
+  }));
+  const first = assessModelDrift({ artifact: trained.artifact, examples: shiftedRows });
+  const second = assessModelDrift({ artifact: trained.artifact, examples: shiftedRows, previousConsecutiveCritical: 1 });
+  assert.equal(first.status, "critical");
+  assert.equal(first.shouldRollback, false);
+  assert.equal(second.consecutiveCritical, 2);
+  assert.equal(second.shouldRollback, true);
 });

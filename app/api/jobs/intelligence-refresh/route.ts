@@ -4,11 +4,12 @@ import { requireCronRequest } from "@/lib/security/cron";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 function boundedLimit(value: string | null) {
-  const parsed = Number(value ?? 100);
-  if (!Number.isFinite(parsed)) return 100;
-  return Math.min(100, Math.max(1, Math.floor(parsed)));
+  const parsed = Number(value ?? 5);
+  if (!Number.isFinite(parsed)) return 5;
+  return Math.min(25, Math.max(1, Math.floor(parsed)));
 }
 
 async function handleIntelligenceRefresh(request: Request) {
@@ -21,7 +22,7 @@ async function handleIntelligenceRefresh(request: Request) {
     limit: boundedLimit(url.searchParams.get("limit"))
   });
 
-  return NextResponse.json(result, { status: result.failed.length ? 207 : 200 });
+  return NextResponse.json(result, { status: result.failed.length || result.deferred.length ? 207 : 200 });
 }
 
 export function GET(request: Request) {
