@@ -50,7 +50,7 @@ export function buildFallbackPredictionResponse({
     fallback: true,
     fallbackReason: "No trained first-party ML model artifact is available for this business yet.",
     dataSource: "first_party_database" as const,
-    externalDatasets: "none" as const,
+    externalDatasets: "isolated_evaluation_only" as const,
     syntheticProductionData: "none" as const,
     predictions: {
       demand: [],
@@ -153,7 +153,7 @@ export async function getPredictionsOrFallback(businessId: string) {
     fallback: predictionResult.fallback,
     fallbackReason: predictionResult.fallback ? "Trained artifacts exist, but no current prediction examples were available." : null,
     dataSource: "first_party_database" as const,
-    externalDatasets: "none" as const,
+    externalDatasets: "isolated_evaluation_only" as const,
     syntheticProductionData: "none" as const,
     predictions: predictionResult.predictions
   };

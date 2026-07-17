@@ -349,7 +349,7 @@ test("business intelligence governance report documents data sources and model r
   assert.equal(report.currentEngine.type, "rules_engine");
   assert.equal(report.currentEngine.trainedModelInUse, false);
   assert.equal(report.currentEngine.usesExternalDatasets, false);
-  assert.equal(report.currentEngine.externalDatasets, "none");
+  assert.equal(report.currentEngine.externalDatasets, "isolated_evaluation_only");
   assert.equal(report.currentEngine.syntheticProductionData, "none");
   assert.equal(report.datasetProfile.source, "database");
   assert.equal(report.datasetProfile.orderHistory.linkedOrderItemRate, 100);
@@ -359,6 +359,7 @@ test("business intelligence governance report documents data sources and model r
   assert.equal(report.readiness.gates.find((gate) => gate.id === "custom_ml_training")?.status, "needs_data");
   assert.ok(report.modelStatus.every((model) => model.status === "needs_data"));
   assert.equal(report.trainingPlan.currentTrainingStatus, "not_training");
-  assert.equal(report.trainingPlan.externalDatasets.length, 0);
+  assert.equal(report.trainingPlan.externalDatasets.length, 4);
+  assert.ok(report.trainingPlan.externalDatasets.some((dataset) => dataset.status === "excluded_duplicate"));
   assert.ok(report.maintenance.recommendedActions.length > 0);
 });

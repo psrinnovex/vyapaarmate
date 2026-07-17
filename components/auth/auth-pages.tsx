@@ -187,7 +187,7 @@ function AuthShell({
           {switcher}
           {showDemoNotice && process.env.NODE_ENV !== "production" && (
             <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Local demo only: admin@pshrinnovex.com, support@demo.com, and owner@demo.com use ChangeMe123!. Change credentials before production.
+              Local demo only: use the password supplied through DEMO_SEED_PASSWORD when creating the seeded accounts. Never reuse production credentials.
             </div>
           )}
           {children}

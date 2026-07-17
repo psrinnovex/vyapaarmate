@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import nextEnv from "@next/env";
 import bcrypt from "bcryptjs";
 import prismaPkg from "@prisma/client";
@@ -8,14 +9,14 @@ const { PrismaClient } = prismaPkg;
 loadEnvConfig(process.cwd());
 
 let prisma;
+const seedProvenance = { dataOrigin: "SEED", trainingEligible: false };
 
 const audit = {
   businessSlug: "audit-business",
   businessName: "Audit Business",
   ownerEmail: "audit.owner@example.test",
   adminEmail: "audit.admin@example.test",
-  supportEmail: "audit.support@example.test",
-  password: "AuditLocal123!"
+  supportEmail: "audit.support@example.test"
 };
 
 function looksLikePlaceholderValue(value) {
@@ -139,6 +140,7 @@ async function upsertMenuItem({ businessId, categoryId }) {
   const data = {
     businessId,
     categoryId,
+    ...seedProvenance,
     name: "Audit Combo",
     description: "Local responsive audit menu item.",
     price: 180,
@@ -195,7 +197,7 @@ async function main() {
   prisma = new PrismaClient();
 
   const now = new Date();
-  const passwordHash = await bcrypt.hash(audit.password, 12);
+  const passwordHash = await bcrypt.hash(randomBytes(32).toString("base64url"), 12);
 
   const business = await prisma.business.upsert({
     where: { slug: audit.businessSlug },
@@ -311,11 +313,12 @@ async function main() {
         name: "Audit Menu"
       }
     },
-    update: { sortOrder: 10 },
+    update: { sortOrder: 10, ...seedProvenance },
     create: {
       businessId: business.id,
       name: "Audit Menu",
-      sortOrder: 10
+      sortOrder: 10,
+      ...seedProvenance
     }
   });
 
@@ -334,6 +337,7 @@ async function main() {
       address: "Audit Customer Address",
       whatsappOptIn: false,
       marketingOptIn: false,
+      ...seedProvenance,
       totalOrders: 1,
       totalSpent: 180,
       lastOrderAt: now
@@ -346,6 +350,7 @@ async function main() {
       address: "Audit Customer Address",
       whatsappOptIn: false,
       marketingOptIn: false,
+      ...seedProvenance,
       totalOrders: 1,
       totalSpent: 180,
       lastOrderAt: now
@@ -363,6 +368,7 @@ async function main() {
       customerId: customer.id,
       status: "DELIVERED",
       paymentStatus: "COMPLETED",
+      ...seedProvenance,
       subtotal: 180,
       deliveryFee: 0,
       discountAmount: 0,
@@ -380,6 +386,7 @@ async function main() {
       orderNumber: "AUDIT-1001",
       status: "DELIVERED",
       paymentStatus: "COMPLETED",
+      ...seedProvenance,
       subtotal: 180,
       deliveryFee: 0,
       discountAmount: 0,
@@ -412,6 +419,7 @@ async function main() {
       provider: "CASH",
       amount: 180,
       status: "COMPLETED",
+      ...seedProvenance,
       paidAt: now
     },
     create: {
@@ -420,6 +428,7 @@ async function main() {
       provider: "CASH",
       amount: 180,
       status: "COMPLETED",
+      ...seedProvenance,
       paidAt: now
     }
   });

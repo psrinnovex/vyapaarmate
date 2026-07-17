@@ -37,6 +37,11 @@ type OrderWithRelations = Prisma.OrderGetPayload<{
     orderType: true;
     notes: true;
     createdAt: true;
+    scheduledFor: true;
+    completedAt: true;
+    cancelledAt: true;
+    cancellationReason: true;
+    noShowAt: true;
     customer: { select: { name: true; phone: true; whatsappOptIn: true } };
     items: { select: { itemName: true; quantity: true } };
   };
@@ -196,6 +201,11 @@ type RawRecentOrderRow = {
   orderType: LiveOrder["orderType"];
   notes: string | null;
   createdAt: Date;
+  scheduledFor: Date | null;
+  completedAt: Date | null;
+  cancelledAt: Date | null;
+  cancellationReason: string | null;
+  noShowAt: Date | null;
   customerName: string;
   customerPhone: string;
   customerWhatsappOptIn: boolean;
@@ -419,6 +429,11 @@ function mapOrder(order: OrderWithRelations): LiveOrder {
     channel: order.customer.whatsappOptIn ? "WhatsApp" : "Direct Link",
     time: timeAgo(order.createdAt),
     createdAt: order.createdAt.toISOString(),
+    scheduledFor: order.scheduledFor?.toISOString() ?? null,
+    completedAt: order.completedAt?.toISOString() ?? null,
+    cancelledAt: order.cancelledAt?.toISOString() ?? null,
+    cancellationReason: order.cancellationReason,
+    noShowAt: order.noShowAt?.toISOString() ?? null,
     orderType: order.orderType,
     notes: order.notes
   };
@@ -441,6 +456,11 @@ function mapRawRecentOrder(order: RawRecentOrderRow): LiveOrder {
     channel: order.customerWhatsappOptIn ? "WhatsApp" : "Direct Link",
     time: timeAgo(order.createdAt),
     createdAt: order.createdAt.toISOString(),
+    scheduledFor: order.scheduledFor?.toISOString() ?? null,
+    completedAt: order.completedAt?.toISOString() ?? null,
+    cancelledAt: order.cancelledAt?.toISOString() ?? null,
+    cancellationReason: order.cancellationReason,
+    noShowAt: order.noShowAt?.toISOString() ?? null,
     orderType: order.orderType,
     notes: order.notes
   };
@@ -992,6 +1012,11 @@ async function getRecentOrders(businessId: string, limit: number): Promise<LiveO
       o."orderType"::text AS "orderType",
       o."notes",
       o."createdAt",
+      o."scheduledFor",
+      o."completedAt",
+      o."cancelledAt",
+      o."cancellationReason",
+      o."noShowAt",
       c."name" AS "customerName",
       c."phone" AS "customerPhone",
       c."whatsappOptIn" AS "customerWhatsappOptIn",
@@ -1423,6 +1448,11 @@ export async function getDashboardLivePayload(
         orderType: true,
         notes: true,
         createdAt: true,
+        scheduledFor: true,
+        completedAt: true,
+        cancelledAt: true,
+        cancellationReason: true,
+        noShowAt: true,
         customer: { select: { name: true, phone: true, whatsappOptIn: true } },
         items: { select: { itemName: true, quantity: true } }
       }

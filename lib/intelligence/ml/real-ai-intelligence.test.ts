@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildBusinessIntelligencePayload, type BusinessIntelligenceDataset } from "@/lib/business-intelligence";
 import { buildBusinessIntelligenceGovernanceReport } from "@/lib/business-intelligence-governance";
+import { intelligenceBenchmarkDatasets } from "@/lib/intelligence/benchmark-datasets";
 import { canManageIntelligenceModels } from "@/lib/intelligence/ml/access";
 import { demandTrainingExamples, predictDemandForecasts, trainDemandForecastModel } from "@/lib/intelligence/ml/demand-forecast-model";
 import {
@@ -11,7 +12,12 @@ import {
   evaluateModelReadiness,
   type FirstPartyTrainingData
 } from "@/lib/intelligence/ml/features";
-import { intelligenceModelTypes, type PersistedModelStatus } from "@/lib/intelligence/ml/model-registry";
+import {
+  intelligenceFeatureSchemaVersions,
+  intelligenceModelTypes,
+  isCompatibleModelArtifact,
+  type PersistedModelStatus
+} from "@/lib/intelligence/ml/model-registry";
 import { trainPaymentRiskModel, predictPaymentRisk } from "@/lib/intelligence/ml/payment-risk-model";
 import { buildFallbackPredictionResponse } from "@/lib/intelligence/ml/prediction-service";
 import { predictRetention, trainRetentionModel } from "@/lib/intelligence/ml/retention-model";
@@ -84,8 +90,6 @@ function syntheticTrainingData(): FirstPartyTrainingData {
         amount: totalAmount,
         status: paymentStatus,
         provider: orderIndex % 2 === 0 ? "CASHFREE" : "UPI",
-        orderStatus: "DELIVERED",
-        orderPaymentStatus: paymentStatus,
         createdAt,
         paidAt: paymentStatus === "COMPLETED" ? addDays(createdAt, 0, createdAt.getHours() + 1) : null
       });
@@ -205,9 +209,44 @@ test("minimum data gates return needs_data with exact missing requirements", () 
   const payment = evaluateModelReadiness(small, "payment_risk");
 
   assert.equal(demand.status, "needs_data");
-  assert.match(demand.missingRequirements[0] ?? "", /Demand forecasting needs/);
+  assert.ok(demand.missingRequirements.some((requirement) => requirement.includes("Completed order history")));
   assert.equal(retention.status, "needs_data");
   assert.equal(payment.status, "needs_data");
+});
+
+test("demand and retention readiness require every volume, history, maturity, and quality gate", () => {
+  const data = syntheticTrainingData();
+  const oneActivityDate = new Date("2026-05-01T10:00:00.000Z");
+  data.orders = data.orders.map((order) => ({ ...order, completedAt: oneActivityDate }));
+
+  const demand = evaluateModelReadiness(data, "demand");
+  const retention = evaluateModelReadiness(data, "retention");
+
+  assert.equal(demand.gates.find((gate) => gate.id === "completed_linked_orders")?.met, true);
+  assert.equal(demand.gates.find((gate) => gate.id === "history_days")?.met, false);
+  assert.equal(demand.gates.find((gate) => gate.id === "active_order_days")?.met, false);
+  assert.equal(demand.status, "needs_data");
+  assert.equal(retention.gates.find((gate) => gate.id === "customers")?.met, true);
+  assert.equal(retention.gates.find((gate) => gate.id === "history_days")?.met, false);
+  assert.equal(retention.status, "needs_data");
+});
+
+test("payment training excludes unresolved/refunded outcomes and does not leak final status features", () => {
+  const data = syntheticTrainingData();
+  const seed = data.payments[0]!;
+  data.payments = [
+    { ...seed, id: "paid", status: "COMPLETED" },
+    { ...seed, id: "failed", status: "FAILED", createdAt: addDays(seed.createdAt, 1) },
+    { ...seed, id: "pending", status: "PENDING", createdAt: addDays(seed.createdAt, 2) },
+    { ...seed, id: "refunded", status: "REFUNDED", createdAt: addDays(seed.createdAt, 3) }
+  ];
+
+  const examples = buildPaymentRiskTrainingExamples(data);
+  const featureNames = new Set(examples.flatMap((example) => Object.keys(example.features)));
+
+  assert.deepEqual(examples.map((example) => example.entityId), ["paid", "failed"]);
+  assert.deepEqual(examples.map((example) => example.label), [0, 1]);
+  assert.equal(Array.from(featureNames).some((feature) => /paymentStatus|orderStatus/i.test(feature)), false);
 });
 
 test("training creates real model artifacts and trained models return predictions", () => {
@@ -215,6 +254,7 @@ test("training creates real model artifacts and trained models return prediction
   const demandResult = trainDemandForecastModel(demandTrainingExamples(data));
 
   assert.equal(demandResult.artifact.modelType, "demand");
+  assert.equal(demandResult.artifact.featureSchemaVersion, intelligenceFeatureSchemaVersions.demand);
   assert.equal(demandResult.artifact.algorithm, "regularized_linear_regression_gradient_descent");
   assert.ok(demandResult.trainRows > 0);
   assert.ok(demandResult.validationRows > 0);
@@ -224,6 +264,15 @@ test("training creates real model artifacts and trained models return prediction
   assert.ok(predictions.length > 0);
   assert.ok(predictions[0]!.confidence > 0);
   assert.match(predictions[0]!.explanationJson.text, /Demand forecast/);
+});
+
+test("artifacts from an obsolete feature schema are rejected", () => {
+  const result = trainDemandForecastModel(demandTrainingExamples(syntheticTrainingData()));
+  const obsolete = { ...result.artifact, featureSchemaVersion: result.artifact.featureSchemaVersion - 1 };
+
+  assert.equal(isCompatibleModelArtifact(result.artifact, "demand"), true);
+  assert.equal(isCompatibleModelArtifact(obsolete, "demand"), false);
+  assert.equal(isCompatibleModelArtifact(result.artifact, "payment_risk"), false);
 });
 
 test("retention and payment risk train logistic models from first-party-shaped history", () => {
@@ -251,7 +300,7 @@ test("prediction fallback returns rules output when no model exists", () => {
 
   assert.equal(response.fallback, true);
   assert.equal(response.engine.type, "rules_engine");
-  assert.equal(response.externalDatasets, "none");
+  assert.equal(response.externalDatasets, "isolated_evaluation_only");
   assert.equal(response.syntheticProductionData, "none");
   assert.equal(response.rulesEngine.business.id, data.business.id);
 });
@@ -266,9 +315,17 @@ test("governance says trained_ml only when trained artifacts are supplied", () =
   assert.equal(rulesOnly.currentEngine.trainedModelInUse, false);
   assert.equal(trained.currentEngine.type, "trained_ml");
   assert.equal(trained.currentEngine.trainedModelInUse, true);
-  assert.equal(trained.currentEngine.externalDatasets, "none");
+  assert.equal(trained.currentEngine.externalDatasets, "isolated_evaluation_only");
   assert.equal(trained.currentEngine.syntheticProductionData, "none");
-  assert.equal(trained.trainingPlan.externalDatasets.length, 0);
+  assert.equal(trained.trainingPlan.externalDatasets.length, 4);
+  assert.ok(trained.trainingPlan.externalDatasets.every((dataset) => /Never eligible for production/.test(dataset.purpose)));
+});
+
+test("every registered external benchmark is ineligible for production training", () => {
+  assert.equal(intelligenceBenchmarkDatasets.length, 4);
+  assert.ok(intelligenceBenchmarkDatasets.every((dataset) => dataset.productionTrainingEligible === false));
+  assert.equal(intelligenceBenchmarkDatasets.find((dataset) => dataset.id === "uci-online-retail")?.status, "EXCLUDED_DUPLICATE");
+  assert.equal(intelligenceBenchmarkDatasets.find((dataset) => dataset.id === "m5-calendar-selected-columns")?.status, "INCOMPLETE_CALENDAR_ONLY");
 });
 
 test("owner/admin access checks block cross-business model operations", () => {

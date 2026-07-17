@@ -26,11 +26,8 @@ function readableFeature(feature: string) {
   if (feature === "firstOrderAgeDays") return "customer history length";
   if (feature === "orderValue") return "order value";
   if (feature === "previousPaymentSuccessRatio") return "previous payment success ratio";
-  if (feature === "pendingFailedCount") return "previous pending or failed payments";
-  if (feature === "paymentAgeDays") return "payment age";
-  if (feature.startsWith("paymentStatus:")) return "current payment status";
+  if (feature === "priorFailedCount") return "previous resolved failed payments";
   if (feature.startsWith("paymentMethod:")) return "payment method";
-  if (feature.startsWith("orderStatus:")) return "order status";
   if (feature.startsWith("category:")) return "category history";
   if (feature.startsWith("item:")) return "item history";
   return feature.replace(/[A-Z]/g, (match) => ` ${match.toLowerCase()}`);

@@ -6,6 +6,7 @@ import {
   type BusinessIntelligencePayload
 } from "@/lib/business-intelligence";
 import { LiveDataNotFoundError } from "@/lib/live-data";
+import { productionTrainingOrigins } from "@/lib/intelligence/benchmark-datasets";
 
 type IntelligenceProductRow = {
   id: string;
@@ -273,7 +274,11 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
 
   const [products, orders, customers, payments] = await Promise.all([
     prisma.menuItem.findMany({
-      where: { businessId },
+      where: {
+        businessId,
+        dataOrigin: { in: [...productionTrainingOrigins] },
+        category: { dataOrigin: { in: [...productionTrainingOrigins] } }
+      },
       orderBy: [{ isAvailable: "desc" }, { isBestSeller: "desc" }, { updatedAt: "desc" }],
       take: 120,
       select: {
@@ -284,7 +289,12 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
       }
     }),
     prisma.order.findMany({
-      where: { businessId, createdAt: { gte: historyStart } },
+      where: {
+        businessId,
+        createdAt: { gte: historyStart },
+        dataOrigin: { in: [...productionTrainingOrigins] },
+        customer: { dataOrigin: { in: [...productionTrainingOrigins] } }
+      },
       orderBy: { createdAt: "desc" },
       take: 500,
       select: {
@@ -295,6 +305,8 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
         totalAmount: true,
         orderType: true,
         createdAt: true,
+        scheduledFor: true,
+        completedAt: true,
         customer: { select: { name: true, phone: true } },
         items: {
           select: {
@@ -307,7 +319,7 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
       }
     }),
     prisma.customer.findMany({
-      where: { businessId },
+      where: { businessId, dataOrigin: { in: [...productionTrainingOrigins] } },
       orderBy: [{ lastOrderAt: "desc" }, { totalOrders: "desc" }],
       take: 500,
       select: {
@@ -320,6 +332,7 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
         whatsappOptIn: true,
         marketingOptIn: true,
         orders: {
+          where: { dataOrigin: { in: [...productionTrainingOrigins] } },
           orderBy: { createdAt: "desc" },
           take: 8,
           select: {
@@ -331,6 +344,11 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
     prisma.payment.findMany({
       where: {
         businessId,
+        dataOrigin: { in: [...productionTrainingOrigins] },
+        order: {
+          dataOrigin: { in: [...productionTrainingOrigins] },
+          customer: { dataOrigin: { in: [...productionTrainingOrigins] } }
+        },
         OR: [{ status: "PENDING" }, { createdAt: { gte: paymentStart } }]
       },
       orderBy: { createdAt: "desc" },
@@ -395,6 +413,8 @@ export async function getBusinessIntelligenceDataset(businessId: string): Promis
       paymentStatus: order.paymentStatus,
       totalAmount: Number(order.totalAmount),
       createdAt: order.createdAt,
+      scheduledFor: order.scheduledFor,
+      completedAt: order.completedAt,
       orderType: order.orderType,
       items: order.items.map((item) => ({
         productId: item.menuItemId,

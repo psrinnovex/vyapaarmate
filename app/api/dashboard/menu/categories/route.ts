@@ -41,7 +41,9 @@ export async function POST(request: Request) {
       data: {
         businessId: session.businessId,
         name: parsed.data.name,
-        sortOrder: (maxSort._max.sortOrder ?? 0) + 1
+        sortOrder: (maxSort._max.sortOrder ?? 0) + 1,
+        dataOrigin: "LIVE",
+        trainingEligible: true
       },
       include: { _count: { select: { items: true } } }
     });

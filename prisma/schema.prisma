@@ -68,6 +68,16 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum DataOrigin {
+  LIVE
+  HISTORICAL_IMPORT
+  MANUAL
+  EXTERNAL_BENCHMARK
+  DEMO
+  SEED
+  TEST
+}
+
 enum OrderType {
   PICKUP
   DELIVERY
@@ -289,9 +299,9 @@ model Business {
   customerIntelligenceScores  CustomerIntelligenceScore[]
   demandForecasts             DemandForecast[]
   paymentPriorities           PaymentPriority[]
-  intelligenceModelArtifacts   IntelligenceModelArtifact[]
-  intelligenceTrainingRuns     IntelligenceTrainingRun[]
-  intelligencePredictions      IntelligencePrediction[]
+  intelligenceModelArtifacts  IntelligenceModelArtifact[]
+  intelligenceTrainingRuns    IntelligenceTrainingRun[]
+  intelligencePredictions     IntelligencePrediction[]
   createdAt                   DateTime                    @default(now())
   updatedAt                   DateTime                    @updatedAt
 
@@ -350,39 +360,45 @@ model BusinessServiceType {
 }
 
 model MenuCategory {
-  id         String     @id @default(cuid())
-  businessId String
-  business   Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  name       String
-  sortOrder  Int        @default(0)
-  items      MenuItem[]
+  id               String     @id @default(cuid())
+  businessId       String
+  business         Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name             String
+  sortOrder        Int        @default(0)
+  dataOrigin       DataOrigin @default(LIVE)
+  trainingEligible Boolean    @default(true)
+  items            MenuItem[]
 
   @@unique([businessId, name])
   @@index([businessId, sortOrder])
+  @@index([businessId, dataOrigin, trainingEligible])
 }
 
 model MenuItem {
-  id              String           @id @default(cuid())
-  businessId      String
-  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  categoryId      String
-  category        MenuCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  name            String
-  description     String
-  price           Decimal          @db.Decimal(10, 2)
-  imageUrl        String?
-  image           MenuItemImage?
-  foodType        FoodType         @default(VEG)
-  isAvailable     Boolean          @default(true)
-  isBestSeller    Boolean          @default(false)
-  orderItems      OrderItem[]
-  demandForecasts DemandForecast[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id               String           @id @default(cuid())
+  businessId       String
+  business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  categoryId       String
+  category         MenuCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name             String
+  description      String
+  price            Decimal          @db.Decimal(10, 2)
+  imageUrl         String?
+  image            MenuItemImage?
+  foodType         FoodType         @default(VEG)
+  isAvailable      Boolean          @default(true)
+  isBestSeller     Boolean          @default(false)
+  dataOrigin       DataOrigin       @default(LIVE)
+  trainingEligible Boolean          @default(true)
+  orderItems       OrderItem[]
+  demandForecasts  DemandForecast[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   @@index([businessId, categoryId])
   @@index([businessId, isAvailable])
   @@index([businessId, isBestSeller, updatedAt])
+  @@index([businessId, dataOrigin, trainingEligible])
 }
 
 model MenuItemImage {
@@ -404,6 +420,8 @@ model Customer {
   address            String?
   whatsappOptIn      Boolean                     @default(false)
   marketingOptIn     Boolean                     @default(false)
+  dataOrigin         DataOrigin                  @default(LIVE)
+  trainingEligible   Boolean                     @default(true)
   totalOrders        Int                         @default(0)
   totalSpent         Decimal                     @default(0) @db.Decimal(12, 2)
   lastOrderAt        DateTime?
@@ -418,6 +436,7 @@ model Customer {
   @@index([businessId, lastOrderAt, createdAt])
   @@index([businessId, totalOrders])
   @@index([businessId, email])
+  @@index([businessId, dataOrigin, trainingEligible])
 }
 
 model Order {
@@ -450,6 +469,13 @@ model Order {
   customerLongitude        Decimal?          @db.Decimal(9, 6)
   distanceKm               Decimal?          @db.Decimal(7, 2)
   notes                    String?
+  scheduledFor             DateTime?
+  completedAt              DateTime?
+  cancelledAt              DateTime?
+  cancellationReason       String?
+  noShowAt                 DateTime?
+  dataOrigin               DataOrigin        @default(LIVE)
+  trainingEligible         Boolean           @default(true)
   items                    OrderItem[]
   payment                  Payment?
   paymentPriorities        PaymentPriority[]
@@ -460,6 +486,9 @@ model Order {
   @@unique([businessId, orderNumber])
   @@index([businessId, status, paymentStatus])
   @@index([businessId, createdAt])
+  @@index([businessId, scheduledFor])
+  @@index([businessId, status, scheduledFor])
+  @@index([businessId, dataOrigin, trainingEligible])
   @@index([customerId])
   @@index([couponId])
   @@index([invoiceEmailSentAt])
@@ -510,10 +539,13 @@ model Payment {
   amount                      Decimal              @db.Decimal(10, 2)
   status                      PaymentStatus        @default(PENDING)
   paidAt                      DateTime?
+  dataOrigin                  DataOrigin           @default(LIVE)
+  trainingEligible            Boolean              @default(true)
   walletEntry                 BusinessWalletEntry?
   createdAt                   DateTime             @default(now())
 
   @@index([businessId, status])
+  @@index([businessId, dataOrigin, trainingEligible])
   @@index([businessId, createdAt])
   @@index([businessId, status, createdAt])
   @@index([status, paymentRequestExpiresAt])

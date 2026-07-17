@@ -16,6 +16,7 @@
     "test:payments": "node --import tsx --test services/payment-integrity.test.ts lib/order-tracking.test.ts lib/business-rules.test.ts lib/business-copy.test.ts lib/business-hours.test.ts",
     "test:chatbot": "node --import tsx --test lib/support-chatbot.test.ts lib/chatbot/chatbot-security.test.ts",
     "test:security": "node --import tsx --test lib/rbac.test.ts lib/security/security.test.ts",
+    "intelligence:verify-benchmarks": "node scripts/verify-intelligence-benchmarks.mjs",
     "verify": "npm run lint && npm run typecheck && npm run build",
     "production:check": "node scripts/check-production-env.mjs",
     "seo:check": "node scripts/check-production-seo.mjs",

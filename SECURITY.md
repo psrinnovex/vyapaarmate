@@ -23,9 +23,8 @@
 
 ## Required Before Production
 
-- Replace demo credentials:
-  - `admin@pshrinnovex.com / ChangeMe123!`
-  - `owner@demo.com / ChangeMe123!`
+- Set `DEMO_SEED_PASSWORD` to a unique local-only value before seeding; never commit or reuse it for production.
+- Rotate any account that ever used the historical committed demo password.
 - Set strong `JWT_SECRET` and `ENCRYPTION_KEY`.
 - Use HTTPS everywhere.
 - Configure `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; keep `RATE_LIMIT_FAIL_OPEN=false`.

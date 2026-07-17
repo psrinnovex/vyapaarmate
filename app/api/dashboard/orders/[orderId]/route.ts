@@ -3,6 +3,7 @@ import { requireBusinessSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit";
 import { orderStatusSchema } from "@/lib/validations";
+import { getNoShowEligibility } from "@/lib/booking-outcomes";
 import { cancelOrderPaymentForBusinessCancellation } from "@/services/business-wallet";
 import { sendOrderWhatsappUpdate } from "@/services/order-whatsapp";
 
@@ -54,8 +55,24 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Bookings must move one step at a time. Refresh and use the next available action." }, { status: 409 });
   }
 
+  const isNoShow = parsed.data.outcome === "NO_SHOW";
+  if (isNoShow) {
+    const eligibility = getNoShowEligibility(existing);
+    if (!eligibility.allowed) {
+      const error =
+        eligibility.reason === "missing_schedule"
+          ? "This booking has no scheduled time, so it cannot be recorded as a no-show."
+          : eligibility.reason === "before_schedule"
+            ? "A no-show cannot be recorded before the scheduled appointment time."
+            : eligibility.reason === "already_recorded"
+              ? "This booking is already recorded as a no-show."
+              : "Only an active, confirmed appointment can be recorded as a no-show.";
+      return NextResponse.json({ error }, { status: 409 });
+    }
+  }
+
   let cancellation: Awaited<ReturnType<typeof cancelOrderPaymentForBusinessCancellation>> | null = null;
-  if (parsed.data.status === "CANCELLED") {
+  if (parsed.data.status === "CANCELLED" && !isNoShow) {
     try {
       cancellation = await cancelOrderPaymentForBusinessCancellation({
         businessId: session.businessId,
@@ -70,20 +87,53 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
   }
 
-  if (parsed.data.status === "CANCELLED" && !cancellation) {
+  if (parsed.data.status === "CANCELLED" && !isNoShow && !cancellation) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  const order = parsed.data.status === "CANCELLED"
-    ? await prisma.order.findUniqueOrThrow({
-        where: { id: existing.id },
-        include: { customer: true, items: true, payment: true }
-      })
-    : await prisma.order.update({
-        where: { id: existing.id },
-        data: { status: parsed.data.status },
-        include: { customer: true, items: true, payment: true }
-      });
+  const outcomeAt = new Date();
+  let order;
+  if (isNoShow) {
+    const updated = await prisma.order.updateMany({
+      where: {
+        id: existing.id,
+        status: { in: ["ACCEPTED", "PREPARING", "READY"] },
+        scheduledFor: { lte: outcomeAt },
+        noShowAt: null
+      },
+      data: {
+        status: "CANCELLED",
+        cancelledAt: outcomeAt,
+        noShowAt: outcomeAt,
+        cancellationReason: parsed.data.reason ?? "CUSTOMER_NO_SHOW"
+      }
+    });
+    if (updated.count !== 1) {
+      return NextResponse.json({ error: "The booking changed before the no-show could be saved. Refresh and try again." }, { status: 409 });
+    }
+    order = await prisma.order.findUniqueOrThrow({
+      where: { id: existing.id },
+      include: { customer: true, items: true, payment: true }
+    });
+  } else if (parsed.data.status === "CANCELLED") {
+    order = await prisma.order.update({
+      where: { id: existing.id },
+      data: {
+        cancelledAt: outcomeAt,
+        cancellationReason: parsed.data.reason ?? "CANCELLED_BY_BUSINESS"
+      },
+      include: { customer: true, items: true, payment: true }
+    });
+  } else {
+    order = await prisma.order.update({
+      where: { id: existing.id },
+      data: {
+        status: parsed.data.status,
+        completedAt: parsed.data.status === "DELIVERED" ? outcomeAt : undefined
+      },
+      include: { customer: true, items: true, payment: true }
+    });
+  }
   const refundedAt = cancellation?.paymentAction === "refunded" ? cancellation.refundedAt.toISOString() : undefined;
   const [whatsapp] = await Promise.all([
     sendOrderWhatsappUpdate({ businessId: session.businessId, orderId: order.id }),
@@ -99,6 +149,8 @@ export async function PATCH(request: Request, context: RouteContext) {
         status: order.status,
         paymentStatus: order.paymentStatus,
         paymentAction: cancellation?.paymentAction ?? "unchanged",
+        outcome: isNoShow ? "NO_SHOW" : undefined,
+        cancellationReason: order.cancellationReason,
         walletAction: cancellation?.walletAction ?? "unchanged",
         providerRefund: cancellation && "providerRefund" in cancellation ? cancellation.providerRefund : undefined,
         providerTermination: cancellation && "providerTermination" in cancellation ? cancellation.providerTermination : undefined,
