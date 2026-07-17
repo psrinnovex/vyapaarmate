@@ -6,7 +6,8 @@ import {
   fulfillmentFeeForOrder,
   fulfillmentLabelForBusinessType,
   fulfillmentModesFromFlags,
-  isValidCoordinate
+  isValidCoordinate,
+  requiresScheduledServiceTime
 } from "@/lib/business-rules";
 import { isBusinessAcceptingNow } from "@/lib/business-hours";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
@@ -193,6 +194,22 @@ export async function POST(request: Request) {
   if (!isBusinessAcceptingNow({ manuallyOpen: business.isOpen, hours: business.businessHours })) {
     return NextResponse.json({ error: "Business is closed right now. Please try again when it is open." }, { status: 403 });
   }
+  const requestReceivedAt = new Date();
+  const scheduledFor = parsed.data.scheduledFor ? new Date(parsed.data.scheduledFor) : null;
+  const requiresScheduledTime = requiresScheduledServiceTime(business.businessType);
+  if (requiresScheduledTime && !scheduledFor) {
+    return NextResponse.json({ error: `Choose the requested ${copy.transactionSingular.toLowerCase()} date and time.` }, { status: 400 });
+  }
+  if (scheduledFor) {
+    const earliestAllowed = requestReceivedAt.getTime() + 15 * 60 * 1000;
+    const latestAllowed = requestReceivedAt.getTime() + 365 * 24 * 60 * 60 * 1000;
+    if (scheduledFor.getTime() < earliestAllowed) {
+      return NextResponse.json({ error: "Choose a time at least 15 minutes from now." }, { status: 400 });
+    }
+    if (scheduledFor.getTime() > latestAllowed) {
+      return NextResponse.json({ error: "Bookings can be scheduled up to one year in advance." }, { status: 400 });
+    }
+  }
   const paymentConfig = await getOnlinePaymentConfig();
 
   const fulfillmentModes = fulfillmentModesFromFlags({
@@ -313,7 +330,7 @@ export async function POST(request: Request) {
   const totalAmount = orderBilling.total;
   const orderNumber = createOrderNumber();
   const invoiceNumber = `INV-${business.id.slice(-6).toUpperCase()}-${orderNumber}`;
-  const placedAt = new Date();
+  const placedAt = requestReceivedAt;
 
   let order: { id: string; publicToken: string; customerId: string; status: string };
   try {
@@ -333,6 +350,8 @@ export async function POST(request: Request) {
         address: parsed.data.customer.address,
         whatsappOptIn: customerWhatsappOptIn,
         marketingOptIn: customerMarketingOptIn,
+        dataOrigin: "LIVE",
+        trainingEligible: true,
         totalOrders: 1,
         totalSpent: totalAmount,
         lastOrderAt: placedAt
@@ -390,6 +409,9 @@ export async function POST(request: Request) {
         customerLongitude,
         distanceKm,
         notes: parsed.data.notes,
+        scheduledFor,
+        dataOrigin: "LIVE",
+        trainingEligible: true,
         status: "NEW",
         paymentStatus: "PENDING",
         items: { create: items },
@@ -398,7 +420,9 @@ export async function POST(request: Request) {
             businessId: business.id,
             provider: parsed.data.paymentMethod === "UPI" ? selectedOnlinePaymentProvider(paymentConfig) : "CASH",
             amount: totalAmount,
-            status: "PENDING"
+            status: "PENDING",
+            dataOrigin: "LIVE",
+            trainingEligible: true
           }
         }
       },

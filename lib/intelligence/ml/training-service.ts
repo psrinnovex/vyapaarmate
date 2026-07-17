@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { productionTrainingOrigins } from "@/lib/intelligence/benchmark-datasets";
 import { demandTrainingExamples, trainDemandForecastModel } from "@/lib/intelligence/ml/demand-forecast-model";
 import {
   evaluateModelReadiness,
@@ -11,9 +12,11 @@ import { paymentRiskTrainingExamples, trainPaymentRiskModel } from "@/lib/intell
 import { retentionTrainingExamples, trainRetentionModel } from "@/lib/intelligence/ml/retention-model";
 import {
   buildEngineSummary,
+  intelligenceFeatureSchemaVersions,
   intelligenceModelStatuses,
   intelligenceModelTypes,
   isIntelligenceModelType,
+  isCompatibleModelArtifact,
   modelTypesForRequest,
   type IntelligenceModelStatus,
   type IntelligenceModelType,
@@ -42,7 +45,7 @@ function safeStatus(status: string | null | undefined): IntelligenceModelStatus 
 }
 
 function versionFor(modelType: IntelligenceModelType) {
-  return `${modelType}_v${Date.now()}`;
+  return `${modelType}_schema${intelligenceFeatureSchemaVersions[modelType]}_v${Date.now()}`;
 }
 
 function pickTrainingFunction(modelType: IntelligenceModelType, data: FirstPartyTrainingData): ModelTrainingResult {
@@ -75,7 +78,15 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
       select: { id: true, name: true, businessType: true }
     }),
     prisma.menuItem.findMany({
-      where: { businessId },
+      where: {
+        businessId,
+        trainingEligible: true,
+        dataOrigin: { in: [...productionTrainingOrigins] },
+        category: {
+          trainingEligible: true,
+          dataOrigin: { in: [...productionTrainingOrigins] }
+        }
+      },
       orderBy: [{ isAvailable: "desc" }, { updatedAt: "desc" }],
       take: 1000,
       select: {
@@ -88,7 +99,11 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
       }
     }),
     prisma.customer.findMany({
-      where: { businessId },
+      where: {
+        businessId,
+        trainingEligible: true,
+        dataOrigin: { in: [...productionTrainingOrigins] }
+      },
       orderBy: { createdAt: "asc" },
       take: 20000,
       select: {
@@ -102,7 +117,15 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
       }
     }),
     prisma.order.findMany({
-      where: { businessId },
+      where: {
+        businessId,
+        trainingEligible: true,
+        dataOrigin: { in: [...productionTrainingOrigins] },
+        customer: {
+          trainingEligible: true,
+          dataOrigin: { in: [...productionTrainingOrigins] }
+        }
+      },
       orderBy: { createdAt: "asc" },
       take: 50000,
       select: {
@@ -113,6 +136,8 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
         totalAmount: true,
         orderType: true,
         createdAt: true,
+        scheduledFor: true,
+        completedAt: true,
         items: {
           select: {
             id: true,
@@ -131,7 +156,19 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
       }
     }),
     prisma.payment.findMany({
-      where: { businessId },
+      where: {
+        businessId,
+        trainingEligible: true,
+        dataOrigin: { in: [...productionTrainingOrigins] },
+        order: {
+          trainingEligible: true,
+          dataOrigin: { in: [...productionTrainingOrigins] },
+          customer: {
+            trainingEligible: true,
+            dataOrigin: { in: [...productionTrainingOrigins] }
+          }
+        }
+      },
       orderBy: { createdAt: "asc" },
       take: 50000,
       select: {
@@ -145,9 +182,7 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
         paidAt: true,
         order: {
           select: {
-            customerId: true,
-            status: true,
-            paymentStatus: true
+            customerId: true
           }
         }
       }
@@ -185,6 +220,8 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
       totalAmount: decimalToNumber(order.totalAmount),
       orderType: order.orderType,
       createdAt: order.createdAt,
+      scheduledFor: order.scheduledFor,
+      completedAt: order.completedAt,
       items: order.items.map((item) => ({
         id: item.id,
         menuItemId: item.menuItemId,
@@ -203,8 +240,6 @@ export async function fetchFirstPartyTrainingData(businessId: string): Promise<F
       amount: decimalToNumber(payment.amount),
       status: payment.status,
       provider: payment.provider,
-      orderStatus: payment.order.status,
-      orderPaymentStatus: payment.order.paymentStatus,
       createdAt: payment.createdAt,
       paidAt: payment.paidAt
     })),
@@ -227,7 +262,12 @@ export async function getIntelligenceModelStatuses(businessId: string): Promise<
 
   return intelligenceModelTypes.map((modelType) => {
     const readiness = evaluateModelReadiness(data, modelType);
-    const latestArtifact = artifacts.find((artifact) => artifact.modelType === modelType && artifact.status === "trained") ?? null;
+    const latestArtifact = artifacts.find(
+      (artifact) =>
+        artifact.modelType === modelType &&
+        artifact.status === "trained" &&
+        isCompatibleModelArtifact(artifact.artifactJson, modelType)
+    ) ?? null;
     const latestRun = runs.find((run) => run.modelType === modelType) ?? null;
     const status = resolvedModelStatus({ baseStatus: readiness.status, latestArtifact, latestRun });
 
@@ -260,10 +300,12 @@ export async function getModelStatusPayload(businessId: string) {
 }
 
 async function latestTrainedArtifact(businessId: string, modelType: IntelligenceModelType) {
-  return prisma.intelligenceModelArtifact.findFirst({
+  const artifacts = await prisma.intelligenceModelArtifact.findMany({
     where: { businessId, modelType, status: "trained" },
-    orderBy: [{ trainedAt: "desc" }, { createdAt: "desc" }]
+    orderBy: [{ trainedAt: "desc" }, { createdAt: "desc" }],
+    take: 20
   });
+  return artifacts.find((artifact) => isCompatibleModelArtifact(artifact.artifactJson, modelType)) ?? null;
 }
 
 async function latestFailedRun(businessId: string, modelType: IntelligenceModelType) {
@@ -337,6 +379,7 @@ export async function trainIntelligenceModel({
           algorithm: artifact.algorithm,
           featuresJson: jsonObject({
             modelType,
+            featureSchemaVersion: artifact.featureSchemaVersion,
             featureNames: artifact.featureNames,
             means: artifact.means,
             stds: artifact.stds
@@ -417,9 +460,10 @@ export async function latestTrainedArtifactsByType(businessId: string, modelType
 
   rows.forEach((row) => {
     if (!isIntelligenceModelType(row.modelType) || byType.has(row.modelType)) return;
+    if (!isCompatibleModelArtifact(row.artifactJson, row.modelType)) return;
     byType.set(row.modelType, {
       version: row.version,
-      artifact: row.artifactJson as unknown as VectorModelArtifact
+      artifact: row.artifactJson
     });
   });
 

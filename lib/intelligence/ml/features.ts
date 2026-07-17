@@ -1,4 +1,13 @@
 import { stableHash, type FeatureExample, type FeatureMap, type IntelligenceModelType, type ModelReadiness } from "@/lib/intelligence/ml/model-registry";
+import {
+  addBusinessDays as addDays,
+  businessDateKey as dateKey,
+  businessDayOfMonth,
+  businessDayOfWeek,
+  businessDaysBetween as daysBetween,
+  businessMonth,
+  startOfBusinessDay as startOfDay
+} from "@/lib/intelligence/intelligence-time";
 
 export type FirstPartyMenuItemRecord = {
   id: string;
@@ -27,6 +36,8 @@ export type FirstPartyOrderRecord = {
   totalAmount: number;
   orderType: string;
   createdAt: Date;
+  scheduledFor?: Date | null;
+  completedAt?: Date | null;
   items: FirstPartyOrderItemRecord[];
 };
 
@@ -48,8 +59,6 @@ export type FirstPartyPaymentRecord = {
   amount: number;
   status: string;
   provider: string;
-  orderStatus: string;
-  orderPaymentStatus: string;
   createdAt: Date;
   paidAt: Date | null;
 };
@@ -71,36 +80,18 @@ export type FirstPartyDataProfile = {
   completedLinkedOrders: number;
   completedLinkedOrderItems: number;
   completedOrderHistoryDays: number;
+  completedOrderActiveDays: number;
+  linkedItemRate: number;
   customerCount: number;
   customerLinkedOrders: number;
+  repeatCustomerCount: number;
   paymentCount: number;
+  resolvedPayments: number;
   completedPayments: number;
-  failedOrPendingPayments: number;
+  failedPayments: number;
   dataStart: Date | null;
   dataEnd: Date | null;
 };
-
-const dayMs = 24 * 60 * 60 * 1000;
-
-function startOfDay(date: Date) {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function addDays(date: Date, days: number) {
-  const copy = new Date(date);
-  copy.setDate(copy.getDate() + days);
-  return copy;
-}
-
-function daysBetween(from: Date, to: Date) {
-  return Math.max(0, Math.floor((startOfDay(to).getTime() - startOfDay(from).getTime()) / dayMs));
-}
-
-function dateKey(date: Date) {
-  return startOfDay(date).toISOString().slice(0, 10);
-}
 
 function dateRange(start: Date, end: Date) {
   const dates: Date[] = [];
@@ -122,8 +113,12 @@ function isSuccessfulPayment(payment: Pick<FirstPartyPaymentRecord, "status"> | 
   return payment.status === "COMPLETED" || payment.status === "PAID";
 }
 
-function isRiskPayment(payment: Pick<FirstPartyPaymentRecord, "status"> | { status: string }) {
-  return payment.status === "PENDING" || payment.status === "FAILED" || payment.status === "REFUNDED";
+function isResolvedPayment(payment: Pick<FirstPartyPaymentRecord, "status"> | { status: string }) {
+  return isSuccessfulPayment(payment) || payment.status === "FAILED";
+}
+
+function isFailedPayment(payment: Pick<FirstPartyPaymentRecord, "status"> | { status: string }) {
+  return payment.status === "FAILED";
 }
 
 function safeNumber(value: number) {
@@ -151,8 +146,12 @@ function entityKeyForItem(item: Pick<FirstPartyOrderItemRecord, "menuItemId" | "
   return stableHash(item.menuItemId ?? item.itemName);
 }
 
+function orderActivityAt(order: FirstPartyOrderRecord) {
+  return order.completedAt ?? order.scheduledFor ?? order.createdAt;
+}
+
 function orderTimes(orders: FirstPartyOrderRecord[]) {
-  return orders.map((order) => order.createdAt.getTime()).filter(Number.isFinite);
+  return orders.map((order) => orderActivityAt(order).getTime()).filter(Number.isFinite);
 }
 
 export function buildFirstPartyDataProfile(data: FirstPartyTrainingData): FirstPartyDataProfile {
@@ -162,7 +161,14 @@ export function buildFirstPartyDataProfile(data: FirstPartyTrainingData): FirstP
     .reduce((count, order) => count + order.items.filter((item) => item.menuItemId).length, 0);
   const completedLinkedOrderDates = data.orders
     .filter((order) => isCompletedOrder(order) && order.items.some((item) => item.menuItemId))
-    .map((order) => startOfDay(order.createdAt).getTime());
+    .map((order) => startOfDay(orderActivityAt(order)).getTime());
+  const activeDates = new Set(completedLinkedOrderDates.map((time) => new Date(time).toISOString().slice(0, 10)));
+  const completedItems = data.orders.filter(isCompletedOrder).flatMap((order) => order.items);
+  const customerOrderCounts = new Map<string, number>();
+  data.orders.filter((order) => !isCancelledOrder(order)).forEach((order) => {
+    customerOrderCounts.set(order.customerId, (customerOrderCounts.get(order.customerId) ?? 0) + 1);
+  });
+  const resolvedPayments = data.payments.filter(isResolvedPayment);
   const earliestLinkedOrder = completedLinkedOrderDates.length ? new Date(Math.min(...completedLinkedOrderDates)) : null;
   const latestLinkedOrder = completedLinkedOrderDates.length ? new Date(Math.max(...completedLinkedOrderDates)) : null;
   const allTimes = [
@@ -175,11 +181,15 @@ export function buildFirstPartyDataProfile(data: FirstPartyTrainingData): FirstP
     completedLinkedOrders,
     completedLinkedOrderItems,
     completedOrderHistoryDays: earliestLinkedOrder && latestLinkedOrder ? daysBetween(earliestLinkedOrder, latestLinkedOrder) + 1 : 0,
+    completedOrderActiveDays: activeDates.size,
+    linkedItemRate: completedItems.length ? completedItems.filter((item) => item.menuItemId).length / completedItems.length : 0,
     customerCount: data.customers.length,
     customerLinkedOrders: data.orders.filter((order) => Boolean(order.customerId) && !isCancelledOrder(order)).length,
+    repeatCustomerCount: Array.from(customerOrderCounts.values()).filter((count) => count >= 2).length,
     paymentCount: data.payments.length,
-    completedPayments: data.payments.filter(isSuccessfulPayment).length,
-    failedOrPendingPayments: data.payments.filter(isRiskPayment).length,
+    resolvedPayments: resolvedPayments.length,
+    completedPayments: resolvedPayments.filter(isSuccessfulPayment).length,
+    failedPayments: resolvedPayments.filter(isFailedPayment).length,
     dataStart: allTimes.length ? new Date(Math.min(...allTimes)) : null,
     dataEnd: allTimes.length ? new Date(Math.max(...allTimes)) : null
   };
@@ -203,7 +213,10 @@ export function evaluateModelReadiness(data: FirstPartyTrainingData, modelType: 
   if (modelType === "demand") {
     const historyGate = readinessGate("history_days", "Completed order history", profile.completedOrderHistoryDays, 90, "days");
     const completedOrdersGate = readinessGate("completed_linked_orders", "Completed orders with linked items", profile.completedLinkedOrders, 300, "orders");
-    const ready = historyGate.met || completedOrdersGate.met;
+    const activeDaysGate = readinessGate("active_order_days", "Active completed-order days", profile.completedOrderActiveDays, 30, "days");
+    const linkQualityGate = readinessGate("linked_item_rate", "Completed item link quality", Math.round(profile.linkedItemRate * 100), 80, "percent");
+    const gates = [historyGate, completedOrdersGate, activeDaysGate, linkQualityGate];
+    const ready = gates.every((gate) => gate.met);
 
     return {
       modelType,
@@ -211,19 +224,20 @@ export function evaluateModelReadiness(data: FirstPartyTrainingData, modelType: 
       rowsAvailable: profile.completedLinkedOrderItems,
       trainingDataStart: profile.dataStart,
       trainingDataEnd: profile.dataEnd,
-      gates: [historyGate, completedOrdersGate],
+      gates,
       missingRequirements: ready
         ? []
-        : [
-            `Demand forecasting needs either ${historyGate.missing} more days of completed order history or ${completedOrdersGate.missing} more completed orders with linked order items.`
-          ]
+        : gates.filter((gate) => !gate.met).map((gate) => `${gate.label} needs ${gate.missing} more ${gate.unit}.`)
     };
   }
 
   if (modelType === "retention") {
     const customerGate = readinessGate("customers", "Customers", profile.customerCount, 100, "customers");
     const orderGate = readinessGate("customer_linked_orders", "Customer-linked orders", profile.customerLinkedOrders, 300, "orders");
-    const ready = customerGate.met || orderGate.met;
+    const repeatGate = readinessGate("repeat_customers", "Repeat customers", profile.repeatCustomerCount, 20, "customers");
+    const historyGate = readinessGate("history_days", "Customer order history", profile.completedOrderHistoryDays, 90, "days");
+    const gates = [customerGate, orderGate, repeatGate, historyGate];
+    const ready = gates.every((gate) => gate.met);
 
     return {
       modelType,
@@ -231,29 +245,29 @@ export function evaluateModelReadiness(data: FirstPartyTrainingData, modelType: 
       rowsAvailable: Math.max(profile.customerCount, profile.customerLinkedOrders),
       trainingDataStart: profile.dataStart,
       trainingDataEnd: profile.dataEnd,
-      gates: [customerGate, orderGate],
+      gates,
       missingRequirements: ready
         ? []
-        : [`Retention modeling needs either ${customerGate.missing} more customers or ${orderGate.missing} more customer-linked orders.`]
+        : gates.filter((gate) => !gate.met).map((gate) => `${gate.label} needs ${gate.missing} more ${gate.unit}.`)
     };
   }
 
-  const totalGate = readinessGate("payments", "Payment examples", profile.paymentCount, 300, "payments");
+  const totalGate = readinessGate("resolved_payments", "Resolved payment examples", profile.resolvedPayments, 300, "payments");
   const successGate = readinessGate("successful_payments", "Successful payment examples", profile.completedPayments, 50, "payments");
-  const riskGate = readinessGate("failed_or_pending_payments", "Failed or pending payment examples", profile.failedOrPendingPayments, 30, "payments");
+  const riskGate = readinessGate("failed_payments", "Resolved failed payment examples", profile.failedPayments, 30, "payments");
   const ready = totalGate.met && successGate.met && riskGate.met;
 
   return {
     modelType,
     status: ready ? "ready_for_training" : "needs_data",
-    rowsAvailable: profile.paymentCount,
+    rowsAvailable: profile.resolvedPayments,
     trainingDataStart: profile.dataStart,
     trainingDataEnd: profile.dataEnd,
     gates: [totalGate, successGate, riskGate],
     missingRequirements: ready
       ? []
       : [
-          `Payment risk needs ${totalGate.missing} more payments, ${successGate.missing} more successful payments, and ${riskGate.missing} more failed or pending examples.`
+          `Payment risk needs ${totalGate.missing} more resolved payments, ${successGate.missing} more successful payments, and ${riskGate.missing} more resolved failed payments.`
         ]
   };
 }
@@ -304,7 +318,7 @@ function demandQuantityIndex(orders: FirstPartyOrderRecord[]) {
   const index = new Map<string, Map<string, number>>();
 
   orders.filter(isCompletedOrder).forEach((order) => {
-    const key = dateKey(order.createdAt);
+    const key = dateKey(orderActivityAt(order));
     const byItem = index.get(key) ?? new Map<string, number>();
     order.items.forEach((item) => {
       const itemKey = entityKeyForItem(item);
@@ -317,7 +331,10 @@ function demandQuantityIndex(orders: FirstPartyOrderRecord[]) {
 }
 
 function ordersBetween(orders: FirstPartyOrderRecord[], start: Date, end: Date) {
-  return orders.filter((order) => !isCancelledOrder(order) && order.createdAt >= start && order.createdAt < end);
+  return orders.filter((order) => {
+    const activityAt = orderActivityAt(order);
+    return !isCancelledOrder(order) && activityAt >= start && activityAt < end;
+  });
 }
 
 function paymentsBetween(payments: FirstPartyPaymentRecord[], start: Date, end: Date) {
@@ -360,10 +377,10 @@ function demandFeatures({
     : ratio(prior30Orders.filter((order) => order.paymentStatus === "COMPLETED" || order.paymentStatus === "PAID").length, prior30Orders.length);
 
   return {
-    dayOfWeek: day.getDay() / 6,
-    isWeekend: day.getDay() === 0 || day.getDay() === 6 ? 1 : 0,
-    weekOfMonth: Math.ceil(day.getDate() / 7) / 5,
-    month: (day.getMonth() + 1) / 12,
+    dayOfWeek: businessDayOfWeek(day) / 6,
+    isWeekend: businessDayOfWeek(day) === 0 || businessDayOfWeek(day) === 6 ? 1 : 0,
+    weekOfMonth: Math.ceil(businessDayOfMonth(day) / 7) / 5,
+    month: (businessMonth(day) + 1) / 12,
     recent7Quantity: logFeature(sumRecentQuantity(quantityByDate, entity.key, day, 7)),
     recent14Quantity: logFeature(sumRecentQuantity(quantityByDate, entity.key, day, 14)),
     recent30Quantity: logFeature(sumRecentQuantity(quantityByDate, entity.key, day, 30)),
@@ -376,13 +393,13 @@ function demandFeatures({
 }
 
 export function buildDemandTrainingExamples(data: FirstPartyTrainingData): FeatureExample[] {
-  const completedOrders = data.orders.filter(isCompletedOrder).sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime());
+  const completedOrders = data.orders.filter(isCompletedOrder).sort((first, second) => orderActivityAt(first).getTime() - orderActivityAt(second).getTime());
   if (!completedOrders.length) return [];
 
   const entities = demandEntities(data);
   const quantityByDate = demandQuantityIndex(completedOrders);
-  const earliest = startOfDay(completedOrders[0]!.createdAt);
-  const latest = startOfDay(completedOrders[completedOrders.length - 1]!.createdAt);
+  const earliest = startOfDay(orderActivityAt(completedOrders[0]!));
+  const latest = startOfDay(orderActivityAt(completedOrders[completedOrders.length - 1]!));
   const firstTrainingDay = addDays(earliest, 30);
 
   return dateRange(firstTrainingDay, latest).flatMap((day) =>
@@ -424,9 +441,9 @@ export function buildDemandPredictionExamples(data: FirstPartyTrainingData, targ
 function customerOrders(data: FirstPartyTrainingData, customerId: string, before?: Date, after?: Date) {
   return data.orders
     .filter((order) => order.customerId === customerId && !isCancelledOrder(order))
-    .filter((order) => (before ? order.createdAt < before : true))
-    .filter((order) => (after ? order.createdAt >= after : true))
-    .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime());
+    .filter((order) => (before ? orderActivityAt(order) < before : true))
+    .filter((order) => (after ? orderActivityAt(order) >= after : true))
+    .sort((first, second) => orderActivityAt(first).getTime() - orderActivityAt(second).getTime());
 }
 
 function customerPayments(data: FirstPartyTrainingData, customerId: string, before?: Date) {
@@ -437,8 +454,8 @@ function retentionFeatures(data: FirstPartyTrainingData, customer: FirstPartyCus
   const orders = customerOrders(data, customer.id, referenceDate);
   if (!orders.length) return null;
 
-  const firstOrderAt = orders[0]!.createdAt;
-  const lastOrderAt = orders[orders.length - 1]!.createdAt;
+  const firstOrderAt = orderActivityAt(orders[0]!);
+  const lastOrderAt = orderActivityAt(orders[orders.length - 1]!);
   const totalSpent = orders.reduce((sum, order) => sum + order.totalAmount, 0);
   const payments = customerPayments(data, customer.id, referenceDate);
   const firstOrderAgeDays = Math.max(1, daysBetween(firstOrderAt, referenceDate));
@@ -455,11 +472,11 @@ function retentionFeatures(data: FirstPartyTrainingData, customer: FirstPartyCus
 }
 
 export function buildRetentionTrainingExamples(data: FirstPartyTrainingData): FeatureExample[] {
-  const activeOrders = data.orders.filter((order) => !isCancelledOrder(order)).sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime());
+  const activeOrders = data.orders.filter((order) => !isCancelledOrder(order)).sort((first, second) => orderActivityAt(first).getTime() - orderActivityAt(second).getTime());
   if (activeOrders.length < 2) return [];
 
-  const firstDate = addDays(startOfDay(activeOrders[0]!.createdAt), 30);
-  const lastDate = addDays(startOfDay(activeOrders[activeOrders.length - 1]!.createdAt), -30);
+  const firstDate = addDays(startOfDay(orderActivityAt(activeOrders[0]!)), 30);
+  const lastDate = addDays(startOfDay(orderActivityAt(activeOrders[activeOrders.length - 1]!)), -30);
   if (firstDate > lastDate) return [];
 
   const examples: FeatureExample[] = [];
@@ -511,34 +528,32 @@ export function buildRetentionPredictionExamples(data: FirstPartyTrainingData): 
 
 function priorPaymentsForCustomer(data: FirstPartyTrainingData, customerId: string, before: Date) {
   return data.payments
-    .filter((payment) => payment.customerId === customerId && payment.createdAt < before)
+    .filter((payment) => payment.customerId === customerId && payment.createdAt < before && isResolvedPayment(payment))
     .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime());
 }
 
 function paymentRiskFeatures(data: FirstPartyTrainingData, payment: FirstPartyPaymentRecord) {
   const previousPayments = priorPaymentsForCustomer(data, payment.customerId, payment.createdAt);
   const successfulPrevious = previousPayments.filter(isSuccessfulPayment).length;
-  const pendingFailedPrevious = previousPayments.filter(isRiskPayment).length;
+  const failedPrevious = previousPayments.filter(isFailedPayment).length;
 
   return {
     orderValue: logFeature(payment.amount),
     previousPaymentSuccessRatio: previousPayments.length ? ratio(successfulPrevious, previousPayments.length) : 0,
-    pendingFailedCount: logFeature(pendingFailedPrevious),
-    paymentAgeDays: daysBetween(payment.createdAt, data.now) / 365,
-    [categoricalFeature("paymentMethod", payment.provider)]: 1,
-    [categoricalFeature("orderStatus", payment.orderStatus)]: 1,
-    [categoricalFeature("paymentStatus", payment.status || payment.orderPaymentStatus)]: 1
+    priorFailedCount: logFeature(failedPrevious),
+    [categoricalFeature("paymentMethod", payment.provider)]: 1
   };
 }
 
 export function buildPaymentRiskTrainingExamples(data: FirstPartyTrainingData): FeatureExample[] {
   return data.payments
+    .filter(isResolvedPayment)
     .slice()
     .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime())
     .map((payment) => ({
       entityId: payment.id,
       entityType: "payment",
-      label: isSuccessfulPayment(payment) ? 0 : 1,
+      label: isFailedPayment(payment) ? 1 : 0,
       features: paymentRiskFeatures(data, payment),
       observedAt: payment.createdAt,
       metadata: {
@@ -553,7 +568,7 @@ export function buildPaymentRiskTrainingExamples(data: FirstPartyTrainingData): 
 
 export function buildPaymentRiskPredictionExamples(data: FirstPartyTrainingData): FeatureExample[] {
   return data.payments
-    .filter((payment) => isRiskPayment(payment) || daysBetween(payment.createdAt, data.now) <= 14)
+    .filter((payment) => payment.status === "PENDING")
     .sort((first, second) => second.createdAt.getTime() - first.createdAt.getTime())
     .slice(0, 100)
     .map((payment) => ({

@@ -4,19 +4,19 @@ VyapaarMate by PSHR INNOVEX PRIVATE LIMITED is a website ordering, UPI payment, 
 
 It includes a polished landing page, website checkout and invoices, WhatsApp order notifications, business owner dashboard, PSHR Innovex super admin panel, Prisma PostgreSQL schema, auth/RBAC structure, API routes, integration placeholders, seed data, and security controls.
 
-## Demo Credentials
+## Local Demo Accounts
 
-Local development only. Change all credentials and secrets before production.
+Local development only. The repository does not contain a default password. Set a unique `DEMO_SEED_PASSWORD` before running the seed command and never reuse it for production.
 
 Admin:
 
 - Email: `admin@pshrinnovex.com`
-- Password: `ChangeMe123!`
+- Password: the value supplied through `DEMO_SEED_PASSWORD`
 
 Business owner:
 
 - Email: `owner@demo.com`
-- Password: `ChangeMe123!`
+- Password: the value supplied through `DEMO_SEED_PASSWORD`
 
 ## Tech Stack
 
@@ -126,6 +126,7 @@ npm run db:generate
 
 ```bash
 npm run db:migrate
+export DEMO_SEED_PASSWORD="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(24).toString("base64url"))')"
 npm run db:seed
 ```
 
@@ -243,9 +244,9 @@ Configure the Cashfree webhook callback as `https://your-domain.com/api/webhooks
 Configure Cashfree Payouts callback separately as `https://your-domain.com/api/webhooks/cashfree-payouts` and enable transfer success, failure, reversed, and acknowledged events.
 For live Cashfree Payouts API calls, use either Cashfree IP whitelisting or set `CASHFREE_PAYOUTS_PUBLIC_KEY` so the app can generate the required `x-cf-signature` header from serverless environments.
 
-The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes the Bhojzo Intelligence Engine outputs into the AI insight, health snapshot, customer score, demand forecast, and payment priority tables, checks first-party ML readiness, trains when enough real business data exists and no recent valid model is available, generates ML predictions, and falls back to rules/statistical recommendations when data is insufficient. Production cron is handled by the external scheduler, so the Vercel deployment keeps these as protected job endpoints instead of defining Vercel Cron schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`.
+The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes VyapaarMate Intelligence outputs into the AI insight, health snapshot, customer score, demand forecast, and payment priority tables, checks first-party ML readiness, trains when every data-quality gate passes and no recent compatible model is available, generates ML predictions, and falls back to rules/statistical recommendations when data is insufficient. Production cron is handled by the external scheduler, so the Vercel deployment keeps these as protected job endpoints instead of defining Vercel Cron schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`.
 
-Bhojzo uses a hybrid intelligence engine. Where sufficient real business history exists, trained first-party ML models generate forecasts and risk scores. Where data is insufficient, Bhojzo falls back to explainable rules/statistical recommendations and marks the model as `needs_data`. Production ML trains only from `Business`, `MenuItem`, `MenuCategory`, `Order`, `OrderItem`, `Customer`, and `Payment`; no external datasets or synthetic production data are used.
+VyapaarMate uses a hybrid intelligence engine. Production ML reads only training-eligible first-party records from approved origins. Registered external datasets are isolated to offline evaluation and never affect tenant training, readiness, health scores, predictions, or owner actions. When any model gate fails, VyapaarMate falls back to explainable rules/statistical recommendations and marks that model `needs_data`.
 
 Intelligence data lineage and model readiness can be reviewed from `/api/intelligence/data-sources`. Owner/admin model status is available at `/api/intelligence/model-status?businessId=...`, training can be started with `POST /api/intelligence/train`, and predictions are available at `/api/intelligence/predictions?businessId=...`. Intelligence accuracy can be reviewed from `/api/intelligence/accuracy?days=14`. See `docs/intelligence-data-sources-and-model-readiness.md` for the source/training policy and `docs/intelligence-accuracy-maintenance.md` for the metrics, quality gates, and maintenance workflow.
 

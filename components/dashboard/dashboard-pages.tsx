@@ -40,6 +40,7 @@ import { PasswordChangeCard } from "@/components/auth/password-change-card";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
 import { fulfillmentModeIcons, getBusinessConsoleIcons } from "@/lib/business-console-icons";
 import { getBusinessStaffRoleLabel } from "@/lib/business-staff-copy";
+import { getNoShowEligibility } from "@/lib/booking-outcomes";
 import { orderStatuses, type LiveBillingHistoryItem, type LiveDashboardPayload, type LiveOrder, type LiveOrderStatus, type LivePayment, type LivePaymentStatus } from "@/lib/live-types";
 import { getOrderTrackingCopy, getOrderTrackingStatusActionLabel, getOrderTrackingStatusLabel } from "@/lib/order-tracking";
 import {
@@ -179,6 +180,20 @@ function dashboardTrackingOrderType(fulfillmentModes: LiveDashboardPayload["busi
 function orderDecisionText(status: LiveOrderStatus, businessType: string, orderType: string) {
   if (status === "CANCELLED") return "declined";
   return getOrderTrackingStatusLabel(businessType, orderType, status).toLowerCase();
+}
+
+function formatScheduledDateTime(value: string) {
+  return new Date(value).toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function canRecordNoShow(order: LiveOrder) {
+  return getNoShowEligibility(order).allowed;
 }
 
 function nextOrderStatus(currentStatus: LiveOrderStatus) {
@@ -452,7 +467,11 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
 
   if (loading) return <DashboardPageSkeleton variant="orders" />;
 
-  async function updateOrderStatus(order: LiveOrder, status: LiveOrderStatus) {
+  async function updateOrderStatus(
+    order: LiveOrder,
+    status: LiveOrderStatus,
+    options: { outcome?: "NO_SHOW"; reason?: string } = {}
+  ) {
     const updatedOrder = { ...order, status };
     const decisionText = orderDecisionText(status, data.business.businessType, order.orderType);
 
@@ -469,7 +488,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
       const response = await fetch(`/api/dashboard/orders/${encodeURIComponent(order.id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, ...options })
       });
 
       if (!response.ok) {
@@ -682,6 +701,21 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                   <OrderDetailItem label="Received">
                     {selected.time}
                   </OrderDetailItem>
+                  {selected.scheduledFor && (
+                    <OrderDetailItem label="Scheduled for">
+                      <span className="font-extrabold text-ink">{formatScheduledDateTime(selected.scheduledFor)}</span>
+                    </OrderDetailItem>
+                  )}
+                  {selected.noShowAt && (
+                    <OrderDetailItem label="Outcome">
+                      <Badge variant="red">Customer no-show</Badge>
+                    </OrderDetailItem>
+                  )}
+                  {selected.cancellationReason && (
+                    <OrderDetailItem label="Cancellation reason" className="sm:col-span-2">
+                      {selected.cancellationReason.replaceAll("_", " ").toLowerCase()}
+                    </OrderDetailItem>
+                  )}
                   {selected.notes && (
                     <OrderDetailItem label="Notes" className="sm:col-span-2">
                       {selected.notes}
@@ -689,6 +723,19 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                   )}
                 </div>
               </section>
+              {canRecordNoShow(selected) && (
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={() => updateOrderStatus(selected, "CANCELLED", {
+                    outcome: "NO_SHOW",
+                    reason: "CUSTOMER_NO_SHOW"
+                  })}
+                  disabled={updatingOrder?.id === selected.id}
+                >
+                  Record customer no-show
+                </Button>
+              )}
               <div className="grid gap-2 sm:grid-cols-2">
                 {["ACCEPTED", "PREPARING", "READY", "DELIVERED", "CANCELLED"].map((status) => {
                   const targetStatus = status as LiveOrderStatus;

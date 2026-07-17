@@ -13,6 +13,7 @@ import {
   fulfillmentFeeForOrder,
   fulfillmentLabelForBusinessType,
   fulfillmentSummaryForBusinessType,
+  requiresScheduledServiceTime,
   type ActiveFulfillmentMode
 } from "@/lib/business-rules";
 import { getBusinessConsoleCopy, type BusinessConsoleCopy } from "@/lib/business-console-copy";
@@ -86,6 +87,11 @@ function money(value: number) {
 
 function normalizeCouponInput(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g, "");
+}
+
+function localDateTimeInputValue(date: Date) {
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
 function clearSelectionLabel(copy: BusinessConsoleCopy) {
@@ -589,8 +595,22 @@ export function CustomerOrderPage({
       setSubmitError("Cash payment is not available for this business.");
       return;
     }
-    setSubmitting(true);
     const form = new FormData(event.currentTarget);
+    const requestedSchedule = String(form.get("scheduledFor") ?? "").trim();
+    let scheduledFor: string | undefined;
+    if (requiresScheduledServiceTime(business.businessType) && !requestedSchedule) {
+      setSubmitError(`Choose the requested ${transactionLower} date and time.`);
+      return;
+    }
+    if (requestedSchedule) {
+      const parsedSchedule = new Date(requestedSchedule);
+      if (!Number.isFinite(parsedSchedule.getTime())) {
+        setSubmitError(`Choose a valid ${transactionLower} date and time.`);
+        return;
+      }
+      scheduledFor = parsedSchedule.toISOString();
+    }
+    setSubmitting(true);
     try {
       const response = await fetch("/api/orders", {
         method: "POST",
@@ -608,6 +628,7 @@ export function CustomerOrderPage({
             marketingOptIn: whatsappFlowAvailable && whatsappOptIn ? marketingOptIn : false
           },
           orderType,
+          scheduledFor,
           notes: String(form.get("notes") ?? ""),
           paymentMethod,
           couponCode: appliedCouponCode ?? undefined,
@@ -1617,6 +1638,7 @@ function BillingPanel({
   const transactionLower = copy.transactionSingular.toLowerCase();
   const onlinePaymentAvailable = business.onlinePaymentAvailable;
   const cashPaymentAvailable = business.allowsPayOnDelivery;
+  const scheduledTimeRequired = requiresScheduledServiceTime(business.businessType);
   const paymentMethodAvailable = paymentMethod === "UPI" ? onlinePaymentAvailable : cashPaymentAvailable;
   const clearLabel = clearSelectionLabel(copy);
   const submitDisabled =
@@ -1785,6 +1807,22 @@ function BillingPanel({
             required
           />
         </div>
+        {scheduledTimeRequired && (
+          <div className="grid gap-2">
+            <Label htmlFor="scheduledFor">Requested {transactionLower} date and time</Label>
+            <Input
+              id="scheduledFor"
+              name="scheduledFor"
+              type="datetime-local"
+              onFocus={(event) => {
+                event.currentTarget.min = localDateTimeInputValue(new Date(Date.now() + 15 * 60 * 1000));
+              }}
+              className="h-12 bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20"
+              required
+            />
+            <p className="text-xs leading-5 text-slate-500">The business will confirm availability after receiving your request.</p>
+          </div>
+        )}
         {serviceAtLocation && (
           <div className="grid gap-3 rounded-lg border border-white bg-[#f6faf8] p-3 shadow-sm">
             <div className="grid gap-2">

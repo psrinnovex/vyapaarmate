@@ -1,119 +1,106 @@
-# Bhojzo Intelligence Data Sources and Model Readiness
+# VyapaarMate Intelligence Data Sources and Model Readiness
 
-Bhojzo uses a hybrid intelligence engine. Where sufficient real business history exists, trained first-party ML models generate forecasts and risk scores. Where data is insufficient, Bhojzo falls back to explainable rules/statistical recommendations and marks the model as `needs_data`.
+VyapaarMate uses a hybrid intelligence engine. Compatible first-party models are used only after every readiness gate passes; otherwise the product returns explainable rules and statistical signals with a `needs_data` state. Limited operational history is shown as preliminary/low-confidence instead of as a mature business-health result.
 
-Production ML trains only from first-party application tables:
+## Production data boundary
 
-- `Business`
-- `MenuItem`
-- `MenuCategory`
-- `Order`
-- `OrderItem`
-- `Customer`
-- `Payment`
+Production training reads only records that have both:
 
-No external datasets are used. Synthetic data is allowed only inside tests and is never a production training source.
+- `trainingEligible = true`
+- `dataOrigin` in `LIVE`, `HISTORICAL_IMPORT`, or `MANUAL`
 
-## Runtime Modes
+The allowed tables are `Business`, `MenuItem`, `MenuCategory`, `Order`, `OrderItem`, `Customer`, and `Payment`. `EXTERNAL_BENCHMARK`, `DEMO`, `SEED`, and `TEST` records are excluded at the database-query boundary. Database constraints prevent non-production origins from being marked training-eligible.
 
-- `rules_engine`: no trained first-party model artifact is active, so Bhojzo returns explainable rules/statistical recommendations.
-- `trained_ml`: all model families have trained artifacts from first-party data.
-- `hybrid_rules_plus_ml`: at least one model family is trained, and the remaining gaps are filled by the rules/statistical engine.
+Synthetic fixtures stay inside tests. External benchmarks stay in offline evaluation tooling. Neither can affect tenant training, readiness, health scores, predictions, or automatic owner actions.
 
-## Model Lifecycle
+## External benchmark registry
 
-Real AI Intelligence v1 stores:
+The source of truth is `config/intelligence-benchmarks.json`.
 
-- `IntelligenceModelArtifact`: trained artifact, model version, algorithm, feature schema, weights/artifact JSON, metrics, and training window.
-- `IntelligenceTrainingRun`: training status, rows used, train/validation split, metrics, completion time, and error message.
-- `IntelligencePrediction`: model prediction JSON, confidence, explanation JSON, model version, entity type, and entity id.
+| Dataset | Status | Permitted purpose | Production use |
+| --- | --- | --- | --- |
+| UCI Online Retail II (2009–2011) | Master evaluation dataset | Importer, demand, RFM, return, and cancellation backtests | Prohibited |
+| UCI Online Retail (2010–2011) | Excluded duplicate/subset | Duplicate and checksum checks only | Prohibited |
+| Medical Appointments No-Show | Restricted evaluation only | Generic offline appointment and attendance-pipeline tests | Prohibited |
+| M5 `calendar-selected-columns.csv` | Incomplete calendar-only export | Offline calendar-join tests | Prohibited |
 
-Model statuses are:
+The medical benchmark excludes sensitive and diagnosis-related fields listed in the registry. It must not be used for customer-level prediction or salon accuracy claims. The M5 export contains calendar context only, is US-centric, and is not a demand-training dataset.
 
-- `needs_data`
-- `ready_for_training`
-- `training`
-- `trained`
-- `failed`
-- `disabled`
+Downloaded benchmark files are intentionally not committed. The registry locks the exact approved files by SHA-256. Verify a supplied set with:
 
-## Minimum Data Gates
+```bash
+npm run intelligence:verify-benchmarks -- --dir /path/to/downloads
+```
 
-- Demand forecasting requires at least 90 days of completed order history or at least 300 completed orders with linked order items.
-- Retention requires at least 100 customers or at least 300 customer-linked orders.
-- Payment risk requires at least 300 payments, at least 50 successful payments, and at least 30 failed or pending examples.
+A missing or changed file fails verification. `--allow-unlocked` is available only while an explicitly reviewed new dataset version is being fingerprinted; it must not be used for an import or published evaluation.
 
-If a gate fails, the API returns `needs_data` with exact missing requirements. It does not create or claim a trained model.
+## Runtime modes and artifact compatibility
 
-## Models
+- `rules_engine`: no compatible first-party artifact is active.
+- `trained_ml`: all three model families have compatible trained artifacts.
+- `hybrid_rules_plus_ml`: at least one family is trained; rules/statistics fill the remaining gaps.
 
-Demand forecasting uses regularized linear regression trained from historical `OrderItem` quantities. Features include day of week, week of month, month, safely encoded item/category identity, recent 7/14/30 day quantity, average order value, payment success ratio, and order count trend. Metrics include MAE, RMSE, and MAPE where valid.
+Every artifact stores a `featureSchemaVersion`. Loading and status queries reject artifacts from an older schema, so models trained with leaked or obsolete features cannot silently return to service after a deployment.
 
-Retention uses logistic regression trained from customer/order snapshots. Features include total orders, days since last order, average order value, payment success rate, first order age, and order frequency. Metrics include accuracy, precision, recall, F1, and AUC where practical.
+Lifecycle data is stored in `IntelligenceModelArtifact`, `IntelligenceTrainingRun`, and `IntelligencePrediction`. Supported model states are `needs_data`, `ready_for_training`, `training`, `trained`, `failed`, and `disabled`.
 
-Payment risk uses logistic regression trained from payment/order history. Features include payment method, order value, previous payment success ratio, prior pending/failed count, order status, and payment status. Metrics include accuracy, precision, recall, and F1.
+## Minimum readiness gates
 
-## API Examples
+Every gate in a model family must pass.
 
-Train one or all model families:
+### Demand
+
+- At least 90 days of completed-order history.
+- At least 300 completed orders with linked catalog items.
+- At least 30 active completed-order days.
+- At least 80% of completed items linked to catalog records.
+
+### Retention
+
+- At least 100 customers.
+- At least 300 customer-linked, non-cancelled orders.
+- At least 20 repeat customers.
+- At least 90 days of customer order history.
+
+### Payment risk
+
+- At least 300 resolved payment outcomes.
+- At least 50 successful outcomes.
+- At least 30 explicitly failed outcomes.
+
+`PENDING` is unresolved and is never a failed training label. `REFUNDED` is also excluded from this failure classifier. A pending payment may be scored at prediction time, but its current payment status, final order status, and eventual outcome are not input features.
+
+## Model features and labels
+
+Demand forecasting uses regularized linear regression over completed order-item quantities. Its time axis is `completedAt`, then `scheduledFor`, with `createdAt` only as a legacy fallback. Features include calendar position, safely encoded item/category identity, historical quantities, prior order trends, average order value, and prior payment success ratio.
+
+Retention uses logistic regression over historical customer snapshots. Features include prior order frequency, recency, average order value, first-order age, and payment success history. Customer names, phone numbers, addresses, and free-text notes are excluded.
+
+Payment risk uses logistic regression over resolved `COMPLETED`/`PAID` versus `FAILED` outcomes. Features include amount, provider, and only the customer's resolved outcomes that existed before the candidate payment. Current/final status fields are deliberately excluded to prevent label leakage.
+
+## Appointment outcome truth
+
+Businesses with scheduled services must capture `Order.scheduledFor`. Owners can record a no-show only after the scheduled time and only while the booking is in an active accepted/preparation state. A no-show stores `noShowAt`, `cancelledAt`, and a cancellation reason, but it does not refund or otherwise mutate payment state. Ordinary business cancellation keeps the existing payment/refund workflow.
+
+## APIs and refresh lifecycle
 
 ```http
 POST /api/intelligence/train
-Content-Type: application/json
-
-{
-  "businessId": "business_id",
-  "modelType": "all"
-}
-```
-
-Check readiness, versions, metrics, and missing data:
-
-```http
 GET /api/intelligence/model-status?businessId=business_id
-```
-
-Return trained ML predictions when artifacts exist, otherwise return rules-engine fallback:
-
-```http
 GET /api/intelligence/predictions?businessId=business_id
-```
-
-Review governance, data lineage, privacy notes, and model readiness:
-
-```http
 GET /api/intelligence/data-sources
 GET /api/intelligence/accuracy?days=14
 ```
 
-All owner/admin model routes verify the authenticated user can access the requested business. `businessId` is never trusted by itself.
+Owner/admin routes verify access to the requested business. The protected `/api/jobs/intelligence-refresh` job materializes rules outputs, checks all gates, trains only when needed, generates compatible-model predictions, and preserves rules fallback for every untrained family.
 
-## Refresh Job
+## Privacy and maintenance
 
-`/api/jobs/intelligence-refresh` remains protected by `Authorization: Bearer $CRON_SECRET`.
+- Do not train on names, phone numbers, addresses, protected/sensitive attributes, diagnoses, or free-text notes.
+- Tokenize customer identifiers before an offline export.
+- Use consent fields only for communication eligibility.
+- Do not introduce cross-business aggregate training without explicit product, privacy, legal, and consent review.
+- Keep service-role/database credentials server-side and do not expose raw training rows or artifacts to browsers.
+- Review readiness and accuracy weekly, and after material catalog, pricing, scheduling, operating-hours, or campaign changes.
 
-On each refresh it:
-
-1. Materializes the existing rules/statistical intelligence outputs.
-2. Checks model readiness for each model family.
-3. Trains only when data gates pass and no recent valid model exists.
-4. Generates predictions from trained artifacts.
-5. Falls back to rules/statistical recommendations when no trained artifact is available.
-
-## Supabase and RLS
-
-The app uses server-side Prisma. Supabase generated Data API access remains revoked for these model lifecycle tables. RLS is enabled, and tenant-scoped authenticated read policies are present as defense in depth if a future migration deliberately grants table access.
-
-Do not expose model artifacts, training rows, or predictions publicly.
-
-## Privacy Rules
-
-- Do not train on customer names, phone numbers, addresses, or free-text notes.
-- Use customer identifiers only as entity references and owner-facing output keys.
-- Use consent fields for campaign eligibility, not as pressure signals.
-- Keep service-role and database credentials server-side only.
-- Do not use cross-business aggregate training without explicit product, legal, consent, and privacy approval.
-
-## Tests
-
-Unit tests use synthetic records only inside test files to verify feature extraction, gates, training, prediction, fallback, governance honesty, and access checks. Synthetic fixtures must never be loaded as production training data.
+Tests use synthetic records only to verify gates, feature extraction, leakage prevention, artifact invalidation, external-data isolation, predictions, fallback, governance, and access checks.

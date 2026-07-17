@@ -2,6 +2,7 @@ import type { Business, Customer, Prisma } from "@prisma/client";
 import { fulfillmentFeeForOrder, fulfillmentModesFromFlags, isFoodBusinessType, type ActiveFulfillmentMode } from "@/lib/business-rules";
 import { buildOrderCouponBreakdown } from "@/lib/coupons";
 import { prisma } from "@/lib/prisma";
+import { parseScheduledServiceTime, scheduledServiceTimeFormatHelp } from "@/lib/scheduled-service-time";
 import { formatINR } from "@/lib/utils";
 import { businessWhatsappConfig } from "@/services/business-whatsapp";
 import { terminateCashfreeOrder } from "@/services/cashfree";
@@ -146,7 +147,9 @@ async function upsertWhatsAppCustomer(business: Business, message: WhatsAppInbou
       name,
       phone,
       whatsappOptIn: true,
-      marketingOptIn: false
+      marketingOptIn: false,
+      dataOrigin: "LIVE",
+      trainingEligible: true
     },
     update: {
       name,
@@ -627,6 +630,8 @@ async function addItemToWhatsAppOrder(input: {
             input.marker === BOOKING_MARKER
               ? `${BOOKING_MARKER} Awaiting preferred appointment date/time from WhatsApp.`
               : `${CART_MARKER} Customer is building this cart in WhatsApp.`,
+          dataOrigin: "LIVE",
+          trainingEligible: true,
           status: "NEW",
           paymentStatus: "PENDING",
           items: {
@@ -648,7 +653,9 @@ async function addItemToWhatsAppOrder(input: {
           orderId: created.id,
           provider: canBusinessAcceptOnlinePayment(input.business, paymentConfig) ? selectedOnlinePaymentProvider(paymentConfig) : "CASH",
           amount: totalAmount,
-          status: "PENDING"
+          status: "PENDING",
+          dataOrigin: "LIVE",
+          trainingEligible: true
         }
       });
       await tx.customer.update({
@@ -836,17 +843,36 @@ async function handleAppointmentReply(business: Business, customer: Customer, te
   const order = await latestWhatsAppOrder(customer, BOOKING_MARKER);
   if (!order) return false;
 
+  const parsedSchedule = parseScheduledServiceTime(text);
+  if (!parsedSchedule.ok) {
+    await sendTextAndLog({
+      business,
+      customer,
+      orderId: order.id,
+      templateName: "whatsapp_booking_time_needed",
+      body: scheduledServiceTimeFormatHelp(parsedSchedule.reason)
+    });
+    return true;
+  }
+
   const nextNotes = [order.notes, `Customer reply on WhatsApp: ${text.trim()}`].filter(Boolean).join("\n");
   await prisma.order.update({
     where: { id: order.id },
-    data: { notes: nextNotes }
+    data: { notes: nextNotes, scheduledFor: parsedSchedule.scheduledFor }
   });
   await sendTextAndLog({
     business,
     customer,
     orderId: order.id,
     templateName: "whatsapp_booking_details_received",
-    body: `Got it. ${business.name} has your appointment request ${order.orderNumber} and will confirm the slot here on WhatsApp.`
+    body: `Got it. ${business.name} has your appointment request ${order.orderNumber} for ${parsedSchedule.scheduledFor.toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    })} and will confirm the slot here on WhatsApp.`
   });
   return true;
 }

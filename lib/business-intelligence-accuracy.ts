@@ -7,6 +7,11 @@ import {
   type IntelligenceTimeSlot
 } from "@/lib/business-intelligence";
 import { getBusinessIntelligenceDataset } from "@/lib/business-intelligence-data";
+import {
+  addBusinessDays as addDays,
+  businessHour,
+  startOfBusinessDay as startOfDay
+} from "@/lib/intelligence/intelligence-time";
 
 export type DemandForecastAccuracySample = {
   forecastDate: string;
@@ -74,20 +79,8 @@ function round(value: number, decimals = 0) {
   return Math.round(value * factor) / factor;
 }
 
-function startOfDay(date: Date) {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function addDays(date: Date, days: number) {
-  const copy = new Date(date);
-  copy.setDate(copy.getDate() + days);
-  return copy;
-}
-
 function timeSlotForDate(date: Date): IntelligenceTimeSlot {
-  const hour = date.getHours();
+  const hour = businessHour(date);
   if (hour >= 5 && hour < 11) return "morning";
   if (hour >= 11 && hour < 16) return "afternoon";
   if (hour >= 16 && hour < 21) return "evening";
@@ -106,6 +99,10 @@ function isFinalOrActiveOrder(order: IntelligenceOrder) {
   return order.status !== "CANCELLED";
 }
 
+function orderActivityAt(order: IntelligenceOrder) {
+  return order.completedAt ?? order.scheduledFor ?? order.createdAt;
+}
+
 function actualDemandForDateSlot({
   orders,
   targetDate,
@@ -120,7 +117,10 @@ function actualDemandForDateSlot({
   const actuals = new Map<string, { productId: string | null; productName: string; quantity: number }>();
 
   orders
-    .filter((order) => isFinalOrActiveOrder(order) && order.createdAt >= targetStart && order.createdAt < targetEnd && timeSlotForDate(order.createdAt) === timeSlot)
+    .filter((order) => {
+      const activityAt = orderActivityAt(order);
+      return isFinalOrActiveOrder(order) && activityAt >= targetStart && activityAt < targetEnd && timeSlotForDate(activityAt) === timeSlot;
+    })
     .forEach((order) => {
       order.items.forEach((item) => {
         const key = productKey(item);

@@ -97,6 +97,15 @@ export function isStudioBusinessType(businessType: string) {
   return includesAny(businessType.trim().toLowerCase(), studioBusinessTerms);
 }
 
+export function requiresScheduledServiceTime(businessType: string) {
+  return (
+    isSalonBusinessType(businessType) ||
+    isStudioBusinessType(businessType) ||
+    isCateringBusinessType(businessType) ||
+    isHomeServiceBusinessType(businessType)
+  );
+}
+
 export function getBusinessFulfillmentProfile(businessType: string): BusinessFulfillmentProfile {
   const normalized = businessType.trim().toLowerCase();
   const labels = { ...fulfillmentLabels };

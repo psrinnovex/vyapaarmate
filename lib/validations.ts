@@ -201,6 +201,7 @@ export const orderSubmissionSchema = z.object({
     marketingOptIn: z.boolean()
   }),
   orderType: orderFulfillmentModeSchema,
+  scheduledFor: optionalIsoDateSchema,
   notes: z.string().max(500).optional(),
   paymentMethod: z.enum(["UPI", "PAY_ON_PICKUP_OR_DELIVERY"]),
   couponCode: optionalCouponCodeSchema,
@@ -214,9 +215,21 @@ export const orderSubmissionSchema = z.object({
     .min(1)
 });
 
-export const orderStatusSchema = z.object({
-  status: z.enum(["NEW", "ACCEPTED", "PREPARING", "READY", "DELIVERED", "CANCELLED"])
-});
+export const orderStatusSchema = z
+  .object({
+    status: z.enum(["NEW", "ACCEPTED", "PREPARING", "READY", "DELIVERED", "CANCELLED"]),
+    outcome: z.enum(["NO_SHOW"]).optional(),
+    reason: optionalTrimmedString(240)
+  })
+  .superRefine((data, context) => {
+    if (data.outcome === "NO_SHOW" && data.status !== "CANCELLED") {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A no-show must close the appointment as cancelled.",
+        path: ["status"]
+      });
+    }
+  });
 
 export const cashPaymentStatusSchema = z.object({
   status: z.literal("COMPLETED")

@@ -131,7 +131,7 @@ function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload
             </Badge>
             <Badge variant="neutral">Rules</Badge>
             <Badge variant="neutral">First-party database</Badge>
-            <Badge variant="neutral">No external datasets</Badge>
+            <Badge variant="neutral">Benchmarks isolated from production</Badge>
             <Badge variant="neutral">No synthetic production data</Badge>
           </div>
           <h2 className="mt-3 text-base font-bold text-ink">Model readiness</h2>
@@ -409,21 +409,21 @@ export function AiSuggestionsPage() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="blue">
                 <BrainCircuit className="size-3" />
-                Bhojzo Intelligence Engine
+                VyapaarMate Intelligence Engine
               </Badge>
               <Badge variant="secondary">{data.dataWindow}</Badge>
               <Badge variant="neutral">No paid AI APIs</Badge>
             </div>
             <h2 className="mt-3 max-w-3xl text-xl font-bold leading-tight text-ink sm:text-2xl">
-              {data.business.name} has a {health.score}/100 business health score.
+              {health.isPreliminary ? "Preliminary operational score" : "Operational health score"}: {health.score}/100.
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-              {health.explanation} Generated {formatGeneratedAt(data.generatedAt)} without paid AI API calls.
+              {health.explanation} Confidence is {health.confidence.toLowerCase()} from {health.observationCount} recorded transactions. Generated {formatGeneratedAt(data.generatedAt)} without paid AI API calls.
             </p>
           </div>
           <div className="grid min-h-24 min-w-24 place-items-center rounded-lg border border-ocean/15 bg-white p-4 text-center shadow-[0_14px_36px_rgba(18,70,160,0.10)]">
             <p className="text-4xl font-extrabold leading-none text-ink">{health.score}</p>
-            <p className="mt-2 text-xs font-bold uppercase text-slate-500">Grade {health.grade}</p>
+            <p className="mt-2 text-xs font-bold uppercase text-slate-500">Grade {health.grade} · {health.confidence} confidence</p>
           </div>
         </div>
       </Card>

@@ -104,6 +104,8 @@ export async function POST(request: Request) {
       foodType: parsed.data.foodType,
       isAvailable: parsed.data.isAvailable,
       isBestSeller: parsed.data.isBestSeller,
+      dataOrigin: "LIVE",
+      trainingEligible: true,
       image: image ? { create: image } : undefined
     },
     include: { category: true, image: { select: { updatedAt: true } } }

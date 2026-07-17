@@ -4,6 +4,12 @@ import { calculateClassificationMetrics, calculateRegressionMetrics, clamp, dot,
 export const intelligenceModelTypes = ["demand", "retention", "payment_risk"] as const;
 export type IntelligenceModelType = (typeof intelligenceModelTypes)[number];
 
+export const intelligenceFeatureSchemaVersions: Record<IntelligenceModelType, number> = {
+  demand: 2,
+  retention: 2,
+  payment_risk: 2
+};
+
 export const intelligenceModelStatuses = ["needs_data", "ready_for_training", "training", "trained", "failed", "disabled"] as const;
 export type IntelligenceModelStatus = (typeof intelligenceModelStatuses)[number];
 
@@ -22,6 +28,7 @@ export type FeatureExample = {
 
 export type VectorModelArtifact = {
   modelType: IntelligenceModelType;
+  featureSchemaVersion: number;
   algorithm: string;
   featureNames: string[];
   means: number[];
@@ -80,7 +87,7 @@ export type PersistedModelStatus = ModelReadiness & {
 export type IntelligenceEngineSummary = {
   type: IntelligenceEngineType;
   dataSource: "first_party_database";
-  externalDatasets: "none";
+  externalDatasets: "isolated_evaluation_only";
   syntheticProductionData: "none";
   trainedModelInUse: boolean;
   modelStatuses: Array<{
@@ -103,6 +110,12 @@ export const modelLabels: Record<IntelligenceModelType, string> = {
 
 export function isIntelligenceModelType(value: unknown): value is IntelligenceModelType {
   return typeof value === "string" && intelligenceModelTypes.includes(value as IntelligenceModelType);
+}
+
+export function isCompatibleModelArtifact(value: unknown, modelType: IntelligenceModelType): value is VectorModelArtifact {
+  if (!value || typeof value !== "object") return false;
+  const artifact = value as Partial<VectorModelArtifact>;
+  return artifact.modelType === modelType && artifact.featureSchemaVersion === intelligenceFeatureSchemaVersions[modelType];
 }
 
 export function modelTypesForRequest(value: unknown): IntelligenceModelType[] | null {
@@ -128,7 +141,7 @@ export function buildEngineSummary(statuses: PersistedModelStatus[]): Intelligen
   return {
     type,
     dataSource: "first_party_database",
-    externalDatasets: "none",
+    externalDatasets: "isolated_evaluation_only",
     syntheticProductionData: "none",
     trainedModelInUse: trainedCount > 0,
     modelStatuses: statuses.map((status) => ({
@@ -265,6 +278,7 @@ export function trainLinearRegressionModel({
 
   const artifact: VectorModelArtifact = {
     modelType,
+    featureSchemaVersion: intelligenceFeatureSchemaVersions[modelType],
     algorithm,
     featureNames,
     means,
@@ -345,6 +359,7 @@ export function trainLogisticRegressionModel({
 
   const artifact: VectorModelArtifact = {
     modelType,
+    featureSchemaVersion: intelligenceFeatureSchemaVersions[modelType],
     algorithm,
     featureNames,
     means,

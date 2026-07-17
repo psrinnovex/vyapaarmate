@@ -1,3 +1,13 @@
+import {
+  addBusinessDays as addDays,
+  atBusinessHour,
+  businessDayOfWeek,
+  businessDaysBetween as daysBetween,
+  businessHour,
+  businessWeekdayName as weekdayName,
+  startOfBusinessDay as startOfDay
+} from "@/lib/intelligence/intelligence-time";
+
 export type IntelligenceConfidence = "Low" | "Medium" | "High";
 export type IntelligenceSource = "database" | "demo";
 export type IntelligenceTimeSlot = "morning" | "afternoon" | "evening" | "night";
@@ -17,7 +27,7 @@ export type IntelligenceEngineModelSummary = {
 export type IntelligenceEnginePayloadSummary = {
   type: IntelligenceEngineType;
   dataSource: "first_party_database";
-  externalDatasets: "none";
+  externalDatasets: "isolated_evaluation_only";
   syntheticProductionData: "none";
   trainedModelInUse: boolean;
   modelStatuses: IntelligenceEngineModelSummary[];
@@ -46,6 +56,8 @@ export type IntelligenceOrder = {
   paymentStatus: string;
   totalAmount: number;
   createdAt: Date;
+  scheduledFor?: Date | null;
+  completedAt?: Date | null;
   orderType?: string;
   items: IntelligenceOrderItem[];
 };
@@ -146,6 +158,10 @@ export type BusinessHealthScoreFactor = {
 export type BusinessHealthScoreResult = {
   score: number;
   grade: "A" | "B" | "C" | "D";
+  confidence: IntelligenceConfidence;
+  confidenceScore: number;
+  isPreliminary: boolean;
+  observationCount: number;
   salesTrend: number;
   repeatRate: number;
   pendingPaymentRisk: number;
@@ -233,8 +249,6 @@ export type BusinessIntelligenceArtifacts = {
   customerScores: RepeatCustomerScoreResult[];
 };
 
-const dayMs = 24 * 60 * 60 * 1000;
-
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
@@ -242,22 +256,6 @@ function clamp(value: number, min: number, max: number) {
 function round(value: number, decimals = 0) {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
-}
-
-function startOfDay(date: Date) {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function addDays(date: Date, days: number) {
-  const copy = new Date(date);
-  copy.setDate(copy.getDate() + days);
-  return copy;
-}
-
-function daysBetween(from: Date, to: Date) {
-  return Math.max(0, Math.floor((startOfDay(to).getTime() - startOfDay(from).getTime()) / dayMs));
 }
 
 function isFinalOrActiveOrder(order: IntelligenceOrder) {
@@ -277,21 +275,21 @@ function isCompletedOrder(order: IntelligenceOrder) {
 }
 
 function timeSlotForDate(date: Date): IntelligenceTimeSlot {
-  const hour = date.getHours();
+  const hour = businessHour(date);
   if (hour >= 5 && hour < 11) return "morning";
   if (hour >= 11 && hour < 16) return "afternoon";
   if (hour >= 16 && hour < 21) return "evening";
   return "night";
 }
 
+function orderActivityAt(order: IntelligenceOrder) {
+  return order.completedAt ?? order.scheduledFor ?? order.createdAt;
+}
+
 function confidenceFromScore(score: number): IntelligenceConfidence {
   if (score >= 70) return "High";
   if (score >= 45) return "Medium";
   return "Low";
-}
-
-function weekdayName(date: Date) {
-  return date.toLocaleDateString("en-IN", { weekday: "long" });
 }
 
 function pluralWeekday(date: Date) {
@@ -309,7 +307,7 @@ function timeSlotLabel(slot: IntelligenceTimeSlot) {
 function countWeekdayOccurrences(start: Date, end: Date, weekday: number) {
   let count = 0;
   for (let cursor = startOfDay(start); cursor < startOfDay(end); cursor = addDays(cursor, 1)) {
-    if (cursor.getDay() === weekday) count += 1;
+    if (businessDayOfWeek(cursor) === weekday) count += 1;
   }
   return Math.max(1, count);
 }
@@ -340,7 +338,7 @@ export function calculateDemandForecast({
   const windowStart = addDays(targetDate, -windowDays);
   const last7Start = addDays(targetDate, -7);
   const previous7Start = addDays(targetDate, -14);
-  const targetWeekday = targetDate.getDay();
+  const targetWeekday = businessDayOfWeek(targetDate);
   const weekdayOccurrences = countWeekdayOccurrences(windowStart, targetDate, targetWeekday);
   const stats = new Map<
     string,
@@ -394,13 +392,17 @@ export function calculateDemandForecast({
     .forEach((product) => ensureStats(product.id ?? product.name.trim().toLowerCase(), product.name, product.id));
 
   orders
-    .filter((order) => isFinalOrActiveOrder(order) && order.createdAt >= windowStart && order.createdAt < targetDate)
+    .filter((order) => {
+      const activityAt = orderActivityAt(order);
+      return isFinalOrActiveOrder(order) && activityAt >= windowStart && activityAt < targetDate;
+    })
     .forEach((order) => {
-      const orderSlot = timeSlotForDate(order.createdAt);
-      const sameWeekday = order.createdAt.getDay() === targetWeekday;
+      const activityAt = orderActivityAt(order);
+      const orderSlot = timeSlotForDate(activityAt);
+      const sameWeekday = businessDayOfWeek(activityAt) === targetWeekday;
       const sameSlot = orderSlot === timeSlot;
-      const recent = order.createdAt >= last7Start;
-      const previousRecent = order.createdAt >= previous7Start && order.createdAt < last7Start;
+      const recent = activityAt >= last7Start;
+      const previousRecent = activityAt >= previous7Start && activityAt < last7Start;
 
       order.items.forEach((item) => {
         const key = productKey(item);
@@ -629,7 +631,10 @@ export function calculateBusinessHealthScore({
   pendingPaymentsCount,
   completedOrders,
   cancelledOrders,
-  activeCustomers
+  activeCustomers,
+  observationCount = 0,
+  historyDays = 0,
+  paymentObservationCount = 0
 }: {
   weeklySales: number;
   previousWeekSales: number;
@@ -640,6 +645,9 @@ export function calculateBusinessHealthScore({
   completedOrders: number;
   cancelledOrders: number;
   activeCustomers: number;
+  observationCount?: number;
+  historyDays?: number;
+  paymentObservationCount?: number;
 }): BusinessHealthScoreResult {
   const totalTerminalOrders = completedOrders + cancelledOrders;
   const salesTrend = previousWeekSales === 0 ? (weeklySales > 0 ? 100 : 0) : round(((weeklySales - previousWeekSales) / previousWeekSales) * 100);
@@ -655,6 +663,17 @@ export function calculateBusinessHealthScore({
   const activeCustomerComponent = clamp((activeCustomerRatio / 70) * 15, 0, 15);
   const score = Math.round(clamp(salesComponent + repeatComponent + paymentComponent + completionComponent + activeCustomerComponent, 0, 100));
   const grade = score >= 85 ? "A" : score >= 70 ? "B" : score >= 55 ? "C" : "D";
+  const confidenceScore = Math.round(
+    clamp(
+      Math.min(1, observationCount / 50) * 40 +
+      Math.min(1, totalCustomers / 30) * 25 +
+      Math.min(1, paymentObservationCount / 30) * 15 +
+      Math.min(1, historyDays / 30) * 20,
+      0,
+      100
+    )
+  );
+  const confidence: IntelligenceConfidence = confidenceScore >= 80 ? "High" : confidenceScore >= 50 ? "Medium" : "Low";
   const factors: BusinessHealthScoreFactor[] = [
     {
       label: "Sales trend",
@@ -719,6 +738,10 @@ export function calculateBusinessHealthScore({
   return {
     score,
     grade,
+    confidence,
+    confidenceScore,
+    isPreliminary: confidence !== "High",
+    observationCount,
     salesTrend,
     repeatRate,
     pendingPaymentRisk,
@@ -752,8 +775,12 @@ function calculateTopProductTrend(orders: IntelligenceOrder[], now: Date): TopPr
   >();
 
   orders
-    .filter((order) => isFinalOrActiveOrder(order) && order.createdAt >= previousStart && order.createdAt < now)
+    .filter((order) => {
+      const activityAt = orderActivityAt(order);
+      return isFinalOrActiveOrder(order) && activityAt >= previousStart && activityAt < now;
+    })
     .forEach((order) => {
+      const activityAt = orderActivityAt(order);
       order.items.forEach((item) => {
         const key = item.productName.trim().toLowerCase();
         const row =
@@ -764,7 +791,7 @@ function calculateTopProductTrend(orders: IntelligenceOrder[], now: Date): TopPr
             previousQty: 0,
             customerPurchases: new Map<string, number>()
           };
-        if (order.createdAt >= currentStart) row.currentQty += item.quantity;
+        if (activityAt >= currentStart) row.currentQty += item.quantity;
         else row.previousQty += item.quantity;
         row.customerPurchases.set(order.customerId, (row.customerPurchases.get(order.customerId) ?? 0) + item.quantity);
         productStats.set(key, row);
@@ -964,8 +991,7 @@ export function buildBusinessIntelligenceArtifacts(dataset: BusinessIntelligence
 
   const demandForecast = (["morning", "afternoon", "evening", "night"] as IntelligenceTimeSlot[])
     .flatMap((slot) => {
-      const forecastDate = new Date(tomorrow);
-      forecastDate.setHours(slot === "morning" ? 8 : slot === "afternoon" ? 13 : slot === "evening" ? 18 : 22, 0, 0, 0);
+      const forecastDate = atBusinessHour(tomorrow, slot === "morning" ? 8 : slot === "afternoon" ? 13 : slot === "evening" ? 18 : 22);
       return calculateDemandForecast({
         orders,
         products: dataset.products,
@@ -998,6 +1024,10 @@ export function buildBusinessIntelligenceArtifacts(dataset: BusinessIntelligence
   const weeklySales = sumCompletedPayments(dataset.payments, currentWeekStart, now);
   const previousWeekSales = sumCompletedPayments(dataset.payments, previousWeekStart, currentWeekStart);
   const pendingPaymentsAmount = pendingPayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const orderActivityDates = dataset.orders.map(orderActivityAt).sort((first, second) => first.getTime() - second.getTime());
+  const historyDays = orderActivityDates.length
+    ? daysBetween(orderActivityDates[0]!, orderActivityDates[orderActivityDates.length - 1]!) + 1
+    : 0;
   const businessHealth = calculateBusinessHealthScore({
     weeklySales,
     previousWeekSales,
@@ -1007,7 +1037,10 @@ export function buildBusinessIntelligenceArtifacts(dataset: BusinessIntelligence
     pendingPaymentsCount: pendingPayments.length,
     completedOrders,
     cancelledOrders,
-    activeCustomers
+    activeCustomers,
+    observationCount: dataset.orders.length,
+    historyDays,
+    paymentObservationCount: dataset.payments.length
   });
   const nextBestActions = generateNextBestActions({
     demandForecast,

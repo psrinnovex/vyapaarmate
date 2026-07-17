@@ -4,10 +4,24 @@ import { businessServiceTypeOptions } from "../lib/business-service-types";
 import { subscriptionPlanAmounts } from "../lib/billing";
 
 const prisma = new PrismaClient();
+const seedProvenance = { dataOrigin: "SEED" as const, trainingEligible: false };
+
+function demoSeedPassword() {
+  const password = process.env.DEMO_SEED_PASSWORD?.trim();
+  if (!password || password.length < 10) {
+    throw new Error(
+      "DEMO_SEED_PASSWORD must be set to a unique local-only password with at least 10 characters before seeding."
+    );
+  }
+
+  return password;
+}
 
 async function main() {
+  const passwordHash = await bcrypt.hash(demoSeedPassword(), 12);
+
   console.warn(
-    "Demo credentials are for local development only. Change all passwords and secrets before production."
+    "Demo accounts are for local development only. Never reuse DEMO_SEED_PASSWORD for production accounts."
   );
 
   await prisma.auditLog.deleteMany();
@@ -31,8 +45,6 @@ async function main() {
       sortOrder: (index + 1) * 10
     }))
   });
-
-  const passwordHash = await bcrypt.hash("ChangeMe123!", 12);
 
   const businesses = await Promise.all([
     prisma.business.create({
@@ -197,16 +209,16 @@ async function main() {
   });
 
   const breakfast = await prisma.menuCategory.create({
-    data: { id: "cat_breakfast", businessId: tiffins.id, name: "Breakfast", sortOrder: 1 }
+    data: { id: "cat_breakfast", businessId: tiffins.id, name: "Breakfast", sortOrder: 1, ...seedProvenance }
   });
   const meals = await prisma.menuCategory.create({
-    data: { id: "cat_meals", businessId: tiffins.id, name: "Meals", sortOrder: 2 }
+    data: { id: "cat_meals", businessId: tiffins.id, name: "Meals", sortOrder: 2, ...seedProvenance }
   });
   const bowls = await prisma.menuCategory.create({
-    data: { id: "cat_bowls", businessId: freshBowl.id, name: "Signature Bowls", sortOrder: 1 }
+    data: { id: "cat_bowls", businessId: freshBowl.id, name: "Signature Bowls", sortOrder: 1, ...seedProvenance }
   });
   const cakes = await prisma.menuCategory.create({
-    data: { id: "cat_cakes", businessId: bakery.id, name: "Cakes", sortOrder: 1 }
+    data: { id: "cat_cakes", businessId: bakery.id, name: "Cakes", sortOrder: 1, ...seedProvenance }
   });
 
   const items = await prisma.$transaction([
@@ -219,7 +231,8 @@ async function main() {
         description: "Three soft idlis with ghee, podi, sambar, and coconut chutney.",
         price: 89,
         foodType: "VEG",
-        isBestSeller: true
+        isBestSeller: true,
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -231,7 +244,8 @@ async function main() {
         description: "Crisp dosa with potato masala and three chutneys.",
         price: 119,
         foodType: "VEG",
-        isBestSeller: true
+        isBestSeller: true,
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -242,7 +256,8 @@ async function main() {
         name: "Mini Meals",
         description: "Rice, dal, curry, curd, papad, and pickle.",
         price: 149,
-        foodType: "VEG"
+        foodType: "VEG",
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -253,7 +268,8 @@ async function main() {
         name: "Punugulu Plate",
         description: "Crispy evening snack with ginger chutney.",
         price: 79,
-        foodType: "VEG"
+        foodType: "VEG",
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -265,7 +281,8 @@ async function main() {
         description: "Paneer tikka, millet rice, salad, mint dressing.",
         price: 249,
         foodType: "VEG",
-        isBestSeller: true
+        isBestSeller: true,
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -276,7 +293,8 @@ async function main() {
         name: "Chicken Teriyaki Bowl",
         description: "Grilled chicken, herbed rice, greens, teriyaki sauce.",
         price: 289,
-        foodType: "NON_VEG"
+        foodType: "NON_VEG",
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -288,7 +306,8 @@ async function main() {
         description: "Small-batch chocolate cake with ganache frosting.",
         price: 399,
         foodType: "EGG",
-        isBestSeller: true
+        isBestSeller: true,
+        ...seedProvenance
       }
     }),
     prisma.menuItem.create({
@@ -299,7 +318,8 @@ async function main() {
         name: "Assorted Cupcake Box",
         description: "Six cupcakes with chocolate, vanilla, and strawberry frosting.",
         price: 549,
-        foodType: "EGG"
+        foodType: "EGG",
+        ...seedProvenance
       }
     })
   ]);
@@ -313,6 +333,7 @@ async function main() {
       address: "Flat 304, Lakshmi Residency",
       whatsappOptIn: true,
       marketingOptIn: true,
+      ...seedProvenance,
       totalOrders: 8,
       totalSpent: 2840,
       lastOrderAt: new Date()
@@ -326,6 +347,7 @@ async function main() {
       orderNumber: "VM-1001",
       status: "PREPARING",
       paymentStatus: "COMPLETED",
+      ...seedProvenance,
       subtotal: 238,
       deliveryFee: 0,
       taxableAmount: 238,
@@ -366,7 +388,8 @@ async function main() {
       cashfreePaymentId: "cfpay_demo_1001",
       cashfreeOrderStatus: "PAID",
       amount: 238,
-      status: "COMPLETED"
+      status: "COMPLETED",
+      ...seedProvenance
     }
   });
 

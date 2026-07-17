@@ -1,5 +1,10 @@
 import type { BusinessIntelligenceDataset, IntelligenceOrder } from "@/lib/business-intelligence";
 import { getBusinessIntelligenceDataset } from "@/lib/business-intelligence-data";
+import { intelligenceBenchmarkDatasets, productionTrainingOrigins } from "@/lib/intelligence/benchmark-datasets";
+import {
+  businessDateKey as dateKey,
+  businessDaysBetween as daysBetween
+} from "@/lib/intelligence/intelligence-time";
 import { buildEngineSummary, intelligenceModelTypes, type PersistedModelStatus } from "@/lib/intelligence/ml/model-registry";
 import { getIntelligenceModelStatuses } from "@/lib/intelligence/ml/training-service";
 
@@ -76,7 +81,7 @@ export type BusinessIntelligenceGovernanceReport = {
     type: "rules_engine" | "trained_ml" | "hybrid_rules_plus_ml";
     trainedModelInUse: boolean;
     dataSource: "first_party_database";
-    externalDatasets: "none";
+    externalDatasets: "isolated_evaluation_only";
     syntheticProductionData: "none";
     usesExternalDatasets: false;
     summary: string;
@@ -106,7 +111,7 @@ export type BusinessIntelligenceGovernanceReport = {
     developmentDataset: string;
     externalDatasets: Array<{
       name: string;
-      status: "not_used";
+      status: "evaluation_only" | "excluded_duplicate" | "incomplete";
       purpose: string;
     }>;
     futureLabels: Array<{
@@ -123,25 +128,17 @@ export type BusinessIntelligenceGovernanceReport = {
   };
 };
 
-const dayMs = 24 * 60 * 60 * 1000;
-
 function round(value: number, decimals = 0) {
   const factor = 10 ** decimals;
   return Math.round(value * factor) / factor;
 }
 
-function startOfDay(date: Date) {
-  const copy = new Date(date);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysBetween(from: Date, to: Date) {
-  return Math.max(0, Math.floor((startOfDay(to).getTime() - startOfDay(from).getTime()) / dayMs));
-}
-
 function isCompletedOrder(order: IntelligenceOrder) {
   return order.status === "DELIVERED" || order.status === "COMPLETED";
+}
+
+function orderActivityAt(order: IntelligenceOrder) {
+  return order.completedAt ?? order.scheduledFor ?? order.createdAt;
 }
 
 function qualityStatus(value: number, passAt: number, warnAt: number): IntelligenceQualityStatus {
@@ -155,17 +152,13 @@ function readinessStatus(blocked: boolean, ready: boolean): IntelligenceReadines
   return ready ? "ready" : "needs_data";
 }
 
-function dateKey(date: Date) {
-  return startOfDay(date).toISOString().slice(0, 10);
-}
-
 function buildDatasetProfile(dataset: BusinessIntelligenceDataset): IntelligenceDatasetProfile {
   const now = dataset.now ?? new Date();
   const orders = dataset.orders;
   const orderItems = orders.flatMap((order) => order.items);
   const linkedOrderItems = orderItems.filter((item) => Boolean(item.productId)).length;
-  const orderDates = new Set(orders.map((order) => dateKey(order.createdAt)));
-  const orderTimes = orders.map((order) => order.createdAt.getTime());
+  const orderDates = new Set(orders.map((order) => dateKey(orderActivityAt(order))));
+  const orderTimes = orders.map((order) => orderActivityAt(order).getTime());
   const earliestOrderAt = orderTimes.length ? new Date(Math.min(...orderTimes)) : null;
   const latestOrderAt = orderTimes.length ? new Date(Math.max(...orderTimes)) : null;
   const completedOrders = orders.filter(isCompletedOrder).length;
@@ -240,7 +233,7 @@ function buildDataSources(dataset: BusinessIntelligenceDataset, profile: Intelli
       storage: "Order, OrderItem",
       sourceType: "first_party_operational",
       recordCount: profile.orderHistory.orders,
-      fieldsUsed: ["status", "paymentStatus", "totalAmount", "createdAt", "orderType", "itemName", "quantity", "menuItemId"],
+      fieldsUsed: ["status", "paymentStatus", "totalAmount", "createdAt", "scheduledFor", "completedAt", "orderType", "itemName", "quantity", "menuItemId"],
       usedFor: ["sales trends", "demand forecasts", "repeat behavior", "product performance", "accuracy backtests"],
       containsPersonalData: false,
       trainingRole: "future_training_label",
@@ -570,12 +563,12 @@ export function buildBusinessIntelligenceGovernanceReport(
       type: engine.type,
       trainedModelInUse: engine.trainedModelInUse,
       dataSource: "first_party_database",
-      externalDatasets: "none",
+      externalDatasets: "isolated_evaluation_only",
       syntheticProductionData: "none",
       usesExternalDatasets: false,
       summary: engine.trainedModelInUse
-        ? "Bhojzo is using trained first-party ML where a trained artifact exists, with rules/statistical recommendations kept as fallback."
-        : "Bhojzo is using explainable rules and statistical signals because no trained first-party ML artifact is active for this business."
+        ? "VyapaarMate is using trained first-party ML where a compatible trained artifact exists, with rules/statistical recommendations kept as fallback."
+        : "VyapaarMate is using explainable rules and statistical signals because no compatible trained first-party ML artifact is active for this business."
     },
     modelStatus: governanceModelStatuses(modelStatuses),
     datasetProfile: profile,
@@ -588,19 +581,28 @@ export function buildBusinessIntelligenceGovernanceReport(
     trainingPlan: {
       currentTrainingStatus: "not_training",
       approvedTrainingSource:
-        "Use only the merchant's first-party operational history from Business, MenuItem, MenuCategory, Order, OrderItem, Customer, and Payment.",
+        `Use only training-eligible merchant records with origins ${productionTrainingOrigins.join(", ")} from Business, MenuItem, MenuCategory, Order, OrderItem, Customer, and Payment.`,
       developmentDataset:
         "Unit tests use a synthetic fixture in lib/business-intelligence.test.ts. That fixture is for regression testing only and is not model-training data.",
-      externalDatasets: [],
+      externalDatasets: intelligenceBenchmarkDatasets.map((benchmark) => ({
+        name: benchmark.name,
+        status:
+          benchmark.status === "EXCLUDED_DUPLICATE"
+            ? "excluded_duplicate"
+            : benchmark.status === "INCOMPLETE_CALENDAR_ONLY"
+              ? "incomplete"
+              : "evaluation_only",
+        purpose: `${benchmark.allowedUses.join(", ")}. Never eligible for production training, readiness, health scoring, or owner actions.`
+      })),
       futureLabels: [
         {
           label: "Actual product demand by date and time slot",
-          builtFrom: "Order.createdAt plus OrderItem.menuItemId, itemName, and quantity",
+          builtFrom: "Order.completedAt or scheduledFor (createdAt only as fallback), plus OrderItem.menuItemId, itemName, and quantity",
           useCase: "Demand forecasting"
         },
         {
           label: "Customer returned within the next N days",
-          builtFrom: "Customer.id and subsequent Order.createdAt events",
+          builtFrom: "Tokenized Customer.id and subsequent completed or scheduled Order events",
           useCase: "Repeat-customer and churn prediction"
         },
         {

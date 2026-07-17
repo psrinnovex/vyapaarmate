@@ -27,6 +27,11 @@ export type LiveOrder = {
   channel: string;
   time: string;
   createdAt: string;
+  scheduledFor: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+  noShowAt: string | null;
   orderType: "PICKUP" | "DELIVERY" | "DINE_IN" | "SERVICE_AT_LOCATION";
   notes: string | null;
 };
@@ -549,6 +554,11 @@ export function getDemoDashboardPayload(): LiveDashboardPayload {
     channel: order.channel,
     time: order.time,
     createdAt: new Date().toISOString(),
+    scheduledFor: null,
+    completedAt: null,
+    cancelledAt: null,
+    cancellationReason: null,
+    noShowAt: null,
     orderType: "PICKUP",
     notes: null
   }));
