@@ -15,12 +15,16 @@ export type IntelligenceEngineType = "rules_engine" | "trained_ml" | "hybrid_rul
 
 export type IntelligenceEngineModelSummary = {
   modelType: "demand" | "retention" | "payment_risk";
-  status: "needs_data" | "ready_for_training" | "training" | "trained" | "failed" | "disabled";
+  status: "needs_data" | "ready_for_training" | "training" | "shadow" | "trained" | "failed" | "disabled";
   latestVersion: string | null;
   lastTrainedAt: string | null;
   trainingRows: number | null;
   validationRows: number | null;
   metrics: unknown;
+  lifecycleStatus: "shadow" | "active" | "retired" | "rolled_back" | null;
+  promotionEligible: boolean;
+  driftStatus: string | null;
+  driftScore: number | null;
   missingRequirements: string[];
 };
 

@@ -8,7 +8,8 @@ import {
   type ModelTrainingResult,
   type VectorModelArtifact
 } from "@/lib/intelligence/ml/model-registry";
-import { clamp, round, trainValidationSplit } from "@/lib/intelligence/ml/metrics";
+import { clamp, round } from "@/lib/intelligence/ml/metrics";
+import { prepareChronologicalTraining } from "@/lib/intelligence/ml/training-policy";
 
 export type PaymentRiskPrediction = {
   modelType: "payment_risk";
@@ -35,17 +36,17 @@ export function paymentRiskTrainingExamples(data: FirstPartyTrainingData) {
 }
 
 export function trainPaymentRiskModel(examples: FeatureExample[]): ModelTrainingResult {
-  const sorted = examples.slice().sort((first, second) => first.observedAt.getTime() - second.observedAt.getTime());
-  const { trainRows, validationRows } = trainValidationSplit(sorted, 0.2);
+  const prepared = prepareChronologicalTraining(examples, "payment_risk");
 
   return trainLogisticRegressionModel({
     modelType: "payment_risk",
-    trainExamples: trainRows,
-    validationExamples: validationRows,
-    algorithm: "regularized_logistic_regression_gradient_descent",
+    trainExamples: prepared.trainExamples,
+    validationExamples: prepared.validationExamples,
+    algorithm: "calibrated_regularized_logistic_regression_sparse_minibatch",
     learningRate: 0.045,
-    iterations: 420,
-    l2: 0.003
+    iterations: 220,
+    l2: 0.003,
+    runtime: prepared.runtime
   });
 }
 

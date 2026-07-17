@@ -42,7 +42,7 @@ A missing or changed file fails verification. `--allow-unlocked` is available on
 
 Every artifact stores a `featureSchemaVersion`. Loading and status queries reject artifacts from an older schema, so models trained with leaked or obsolete features cannot silently return to service after a deployment.
 
-Lifecycle data is stored in `IntelligenceModelArtifact`, `IntelligenceTrainingRun`, and `IntelligencePrediction`. Supported model states are `needs_data`, `ready_for_training`, `training`, `trained`, `failed`, and `disabled`.
+Lifecycle data is stored in `IntelligenceModelArtifact`, `IntelligenceTrainingRun`, and `IntelligencePrediction`. Supported model states are `needs_data`, `ready_for_training`, `training`, `shadow`, `trained`, `failed`, and `disabled`. Artifact lifecycle states are `shadow`, `active`, `retired`, and `rolled_back`; only a compatible active artifact serves predictions.
 
 ## Minimum readiness gates
 
@@ -60,7 +60,7 @@ Every gate in a model family must pass.
 - At least 100 customers.
 - At least 300 customer-linked, non-cancelled orders.
 - At least 20 repeat customers.
-- At least 90 days of customer order history.
+- Enough customer order history for point-in-time train/validation labels: 105 days for a 30-day return horizon, 143 days for 45 days, or 180 days for 60 days.
 
 ### Payment risk
 
@@ -88,11 +88,12 @@ Businesses with scheduled services must capture `Order.scheduledFor`. Owners can
 POST /api/intelligence/train
 GET /api/intelligence/model-status?businessId=business_id
 GET /api/intelligence/predictions?businessId=business_id
+POST /api/intelligence/rollback
 GET /api/intelligence/data-sources
 GET /api/intelligence/accuracy?days=14
 ```
 
-Owner/admin routes verify access to the requested business. The protected `/api/jobs/intelligence-refresh` job materializes rules outputs, checks all gates, trains only when needed, generates compatible-model predictions, and preserves rules fallback for every untrained family.
+Owner/admin routes verify access to the requested business. The protected `/api/jobs/intelligence-refresh` job materializes rules outputs, checks all gates, trains only when needed, stores candidates in shadow, promotes only candidates that beat their baseline gates, checks feature drift, generates active compatible-model predictions, and preserves rules fallback for every untrained family. Two consecutive critical drift checks attempt to restore the latest compatible retired artifact.
 
 ## Privacy and maintenance
 

@@ -1,4 +1,7 @@
 import { stableHash, type FeatureExample, type FeatureMap, type IntelligenceModelType, type ModelReadiness } from "@/lib/intelligence/ml/model-registry";
+import { intelligenceBusinessProfile } from "@/lib/intelligence/ml/business-profiles";
+import { boundedChronologicalRows } from "@/lib/intelligence/ml/metrics";
+import { intelligenceTrainingBounds } from "@/lib/intelligence/ml/training-policy";
 import {
   addBusinessDays as addDays,
   businessDateKey as dateKey,
@@ -61,6 +64,7 @@ export type FirstPartyPaymentRecord = {
   provider: string;
   createdAt: Date;
   paidAt: Date | null;
+  resolvedAt?: Date | null;
 };
 
 export type FirstPartyTrainingData = {
@@ -119,6 +123,15 @@ function isResolvedPayment(payment: Pick<FirstPartyPaymentRecord, "status"> | { 
 
 function isFailedPayment(payment: Pick<FirstPartyPaymentRecord, "status"> | { status: string }) {
   return payment.status === "FAILED";
+}
+
+function paymentOutcomeAvailableAt(payment: FirstPartyPaymentRecord) {
+  if (isSuccessfulPayment(payment)) return payment.paidAt ?? payment.resolvedAt ?? payment.createdAt;
+  return payment.resolvedAt ?? payment.createdAt;
+}
+
+function isSuccessfulPaymentBy(payment: FirstPartyPaymentRecord, cutoff: Date) {
+  return isSuccessfulPayment(payment) && paymentOutcomeAvailableAt(payment).getTime() <= cutoff.getTime();
 }
 
 function safeNumber(value: number) {
@@ -232,10 +245,12 @@ export function evaluateModelReadiness(data: FirstPartyTrainingData, modelType: 
   }
 
   if (modelType === "retention") {
+    const businessProfile = intelligenceBusinessProfile(data.business.businessType);
     const customerGate = readinessGate("customers", "Customers", profile.customerCount, 100, "customers");
     const orderGate = readinessGate("customer_linked_orders", "Customer-linked orders", profile.customerLinkedOrders, 300, "orders");
     const repeatGate = readinessGate("repeat_customers", "Repeat customers", profile.repeatCustomerCount, 20, "customers");
-    const historyGate = readinessGate("history_days", "Customer order history", profile.completedOrderHistoryDays, 90, "days");
+    const requiredHistoryDays = Math.max(90, 30 + Math.ceil(businessProfile.retentionHorizonDays * 2.5));
+    const historyGate = readinessGate("history_days", "Customer order history", profile.completedOrderHistoryDays, requiredHistoryDays, "days");
     const gates = [customerGate, orderGate, repeatGate, historyGate];
     const ready = gates.every((gate) => gate.met);
 
@@ -373,8 +388,8 @@ function demandFeatures({
     ? prior30Orders.reduce((sum, order) => sum + order.totalAmount, 0) / prior30Orders.length
     : 0;
   const paymentSuccessRatio = prior30Payments.length
-    ? ratio(prior30Payments.filter(isSuccessfulPayment).length, prior30Payments.length)
-    : ratio(prior30Orders.filter((order) => order.paymentStatus === "COMPLETED" || order.paymentStatus === "PAID").length, prior30Orders.length);
+    ? ratio(prior30Payments.filter((payment) => isSuccessfulPaymentBy(payment, day)).length, prior30Payments.length)
+    : 0;
 
   return {
     dayOfWeek: businessDayOfWeek(day) / 6,
@@ -387,9 +402,20 @@ function demandFeatures({
     averageOrderValue: logFeature(averageOrderValue),
     paymentSuccessRatio,
     orderCountTrend: normalizedTrend(prior7Orders.length, previous7Orders.length),
+    [categoricalFeature("businessFamily", intelligenceBusinessProfile(data.business.businessType).family)]: 1,
     [categoricalFeature("item", entity.key)]: 1,
     [categoricalFeature("category", entity.categoryKey)]: 1
   };
+}
+
+function demandBaselinePrediction(
+  quantityByDate: Map<string, Map<string, number>>,
+  entityKey: string,
+  targetDate: Date
+) {
+  const sameWeekday = quantityByDate.get(dateKey(addDays(startOfDay(targetDate), -7)));
+  if (sameWeekday) return sameWeekday.get(entityKey) ?? 0;
+  return sumRecentQuantity(quantityByDate, entityKey, targetDate, 7) / 7;
 }
 
 export function buildDemandTrainingExamples(data: FirstPartyTrainingData): FeatureExample[] {
@@ -399,20 +425,32 @@ export function buildDemandTrainingExamples(data: FirstPartyTrainingData): Featu
   const entities = demandEntities(data);
   const quantityByDate = demandQuantityIndex(completedOrders);
   const earliest = startOfDay(orderActivityAt(completedOrders[0]!));
-  const latest = startOfDay(orderActivityAt(completedOrders[completedOrders.length - 1]!));
+  const latestObserved = startOfDay(orderActivityAt(completedOrders[completedOrders.length - 1]!));
+  const latestMatured = addDays(startOfDay(data.now), -1);
+  const latest = latestObserved < latestMatured ? latestObserved : latestMatured;
   const firstTrainingDay = addDays(earliest, 30);
+  if (firstTrainingDay > latest) return [];
+  const bounds = intelligenceTrainingBounds("demand");
+  const rowBudget = bounds.maximumTrainRows + bounds.maximumValidationRows;
+  const maximumDays = Math.max(1, Math.floor(rowBudget / Math.max(1, entities.length)));
+  const boundedFirstDay = addDays(latest, -(maximumDays - 1));
+  const trainingStart = boundedFirstDay > firstTrainingDay ? boundedFirstDay : firstTrainingDay;
 
-  return dateRange(firstTrainingDay, latest).flatMap((day) =>
+  return dateRange(trainingStart, latest).flatMap((day) =>
     entities.map((entity) => ({
       entityId: entity.entityId,
       entityType: "menu_item",
       label: quantityByDate.get(dateKey(day))?.get(entity.key) ?? 0,
+      labelAvailableAt: addDays(day, 1),
+      baselinePrediction: demandBaselinePrediction(quantityByDate, entity.key, day),
       features: demandFeatures({ data, quantityByDate, entity, targetDate: day }),
       observedAt: day,
       metadata: {
         itemName: entity.itemName,
         categoryName: entity.categoryName,
         forecastDate: day.toISOString().slice(0, 10),
+        businessFamily: intelligenceBusinessProfile(data.business.businessType).family,
+        labelHorizonDays: 1,
         recent30Quantity: sumRecentQuantity(quantityByDate, entity.key, day, 30)
       }
     }))
@@ -433,6 +471,7 @@ export function buildDemandPredictionExamples(data: FirstPartyTrainingData, targ
         itemName: entity.itemName,
         categoryName: entity.categoryName,
         forecastDate: targetDate.toISOString().slice(0, 10),
+        businessFamily: intelligenceBusinessProfile(data.business.businessType).family,
         recent30Quantity: sumRecentQuantity(quantityByDate, entity.key, targetDate, 30)
       }
     }));
@@ -465,9 +504,12 @@ function retentionFeatures(data: FirstPartyTrainingData, customer: FirstPartyCus
     totalOrders: logFeature(totalOrders),
     daysSinceLastOrder: daysBetween(lastOrderAt, referenceDate) / 365,
     averageOrderValue: logFeature(totalSpent / totalOrders),
-    paymentSuccessRate: payments.length ? ratio(payments.filter(isSuccessfulPayment).length, payments.length) : 0,
+    paymentSuccessRate: payments.length
+      ? ratio(payments.filter((payment) => isSuccessfulPaymentBy(payment, referenceDate)).length, payments.length)
+      : 0,
     firstOrderAgeDays: firstOrderAgeDays / 365,
-    orderFrequency: totalOrders / Math.max(1, firstOrderAgeDays / 30)
+    orderFrequency: totalOrders / Math.max(1, firstOrderAgeDays / 30),
+    [categoricalFeature("businessFamily", intelligenceBusinessProfile(data.business.businessType).family)]: 1
   };
 }
 
@@ -475,26 +517,42 @@ export function buildRetentionTrainingExamples(data: FirstPartyTrainingData): Fe
   const activeOrders = data.orders.filter((order) => !isCancelledOrder(order)).sort((first, second) => orderActivityAt(first).getTime() - orderActivityAt(second).getTime());
   if (activeOrders.length < 2) return [];
 
+  const profile = intelligenceBusinessProfile(data.business.businessType);
+  const horizonDays = profile.retentionHorizonDays;
   const firstDate = addDays(startOfDay(orderActivityAt(activeOrders[0]!)), 30);
-  const lastDate = addDays(startOfDay(orderActivityAt(activeOrders[activeOrders.length - 1]!)), -30);
+  const lastDate = addDays(startOfDay(orderActivityAt(activeOrders[activeOrders.length - 1]!)), -horizonDays);
   if (firstDate > lastDate) return [];
 
-  const examples: FeatureExample[] = [];
+  const referenceDates: Date[] = [];
   for (let referenceDate = firstDate; referenceDate <= lastDate; referenceDate = addDays(referenceDate, 7)) {
-    data.customers.forEach((customer) => {
+    referenceDates.push(referenceDate);
+  }
+  const recentReferenceDates = referenceDates.slice(-52);
+  const bounds = intelligenceTrainingBounds("retention");
+  const rowBudget = bounds.maximumTrainRows + bounds.maximumValidationRows;
+  const maximumCustomers = Math.max(1, Math.floor(rowBudget / Math.max(1, recentReferenceDates.length)));
+  const boundedCustomers = boundedChronologicalRows(data.customers, maximumCustomers);
+
+  const examples: FeatureExample[] = [];
+  for (const referenceDate of recentReferenceDates) {
+    boundedCustomers.forEach((customer) => {
       const features = retentionFeatures(data, customer, referenceDate);
       if (!features) return;
 
-      const returned = customerOrders(data, customer.id, addDays(referenceDate, 30), referenceDate).length > 0;
+      const labelAvailableAt = addDays(referenceDate, horizonDays);
+      const returned = customerOrders(data, customer.id, labelAvailableAt, referenceDate).length > 0;
       examples.push({
         entityId: customer.id,
         entityType: "customer",
         label: returned ? 1 : 0,
+        labelAvailableAt,
         features,
         observedAt: referenceDate,
         metadata: {
           customerName: customer.name,
-          referenceDate: referenceDate.toISOString().slice(0, 10)
+          referenceDate: referenceDate.toISOString().slice(0, 10),
+          businessFamily: profile.family,
+          labelHorizonDays: horizonDays
         }
       });
     });
@@ -517,6 +575,7 @@ export function buildRetentionPredictionExamples(data: FirstPartyTrainingData): 
       observedAt: data.now,
       metadata: {
         customerName: customer.name,
+        businessFamily: intelligenceBusinessProfile(data.business.businessType).family,
         daysSinceLastOrder: customer.lastOrderAt ? daysBetween(customer.lastOrderAt, data.now) : null,
         totalOrders: customer.totalOrders
       }
@@ -528,7 +587,13 @@ export function buildRetentionPredictionExamples(data: FirstPartyTrainingData): 
 
 function priorPaymentsForCustomer(data: FirstPartyTrainingData, customerId: string, before: Date) {
   return data.payments
-    .filter((payment) => payment.customerId === customerId && payment.createdAt < before && isResolvedPayment(payment))
+    .filter(
+      (payment) =>
+        payment.customerId === customerId &&
+        payment.createdAt < before &&
+        isResolvedPayment(payment) &&
+        paymentOutcomeAvailableAt(payment).getTime() <= before.getTime()
+    )
     .sort((first, second) => first.createdAt.getTime() - second.createdAt.getTime());
 }
 
@@ -541,6 +606,7 @@ function paymentRiskFeatures(data: FirstPartyTrainingData, payment: FirstPartyPa
     orderValue: logFeature(payment.amount),
     previousPaymentSuccessRatio: previousPayments.length ? ratio(successfulPrevious, previousPayments.length) : 0,
     priorFailedCount: logFeature(failedPrevious),
+    [categoricalFeature("businessFamily", intelligenceBusinessProfile(data.business.businessType).family)]: 1,
     [categoricalFeature("paymentMethod", payment.provider)]: 1
   };
 }
@@ -554,6 +620,7 @@ export function buildPaymentRiskTrainingExamples(data: FirstPartyTrainingData): 
       entityId: payment.id,
       entityType: "payment",
       label: isFailedPayment(payment) ? 1 : 0,
+      labelAvailableAt: paymentOutcomeAvailableAt(payment),
       features: paymentRiskFeatures(data, payment),
       observedAt: payment.createdAt,
       metadata: {
@@ -561,7 +628,8 @@ export function buildPaymentRiskTrainingExamples(data: FirstPartyTrainingData): 
         customerId: payment.customerId,
         amount: payment.amount,
         status: payment.status,
-        provider: payment.provider
+        provider: payment.provider,
+        businessFamily: intelligenceBusinessProfile(data.business.businessType).family
       }
     }));
 }
@@ -581,7 +649,8 @@ export function buildPaymentRiskPredictionExamples(data: FirstPartyTrainingData)
         customerId: payment.customerId,
         amount: payment.amount,
         status: payment.status,
-        provider: payment.provider
+        provider: payment.provider,
+        businessFamily: intelligenceBusinessProfile(data.business.businessType).family
       }
     }));
 }

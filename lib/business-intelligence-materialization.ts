@@ -282,25 +282,45 @@ export async function refreshBusinessIntelligenceForBusiness(businessId: string)
 
 export async function refreshBusinessIntelligence({
   businessId,
-  limit = 100
+  limit = 100,
+  timeBudgetMs = 270_000
 }: {
   businessId?: string | null;
   limit?: number;
+  timeBudgetMs?: number;
 } = {}) {
   const boundedLimit = Math.min(100, Math.max(1, Math.floor(limit)));
+  const requestedTimeBudgetMs = Number.isFinite(timeBudgetMs) ? Math.floor(timeBudgetMs) : 270_000;
+  const boundedTimeBudgetMs = Math.min(270_000, Math.max(30_000, requestedTimeBudgetMs));
+  const startedAt = Date.now();
+  const maximumBusinessWorkMs = 180_000;
   const businesses = businessId
     ? [{ id: businessId }]
-    : await prisma.business.findMany({
-        where: { isActive: true },
-        orderBy: { updatedAt: "desc" },
-        take: boundedLimit,
-        select: { id: true }
-      });
+    : await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+        SELECT business."id"
+        FROM "Business" AS business
+        LEFT JOIN (
+          SELECT snapshot."businessId", MAX(snapshot."createdAt") AS "lastRefreshedAt"
+          FROM "BusinessHealthSnapshot" AS snapshot
+          GROUP BY snapshot."businessId"
+        ) AS refresh_state ON refresh_state."businessId" = business."id"
+        WHERE business."isActive" = true
+        ORDER BY refresh_state."lastRefreshedAt" ASC NULLS FIRST, business."updatedAt" DESC
+        LIMIT ${boundedLimit}
+      `);
 
   const refreshed: BusinessIntelligenceRefreshResult[] = [];
   const failed: Array<{ businessId: string; error: string }> = [];
+  let deferred: string[] = [];
 
-  for (const business of businesses) {
+  for (let index = 0; index < businesses.length; index += 1) {
+    const business = businesses[index]!;
+    const hasProcessedBusiness = refreshed.length + failed.length > 0;
+    const remainingTimeMs = boundedTimeBudgetMs - (Date.now() - startedAt);
+    if (hasProcessedBusiness && remainingTimeMs < maximumBusinessWorkMs) {
+      deferred = businesses.slice(index).map((row) => row.id);
+      break;
+    }
     try {
       refreshed.push(await refreshBusinessIntelligenceForBusiness(business.id));
     } catch (error) {
@@ -314,6 +334,7 @@ export async function refreshBusinessIntelligence({
   return {
     checked: businesses.length,
     refreshed,
-    failed
+    failed,
+    deferred
   };
 }

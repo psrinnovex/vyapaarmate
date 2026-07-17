@@ -543,6 +543,7 @@ model Payment {
   trainingEligible            Boolean              @default(true)
   walletEntry                 BusinessWalletEntry?
   createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @default(now()) @updatedAt
 
   @@index([businessId, status])
   @@index([businessId, dataOrigin, trainingEligible])
@@ -645,46 +646,65 @@ model PaymentPriority {
 }
 
 model IntelligenceModelArtifact {
-  id                String    @id @default(cuid())
-  businessId        String
-  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  modelType         String
-  version           String
-  status            String
-  algorithm         String
-  featuresJson      Json
-  weightsJson       Json?
-  artifactJson      Json?
-  metricsJson       Json?
-  trainedAt         DateTime?
-  trainingDataStart DateTime?
-  trainingDataEnd   DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  businessId          String
+  business            Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  modelType           String
+  version             String
+  status              String
+  lifecycleStatus     String    @default("shadow")
+  promotionEligible   Boolean   @default(false)
+  algorithm           String
+  featuresJson        Json
+  weightsJson         Json?
+  artifactJson        Json?
+  metricsJson         Json?
+  baselineMetricsJson Json?
+  evaluationJson      Json?
+  driftStatus         String    @default("not_checked")
+  driftScore          Float?
+  driftJson           Json?
+  lastDriftCheckedAt  DateTime?
+  trainedAt           DateTime?
+  promotedAt          DateTime?
+  retiredAt           DateTime?
+  rollbackReason      String?   @db.Text
+  trainingDataStart   DateTime?
+  trainingDataEnd     DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   @@unique([businessId, modelType, version])
   @@index([businessId, modelType])
   @@index([businessId, modelType, status])
+  @@index([businessId, modelType, lifecycleStatus])
+  @@index([businessId, driftStatus, lastDriftCheckedAt])
   @@index([businessId, status, createdAt])
   @@index([businessId, createdAt])
 }
 
 model IntelligenceTrainingRun {
-  id             String    @id @default(cuid())
-  businessId     String
-  business       Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  modelType      String
-  status         String
-  rowsUsed       Int       @default(0)
-  trainRows      Int       @default(0)
-  validationRows Int       @default(0)
-  metricsJson    Json?
-  startedAt      DateTime  @default(now())
-  completedAt    DateTime?
-  errorMessage   String?   @db.Text
+  id                String    @id @default(cuid())
+  businessId        String
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  modelType         String
+  status            String
+  trigger           String    @default("manual")
+  rowsUsed          Int       @default(0)
+  trainRows         Int       @default(0)
+  validationRows    Int       @default(0)
+  metricsJson       Json?
+  candidateVersion  String?
+  promotionDecision Json?
+  leaseExpiresAt    DateTime?
+  heartbeatAt       DateTime?
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  errorMessage      String?   @db.Text
 
   @@index([businessId, modelType])
   @@index([businessId, modelType, status])
+  @@index([status, leaseExpiresAt])
   @@index([businessId, status, startedAt])
   @@index([businessId, startedAt])
 }

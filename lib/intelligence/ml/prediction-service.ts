@@ -17,6 +17,7 @@ import {
   hasRecentTrainingFailure,
   hasRecentValidModel,
   latestTrainedArtifactsByType,
+  monitorIntelligenceModels,
   trainIntelligenceModel
 } from "@/lib/intelligence/ml/training-service";
 
@@ -180,9 +181,10 @@ export async function refreshBusinessMlIntelligence(businessId: string) {
       continue;
     }
 
-    trainingResults.push(await trainIntelligenceModel({ businessId, modelType, data }));
+    trainingResults.push(await trainIntelligenceModel({ businessId, modelType, data, trigger: "cron" }));
   }
 
+  const monitoring = await monitorIntelligenceModels({ businessId, data });
   const predictionResult = await generateAndStorePredictions({ businessId, data });
   const statuses = await getIntelligenceModelStatuses(businessId);
 
@@ -190,6 +192,7 @@ export async function refreshBusinessMlIntelligence(businessId: string) {
     businessId,
     engine: buildEngineSummary(statuses),
     trainingResults,
+    monitoring,
     predictions: predictionResult,
     fallbackUsed: predictionResult.fallback
   };
