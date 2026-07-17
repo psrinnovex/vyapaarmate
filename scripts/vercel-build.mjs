@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
+const SECRET_PLACEHOLDERS = ["replace", "placeholder", "changeme", "change-me", "example", "your-secret", "todo"];
 
 function fail(message) {
   throw new Error(`[production-build] ${message}`);
@@ -38,6 +39,16 @@ function supabaseProjectRef(url) {
 
   const directHost = /^db\.([a-z0-9-]+)\.supabase\.co$/i.exec(url.hostname);
   return directHost?.[1]?.toLowerCase() ?? null;
+}
+
+function validateCronSecret() {
+  const secret = process.env.CRON_SECRET?.trim() ?? "";
+  if (secret.length < 32) fail("CRON_SECRET must be set and at least 32 characters in Production.");
+
+  const normalized = secret.toLowerCase();
+  if (SECRET_PLACEHOLDERS.some((placeholder) => normalized.includes(placeholder))) {
+    fail("CRON_SECRET must not contain a placeholder value in Production.");
+  }
 }
 
 function validateProductionDatabaseTarget() {
@@ -86,12 +97,27 @@ function runNodeCli(relativePath, args, label) {
   if (result.status !== 0) fail(`${label} failed with exit code ${result.status ?? "unknown"}.`);
 }
 
-const isVercelProduction = process.env.VERCEL_ENV === "production";
+const vercelEnvironment = process.env.VERCEL_TARGET_ENV?.trim() || process.env.VERCEL_ENV?.trim() || "";
+const isVercelBuild = process.env.VERCEL === "1" || Boolean(vercelEnvironment);
+if (isVercelBuild && !["production", "preview", "development"].includes(vercelEnvironment)) {
+  fail("Vercel must expose VERCEL_ENV or VERCEL_TARGET_ENV before building.");
+}
+
+const isVercelProduction = vercelEnvironment === "production";
+let migrationGate = "not-applicable";
+let cronSecretGate = "not-applicable";
 
 if (isVercelProduction) {
+  validateCronSecret();
+  cronSecretGate = "passed";
   validateProductionDatabaseTarget();
   console.log("[production-build] Database target verified; applying committed Prisma migrations.");
   runNodeCli("node_modules/prisma/build/index.js", ["migrate", "deploy"], "Prisma migration deployment");
+  migrationGate = "passed";
 }
+
+process.env.NEXT_PUBLIC_PRODUCTION_MIGRATION_GATE = migrationGate;
+process.env.NEXT_PUBLIC_PRODUCTION_CRON_GATE = cronSecretGate;
+process.env.NEXT_PUBLIC_RELEASE_COMMIT = process.env.VERCEL_GIT_COMMIT_SHA?.trim() || "local";
 
 runNodeCli("node_modules/next/dist/bin/next", ["build"], "Next.js production build");
