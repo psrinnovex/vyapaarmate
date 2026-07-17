@@ -82,7 +82,7 @@ Optional bounded-training controls have conservative defaults and hard ceilings:
 
 Migration `20260717160000_ml_production_lifecycle` is additive. It records payment resolution update time, lifecycle/evaluation/drift fields, converts the newest legacy trained artifact per business/model to `active`, retires older ones, closes abandoned training rows, and creates concurrency/lifecycle indexes.
 
-The Vercel production build also runs `prisma migrate deploy` before `next build`. It first verifies that `DATABASE_URL` and `DIRECT_URL` use the expected Supabase pooler modes and identify the same project/database. Preview and local builds never run migrations. A target mismatch, missing secret, or failed migration stops the new deployment before it can replace the current production deployment.
+The Vercel production build also runs `prisma migrate deploy` before `next build`. It first verifies that `DATABASE_URL` and `DIRECT_URL` use the expected Supabase pooler modes and identify the same project/database, and that `CRON_SECRET` is a non-placeholder value of at least 32 characters. Preview and local builds never run migrations. A target mismatch, missing secret, or failed migration stops the new deployment before it can replace the current production deployment.
 
 ## 4. Preview deployment
 
@@ -130,6 +130,8 @@ Manual rollback body:
 3. Merge the reviewed release branch and wait for the Production deployment to finish. The build verifies the database target, applies pending Prisma migrations, and only then builds the application.
 4. Check the deployment logs for the successful migration and for route, timeout, or database pool errors. A failed migration must leave the previous deployment serving.
 5. Call the production job once with `limit=1`, then expand only after the first result is healthy.
+
+`GET /api/health` is a non-sensitive release proof. On Production it must report `status: "ok"`, the deployed Git commit, and `passed` for both `productionGates.databaseMigration` and `productionGates.cronSecret`. It never returns connection details or secret values. Preview/local builds report those gates as `not-applicable`.
 
 `vercel.json` schedules `/api/jobs/intelligence-refresh` daily at `02:00 UTC` (`07:30 IST`) with the route's default five-business batch. The route allows at most 25 businesses per call, rotates through the least recently refreshed active businesses, and stops admitting more businesses when its 270-second work budget cannot safely cover another worst-case training cycle. Deferred IDs are returned for the next protected invocation. The Vercel function has a 300-second duration. Other payment and payout jobs continue to use their existing external schedules.
 
