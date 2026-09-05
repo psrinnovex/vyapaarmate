@@ -14,9 +14,9 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["business", "productivity", "shopping"],
     icons: [
       {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: "/brand/vyapaarmate-logo-light.png",
+        sizes: "1254x1254",
+        type: "image/png",
         purpose: "any"
       }
     ]

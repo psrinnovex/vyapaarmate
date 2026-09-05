@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { siteConfig } from "@/lib/site";
 
 export const alt = "VyapaarMate direct local commerce dashboard";
@@ -8,7 +10,8 @@ export const size = {
 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const logo = await readFile(join(process.cwd(), "public/brand/vyapaarmate-logo-light.png"));
   return new ImageResponse(
     (
       <div
@@ -35,22 +38,9 @@ export default function OpenGraphImage() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <div
-              style={{
-                width: 82,
-                height: 82,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 22,
-                background: "#0f172a",
-                color: "#ffffff",
-                fontSize: 32,
-                fontWeight: 800
-              }}
-            >
-              VM
-            </div>
+            {/* ImageResponse requires a native image with embedded local bytes. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`data:image/png;base64,${logo.toString("base64")}`} alt="" width={82} height={82} style={{ objectFit: "contain" }} />
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: 34, fontWeight: 800 }}>{siteConfig.name}</div>
               <div style={{ color: "#10b981", fontSize: 22, fontWeight: 700 }}>PSHR INNOVEX PRIVATE LIMITED</div>

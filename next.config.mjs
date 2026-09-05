@@ -39,6 +39,9 @@ const nextConfig = {
   images: {
     localPatterns: [
       {
+        pathname: "/brand/**"
+      },
+      {
         pathname: "/api/business-images/**"
       },
       {
@@ -58,6 +61,8 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: "/icon.svg", destination: "/brand/vyapaarmate-logo-light.png", permanent: true },
+      { source: "/favicon.ico", destination: "/brand/vyapaarmate-logo-light.png", permanent: true },
       {
         source: "/:path*",
         has: [{ type: "host", value: "vypaarmate.com" }],

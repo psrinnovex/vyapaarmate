@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, CreditCard, KeyRound, LogIn, Mail, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -178,7 +179,7 @@ function AuthShell({
     <main className="grid min-h-screen place-items-center bg-mesh-light px-4 py-10">
       <div className="w-full max-w-md">
         <Link href="/" className="mb-6 flex items-center justify-center gap-2 font-bold text-ink">
-          <span className="grid size-10 place-items-center rounded-lg bg-ink text-white">VM</span>
+          <BrandMark surface="light" size={44} priority />
           <span>VyapaarMate</span>
         </Link>
         <Card className="bg-white/90 p-6 shadow-soft">

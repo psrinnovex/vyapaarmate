@@ -37,8 +37,12 @@ export const metadata: Metadata = {
     telephone: false
   },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: ["/icon.svg"]
+    icon: [
+      { url: "/brand/vyapaarmate-logo-light.png", type: "image/png", media: "(prefers-color-scheme: light)" },
+      { url: "/brand/vyapaarmate-logo-dark.png", type: "image/png", media: "(prefers-color-scheme: dark)" }
+    ],
+    shortcut: ["/brand/vyapaarmate-logo-light.png"],
+    apple: [{ url: "/brand/vyapaarmate-logo-light.png", type: "image/png" }]
   },
   other: {
     "geo.region": "IN",

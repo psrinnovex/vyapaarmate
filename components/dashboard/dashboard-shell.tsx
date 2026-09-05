@@ -3,6 +3,7 @@
 import type { Role } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, X } from "lucide-react";
 import { DashboardLiveProvider } from "@/hooks/use-live-sync";
@@ -239,7 +240,7 @@ export function DashboardShell({
       <aside className="hidden h-full min-h-0 overflow-hidden border-r border-line bg-white lg:block">
         <div className="flex h-full min-h-0 flex-col p-4">
           <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
-            <span className="grid size-10 place-items-center rounded-lg bg-white text-ink">VM</span>
+            <BrandMark surface="dark" size={44} />
             <span>VyapaarMate</span>
           </Link>
           {isSeededDemoUser && (
@@ -322,7 +323,7 @@ export function DashboardShell({
             >
               <div className="flex shrink-0 items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
-                  <span className="grid size-9 place-items-center rounded-lg bg-white text-ink">VM</span>
+                  <BrandMark surface="dark" size={40} />
                   <span>VyapaarMate</span>
                 </Link>
                 <button
