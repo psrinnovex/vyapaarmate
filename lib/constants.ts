@@ -2,7 +2,9 @@ import {
   BarChart3,
   Bell,
   BrainCircuit,
+  CalendarDays,
   CreditCard,
+  DatabaseBackup,
   FileClock,
   Home,
   Megaphone,
@@ -16,7 +18,8 @@ import {
   Users,
   Utensils
 } from "lucide-react";
-import { subscriptionPlanAmounts } from "@/lib/billing";
+import { subscriptionPlanAmounts, subscriptionSellingPlanAmounts } from "@/lib/billing";
+import { launchMarket, launchOffer } from "@/lib/launch-policy";
 import { formatINR } from "@/lib/utils";
 
 export { company } from "@/lib/site";
@@ -36,7 +39,8 @@ export const pricingPlans = [
   {
     id: "STARTER",
     name: "Starter",
-    price: subscriptionPlanAmounts.STARTER,
+    price: subscriptionSellingPlanAmounts.STARTER,
+    listPrice: subscriptionPlanAmounts.STARTER,
     description: "For home sellers, tiffin providers, solo services, and small single-location stores that need a direct digital ordering base.",
     bestFor: "Low-volume direct orders, bookings, or catalog requests",
     features: [
@@ -51,14 +55,15 @@ export const pricingPlans = [
   {
     id: "PRO",
     name: "Pro",
-    price: subscriptionPlanAmounts.PRO,
+    price: subscriptionSellingPlanAmounts.PRO,
+    listPrice: subscriptionPlanAmounts.PRO,
     description: "For growing restaurants, kitchens, salons, retailers, pharmacies, and service teams that need repeat sales and staff workflows.",
     bestFor: "Daily operations with staff, CRM, campaigns, and reporting",
     features: [
       "Everything in Starter",
       "CRM and repeat reminders",
       "Staff roles for operations teams",
-      "Campaign workflows",
+      "Saved campaign drafts (delivery not enabled)",
       "Advanced sales and booking reports",
       "Priority setup and support"
     ],
@@ -67,16 +72,20 @@ export const pricingPlans = [
 ] as const;
 
 export const pricingPolicy = {
-  setupFeeRange: `${formatINR(4999)} to ${formatINR(14999)}`,
-  annualDiscount: "15%",
-  platformCommission: "0%",
+  setupFeeRange: `${formatINR(launchOffer.standardSetupFeeMinimum)} to ${formatINR(launchOffer.standardSetupFeeMaximum)}`,
+  standardSetupFeeRange: `${formatINR(launchOffer.standardSetupFeeMinimum)} to ${formatINR(launchOffer.standardSetupFeeMaximum)}`,
+  launchOfferLabel: launchOffer.discountLabel,
+  launchMarketLabel: launchMarket.displayName,
   passThroughLabel: "Payment gateway and WhatsApp message charges are pass-through usage costs.",
-  recommendation: `Keep the public product at two plans for now: Starter at ${formatINR(subscriptionPlanAmounts.STARTER)}/month and Pro at ${formatINR(subscriptionPlanAmounts.PRO)}/month. Charge setup separately based on catalog size, WhatsApp template work, payment setup, and onboarding effort.`
+  recommendation: launchOffer.publiclyAdvertised
+    ? `${launchMarket.displayName} launch pricing is Starter at ${formatINR(subscriptionSellingPlanAmounts.STARTER)}/month and Pro at ${formatINR(subscriptionSellingPlanAmounts.PRO)}/month before GST, about ${launchOffer.discountPercent}% below the standard subscription prices.`
+    : `Starter is ${formatINR(subscriptionPlanAmounts.STARTER)}/month and Pro is ${formatINR(subscriptionPlanAmounts.PRO)}/month. Charge setup separately based on catalog size, WhatsApp template work, payment setup, and onboarding effort.`
 } as const;
 
 export const dashboardNav = [
   { href: "/dashboard", label: "Overview", icon: Home },
   { href: "/dashboard/ai-suggestions", label: "AI Suggestions", icon: BrainCircuit },
+  { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
   { href: "/dashboard/orders/history", label: "Order History", icon: ReceiptText },
   { href: "/dashboard/menu", label: "Menu", icon: Utensils },
@@ -92,6 +101,7 @@ export const dashboardNav = [
 ];
 
 export const adminNav = [
+  { href: "/admin/pilot", label: "Pilot Evidence", icon: BarChart3 },
   { href: "/admin", label: "Platform", icon: Home },
   { href: "/admin/businesses", label: "Businesses", icon: Store },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
@@ -100,5 +110,6 @@ export const adminNav = [
   { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
   { href: "/admin/support", label: "Support", icon: MessageCircle },
   { href: "/admin/logs", label: "Logs", icon: ReceiptText },
+  { href: "/admin/account-retention", label: "Data retention", icon: DatabaseBackup },
   { href: "/admin/settings", label: "Settings", icon: Settings }
 ];

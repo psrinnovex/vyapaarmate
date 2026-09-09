@@ -29,6 +29,7 @@ import {
 } from "@/lib/business-rules";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
 import { pricingPlans } from "@/lib/constants";
+import { launchMarket, launchSingleCityRestricted } from "@/lib/launch-policy";
 import { formChecked, formNumber, formOptionalNumber, formString } from "@/lib/form-data";
 import { cn, formatINR } from "@/lib/utils";
 import { ActionNotice, type ActionNoticeState } from "@/components/ui/action-feedback";
@@ -610,11 +611,21 @@ export function BusinessSetupPage() {
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
                 <Label>City</Label>
-                <Input name="city" defaultValue={business.city} required />
+                <Input
+                  name="city"
+                  defaultValue={launchSingleCityRestricted ? launchMarket.city : business.city}
+                  readOnly={launchSingleCityRestricted}
+                  required
+                />
               </div>
               <div>
                 <Label>State</Label>
-                <Input name="state" defaultValue={business.state} required />
+                <Input
+                  name="state"
+                  defaultValue={launchSingleCityRestricted ? launchMarket.state : business.state}
+                  readOnly={launchSingleCityRestricted}
+                  required
+                />
               </div>
             </div>
             <div id="setup-location-map">
@@ -623,11 +634,16 @@ export function BusinessSetupPage() {
                 defaultLatitude={business.latitude}
                 defaultLongitude={business.longitude}
                 address={business.address}
-                city={business.city}
-                state={business.state}
+                city={launchSingleCityRestricted ? launchMarket.city : business.city}
+                state={launchSingleCityRestricted ? launchMarket.state : business.state}
                 businessName={business.name}
               />
             </div>
+            {launchSingleCityRestricted && (
+              <p className="text-xs font-semibold text-emerald">
+                Pin the operating location within {launchMarket.maximumBusinessDistanceKm} km of central Bengaluru for the current launch.
+              </p>
+            )}
           </div>
         </Card>
 

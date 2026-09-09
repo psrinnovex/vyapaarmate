@@ -1,0 +1,56 @@
+{
+  "name": "@vyapaarmate/mobile",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@tanstack/react-query": "5.101.4",
+    "expo": "~57.0.14",
+    "expo-build-properties": "~57.0.12",
+    "expo-constants": "~57.0.12",
+    "expo-crypto": "~57.0.1",
+    "expo-file-system": "~57.0.4",
+    "expo-image": "~57.0.3",
+    "expo-linking": "~57.0.6",
+    "expo-location": "~57.0.11",
+    "expo-router": "~57.0.14",
+    "expo-secure-store": "~57.0.1",
+    "expo-sharing": "~57.0.13",
+    "expo-splash-screen": "~57.0.7",
+    "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.2",
+    "expo-web-browser": "~57.0.2",
+    "react": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/jest": "29.5.14",
+    "@types/node": "24.10.1",
+    "@types/react": "~19.2.2",
+    "eslint": "9.39.4",
+    "eslint-config-expo": "57.0.1",
+    "expo-doctor": "1.20.2",
+    "jest-expo": "57.0.4",
+    "sharp": "0.35.1",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "postinstall": "node scripts/patch-expo-modules-jsi.mjs",
+    "assets": "node scripts/generate-assets.mjs",
+    "doctor": "expo-doctor",
+    "lint": "expo lint",
+    "test": "jest --runInBand",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run assets && npm run lint && npm run typecheck && npm test && npm run doctor"
+  },
+  "private": true
+}

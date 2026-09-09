@@ -1,3 +1,5 @@
+import { launchMarket, launchMarketRestricted } from "@/lib/launch-policy";
+
 export const company = {
   product: "VyapaarMate",
   name: "PSHR INNOVEX PRIVATE LIMITED",
@@ -11,20 +13,29 @@ const fallbackOrigin = "https://www.vyapaarmate.com";
 export const siteConfig = {
   name: company.product,
   companyName: company.name,
-  title: "VyapaarMate | WhatsApp Commerce, UPI Payments and CRM for Local Businesses",
+  title: launchMarketRestricted
+    ? `VyapaarMate ${launchMarket.displayName} | WhatsApp Commerce, UPI Payments and CRM`
+    : "VyapaarMate | WhatsApp Commerce, UPI Payments and CRM for Local Businesses",
   description:
-    "VyapaarMate helps Indian local businesses take direct orders and bookings, collect UPI payments, send WhatsApp updates, manage CRM, campaigns, and dashboards.",
+    launchMarketRestricted
+      ? `VyapaarMate is currently onboarding local businesses in ${launchMarket.displayName} for direct orders and bookings, UPI payments, WhatsApp updates, CRM, campaigns, and dashboards.`
+      : "VyapaarMate helps Indian local businesses take direct orders and bookings, collect UPI payments, send WhatsApp updates, manage CRM, campaigns, and dashboards.",
   shortDescription:
-    "Website orders and bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, and owner dashboards for Indian local businesses.",
+    launchMarketRestricted
+      ? `Website orders and bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, and owner dashboards for businesses in ${launchMarket.displayName}.`
+      : "Website orders and bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, and owner dashboards for Indian local businesses.",
   locale: "en_IN",
   themeColor: "#0f172a",
-  market: "India",
+  market: launchMarketRestricted ? launchMarket.displayName : launchMarket.country,
   language: "en-IN",
   alternateNames: ["Vyapaar Mate", "vyapaarmate", "vyapaar mate"] as readonly string[],
   keywords: [
     "VyapaarMate",
     "Vyapaar Mate",
     "PSHR INNOVEX PRIVATE LIMITED",
+    "Bengaluru business software",
+    "Bangalore business software",
+    "Bengaluru WhatsApp ordering software",
     "Indian small business software",
     "local business software India",
     "website ordering system",

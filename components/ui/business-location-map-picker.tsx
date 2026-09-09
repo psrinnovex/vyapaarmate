@@ -3,14 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Crosshair, Loader2, LocateFixed, MapPin, Search, Trash2 } from "lucide-react";
 import { requestBrowserCoordinates } from "@/lib/browser-geolocation";
+import { isInsideLaunchMarket, launchMarket, launchMarketRestricted, launchSingleCityRestricted } from "@/lib/launch-policy";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const DEFAULT_MAP_CENTER = { latitude: 20.5937, longitude: 78.9629 };
-const DEFAULT_MAP_ZOOM = 5;
+const INDIA_MAP_CENTER = { latitude: 20.5937, longitude: 78.9629 };
+const DEFAULT_MAP_CENTER = launchMarketRestricted ? { ...launchMarket.center } : INDIA_MAP_CENTER;
+const DEFAULT_MAP_ZOOM = launchMarketRestricted ? 10 : 5;
 const SELECTED_LOCATION_ZOOM = 16;
 const missingGoogleMapsApiKeyMessage = "Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to load Google Maps.";
+const launchAreaPinError = launchSingleCityRestricted
+  ? `Choose a business pin within ${launchMarket.maximumBusinessDistanceKm} km of central Bengaluru.`
+  : `Choose a business pin in the ${launchMarket.displayName} pilot locations.`;
 
 type MapCoordinates = {
   latitude: number;
@@ -157,7 +162,8 @@ function buildSuggestedSearch({
   state,
   businessName
 }: Pick<BusinessLocationMapPickerProps, "address" | "city" | "state" | "businessName">) {
-  return [businessName, address, city, state].filter((part) => part && part.trim().length > 0).join(", ");
+  const locationParts = launchMarketRestricted ? [launchMarket.city, launchMarket.state] : [city, state];
+  return [businessName, address, ...locationParts].filter((part) => part && part.trim().length > 0).join(", ");
 }
 
 export function BusinessLocationMapPicker({
@@ -172,12 +178,18 @@ export function BusinessLocationMapPicker({
   onAddressSelect
 }: BusinessLocationMapPickerProps) {
   const apiKey = googleMapsBrowserKey();
+  const hasFiniteDefaultLocation =
+    typeof defaultLatitude === "number" &&
+    Number.isFinite(defaultLatitude) &&
+    typeof defaultLongitude === "number" &&
+    Number.isFinite(defaultLongitude);
   const initialLocation = useMemo(() => {
     if (
       typeof defaultLatitude === "number" &&
       Number.isFinite(defaultLatitude) &&
       typeof defaultLongitude === "number" &&
-      Number.isFinite(defaultLongitude)
+      Number.isFinite(defaultLongitude) &&
+      isInsideLaunchMarket(defaultLatitude, defaultLongitude)
     ) {
       return { latitude: defaultLatitude, longitude: defaultLongitude };
     }
@@ -194,13 +206,28 @@ export function BusinessLocationMapPicker({
   const [searchStatus, setSearchStatus] = useState<"idle" | "loading">("idle");
   const [searchError, setSearchError] = useState<string | null>(null);
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading">("idle");
-  const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(
+    hasFiniteDefaultLocation && !initialLocation ? launchAreaPinError : null
+  );
   const [mapStatus, setMapStatus] = useState<"idle" | "loading" | "ready" | "error">(apiKey ? "loading" : "error");
   const [mapError, setMapError] = useState<string | null>(apiKey ? null : missingGoogleMapsApiKeyMessage);
   const searchEditedRef = useRef(false);
   const mapElementRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<GoogleMap | null>(null);
   const markerRef = useRef<GoogleMarker | null>(null);
+  const locationRef = useRef<MapCoordinates | null>(initialLocation);
+
+  const selectLocation = useCallback((coordinates: MapCoordinates) => {
+    if (!isInsideLaunchMarket(coordinates.latitude, coordinates.longitude)) {
+      setLocationError(launchAreaPinError);
+      return false;
+    }
+
+    locationRef.current = coordinates;
+    setLocation(coordinates);
+    setLocationError(null);
+    return true;
+  }, []);
 
   const focusMapOnLocation = useCallback((coordinates: MapCoordinates, zoom = SELECTED_LOCATION_ZOOM) => {
     const map = mapInstanceRef.current;
@@ -242,12 +269,15 @@ export function BusinessLocationMapPicker({
 
         map.addListener("click", (event?: GoogleMapClickEvent) => {
           if (!event?.latLng) return;
-          setLocation(fromGoogleLatLng(event.latLng));
+          selectLocation(fromGoogleLatLng(event.latLng));
         });
         marker.addListener("dragend", () => {
           const position = marker.getPosition();
           if (!position) return;
-          setLocation(fromGoogleLatLng(position));
+          if (!selectLocation(fromGoogleLatLng(position))) {
+            const previousLocation = locationRef.current;
+            marker.setPosition(previousLocation ? toGoogleCoordinates(previousLocation) : null);
+          }
         });
 
         mapInstanceRef.current = map;
@@ -273,7 +303,7 @@ export function BusinessLocationMapPicker({
       markerRef.current = null;
       mapInstanceRef.current = null;
     };
-  }, [apiKey, initialLocation]);
+  }, [apiKey, initialLocation, selectLocation]);
 
   useEffect(() => {
     const marker = markerRef.current;
@@ -325,7 +355,7 @@ export function BusinessLocationMapPicker({
         longitude: Number(result.lon)
       };
 
-      setLocation(nextLocation);
+      if (!selectLocation(nextLocation)) return;
       focusMapOnLocation(nextLocation);
       setSearchQuery(result.display_name);
       onAddressSelect?.(result.display_name);
@@ -333,7 +363,7 @@ export function BusinessLocationMapPicker({
       setSearchError(null);
       searchEditedRef.current = true;
     },
-    [focusMapOnLocation, onAddressSelect]
+    [focusMapOnLocation, onAddressSelect, selectLocation]
   );
 
   const useBrowserLocation = useCallback(async () => {
@@ -354,9 +384,9 @@ export function BusinessLocationMapPicker({
     }
 
     const nextLocation = result.coordinates;
-    setLocation(nextLocation);
+    if (!selectLocation(nextLocation)) return;
     focusMapOnLocation(nextLocation);
-  }, [focusMapOnLocation]);
+  }, [focusMapOnLocation, selectLocation]);
 
   const hasLocation = location !== null;
 
@@ -380,8 +410,12 @@ export function BusinessLocationMapPicker({
               }
             }}
             className="pl-9"
-            aria-label="Search address, landmark, or city"
-            placeholder="Search Google Maps"
+            aria-label={
+              launchMarketRestricted
+                ? `Search address or landmark in ${launchMarket.displayName}`
+                : "Search address, landmark, or city"
+            }
+            placeholder={launchMarketRestricted ? `Search ${launchMarket.city} address or landmark` : "Search Google Maps"}
             autoComplete="street-address"
           />
         </div>
@@ -395,6 +429,13 @@ export function BusinessLocationMapPicker({
           Search
         </Button>
       </div>
+      {launchMarketRestricted && (
+        <p className="text-xs font-semibold text-slate-500">
+          {launchSingleCityRestricted
+            ? `Current launch area: within ${launchMarket.maximumBusinessDistanceKm} km of central Bengaluru.`
+            : `Pilot locations: ${launchMarket.displayName}. The operating address and pin require verification before approval.`}
+        </p>
+      )}
       {searchResults.length > 0 && (
         <div className="grid max-h-56 gap-1 overflow-y-auto rounded-lg border border-line bg-white p-2 shadow-sm">
           {searchResults.map((result) => (
@@ -479,7 +520,11 @@ export function BusinessLocationMapPicker({
           icon={<Trash2 className="size-4" />}
           className="sm:h-full"
           disabled={!hasLocation}
-          onClick={() => setLocation(null)}
+          onClick={() => {
+            locationRef.current = null;
+            setLocation(null);
+            setLocationError(null);
+          }}
         >
           Clear pin
         </Button>

@@ -1,4 +1,5 @@
 import { getPlatformPaymentSettings } from "@/services/platform-payment-settings";
+import { launchOffer } from "@/lib/launch-policy";
 import { createUpiQrImageDataUrl } from "@/services/upi";
 
 export type SubscriptionCheckoutPayloadSource = {
@@ -35,6 +36,8 @@ export type SubscriptionCheckoutPayload = {
   gstAmount: number;
   billingGstin: string | null;
   couponCode: string | null;
+  promotionCode: string | null;
+  discountLabel: string | null;
   status: string;
   paymentState: string;
   paymentProvider: string;
@@ -125,6 +128,8 @@ export async function buildSubscriptionCheckoutPayload(
   const upgradeCreditAmount = Number(subscription.upgradeCreditAmount ?? 0);
   const taxableAmount = Number(subscription.taxableAmount ?? Math.max(0, subtotalAmount - discountAmount - upgradeCreditAmount));
   const gstAmount = Number(subscription.gstAmount ?? Math.max(0, amount - taxableAmount));
+  const storedDiscountCode = subscription.couponCode ?? null;
+  const promotionCode = storedDiscountCode === launchOffer.code ? storedDiscountCode : null;
 
   return {
     subscriptionId: subscription.id,
@@ -138,7 +143,9 @@ export async function buildSubscriptionCheckoutPayload(
     gstRateBps: subscription.gstRateBps ?? 1800,
     gstAmount,
     billingGstin: subscription.billingGstin ?? null,
-    couponCode: subscription.couponCode ?? null,
+    couponCode: promotionCode ? null : storedDiscountCode,
+    promotionCode,
+    discountLabel: promotionCode ? launchOffer.name : storedDiscountCode ? "Coupon" : null,
     status: subscription.status,
     paymentState,
     paymentProvider: subscription.paymentProvider,

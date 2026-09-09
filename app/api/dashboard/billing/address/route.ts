@@ -3,6 +3,7 @@ import { requireBusinessSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { dashboardBusinessAddressSchema } from "@/lib/validations";
+import { canonicalLaunchCity, canonicalLaunchState } from "@/lib/launch-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,11 @@ export async function PATCH(request: Request) {
 
   const business = await prisma.business.update({
     where: { id: session.businessId },
-    data: parsed.data,
+    data: {
+      ...parsed.data,
+      city: canonicalLaunchCity(parsed.data.city) ?? parsed.data.city,
+      state: canonicalLaunchState(parsed.data.state)
+    },
     select: {
       id: true,
       address: true,

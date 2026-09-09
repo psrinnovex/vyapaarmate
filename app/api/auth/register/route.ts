@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
 import { defaultFulfillmentFlagsForBusinessType } from "@/lib/business-rules";
 import { resolveBusinessServiceType } from "@/lib/business-service-types.server";
+import { canonicalLaunchCity, canonicalLaunchState } from "@/lib/launch-policy";
+import { businessTypeSupportsAppointments, getAppointmentTerminology } from "@/lib/appointment-scheduling";
 import {
   createVerificationCode,
   hashVerificationCode,
@@ -67,6 +69,7 @@ export async function POST(request: Request) {
   }
 
   const fulfillmentFlags = defaultFulfillmentFlagsForBusinessType(businessServiceType.name);
+  const supportsAppointments = businessTypeSupportsAppointments(businessServiceType.name);
   const emailCode = createVerificationCode();
   const emailCodeHash = await hashVerificationCode(emailCode);
   const verificationStartedAt = Date.now();
@@ -83,8 +86,8 @@ export async function POST(request: Request) {
           whatsappDisplayPhone: parsed.data.whatsappEnabled ? phone : null,
           email,
           address: "",
-          city: "",
-          state: "",
+          city: canonicalLaunchCity(parsed.data.city) ?? parsed.data.city.trim(),
+          state: canonicalLaunchState(parsed.data.state),
           businessType: businessServiceType.name,
           businessServiceTypeId: businessServiceType.id,
           subscriptionPlan: parsed.data.subscriptionPlan,
@@ -95,7 +98,8 @@ export async function POST(request: Request) {
           isOpen: false,
           acceptsPickup: fulfillmentFlags.acceptsPickup,
           acceptsDineIn: fulfillmentFlags.acceptsDineIn,
-          acceptsServiceAtLocation: fulfillmentFlags.acceptsServiceAtLocation
+          acceptsServiceAtLocation: fulfillmentFlags.acceptsServiceAtLocation,
+          appointmentBookingEnabled: supportsAppointments
         }
       });
 
@@ -118,6 +122,19 @@ export async function POST(request: Request) {
           }
         }
       });
+
+      if (supportsAppointments) {
+        await tx.appointmentProvider.create({
+          data: {
+            businessId: businessRecord.id,
+            userId: userRecord.id,
+            name: parsed.data.name,
+            title: getAppointmentTerminology(businessServiceType.name).providerSingular,
+            acceptsAtBusiness: fulfillmentFlags.acceptsPickup || fulfillmentFlags.acceptsDineIn,
+            acceptsAtCustomerLocation: fulfillmentFlags.acceptsServiceAtLocation
+          }
+        });
+      }
 
       return { business: businessRecord, user: userRecord };
     });

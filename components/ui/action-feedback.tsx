@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -115,13 +115,21 @@ export function ActionDialog({
   className?: string;
   onClose: () => void;
 }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+  useEffect(() => {
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
+  }, []);
   return (
-    <div className="fixed inset-0 z-[60] flex min-h-0 items-end justify-center overflow-hidden bg-ink/40 p-2 sm:items-center sm:p-4">
+    <dialog ref={dialog} aria-labelledby={titleId} aria-describedby={body ? descriptionId : undefined} onCancel={event => { event.preventDefault(); onClose(); }} className="fixed inset-0 z-[60] m-0 flex h-full max-h-none min-h-0 w-full max-w-none items-end justify-center overflow-hidden border-0 bg-ink/40 p-2 backdrop:bg-transparent sm:items-center sm:p-4">
       <div className={cn("flex max-h-[calc(100svh-1rem)] w-full max-w-xl flex-col overflow-hidden rounded-lg bg-white shadow-soft sm:max-h-[calc(100svh-2rem)]", className)}>
         <div className="flex shrink-0 items-start justify-between gap-3 p-4 pb-0 sm:gap-4 sm:p-5 sm:pb-0">
           <div className="min-w-0">
-            <h2 className="break-words text-lg font-bold leading-7 text-ink sm:text-xl">{title}</h2>
-            {body && <p className="mt-1 break-words text-sm leading-6 text-slate-500">{body}</p>}
+            <h2 id={titleId} className="break-words text-lg font-bold leading-7 text-ink sm:text-xl">{title}</h2>
+            {body && <p id={descriptionId} className="mt-1 break-words text-sm leading-6 text-slate-500">{body}</p>}
           </div>
           <button
             type="button"
@@ -137,6 +145,6 @@ export function ActionDialog({
           <div className="flex flex-wrap justify-end gap-2">{footer}</div>
         </div>}
       </div>
-    </div>
+    </dialog>
   );
 }

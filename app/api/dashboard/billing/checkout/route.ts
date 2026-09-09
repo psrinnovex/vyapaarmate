@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireBusinessSession } from "@/lib/api-session";
+import { rejectMobileBusinessSubscriptionRequest, requireBusinessSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
 import { normalizeCouponCode, subscriptionPeriodEnd } from "@/lib/billing";
 import { prisma } from "@/lib/prisma";
@@ -7,6 +7,10 @@ import { billingCheckoutSchema } from "@/lib/validations";
 import { createSubscriptionPaymentRequest } from "@/services/subscription-payments";
 import { buildSubscriptionCheckoutPayload } from "@/lib/subscription-checkout-payload";
 import { getSubscriptionBillingPreview } from "@/lib/subscription-billing";
+import {
+  createSubscriptionBillingIdentitySnapshot,
+  subscriptionBillingIdentitySnapshotMatches
+} from "@/lib/subscription-invoice";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +23,8 @@ function publicAppUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const mobileDenied = await rejectMobileBusinessSubscriptionRequest();
+  if (mobileDenied) return mobileDenied;
   const auth = await requireBusinessSession("business:billing:write");
   if (auth.response) return auth.response;
   const { session } = auth;
@@ -33,10 +39,14 @@ export async function POST(request: Request) {
     where: { id: session.businessId },
     select: {
       id: true,
+      dataOrigin: true,
       name: true,
       ownerName: true,
       email: true,
       phone: true,
+      address: true,
+      city: true,
+      state: true,
       subscriptionPlan: true,
       subscriptionStatus: true
     }
@@ -53,12 +63,15 @@ export async function POST(request: Request) {
   const billingPreview = await getSubscriptionBillingPreview({
     businessId: business.id,
     plan: parsed.data.plan,
-    couponCode
+    couponCode,
+    billingGstin
   });
   if (!billingPreview.ok) {
     return NextResponse.json({ error: billingPreview.error }, { status: 400 });
   }
   const { breakdown } = billingPreview.preview;
+  const billingBusinessSnapshot = createSubscriptionBillingIdentitySnapshot(business);
+  const appliedDiscountCode = billingPreview.preview.promotion?.code ?? couponCode;
   const amount = breakdown.total;
   const referenceId = `SUB-${id.slice(-18).toUpperCase()}`.slice(0, 40);
 
@@ -66,13 +79,19 @@ export async function POST(request: Request) {
     where: {
       businessId: business.id,
       plan: parsed.data.plan,
-      couponCode,
+      couponCode: appliedDiscountCode,
       status: "PAST_DUE",
       paymentProvider: "CASHFREE",
       paymentStatus: "PENDING",
       billingGstin,
+      subtotalAmount: breakdown.subtotal,
+      discountAmount: breakdown.discount,
       upgradeCreditAmount: breakdown.upgradeCredit,
       upgradedFromSubscriptionId: billingPreview.preview.upgradeCredit?.subscriptionId ?? null,
+      taxableAmount: breakdown.taxableAmount,
+      gstRateBps: breakdown.gstRateBps,
+      gstAmount: breakdown.gstAmount,
+      amount,
       paymentRequestExpiresAt: { gt: new Date() },
       paymentRequestUrl: { not: null }
     },
@@ -80,7 +99,17 @@ export async function POST(request: Request) {
   });
 
   if (existingCheckout) {
-    return NextResponse.json(await buildSubscriptionCheckoutPayload(existingCheckout));
+    if (!existingCheckout.billingBusinessSnapshot) {
+      const checkoutWithSnapshot = await prisma.subscription.update({
+        where: { id: existingCheckout.id },
+        data: { billingBusinessSnapshot }
+      });
+      return NextResponse.json(await buildSubscriptionCheckoutPayload(checkoutWithSnapshot));
+    }
+
+    if (subscriptionBillingIdentitySnapshotMatches(existingCheckout.billingBusinessSnapshot, business)) {
+      return NextResponse.json(await buildSubscriptionCheckoutPayload(existingCheckout));
+    }
   }
 
   let paymentRequest: Awaited<ReturnType<typeof createSubscriptionPaymentRequest>>;
@@ -129,6 +158,7 @@ export async function POST(request: Request) {
           id,
           invoiceNumber: `SUBINV-${id.slice(-12).toUpperCase()}`,
           businessId: business.id,
+          dataOrigin: business.dataOrigin,
           plan: parsed.data.plan,
           subtotalAmount: breakdown.subtotal,
           discountAmount: breakdown.discount,
@@ -138,7 +168,8 @@ export async function POST(request: Request) {
           gstRateBps: breakdown.gstRateBps,
           gstAmount: breakdown.gstAmount,
           billingGstin,
-          couponCode,
+          billingBusinessSnapshot,
+          couponCode: appliedDiscountCode,
           subscriptionCouponId: billingPreview.couponRecord?.id ?? null,
           amount,
           status: "PAST_DUE",
@@ -179,7 +210,8 @@ export async function POST(request: Request) {
       gstAmount: breakdown.gstAmount,
       gstRateBps: breakdown.gstRateBps,
       billingGstin,
-      couponCode,
+      couponCode: appliedDiscountCode,
+      promotionCode: billingPreview.preview.promotion?.code ?? null,
       paymentProvider: paymentRequest.provider,
       paymentRequestId: paymentRequest.paymentRequestId,
       paymentRequestStatus: paymentRequest.status

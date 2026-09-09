@@ -4,12 +4,12 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "object-src 'none'",
   "form-action 'self' https://api.cashfree.com https://sandbox.cashfree.com",
-  `script-src 'self' ${isProduction ? "" : "'unsafe-eval'"} 'unsafe-inline' https://sdk.cashfree.com https://maps.googleapis.com https://maps.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com`,
-  "style-src 'self' 'unsafe-inline'",
+  `script-src 'self' ${isProduction ? "" : "'unsafe-eval'"} 'unsafe-inline' https://sdk.cashfree.com https://maps.googleapis.com https://maps.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com`,
+  "style-src 'self' 'unsafe-inline' https://translate.googleapis.com https://www.gstatic.com",
   "font-src 'self' data:",
-  "img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://*.cashfree.com https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com",
+  "img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://*.cashfree.com https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://translate.google.com https://translate.googleapis.com https://www.google.com",
   "media-src 'self'",
-  "connect-src 'self' https://*.cashfree.com https://maps.googleapis.com https://*.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://vitals.vercel-insights.com",
+  "connect-src 'self' https://*.cashfree.com https://maps.googleapis.com https://*.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://vitals.vercel-insights.com https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com",
   "frame-src https://*.cashfree.com https://www.googletagmanager.com",
   "frame-ancestors 'none'",
   "worker-src 'self' blob:",
@@ -74,6 +74,17 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" }
+        ]
+      },
+      {
+        source: "/manifest.webmanifest",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }]
+      },
       {
         source: "/(.*)",
         headers: securityHeaders

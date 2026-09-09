@@ -1,5 +1,5 @@
-import { subscriptionPlanAmounts } from "@/lib/billing";
-import { pricingPolicy } from "@/lib/constants";
+import { subscriptionPlanAmounts, subscriptionSellingPlanAmounts } from "@/lib/billing";
+import { launchMarket, launchMarketRestricted, launchOffer } from "@/lib/launch-policy";
 import { company } from "@/lib/site";
 import { formatINR } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ export type SupportChatbotIntent =
   | "abuse"
   | "thanks"
   | "product"
+  | "availability"
   | "pricing"
   | "demo"
   | "account"
@@ -80,6 +81,13 @@ export const supportChatbotIntents: Array<{
     owner: "Sales",
     trigger: "price, plan, cost, subscription",
     outcome: "Send plan summary and pricing page."
+  },
+  {
+    id: "availability",
+    label: "Launch availability",
+    owner: "Onboarding",
+    trigger: "Bengaluru, Bangalore, city, availability, service area",
+    outcome: "Explain the current Bengaluru-only launch without claiming nationwide availability."
   },
   {
     id: "demo",
@@ -224,18 +232,22 @@ const actionsByIntent: Partial<Record<SupportChatbotIntent, SupportChatbotAction
   ],
   pricing: [
     { label: "Pricing", href: "/pricing" },
-    { label: "Register", href: "/register" }
+    { label: "Register", href: "/register?plan=STARTER" }
+  ],
+  availability: [
+    { label: "Bengaluru launch", href: "/register?plan=STARTER" },
+    { label: "Contact", href: "/contact" }
   ],
   demo: [
     { label: "Contact", href: "/contact" },
-    { label: "Demo store", href: "/b/sri-sai-tiffins" }
+    { label: "Demo store", href: "/b/fresh-bowl-cloud-kitchen" }
   ],
   account: [
     { label: "Login", href: "/login" },
-    { label: "Register", href: "/register" }
+    { label: "Register", href: "/register?plan=STARTER" }
   ],
   orders: [
-    { label: "Demo store", href: "/b/sri-sai-tiffins" },
+    { label: "Demo store", href: "/b/fresh-bowl-cloud-kitchen" },
     { label: "Contact", href: "/contact" }
   ],
   payments: [
@@ -243,7 +255,7 @@ const actionsByIntent: Partial<Record<SupportChatbotIntent, SupportChatbotAction
     supportEmailAction
   ],
   menu: [
-    { label: "Demo store", href: "/b/sri-sai-tiffins" },
+    { label: "Demo store", href: "/b/fresh-bowl-cloud-kitchen" },
     { label: "Features", href: "/features" }
   ],
   customers: [
@@ -260,7 +272,7 @@ const actionsByIntent: Partial<Record<SupportChatbotIntent, SupportChatbotAction
   ],
   billing: [
     { label: "Pricing", href: "/pricing" },
-    { label: "Register", href: "/register" }
+    { label: "Register", href: "/register?plan=STARTER" }
   ],
   settings: [
     { label: "Login", href: "/login" },
@@ -268,11 +280,11 @@ const actionsByIntent: Partial<Record<SupportChatbotIntent, SupportChatbotAction
   ],
   businesses: [
     { label: "Businesses", href: "/businesses" },
-    { label: "Register", href: "/register" }
+    { label: "Register", href: "/register?plan=STARTER" }
   ],
   subscriptions: [
     { label: "Pricing", href: "/pricing" },
-    { label: "Register", href: "/register" }
+    { label: "Register", href: "/register?plan=STARTER" }
   ],
   payouts: [
     { label: "Contact", href: "/contact" },
@@ -329,6 +341,7 @@ const intentPriority: Partial<Record<SupportChatbotIntent, number>> = {
   settings: 68,
   security: 66,
   account: 64,
+  availability: 63,
   pricing: 62,
   demo: 60,
   features: 58,
@@ -360,6 +373,7 @@ const keywordRules: Array<{ intent: SupportChatbotIntent; keywords: string[]; we
     ]
   },
   { intent: "pricing", weight: 2, keywords: ["price", "prices", "pricing", "plan", "plans", "cost", "monthly", "charges", "starter", "pro plan"] },
+  { intent: "availability", weight: 4, keywords: ["bengaluru", "bangalore", "which city", "available city", "available in", "other cities", "outside bengaluru", "outside bangalore", "across india", "india wide", "mumbai", "hyderabad", "delhi"] },
   { intent: "billing", weight: 2, keywords: ["billing", "invoice", "business invoice", "plan invoice", "checkout", "renewal", "billing page", "payment plan"] },
   { intent: "subscriptions", weight: 2.5, keywords: ["subscription", "subscriptions", "trial", "active plan", "past due", "renew subscription", "subscription payment", "subscription status"] },
   { intent: "whatsapp", weight: 2.5, keywords: ["whatsapp", "template", "cloud api", "campaign", "campaigns", "message", "messages", "updates", "waba", "phone number id", "live sends", "opt in"] },
@@ -651,11 +665,17 @@ function replyForIntent(intent: SupportChatbotIntent, portal: SupportPortal, nor
     case "thanks":
       return "You're welcome. If anything is stuck, send the page name and what happened.";
     case "product":
-      return "VyapaarMate helps local businesses take website orders, collect UPI payments, and send WhatsApp updates.";
+      return `VyapaarMate helps approved ${launchMarket.displayName} businesses take website orders, collect UPI payments, and send WhatsApp updates.`;
+    case "availability":
+      return launchMarketRestricted
+        ? `VyapaarMate is currently onboarding eligible businesses only in ${launchMarket.displayName}. Other cities are not part of this launch yet; expansion can come later.`
+        : `VyapaarMate is available to eligible businesses in ${launchMarket.country}.`;
     case "pricing":
-      return `Starter is ${formatINR(subscriptionPlanAmounts.STARTER)}/month. Pro is ${formatINR(subscriptionPlanAmounts.PRO)}/month. Setup is usually ${pricingPolicy.setupFeeRange}, scoped separately.`;
+      return launchOffer.publiclyAdvertised
+        ? `Bengaluru launch pricing applies automatically every month, not only the first month, while enabled: Starter ${formatINR(subscriptionSellingPlanAmounts.STARTER)}, Pro ${formatINR(subscriptionSellingPlanAmounts.PRO)}, plus GST. Setup, gateway, WhatsApp, and provider usage are separate. Coupons do not stack.`
+        : `Starter is ${formatINR(subscriptionPlanAmounts.STARTER)}/month and Pro is ${formatINR(subscriptionPlanAmounts.PRO)}/month, plus GST. Bengaluru-only promotions are confirmed at checkout; Andhra Pradesh is a separate pilot cohort. Setup and usage costs are separate.`;
     case "demo":
-      return "Book a demo from Contact. Share business type, catalog size, payments, and WhatsApp needs.";
+      return "Book a Bengaluru launch demo from Contact. Share business type, catalog size, payments, and WhatsApp needs.";
     case "account":
       return portal === "admin"
         ? "Use admin access only after verified login. For account trouble, check role, staff identity, and audit logs."
@@ -739,7 +759,7 @@ function replyForIntent(intent: SupportChatbotIntent, portal: SupportPortal, nor
         ? "Open Businesses to approve, reject, suspend, verify service area, and manage WhatsApp or route setup safely."
         : portal === "support"
           ? "Use the support ticket to triage business approval, KYC, WhatsApp, or setup status and escalate when needed."
-          : "Business approvals are handled by VyapaarMate Support. Register your business, then wait for verification or contact support.";
+          : `The current launch accepts eligible ${launchMarket.displayName} businesses only. Register your business, then wait for verification or contact support.`;
     case "subscriptions":
       return portal === "admin"
         ? "Open Subscriptions to review plan, amount, payment state, UPI reference, active status, or past-due renewal."
@@ -1009,7 +1029,7 @@ function greetingForPortal(portal: SupportPortal) {
       return "Hi, I'm VyapaarBot. I can help with your user portal, bookings, payments, store details, or contacting the business.";
     case "public":
     default:
-      return "Hi, I'm VyapaarBot. I can help with pricing, demos, payments, WhatsApp, orders, or setup.";
+      return `Hi, I'm VyapaarBot. I can help with the ${launchMarket.displayName} launch, pricing, demos, payments, WhatsApp, orders, or setup.`;
   }
 }
 

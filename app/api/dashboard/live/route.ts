@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireBusinessSession } from "@/lib/api-session";
+import { isMobileBearerRequest, requireBusinessSession } from "@/lib/api-session";
 import {
   DASHBOARD_ORDERS_STREAM_REFRESH_INTERVAL_MS,
   dashboardLiveChangeMatches,
@@ -16,6 +16,7 @@ export const runtime = "nodejs";
 function dashboardScope(value: string | null): DashboardLiveScope {
   switch (value) {
     case "overview":
+    case "appointments":
     case "orders":
     case "menu":
     case "payments":
@@ -38,6 +39,8 @@ function permissionForScope(scope: DashboardLiveScope) {
     case "overview":
       return "business:overview:read";
     case "orders":
+      return "business:orders:read";
+    case "appointments":
       return "business:orders:read";
     case "menu":
       return "business:menu:read";
@@ -71,6 +74,12 @@ export async function GET(request: Request) {
   const auth = await requireBusinessSession(permissionForScope(scope));
   if (auth.response) return auth.response;
   const { session } = auth;
+  if (stream && (await isMobileBearerRequest())) {
+    return NextResponse.json(
+      { error: "Use bounded polling from the mobile app.", code: "MOBILE_STREAM_NOT_AVAILABLE" },
+      { status: 409, headers: { "Cache-Control": "no-store" } }
+    );
+  }
   const includeBillingInvoices = scope === "invoices" && hasPermission(session.role, "business:billing:read");
 
   if (!stream) {

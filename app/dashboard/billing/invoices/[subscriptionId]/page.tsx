@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { formatINR } from "@/lib/utils";
 import { PrintInvoiceButton } from "@/components/invoice/print-invoice-button";
 import { StatusPill } from "@/components/ui/status-pill";
+import { launchOffer } from "@/lib/launch-policy";
+import { readSubscriptionBillingIdentitySnapshot } from "@/lib/subscription-invoice";
 
 export const dynamic = "force-dynamic";
 
@@ -36,9 +38,17 @@ export default async function SubscriptionInvoiceRoute({ params }: PageProps) {
   const subtotalAmount = Number(subscription.subtotalAmount) > 0 ? Number(subscription.subtotalAmount) : Number(subscription.amount);
   const discountAmount = Number(subscription.discountAmount);
   const upgradeCreditAmount = Number(subscription.upgradeCreditAmount);
-  const taxableAmount = Number(subscription.taxableAmount) > 0 ? Number(subscription.taxableAmount) : Math.max(0, subtotalAmount - discountAmount - upgradeCreditAmount);
   const gstAmount = Number(subscription.gstAmount);
   const totalAmount = Number(subscription.amount);
+  const billingIdentity = readSubscriptionBillingIdentitySnapshot(
+    subscription.billingBusinessSnapshot,
+    subscription.business
+  );
+  const discountLabel = subscription.couponCode === launchOffer.code
+    ? launchOffer.name
+    : subscription.couponCode
+      ? `Coupon (${subscription.couponCode})`
+      : "Discount";
 
   return (
     <main className="min-h-screen bg-mist px-4 py-8 print:bg-white print:p-0">
@@ -64,10 +74,10 @@ export default async function SubscriptionInvoiceRoute({ params }: PageProps) {
           <div className="grid gap-5 border-b border-line py-6 sm:grid-cols-2">
             <div>
               <p className="text-xs font-bold uppercase text-slate-500">Billed to</p>
-              <p className="mt-2 font-bold text-ink">{subscription.business.name}</p>
-              <p className="mt-1 text-sm text-slate-600">{subscription.business.ownerName}</p>
-              <p className="text-sm text-slate-600">{subscription.business.address}, {subscription.business.city}, {subscription.business.state}</p>
-              <p className="text-sm text-slate-600">{subscription.business.email} · {subscription.business.phone}</p>
+              <p className="mt-2 font-bold text-ink">{billingIdentity.businessName}</p>
+              <p className="mt-1 text-sm text-slate-600">{billingIdentity.ownerName}</p>
+              <p className="text-sm text-slate-600">{billingIdentity.address}, {billingIdentity.city}, {billingIdentity.state}</p>
+              <p className="text-sm text-slate-600">{billingIdentity.email} · {billingIdentity.phone}</p>
               {subscription.billingGstin && <p className="text-sm font-semibold text-slate-700">GSTIN: {subscription.billingGstin}</p>}
             </div>
             <div className="sm:text-right">
@@ -97,12 +107,12 @@ export default async function SubscriptionInvoiceRoute({ params }: PageProps) {
           <div className="ml-auto max-w-sm">
             <div className="flex justify-between py-2 text-slate-600"><span>Subscription amount</span><span>{formatINR(subtotalAmount)}</span></div>
             {discountAmount > 0 && (
-              <div className="flex justify-between py-2 text-emerald"><span>Coupon {subscription.couponCode ? `(${subscription.couponCode})` : ""}</span><span>-{formatINR(discountAmount)}</span></div>
+              <div className="flex justify-between py-2 text-emerald"><span>{discountLabel}</span><span>-{formatINR(discountAmount)}</span></div>
             )}
             {upgradeCreditAmount > 0 && (
               <div className="flex justify-between py-2 text-emerald"><span>Current subscription credit</span><span>-{formatINR(upgradeCreditAmount)}</span></div>
             )}
-            <div className="flex justify-between py-2 text-slate-600"><span>Taxable amount</span><span>{formatINR(taxableAmount)}</span></div>
+
             <div className="flex justify-between py-2 text-slate-600"><span>GST {(subscription.gstRateBps / 100).toFixed(2)}%</span><span>{formatINR(gstAmount)}</span></div>
             <div className="mt-2 flex justify-between border-t border-line pt-4 text-xl font-bold text-ink"><span>Total</span><span>{formatINR(totalAmount)}</span></div>
           </div>

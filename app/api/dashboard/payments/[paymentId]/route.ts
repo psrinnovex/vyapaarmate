@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { cashPaymentStatusSchema } from "@/lib/validations";
 import { sendPaidOrderInvoiceEmail } from "@/services/order-invoice-email";
 import { sendOrderWhatsappUpdate } from "@/services/order-whatsapp";
+import { parseJsonRequest } from "@/lib/security/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (auth.response) return auth.response;
   const { session } = auth;
 
-  const parsed = cashPaymentStatusSchema.safeParse(await request.json());
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, cashPaymentStatusSchema);
+  if (parsed.response) return parsed.response;
 
   const { paymentId } = await context.params;
   const payment = await prisma.payment.findFirst({

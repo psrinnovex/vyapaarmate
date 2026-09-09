@@ -125,6 +125,15 @@ export async function getCustomerPortalOrders(user: CustomerPortalUser) {
           total: true
         }
       },
+      appointment: {
+        select: {
+          startsAt: true,
+          endsAt: true,
+          timezone: true,
+          status: true,
+          provider: { select: { name: true, title: true } }
+        }
+      },
       payment: {
         select: {
           provider: true,

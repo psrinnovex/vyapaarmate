@@ -25,6 +25,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/section";
 import { pricingPlans } from "@/lib/constants";
 import { isValidGstin, normalizeGstin } from "@/lib/gstin";
+import { launchMarket, launchSingleCityRestricted, launchOffer } from "@/lib/launch-policy";
 import { cn, formatINR } from "@/lib/utils";
 
 export type SubscriptionCheckoutPlanId = (typeof pricingPlans)[number]["id"];
@@ -32,6 +33,7 @@ export type SubscriptionCheckoutPlanId = (typeof pricingPlans)[number]["id"];
 type SubscriptionBillingPreview = {
   plan: SubscriptionCheckoutPlanId;
   coupon: { code: string; description: string | null } | null;
+  promotion: { code: string; name: string; discountPercent: number } | null;
   upgradeCredit: {
     amount: number;
     subscriptionId: string;
@@ -59,6 +61,11 @@ type BusinessAddressFields = {
   city: string;
   state: string;
 };
+
+type GstinVerificationState =
+  | { status: "provider_verified"; businessName: string }
+  | { status: "format_valid" }
+  | null;
 
 function normalizeSubscriptionCouponInput(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g, "");
@@ -122,8 +129,8 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
   const savedBusinessAddress = useMemo(
     () => ({
       address: business.address,
-      city: business.city,
-      state: business.state
+      city: launchSingleCityRestricted ? launchMarket.city : business.city,
+      state: launchSingleCityRestricted ? launchMarket.state : business.state
     }),
     [business.address, business.city, business.state]
   );
@@ -138,13 +145,13 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
   const [businessAddressDraft, setBusinessAddressDraft] = useState(() => ({
     key: businessAddressStateKey(business.id, {
       address: business.address,
-      city: business.city,
-      state: business.state
+      city: launchSingleCityRestricted ? launchMarket.city : business.city,
+      state: launchSingleCityRestricted ? launchMarket.state : business.state
     }),
     fields: {
       address: business.address,
-      city: business.city,
-      state: business.state
+      city: launchSingleCityRestricted ? launchMarket.city : business.city,
+      state: launchSingleCityRestricted ? launchMarket.state : business.state
     }
   }));
   const [businessAddressEditorOpen, setBusinessAddressEditorOpen] = useState(false);
@@ -155,8 +162,13 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
   const [savingBusinessAddress, setSavingBusinessAddress] = useState(false);
   const [creatingCheckout, setCreatingCheckout] = useState(false);
   const [notice, setNotice] = useState<ActionNoticeState>(null);
+
+  const [gstinVerification, setGstinVerification] = useState<GstinVerificationState>(null);
+  const [verifyingGstin, setVerifyingGstin] = useState(false);
+
   const basePreviewRequestId = useRef(0);
   const couponPreviewRequestId = useRef(0);
+  const gstinVerifyRequestId = useRef(0);
   const selectedPlanRef = useRef(selectedPlan);
 
   const selectedPlanDetails = useMemo(
@@ -168,6 +180,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
   const totalPayable = billingPreview?.breakdown.total ?? selectedPlanDetails.price;
   const normalizedBillingGstin = normalizeGstinInput(billingGstin);
   const billingGstinIsInvalid = Boolean(normalizedBillingGstin) && !isValidGstin(normalizedBillingGstin);
+
   const businessAddressFields = businessAddressDraft.key === savedBusinessAddressKey
     ? businessAddressDraft.fields
     : savedBusinessAddress;
@@ -180,7 +193,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
     selectedPlanRef.current = selectedPlan;
   }, [selectedPlan]);
 
-  const loadBasePreview = useCallback(async (plan: SubscriptionCheckoutPlanId) => {
+  const loadBasePreview = useCallback(async (plan: SubscriptionCheckoutPlanId, gstin: string | undefined) => {
     const requestId = ++basePreviewRequestId.current;
     setLoadingPreview(true);
     setBasePreview(null);
@@ -189,7 +202,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
       const response = await fetch("/api/dashboard/billing/checkout/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan })
+        body: JSON.stringify({ plan, billingGstin: gstin })
       });
       const payload = (await response.json().catch(() => ({}))) as SubscriptionBillingPreview & { error?: unknown };
 
@@ -212,10 +225,65 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
     }
   }, []);
 
+  const verifyGstin = useCallback(async (gstin: string) => {
+    const requestId = ++gstinVerifyRequestId.current;
+    setVerifyingGstin(true);
+    setGstinVerification(null);
+
+    try {
+      const response = await fetch("/api/dashboard/billing/checkout/gstin-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gstin })
+      });
+      const payload = (await response.json().catch(() => ({}))) as {
+        formatValid?: unknown;
+        providerVerified?: unknown;
+        businessName?: unknown;
+      };
+
+      if (gstinVerifyRequestId.current !== requestId) return;
+      if (!response.ok || payload.formatValid !== true) {
+        setGstinVerification(null);
+        return;
+      }
+
+      const businessName = typeof payload.businessName === "string" ? payload.businessName.trim() : "";
+      setGstinVerification(
+        payload.providerVerified === true && businessName
+          ? { status: "provider_verified", businessName }
+          : { status: "format_valid" }
+      );
+    } catch {
+      if (gstinVerifyRequestId.current === requestId) {
+        setGstinVerification({ status: "format_valid" });
+      }
+    } finally {
+      if (gstinVerifyRequestId.current === requestId) {
+        setVerifyingGstin(false);
+      }
+    }
+  }, []);
+
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadBasePreview(selectedPlan), 0);
+    const gstin = billingGstinIsInvalid ? undefined : normalizedBillingGstin || undefined;
+    const timer = window.setTimeout(() => void loadBasePreview(selectedPlan, gstin), 0);
     return () => window.clearTimeout(timer);
-  }, [loadBasePreview, selectedPlan]);
+  }, [loadBasePreview, selectedPlan, billingGstinIsInvalid, normalizedBillingGstin]);
+
+  useEffect(() => {
+    if (normalizedBillingGstin && !billingGstinIsInvalid) {
+      const timer = window.setTimeout(() => void verifyGstin(normalizedBillingGstin), 500);
+      return () => window.clearTimeout(timer);
+    } else {
+      const timer = window.setTimeout(() => {
+        setGstinVerification(null);
+        setVerifyingGstin(false);
+      }, 0);
+      gstinVerifyRequestId.current += 1;
+      return () => window.clearTimeout(timer);
+    }
+  }, [verifyGstin, normalizedBillingGstin, billingGstinIsInvalid]);
 
   function choosePlan(plan: SubscriptionCheckoutPlanId) {
     selectedPlanRef.current = plan;
@@ -294,7 +362,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
       const response = await fetch("/api/dashboard/billing/checkout/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planAtRequest, couponCode: code })
+        body: JSON.stringify({ plan: planAtRequest, couponCode: code, billingGstin: billingGstinIsInvalid ? undefined : normalizedBillingGstin || undefined })
       });
       const payload = (await response.json().catch(() => ({}))) as SubscriptionBillingPreview & { error?: unknown };
 
@@ -439,26 +507,38 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                   <div className="grid items-start gap-4 md:grid-cols-2">
                     {pricingPlans.map((plan) => {
                       const selected = selectedPlan === plan.id;
+                      const isProActive = business.subscriptionPlan === "PRO" && business.subscriptionStatus !== "CANCELLED";
+                      const blockStarter = plan.id === "STARTER" && isProActive;
                       return (
                         <button
                           key={plan.id}
                           type="button"
                           aria-pressed={selected}
+                          disabled={blockStarter}
                           className={cn(
                             "flex min-h-[320px] transform-gpu flex-col overflow-hidden rounded-lg border bg-white p-5 text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-ocean/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean/20",
                             selected && "border-emerald bg-emerald/5 shadow-soft ring-4 ring-emerald/10",
-                            !selected && "border-line"
+                            !selected && "border-line",
+                            blockStarter && "opacity-75 grayscale cursor-not-allowed hover:-translate-y-0 hover:border-line"
                           )}
-                          onClick={() => choosePlan(plan.id)}
+                          onClick={() => !blockStarter && choosePlan(plan.id)}
                         >
                           <span className="flex items-center justify-between gap-3">
                             <span className="text-xl font-bold text-ink">{plan.name}</span>
-                            <Badge variant={selected ? "emerald" : "blue"}>{selected ? "Selected" : "Choose"}</Badge>
+                            <Badge variant={selected ? "emerald" : blockStarter ? "secondary" : "blue"}>
+                              {selected ? "Selected" : blockStarter ? "Unavailable" : "Choose"}
+                            </Badge>
                           </span>
                           <span className="mt-3 text-sm leading-6 text-slate-600">{plan.description}</span>
                           <span className="mt-4 text-3xl font-extrabold text-ink">
                             {formatINR(plan.price)}<span className="text-sm font-medium text-slate-500">/month</span>
                           </span>
+                          {launchOffer.publiclyAdvertised && (
+                            <span className="mt-1 text-xs font-semibold text-slate-500">
+                              <span className="line-through">{formatINR(plan.listPrice)}</span>{" "}
+                              <span className="text-emerald">{launchOffer.discountLabel} for the Bengaluru launch</span>
+                            </span>
+                          )}
                           <span className="mt-2 text-sm font-semibold text-slate-600">{plan.bestFor}</span>
                           <span className="mt-4 grid flex-1 gap-2">
                             {plan.features.slice(0, 5).map((feature) => (
@@ -574,6 +654,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                         className="mt-2 bg-white"
                         value={businessAddressFields.city}
                         onChange={(event) => updateBusinessAddressField("city", event.currentTarget.value)}
+                        readOnly={launchSingleCityRestricted}
                         placeholder="City"
                         autoComplete="address-level2"
                         required
@@ -586,12 +667,18 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                         className="mt-2 bg-white"
                         value={businessAddressFields.state}
                         onChange={(event) => updateBusinessAddressField("state", event.currentTarget.value)}
+                        readOnly={launchSingleCityRestricted}
                         placeholder="State"
                         autoComplete="address-level1"
                         required
                       />
                     </div>
                   </div>
+                  {launchSingleCityRestricted && (
+                    <p className="text-xs font-semibold text-emerald">
+                      Business onboarding is currently limited to {launchMarket.displayName}, {launchMarket.state}.
+                    </p>
+                  )}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     {!savedBusinessAddressComplete && (
                       <p className="text-xs font-semibold text-amber-700">Save this address before opening payment.</p>
@@ -613,53 +700,78 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
             <div className="mt-5 grid gap-4 lg:grid-cols-2">
               <div>
                 <Label htmlFor="subscriptionBillingGstin">Business GSTIN (optional)</Label>
-                <Input
-                  id="subscriptionBillingGstin"
-                  className="mt-2"
-                  value={billingGstin}
-                  onChange={(event) => setBillingGstin(event.currentTarget.value.toUpperCase())}
-                  onBlur={(event) => setBillingGstin(normalizeGstinInput(event.currentTarget.value))}
-                  placeholder="29ABCDE1234F1ZW"
-                  maxLength={20}
-                  autoComplete="off"
-                  aria-invalid={billingGstinIsInvalid}
-                />
+                <div className="relative mt-2">
+                  <Input
+                    id="subscriptionBillingGstin"
+                    value={billingGstin}
+                    onChange={(event) => {
+                      gstinVerifyRequestId.current += 1;
+                      setGstinVerification(null);
+                      setBillingGstin(event.currentTarget.value.toUpperCase());
+                    }}
+                    onBlur={(event) => setBillingGstin(normalizeGstinInput(event.currentTarget.value))}
+                    placeholder="29ABCDE1234F1ZW"
+                    maxLength={20}
+                    autoComplete="off"
+                    aria-invalid={billingGstinIsInvalid}
+                  />
+                  {verifyingGstin && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <LoaderCircle className="size-4 animate-spin text-slate-400" />
+                    </div>
+                  )}
+                </div>
                 {billingGstinIsInvalid ? (
                   <p className="mt-2 text-xs font-semibold text-red-600">Enter a valid GSTIN with the correct check digit.</p>
-                ) : normalizedBillingGstin ? (
-                  <p className="mt-2 text-xs font-semibold text-emerald">GSTIN will appear on the invoice; GST still applies at the configured rate.</p>
+                ) : gstinVerification?.status === "provider_verified" ? (
+                  <p className="mt-2 text-xs font-semibold text-emerald">
+                    Provider verified: {gstinVerification.businessName}
+                  </p>
+                ) : normalizedBillingGstin && !verifyingGstin ? (
+                  <p className="mt-2 text-xs font-semibold leading-5 text-amber-700">
+                    Format valid; provider verification is not confirmed. The GSTIN can still be applied to this invoice.
+                  </p>
                 ) : null}
               </div>
-              <div>
-                <Label htmlFor="subscriptionCheckoutCoupon">Subscription coupon</Label>
-                <div className="mt-2 flex flex-col gap-2 sm:flex-row lg:flex-col 2xl:flex-row">
-                  <Input
-                    id="subscriptionCheckoutCoupon"
-                    value={couponCode}
-                    onChange={(event) => {
-                      setCouponCode(event.currentTarget.value.toUpperCase());
-                      setCouponPreview(null);
-                    }}
-                    placeholder="COUPONCODE"
-                    maxLength={32}
-                    autoComplete="off"
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    icon={checkingCoupon ? <LoaderCircle className="size-4 animate-spin" /> : <TicketPercent className="size-4" />}
-                    disabled={checkingCoupon || loadingPreview || creatingCheckout}
-                    onClick={applyCoupon}
-                  >
-                    {checkingCoupon ? "Checking" : "Apply"}
-                  </Button>
-                </div>
-                {appliedCouponCode && (
-                  <p className="mt-2 text-xs font-semibold text-emerald">
-                    Coupon {appliedCouponCode} applied{couponPreview?.coupon?.description ? `: ${couponPreview.coupon.description}` : "."}
+              {basePreview?.promotion ? (
+                <div className="rounded-lg border border-emerald/20 bg-emerald/10 p-3">
+                  <p className="text-sm font-bold text-emerald">{basePreview.promotion.name} applied automatically</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    {basePreview.promotion.discountPercent}% is deducted before GST. Coupons cannot be combined with this launch price.
                   </p>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div>
+                  <Label htmlFor="subscriptionCheckoutCoupon">Subscription coupon</Label>
+                  <div className="mt-2 flex flex-col gap-2 sm:flex-row lg:flex-col 2xl:flex-row">
+                    <Input
+                      id="subscriptionCheckoutCoupon"
+                      value={couponCode}
+                      onChange={(event) => {
+                        setCouponCode(event.currentTarget.value.toUpperCase());
+                        setCouponPreview(null);
+                      }}
+                      placeholder="COUPONCODE"
+                      maxLength={32}
+                      autoComplete="off"
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      icon={checkingCoupon ? <LoaderCircle className="size-4 animate-spin" /> : <TicketPercent className="size-4" />}
+                      disabled={checkingCoupon || loadingPreview || creatingCheckout}
+                      onClick={applyCoupon}
+                    >
+                      {checkingCoupon ? "Checking" : "Apply"}
+                    </Button>
+                  </div>
+                  {appliedCouponCode && (
+                    <p className="mt-2 text-xs font-semibold text-emerald">
+                      Coupon {appliedCouponCode} applied{couponPreview?.coupon?.description ? `: ${couponPreview.coupon.description}` : "."}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -681,7 +793,9 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
               </div>
               {billingPreview.breakdown.discount > 0 && (
                 <div className="flex justify-between gap-3 text-emerald">
-                  <span>Coupon {billingPreview.coupon?.code ? `(${billingPreview.coupon.code})` : ""}</span>
+                  <span>
+                    {billingPreview.promotion?.name ?? "Coupon"}{billingPreview.coupon?.code ? ` (${billingPreview.coupon.code})` : ""}
+                  </span>
                   <span>-{formatINR(billingPreview.breakdown.discount)}</span>
                 </div>
               )}
@@ -693,16 +807,15 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                   <span>-{formatINR(billingPreview.breakdown.upgradeCredit)}</span>
                 </div>
               )}
-              <div className="flex justify-between gap-3 text-slate-600">
-                <span>Taxable amount</span>
-                <span>{formatINR(billingPreview.breakdown.taxableAmount)}</span>
-              </div>
+
               <div className="flex justify-between gap-3 text-slate-600">
                 <span>GST {gstRateLabel(billingPreview.breakdown.gstRateBps)}</span>
                 <span>{formatINR(billingPreview.breakdown.gstAmount)}</span>
               </div>
               {normalizedBillingGstin && !billingGstinIsInvalid && (
-                <p className="pt-1 text-xs font-semibold text-slate-500">GSTIN is printed on the invoice and does not reduce the payable GST automatically.</p>
+                <p className="pt-1 text-xs font-semibold text-slate-600">
+                  GSTIN entered for B2B billing{gstinVerification?.status === "provider_verified" ? " and provider verified" : "; provider verification is not confirmed"}.
+                </p>
               )}
               <div className="mt-3 flex justify-between gap-3 border-t border-line pt-3 text-base font-bold text-ink">
                 <span>Total payable</span>

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import { requireBusinessSession } from "@/lib/api-session";
+import { rejectMobileBusinessSubscriptionRequest, requireBusinessSession } from "@/lib/api-session";
 import { getSubscriptionBillingPreview } from "@/lib/subscription-billing";
 import { billingCheckoutPreviewSchema } from "@/lib/validations";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  const mobileDenied = await rejectMobileBusinessSubscriptionRequest();
+  if (mobileDenied) return mobileDenied;
   const auth = await requireBusinessSession("business:billing:read");
   if (auth.response) return auth.response;
 

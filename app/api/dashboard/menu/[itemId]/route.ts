@@ -6,6 +6,7 @@ import { getMenuItemImageUrl } from "@/lib/menu-item-image";
 import { parseMenuItemImageDataUrl } from "@/lib/menu-item-image.server";
 import { prisma } from "@/lib/prisma";
 import { menuItemSchema } from "@/lib/validations";
+import { parseJsonRequest } from "@/lib/security/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,10 @@ function mapMenuItem(item: MenuItemWithDisplayImage) {
     foodType: item.foodType,
     imageUrl: getMenuItemImageUrl(item),
     isAvailable: item.isAvailable,
-    isBestSeller: item.isBestSeller
+    isBestSeller: item.isBestSeller,
+    appointmentEnabled: item.appointmentEnabled,
+    durationMinutes: item.durationMinutes,
+    bufferMinutes: item.bufferMinutes
   };
 }
 
@@ -37,11 +41,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (auth.response) return auth.response;
   const { session } = auth;
 
-  const body = await request.json();
-  const parsed = menuItemSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, menuItemSchema);
+  if (parsed.response) return parsed.response;
 
   const { itemId } = await context.params;
   const [existing, category] = await Promise.all([
@@ -79,9 +80,27 @@ export async function PATCH(request: Request, context: RouteContext) {
         foodType: parsed.data.foodType,
         isAvailable: parsed.data.isAvailable,
         isBestSeller: parsed.data.isBestSeller,
+        appointmentEnabled: parsed.data.appointmentEnabled,
+        durationMinutes: parsed.data.appointmentEnabled ? parsed.data.durationMinutes : null,
+        bufferMinutes: parsed.data.appointmentEnabled ? parsed.data.bufferMinutes : 0,
         ...(parsed.data.imageDataUrl === undefined ? {} : { imageUrl: null })
       }
     });
+
+    if (parsed.data.appointmentEnabled) {
+      const providers = await transaction.appointmentProvider.findMany({
+        where: { businessId: session.businessId, isActive: true },
+        select: { id: true }
+      });
+      if (providers.length) {
+        await transaction.appointmentProviderService.createMany({
+          data: providers.map((provider) => ({ providerId: provider.id, menuItemId: existing.id })),
+          skipDuplicates: true
+        });
+      }
+    } else {
+      await transaction.appointmentProviderService.deleteMany({ where: { menuItemId: existing.id } });
+    }
 
     if (parsed.data.imageDataUrl === null) {
       await transaction.menuItemImage.deleteMany({ where: { menuItemId: existing.id } });

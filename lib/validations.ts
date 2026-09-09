@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isLaunchCity, isLaunchState, launchBusinessLocationError, launchMarket } from "@/lib/launch-policy";
 import { isValidGstin, normalizeGstin } from "@/lib/gstin";
 import { kycAllowedContentTypes, kycDocumentTypes, kycMaxDocumentBytes } from "@/lib/kyc";
 import { normalizePhoneForStorage, parsePhoneNumber } from "@/lib/phone";
@@ -167,8 +168,23 @@ export const registerSchema = z.object({
   phone: phoneSchema,
   password: z.string().min(10),
   businessType: z.string().min(2).max(80),
+  city: z
+    .string()
+    .trim()
+    .min(2, "Select the launch city")
+    .max(80)
+    .refine(isLaunchCity, `Business onboarding is currently limited to ${launchMarket.displayName}.`),
+  state: z
+    .string()
+    .trim()
+    .min(2, "Enter the business state")
+    .max(80)
+    .refine(isLaunchState, `Business onboarding is currently limited to ${launchMarket.displayName}.`),
   subscriptionPlan: z.enum(["STARTER", "PRO"]).default("STARTER"),
   whatsappEnabled: z.boolean().default(true)
+}).superRefine((value, ctx) => {
+  const error = launchBusinessLocationError(value);
+  if (error) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["city"], message: error });
 });
 
 export const userRegisterSchema = z.object({
@@ -205,6 +221,12 @@ export const orderSubmissionSchema = z.object({
   notes: z.string().max(500).optional(),
   paymentMethod: z.enum(["UPI", "PAY_ON_PICKUP_OR_DELIVERY"]),
   couponCode: optionalCouponCodeSchema,
+  appointment: z
+    .object({
+      providerId: z.string().trim().min(1).max(120),
+      startsAt: z.string().datetime({ offset: true })
+    })
+    .optional(),
   items: z
     .array(
       z.object({
@@ -214,6 +236,163 @@ export const orderSubmissionSchema = z.object({
     )
     .min(1)
 });
+
+export const appointmentAvailabilitySchema = z.object({
+  businessSlug: z.string().trim().min(2).max(160),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a valid appointment date."),
+  providerId: z.string().trim().min(1).max(120).optional(),
+  orderType: orderFulfillmentModeSchema,
+  items: z
+    .array(
+      z.object({
+        menuItemId: z.string().trim().min(1).max(120),
+        quantity: z.number().int().min(1).max(20)
+      })
+    )
+    .min(1)
+    .max(20)
+});
+
+const appointmentProviderShape = {
+  name: z.string().trim().min(2).max(80),
+  title: z.string().trim().min(2).max(80),
+  bio: optionalTrimmedString(500),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Choose a valid provider color."),
+  isActive: z.boolean(),
+  acceptsAtBusiness: z.boolean(),
+  acceptsAtCustomerLocation: z.boolean(),
+  serviceIds: z.array(z.string().trim().min(1).max(120)).max(200)
+};
+
+function validateAppointmentProviderLocations(
+  data: { acceptsAtBusiness: boolean; acceptsAtCustomerLocation: boolean },
+  context: z.RefinementCtx
+) {
+  if (!data.acceptsAtBusiness && !data.acceptsAtCustomerLocation) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["acceptsAtBusiness"],
+      message: "Enable at least one appointment location."
+    });
+  }
+}
+
+const appointmentSettingsActionSchema = z.object({
+  action: z.literal("settings.update"),
+  enabled: z.boolean(),
+  autoConfirm: z.boolean(),
+  slotIntervalMinutes: z.coerce.number().int().min(5).max(120),
+  leadTimeMinutes: z.coerce.number().int().min(0).max(10080),
+  maxAdvanceDays: z.coerce.number().int().min(1).max(365),
+  cancellationNoticeMinutes: z.coerce.number().int().min(0).max(43200)
+});
+
+const appointmentProviderCreateActionSchema = z
+  .object({
+    action: z.literal("provider.create"),
+    ...appointmentProviderShape
+  })
+  .superRefine(validateAppointmentProviderLocations);
+
+const appointmentProviderUpdateActionSchema = z
+  .object({
+    action: z.literal("provider.update"),
+    providerId: z.string().trim().min(1).max(120),
+    ...appointmentProviderShape
+  })
+  .superRefine(validateAppointmentProviderLocations);
+
+const appointmentAvailabilityActionSchema = z.object({
+  action: z.literal("availability.save"),
+  providerId: z.string().trim().min(1).max(120),
+  rules: z
+    .array(
+      z
+        .object({
+          weekday: z.coerce.number().int().min(0).max(6),
+          startMinute: z.coerce.number().int().min(0).max(1439),
+          endMinute: z.coerce.number().int().min(1).max(1440)
+        })
+        .refine((rule) => rule.endMinute > rule.startMinute, "End time must be after start time.")
+    )
+    .max(28)
+});
+
+const appointmentTimeOffCreateActionSchema = z
+  .object({
+    action: z.literal("timeoff.create"),
+    providerId: z.string().trim().min(1).max(120).nullable(),
+    startsAt: z.string().datetime({ offset: true }),
+    endsAt: z.string().datetime({ offset: true }),
+    reason: optionalTrimmedString(200)
+  })
+  .refine((data) => new Date(data.endsAt) > new Date(data.startsAt), {
+    path: ["endsAt"],
+    message: "End time must be after start time."
+  });
+
+const appointmentTimeOffDeleteActionSchema = z.object({
+  action: z.literal("timeoff.delete"),
+  timeOffId: z.string().trim().min(1).max(120)
+});
+
+const appointmentStatusActionSchema = z.object({
+  action: z.literal("appointment.status"),
+  appointmentId: z.string().trim().min(1).max(120),
+  status: z.enum(["REQUESTED", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED", "NO_SHOW"]),
+  cancellationReason: optionalTrimmedString(240)
+});
+
+const appointmentRescheduleActionSchema = z.object({
+  action: z.literal("appointment.reschedule"),
+  appointmentId: z.string().trim().min(1).max(120),
+  providerId: z.string().trim().min(1).max(120),
+  startsAt: z.string().datetime({ offset: true })
+});
+
+const appointmentCreateActionSchema = z.object({
+  action: z.literal("appointment.create"),
+  customer: z.object({
+    name: z.string().trim().min(2).max(80),
+    phone: phoneSchema,
+    email: optionalEmailSchema,
+    address: optionalTrimmedString(300),
+    whatsappOptIn: z.boolean().default(false)
+  }),
+  providerId: z.string().trim().min(1).max(120),
+  startsAt: z.string().datetime({ offset: true }),
+  orderType: orderFulfillmentModeSchema,
+  notes: optionalTrimmedString(500),
+  items: z
+    .array(
+      z.object({
+        menuItemId: z.string().trim().min(1).max(120),
+        quantity: z.coerce.number().int().min(1).max(20)
+      })
+    )
+    .min(1)
+    .max(20)
+}).superRefine((data, context) => {
+  if (data.orderType === "SERVICE_AT_LOCATION" && !data.customer.address) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["customer", "address"],
+      message: "Add the customer service address."
+    });
+  }
+});
+
+export const appointmentDashboardActionSchema = z.union([
+  appointmentSettingsActionSchema,
+  appointmentProviderCreateActionSchema,
+  appointmentProviderUpdateActionSchema,
+  appointmentAvailabilityActionSchema,
+  appointmentTimeOffCreateActionSchema,
+  appointmentTimeOffDeleteActionSchema,
+  appointmentStatusActionSchema,
+  appointmentRescheduleActionSchema,
+  appointmentCreateActionSchema
+]);
 
 export const orderStatusSchema = z
   .object({
@@ -239,16 +418,32 @@ export const menuCategorySchema = z.object({
   name: z.string().trim().min(2).max(80)
 });
 
-export const menuItemSchema = z.object({
-  categoryId: z.string().min(1),
-  name: z.string().trim().min(2).max(120),
-  description: z.string().trim().min(2).max(500),
-  price: z.coerce.number().min(0).max(999999),
-  foodType: z.enum(["VEG", "NON_VEG", "EGG", "NOT_APPLICABLE"]),
-  isAvailable: z.boolean(),
-  isBestSeller: z.boolean(),
-  imageDataUrl: z.string().max(700_000).nullable().optional()
-});
+export const menuItemSchema = z
+  .object({
+    categoryId: z.string().min(1),
+    name: z.string().trim().min(2).max(120),
+    description: z.string().trim().min(2).max(500),
+    price: z.coerce.number().min(0).max(999999),
+    foodType: z.enum(["VEG", "NON_VEG", "EGG", "NOT_APPLICABLE"]),
+    isAvailable: z.boolean(),
+    isBestSeller: z.boolean(),
+    appointmentEnabled: z.boolean().default(false),
+    durationMinutes: z.preprocess(
+      (value) => (value === "" || value === null ? undefined : value),
+      z.coerce.number().int().min(5).max(1440).optional()
+    ),
+    bufferMinutes: z.coerce.number().int().min(0).max(240).default(0),
+    imageDataUrl: z.string().max(700_000).nullable().optional()
+  })
+  .superRefine((data, context) => {
+    if (data.appointmentEnabled && !data.durationMinutes) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["durationMinutes"],
+        message: "Set the service duration before enabling appointment booking."
+      });
+    }
+  });
 
 const businessImageDataUrlSchema = z.string().max(500_000).nullable().optional();
 
@@ -345,9 +540,9 @@ export const dashboardSettingsSchema = z
     businessType: z.string().trim().min(2).max(80),
     email: emailSchema,
     phone: phoneSchema,
-    address: z.string().trim().max(300),
-    city: z.string().trim().max(80),
-    state: z.string().trim().max(80),
+    address: z.string().trim().min(5, "Enter the full business address").max(300),
+    city: z.string().trim().min(2, "Enter the city").max(80),
+    state: z.string().trim().min(2, "Enter the state").max(80),
     businessHours: z.string().trim().min(2).max(500),
     isOpen: z.boolean(),
     minimumOrder: z.coerce.number().min(0).max(999999),
@@ -365,6 +560,11 @@ export const dashboardSettingsSchema = z
     ...payoutDestinationShape
   })
   .superRefine((data, context) => {
+    const marketError = launchBusinessLocationError(data, { requireCoordinates: true });
+    if (marketError) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: marketError, path: ["city"] });
+    }
+
     if (!data.acceptsPickup && !data.acceptsDineIn && !data.acceptsServiceAtLocation) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -393,11 +593,18 @@ export const dashboardSettingsSchema = z
     validatePayoutDestination(data, context);
   });
 
-export const dashboardBusinessAddressSchema = z.object({
-  address: z.string().trim().min(5, "Enter the full business address").max(300),
-  city: z.string().trim().min(2, "Enter the city").max(80),
-  state: z.string().trim().min(2, "Enter the state").max(80)
-});
+export const dashboardBusinessAddressSchema = z
+  .object({
+    address: z.string().trim().min(5, "Enter the full business address").max(300),
+    city: z.string().trim().min(2, "Enter the city").max(80),
+    state: z.string().trim().min(2, "Enter the state").max(80)
+  })
+  .superRefine((data, context) => {
+    const marketError = launchBusinessLocationError(data);
+    if (marketError) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: marketError, path: ["city"] });
+    }
+  });
 
 export const businessSetupSchema = z
   .object({
@@ -426,6 +633,11 @@ export const businessSetupSchema = z
     ...payoutDestinationShape
   })
   .superRefine((data, context) => {
+    const marketError = launchBusinessLocationError(data, { requireCoordinates: true });
+    if (marketError) {
+      context.addIssue({ code: z.ZodIssueCode.custom, message: marketError, path: ["city"] });
+    }
+
     if (!data.acceptsPickup && !data.acceptsDineIn && !data.acceptsServiceAtLocation) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

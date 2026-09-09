@@ -1,16 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Suspense } from "react";
 import { MarketingTags } from "@/components/marketing/marketing-tags";
+import { RouteAwareSpeedInsights } from "@/components/marketing/route-aware-speed-insights";
 import { LazySiteChatbot } from "@/components/support/lazy-site-chatbot";
 import { SupportAgentAlerts } from "@/components/support/support-agent-alerts";
+import { AppInstall } from "@/components/pwa/app-install";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createMetadata, getSearchVerification } from "@/lib/seo";
+import { launchSingleCityRestricted } from "@/lib/launch-policy";
 import { company, getSiteOrigin, siteConfig } from "@/lib/site";
 import "./globals.css";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   ...createMetadata({ path: null }),
@@ -31,17 +30,18 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: siteConfig.name,
-    statusBarStyle: "black-translucent"
+    statusBarStyle: "default"
   },
   formatDetection: {
     telephone: false
   },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    shortcut: ["/icon.svg"]
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    shortcut: ["/icon.svg"],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }]
   },
   other: {
-    "geo.region": "IN",
+    "geo.region": launchSingleCityRestricted ? "IN-KA" : "IN",
     "geo.placename": siteConfig.market,
     "mobile-web-app-capable": "yes"
   }
@@ -50,20 +50,24 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: siteConfig.themeColor,
   colorScheme: "light"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={siteConfig.language} className={cn("scroll-smooth", "font-sans", geist.variable)} data-scroll-behavior="smooth">
+    <html lang={siteConfig.language} className="scroll-smooth font-sans" data-scroll-behavior="smooth">
       <body>
         <TooltipProvider>
           <MarketingTags />
           <SupportAgentAlerts />
           {children}
+          <Suspense fallback={null}>
+            <AppInstall />
+          </Suspense>
           <LazySiteChatbot />
-          <SpeedInsights />
+          <RouteAwareSpeedInsights />
         </TooltipProvider>
       </body>
     </html>

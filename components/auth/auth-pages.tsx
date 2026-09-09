@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { useSearchParams } from "next/navigation";
-import { ArrowRight, CheckCircle2, CreditCard, KeyRound, LogIn, Mail, RefreshCw, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, CreditCard, KeyRound, LogIn, Mail, MapPin, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
@@ -24,6 +25,8 @@ import { defaultBusinessServiceTypeName } from "@/lib/business-service-types";
 import { pricingPlans } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { trackMarketingEvent } from "@/components/marketing/marketing-runtime";
+import { launchMarket, launchSingleCityRestricted, launchOffer } from "@/lib/launch-policy";
+import { isMobileAuthorizationPath } from "@/lib/mobile-client-contract";
 
 type RegisterPortal = Extract<AuthPortal, "business" | "user">;
 type AuthPage = "/login" | "/register" | "/forgot-password";
@@ -35,6 +38,8 @@ const fieldLabels: Record<string, string> = {
   phone: "Phone",
   password: "Password",
   businessType: "Business type",
+  city: "Launch city",
+  state: "Launch state",
   subscriptionPlan: "Subscription plan",
   whatsappEnabled: "WhatsApp customer flow"
 };
@@ -166,28 +171,37 @@ function AuthShell({
   body,
   switcher,
   showDemoNotice = true,
+  lockedToApp = false,
   children
 }: {
   title: string;
   body: string;
   switcher?: React.ReactNode;
   showDemoNotice?: boolean;
+  lockedToApp?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-mesh-light px-4 py-10">
-      <div className="w-full max-w-md">
-        <Link href="/" className="mb-6 flex items-center justify-center gap-2 font-bold text-ink">
-          <span className="grid size-10 place-items-center rounded-lg bg-ink text-white">VM</span>
-          <span>VyapaarMate</span>
-        </Link>
+    <main className="grid min-h-screen min-w-0 grid-cols-[minmax(0,1fr)] place-items-center bg-mesh-light px-4 py-10">
+      <div className="w-full min-w-0 max-w-md">
+        {lockedToApp ? (
+          <div className="mb-6 flex items-center justify-center gap-2 font-bold text-ink" aria-label="VyapaarMate secure app sign in">
+            <BrandMark />
+            <span>VyapaarMate</span>
+          </div>
+        ) : (
+          <Link href="/" className="mb-6 flex items-center justify-center gap-2 font-bold text-ink">
+            <BrandMark />
+            <span>VyapaarMate</span>
+          </Link>
+        )}
         <Card className="bg-white/90 p-6 shadow-soft">
           <h1 className="text-2xl font-bold text-ink">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
           {switcher}
           {showDemoNotice && process.env.NODE_ENV !== "production" && (
             <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Local demo only: use the password supplied through DEMO_SEED_PASSWORD when creating the seeded accounts. Never reuse production credentials.
+              Local development. Use the test accounts created for this database; demo activity is not customer or revenue evidence.
             </div>
           )}
           {children}
@@ -201,6 +215,7 @@ export function LoginForm() {
   const params = useSearchParams();
   const portal = selectedAuthPortal(params.get("type"), params.get("next"));
   const nextPath = params.get("next");
+  const isMobileAuthorization = isMobileAuthorizationPath(nextPath);
   const isPrivateTeamPortal = portal === "admin" || portal === "support";
   const isUser = portal === "user";
   const copy = loginCopy[portal];
@@ -250,8 +265,9 @@ export function LoginForm() {
     <AuthShell
       title={copy.title}
       body={copy.body}
-      switcher={!isPrivateTeamPortal ? <AuthPortalSwitch portal={portal} page="/login" nextPath={nextPath} /> : undefined}
+      switcher={!isPrivateTeamPortal && !isMobileAuthorization ? <AuthPortalSwitch portal={portal} page="/login" nextPath={nextPath} /> : undefined}
       showDemoNotice={!isUser}
+      lockedToApp={isMobileAuthorization}
     >
       <form onSubmit={submit} className="mt-6 grid gap-4">
         <div className="grid gap-2">
@@ -272,7 +288,7 @@ export function LoginForm() {
       </form>
       <div className="mt-5 flex items-center justify-between text-sm font-semibold text-ocean">
         <Link href={authPath("/forgot-password", portal, nextPath)}>Forgot password?</Link>
-        {!isPrivateTeamPortal && (
+        {!isPrivateTeamPortal && !isMobileAuthorization && (
           <Link href={authPath("/register", isUser ? "user" : "business", nextPath)}>
             {isUser ? "Create user account" : "Register business"}
           </Link>
@@ -286,13 +302,16 @@ export function RegisterForm() {
   const params = useSearchParams();
   const portal = selectedRegisterPortal(params.get("type"), params.get("next"));
   const nextPath = params.get("next");
+  const isMobileAuthorization = isMobileAuthorizationPath(nextPath);
   const isUser = portal === "user";
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [businessType, setBusinessType] = useState(defaultBusinessServiceTypeName);
-  const [subscriptionPlan, setSubscriptionPlan] = useState<(typeof pricingPlans)[number]["id"]>("STARTER");
+  const [subscriptionPlan, setSubscriptionPlan] = useState<(typeof pricingPlans)[number]["id"]>(() =>
+    params.get("plan")?.toUpperCase() === "PRO" ? "PRO" : "STARTER"
+  );
   const [registrationId, setRegistrationId] = useState(() => params.get("verification") ?? "");
   const [maskedEmail, setMaskedEmail] = useState("your email");
   const [maskedPhone, setMaskedPhone] = useState("your phone");
@@ -317,6 +336,8 @@ export function RegisterForm() {
         phone: String(form.get("phone")),
         password: String(form.get("password")),
         businessType: String(form.get("businessType")),
+        city: String(form.get("city")),
+        state: String(form.get("state")),
         subscriptionPlan: String(form.get("subscriptionPlan")),
         whatsappEnabled: form.get("whatsappEnabled") === "on"
       })
@@ -474,6 +495,7 @@ export function RegisterForm() {
             ? `Enter the codes sent to ${maskedEmail} and ${maskedPhone}. Both are required before your account is activated.`
             : `Enter the code sent to ${maskedEmail}. Phone numbers are still kept unique, but SMS verification is disabled.`
         }
+        lockedToApp={isMobileAuthorization}
       >
         <form key={`verification-${registrationId}`} onSubmit={verifyRegistration} className="mt-6 grid gap-4">
           <div className="grid gap-2">
@@ -549,6 +571,23 @@ export function RegisterForm() {
     );
   }
 
+  if (isMobileAuthorization) {
+    return (
+      <AuthShell
+        title="Sign in to continue in the app"
+        body="New account and subscription enrollment are available on the VyapaarMate website, not inside the mobile app sign-in flow."
+        showDemoNotice={false}
+        lockedToApp
+      >
+        <div className="mt-6">
+          <ButtonLink href={authPath("/login", portal, nextPath)} variant="emerald" className="w-full" icon={<LogIn className="size-4" />}>
+            Back to Sign In
+          </ButtonLink>
+        </div>
+      </AuthShell>
+    );
+  }
+
   if (isUser) {
     return (
       <AuthShell
@@ -591,7 +630,7 @@ export function RegisterForm() {
   return (
     <AuthShell
       title="Business Register"
-      body="Choose a subscription, verify your account, then pay the plan amount before KYC document upload and admin approval."
+      body={`Apply for the ${launchMarket.displayName} business launch, verify your account, confirm your operating location, then review your cohort’s applicable subscription total plus GST before payment and KYC.`}
       switcher={<AuthPortalSwitch portal={portal} page="/register" nextPath={nextPath} portals={["business", "user"]} />}
     >
       <form onSubmit={submitBusinessRegistration} className="mt-6 grid gap-4">
@@ -603,8 +642,23 @@ export function RegisterForm() {
           <Label htmlFor="businessName">Business name</Label>
           <div className="relative">
             <BusinessIcon className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />
-            <Input id="businessName" name="businessName" className="pl-10" placeholder="Sri Sai Tiffins" required />
+            <Input id="businessName" name="businessName" className="pl-10" placeholder="HSR Fresh Foods" required />
           </div>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="city">Current launch location</Label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="relative">
+              <MapPin className="pointer-events-none absolute left-3 top-3 size-5 text-emerald" />
+              <Input id="city" name="city" defaultValue={launchSingleCityRestricted ? launchMarket.city : ""} className="pl-10" readOnly={launchSingleCityRestricted} required />
+            </div>
+            <Input id="state" name="state" defaultValue={launchSingleCityRestricted ? launchMarket.state : ""} readOnly={launchSingleCityRestricted} required />
+          </div>
+          <p className="text-xs leading-5 text-slate-500">
+            {launchSingleCityRestricted
+              ? "Your operating address and map pin will be verified inside the Bengaluru launch area before payment."
+              : "Enter the city and state where the business operates. The map pin will be verified before payment."}
+          </p>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
@@ -657,7 +711,13 @@ export function RegisterForm() {
                     {selected ? <CheckCircle2 className="size-5 text-emerald" /> : <CreditCard className="size-5 text-slate-400" />}
                   </span>
                   <span className="mt-2 block text-2xl font-extrabold text-ink">{formatINR(plan.price)}</span>
-                  <span className="mt-1 block text-xs font-semibold text-slate-500">per month, payable before KYC</span>
+                  {launchOffer.publiclyAdvertised && (
+                    <span className="mt-1 block text-xs font-semibold text-slate-500">
+                      <span className="line-through">{formatINR(plan.listPrice)}</span>{" "}
+                      <span className="text-emerald">{launchOffer.discountLabel}</span>
+                    </span>
+                  )}
+                  <span className="mt-1 block text-xs font-semibold text-slate-500">per 30 days, plus GST; setup and provider usage are separate</span>
                 </button>
               );
             })}
@@ -671,9 +731,19 @@ export function RegisterForm() {
           <input name="whatsappEnabled" type="checkbox" defaultChecked className="peer sr-only" />
           <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
         </label>
+        <p className="text-xs leading-5 text-slate-500">
+          By creating an account, you agree to the <Link href="/terms" className="font-semibold text-ocean">Terms</Link> and acknowledge the{" "}
+          <Link href="/privacy" className="font-semibold text-ocean">Privacy Policy</Link>. You will review the final discounted amount, GST, and any separate setup or provider charges before payment.
+        </p>
         {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        <Button type="submit" disabled={loading} variant="emerald" icon={<ArrowRight className="size-4" />}>
-          {loading ? "Submitting" : `Register and Pay ${formatINR(pricingPlans.find((plan) => plan.id === subscriptionPlan)?.price ?? pricingPlans[0].price)}`}
+        <Button
+          type="submit"
+          disabled={loading}
+          variant="emerald"
+          icon={<ArrowRight className="size-4" />}
+          className="h-auto min-h-10 min-w-0 whitespace-normal px-3 py-2 text-center leading-5"
+        >
+          {loading ? "Submitting" : `Create account for ${formatINR(pricingPlans.find((plan) => plan.id === subscriptionPlan)?.price ?? pricingPlans[0].price)} + GST`}
         </Button>
         <ButtonLink href={authPath("/login", "business", nextPath)} variant="secondary" className="w-full" icon={<LogIn className="size-4" />}>
           Sign In
@@ -687,6 +757,7 @@ export function ForgotPasswordPage() {
   const params = useSearchParams();
   const portal = selectedAuthPortal(params.get("type"), params.get("next"));
   const nextPath = params.get("next");
+  const isMobileAuthorization = isMobileAuthorizationPath(nextPath);
   const isPrivateTeamPortal = portal === "admin" || portal === "support";
   const copy = forgotCopy[portal];
   const [loading, setLoading] = useState(false);
@@ -722,8 +793,9 @@ export function ForgotPasswordPage() {
     <AuthShell
       title={copy.title}
       body={copy.body}
-      switcher={!isPrivateTeamPortal ? <AuthPortalSwitch portal={portal} page="/forgot-password" nextPath={nextPath} /> : undefined}
+      switcher={!isPrivateTeamPortal && !isMobileAuthorization ? <AuthPortalSwitch portal={portal} page="/forgot-password" nextPath={nextPath} /> : undefined}
       showDemoNotice={false}
+      lockedToApp={isMobileAuthorization}
     >
       <form className="mt-6 grid gap-4" onSubmit={submit}>
         <div className="grid gap-2">
@@ -760,6 +832,7 @@ export function ResetPasswordPage() {
   const token = params.get("token") ?? "";
   const portal = selectedAuthPortal(params.get("type"), params.get("next"));
   const nextPath = params.get("next");
+  const isMobileAuthorization = isMobileAuthorizationPath(nextPath);
   const [loading, setLoading] = useState(false);
   const [complete, setComplete] = useState(false);
   const [message, setMessage] = useState("");
@@ -805,6 +878,7 @@ export function ResetPasswordPage() {
         title="Reset link missing"
         body="Request a new password reset link and open it from your email."
         showDemoNotice={false}
+        lockedToApp={isMobileAuthorization}
       >
         <div className="mt-6 grid gap-3">
           <ButtonLink href={authPath("/forgot-password", portal, nextPath)} variant="emerald" className="w-full" icon={<Mail className="size-4" />}>
@@ -823,6 +897,7 @@ export function ResetPasswordPage() {
       title="Set new password"
       body={`Choose a new password for your ${portalLabels[portal]}. This reset link can be used only once.`}
       showDemoNotice={false}
+      lockedToApp={isMobileAuthorization}
     >
       {complete ? (
         <div className="mt-6 grid gap-4">

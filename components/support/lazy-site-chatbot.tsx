@@ -3,7 +3,18 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { usePathname } from "next/navigation";
 
-const hiddenPathPrefixes = ["/login", "/register", "/forgot-password", "/dashboard", "/admin", "/support", "/b/", "/order/"];
+const hiddenPathPrefixes = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/dashboard",
+  "/admin",
+  "/support",
+  "/b/",
+  "/order/",
+  "/mobile/",
+  "/account-deletion"
+];
 const fallbackDelayMs = 1400;
 
 type IdleDeadline = {

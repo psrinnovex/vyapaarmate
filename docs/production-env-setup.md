@@ -8,6 +8,11 @@ Status: required before deployment
 
 - `NEXT_PUBLIC_APP_URL`: deployed HTTPS origin, for example `https://www.vyapaarmate.com`.
 - `JWT_SECRET`: random 32+ character server-only secret used to sign app session cookies.
+- `MOBILE_JWT_SECRET`: separate random 32+ byte server-only secret used only for 10-minute native access JWTs.
+- `MOBILE_TOKEN_PEPPER`: separate random 32+ byte server-only HMAC pepper for native authorization codes and rotating refresh tokens.
+- `MOBILE_TOKEN_ISSUER=https://www.vyapaarmate.com`: exact production issuer checked in every native access token.
+- `ACCOUNT_DELETION_TOKEN_PEPPER`: separate random 32+ byte server-only HMAC pepper for single-use post-uninstall deletion links.
+- `ACCOUNT_RETENTION_POLICY_APPROVED_VERSION=2026-08-17`: release gate. Set it only after the owner and qualified counsel approve that exact retention notice and its category-by-category schedule. The deletion cron refuses final retained-record purges when the stored request version does not exactly match this value.
 - `ENCRYPTION_KEY`: random 32+ character server-only secret for encrypted fields.
 - `TRUSTED_ORIGINS`: comma-separated extra HTTPS origins allowed for unsafe API requests, if any.
 
@@ -16,6 +21,8 @@ Generate random secrets with a password manager or:
 ```sh
 openssl rand -base64 48
 ```
+
+Never expose these secrets, Prisma database credentials, Supabase service-role keys, or Supabase database URLs in the native bundle. Rotate each mobile/deletion secret independently during an incident: changing `MOBILE_JWT_SECRET` invalidates access tokens, changing `MOBILE_TOKEN_PEPPER` invalidates authorization codes and refresh tokens, and changing `ACCOUNT_DELETION_TOKEN_PEPPER` invalidates pending deletion-email links. A planned rotation therefore requires users with affected credentials to authenticate or request deletion again. Do not reuse `JWT_SECRET` for any of them.
 
 ## Supabase PostgreSQL
 
@@ -36,6 +43,16 @@ Create an Upstash Redis database for shared rate limiting.
 - `UPSTASH_REDIS_REST_URL`: Upstash REST URL.
 - `UPSTASH_REDIS_REST_TOKEN`: Upstash REST token.
 - `RATE_LIMIT_FAIL_OPEN`: keep `false` in production.
+
+## Launch Market And Subscription Offer
+
+Set these explicitly in Preview and Production. The application has safe defaults, but an explicit production value prevents an accidental city expansion or offer change during a later code update.
+
+- `NEXT_PUBLIC_LAUNCH_MARKET=pilot-cohorts`: enable separate Bengaluru and Andhra Pradesh pilot cohorts across onboarding, billing, discovery and orders. Use `bengaluru` for single-city operation or `all` for national onboarding. AP map bounds are a coarse sanity check; verify the actual operating address during KYC.
+- `NEXT_PUBLIC_BENGALURU_LAUNCH_OFFER=true`: apply the automatic 80% Bengaluru subscription discount to future checkouts. Set `false` to end the offer after updating public copy and QA.
+- `SUBSCRIPTION_GST_RATE_BPS=1800`: current configured subscription GST rate in basis points. Confirm the applicable tax treatment with the company accountant before accepting live payments.
+
+See `docs/bengaluru-launch-operations.md` for the complete commercial policy, service radius, exclusions, expansion behavior, and launch QA matrix.
 
 ## Chatbot And AI Provider
 
@@ -104,6 +121,7 @@ Get these from Meta for Developers / WhatsApp Manager.
 ## Cron And Jobs
 
 - `CRON_SECRET`: random 32+ character value.
+- `APPOINTMENT_REMINDER_HOURS`: reminder lead time in hours; defaults to `24`.
 
 Configure the cron provider to send:
 
@@ -116,6 +134,8 @@ Protected job routes:
 - `/api/jobs/intelligence-refresh`
 - `/api/jobs/payment-reconciliation`
 - `/api/jobs/payment-reminders`
+- `/api/jobs/appointment-reminders`
+- `/api/jobs/account-deletions` (run daily; finalizes verified business deletions whose 30-day waiting period has elapsed)
 - `/api/jobs/payment-transfers`
 
 ## Analytics And SEO

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireBusinessSession } from "@/lib/api-session";
+import { rejectMobileBusinessSubscriptionRequest, requireBusinessSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
 import { cashfreeEnvironment } from "@/services/cashfree";
 
@@ -119,6 +119,8 @@ function checkoutHtml(input: {
 }
 
 export async function GET(request: Request, context: RouteContext) {
+  const mobileDenied = await rejectMobileBusinessSubscriptionRequest();
+  if (mobileDenied) return mobileDenied;
   const auth = await requireBusinessSession("business:billing:write");
   if (auth.response) {
     return NextResponse.redirect(`${appUrl(request)}/login`);

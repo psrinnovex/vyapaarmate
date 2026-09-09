@@ -1,5 +1,6 @@
 import type { PaymentProvider } from "@prisma/client";
 import { subscriptionPeriodEnd } from "@/lib/billing";
+import { launchBusinessLocationError } from "@/lib/launch-policy";
 import { prisma } from "@/lib/prisma";
 import {
   createCashfreeOrder,
@@ -104,13 +105,30 @@ export async function completeSubscriptionPayment(input: {
       businessId: true,
       plan: true,
       paymentProvider: true,
-      paymentStatus: true
+      paymentStatus: true,
+      business: {
+        select: {
+          city: true,
+          state: true,
+          latitude: true,
+          longitude: true
+        }
+      }
     }
   });
 
   if (!subscription) return { updated: false, reason: "not_found" as const };
   if (subscription.paymentProvider !== input.provider) return { updated: false, reason: "provider_mismatch" as const };
   if (subscription.paymentStatus === "COMPLETED") return { updated: false, reason: "already_completed" as const };
+
+  const marketError = launchBusinessLocationError(subscription.business, { requireCoordinates: true });
+  if (marketError) {
+    return {
+      updated: false,
+      reason: "business_outside_launch_market" as const,
+      error: marketError
+    };
+  }
 
   const paidAt = input.paidAt ?? new Date();
   const updated = await prisma.$transaction(async (tx) => {
@@ -295,6 +313,7 @@ export async function syncCashfreeSubscriptionPayment(subscriptionId: string) {
   return {
     updated: result.updated,
     reason: result.updated ? null : result.reason,
+    error: "error" in result ? result.error : undefined,
     paymentState: "COMPLETED" as const,
     providerStatus: cashfreeStatus,
     paymentId: successfulPayment.paymentId

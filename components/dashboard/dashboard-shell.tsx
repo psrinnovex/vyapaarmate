@@ -3,12 +3,14 @@
 import type { Role } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, X } from "lucide-react";
 import { DashboardLiveProvider } from "@/hooks/use-live-sync";
 import { DashboardBookingAlert } from "@/components/dashboard/dashboard-booking-alert";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
 import { getBusinessConsoleIcons } from "@/lib/business-console-icons";
+import { businessTypeSupportsAppointments, getAppointmentTerminology } from "@/lib/appointment-scheduling";
 import { dashboardNav } from "@/lib/constants";
 import { hasPermission } from "@/lib/rbac";
 import type { LiveDashboardPayload } from "@/lib/live-types";
@@ -102,6 +104,7 @@ function ApprovalNotice({ notice }: { notice: BusinessAccessNotice }) {
 function permissionForNavItem(href: string) {
   if (href === "/dashboard") return "business:overview:read";
   if (href.startsWith("/dashboard/ai-suggestions")) return "business:reports:read";
+  if (href.startsWith("/dashboard/appointments")) return "business:orders:read";
   if (href.startsWith("/dashboard/orders")) return "business:orders:read";
   if (href.startsWith("/dashboard/menu")) return "business:menu:read";
   if (href.startsWith("/dashboard/customers")) return "business:customers:read";
@@ -138,8 +141,15 @@ export function DashboardShell({
   const icons = getBusinessConsoleIcons(business.businessType);
   const StorefrontIcon = icons.businessIcon;
   const navItems = dashboardNav
-    .filter((item) => hasPermission(user.role, permissionForNavItem(item.href)))
+    .filter(
+      (item) =>
+        hasPermission(user.role, permissionForNavItem(item.href)) &&
+        (item.href !== "/dashboard/appointments" || businessTypeSupportsAppointments(business.businessType))
+    )
     .map((item) => {
+      if (item.href === "/dashboard/appointments") {
+        return { ...item, label: getAppointmentTerminology(business.businessType).appointmentPlural };
+      }
       if (item.href === "/dashboard/orders") return { ...item, label: copy.transactionPlural, icon: icons.transactionIcon };
       if (item.href === "/dashboard/orders/history") return { ...item, label: `${copy.transactionSingular} History` };
       if (item.href === "/dashboard/menu") return { ...item, label: copy.catalogNavLabel, icon: icons.catalogIcon };
@@ -156,7 +166,7 @@ export function DashboardShell({
   const approvalNotice = user.role === "OWNER" ? businessAccessNotice(business) : null;
   const mobileQuickNav = navItems
     .filter((item) =>
-      ["/dashboard", "/dashboard/orders", "/dashboard/menu", "/dashboard/payments", "/dashboard/settings"].includes(item.href)
+      ["/dashboard", "/dashboard/appointments", "/dashboard/orders", "/dashboard/menu", "/dashboard/settings"].includes(item.href)
     )
     .slice(0, 5);
 
@@ -239,7 +249,7 @@ export function DashboardShell({
       <aside className="hidden h-full min-h-0 overflow-hidden border-r border-line bg-white lg:block">
         <div className="flex h-full min-h-0 flex-col p-4">
           <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
-            <span className="grid size-10 place-items-center rounded-lg bg-white text-ink">VM</span>
+            <BrandMark surface="dark" />
             <span>VyapaarMate</span>
           </Link>
           {isSeededDemoUser && (
@@ -322,7 +332,7 @@ export function DashboardShell({
             >
               <div className="flex shrink-0 items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
-                  <span className="grid size-9 place-items-center rounded-lg bg-white text-ink">VM</span>
+                  <BrandMark surface="dark" />
                   <span>VyapaarMate</span>
                 </Link>
                 <button

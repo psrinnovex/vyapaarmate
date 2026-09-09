@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -10,8 +9,6 @@ import {
   CalendarClock,
   CheckCircle2,
   Gauge,
-  IndianRupee,
-  Info,
   LineChart,
   Megaphone,
   MessageCircle,
@@ -133,6 +130,7 @@ function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload
             <Badge variant="neutral">First-party database</Badge>
             <Badge variant="neutral">Benchmarks isolated from production</Badge>
             <Badge variant="neutral">No synthetic production data</Badge>
+            <Badge variant="neutral">Review recommendations before acting</Badge>
           </div>
           <h2 className="mt-3 text-base font-bold text-ink">Model readiness</h2>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
@@ -248,19 +246,6 @@ function HealthFactorBar({ label, value, tone = "ocean" }: { label: string; valu
 }
 
 export function AiSuggestionsPage() {
-  const pathname = usePathname();
-  const isProtected = useMemo(() => {
-    if (!pathname) return false;
-    return (
-      pathname === "/dashboard" ||
-      pathname.startsWith("/dashboard/") ||
-      pathname === "/admin" ||
-      pathname.startsWith("/admin/") ||
-      pathname === "/support" ||
-      pathname.startsWith("/support/")
-    );
-  }, [pathname]);
-
   const [data, setData] = useState<BusinessIntelligencePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -393,7 +378,7 @@ export function AiSuggestionsPage() {
         action={
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
             <Badge variant={data.source === "demo" ? "amber" : "emerald"}>
-              {data.source === "demo" ? "Demo fallback data" : "Live business data"}
+              {data.source === "demo" ? "Demo fallback data" : "Connected database"}
             </Badge>
             <Badge variant={connected ? "blue" : "amber"}>{connected ? "Live sync on" : "Sync reconnecting"}</Badge>
             <Button className="w-full sm:w-auto" variant="secondary" icon={<RefreshCw className="size-4" />} onClick={() => void refreshData()}>
@@ -745,19 +730,6 @@ export function AiSuggestionsPage() {
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-3 rounded-lg border border-line bg-white p-4 text-sm leading-6 text-slate-600 shadow-[0_16px_48px_rgba(13,19,33,0.05)] lg:grid-cols-[auto_1fr_auto] lg:items-center">
-        <div className="grid size-10 place-items-center rounded-lg bg-ocean/10 text-ocean">
-          <Info className="size-5" />
-        </div>
-        <p>
-          These are explainable decision-support suggestions from local rules and business data. They do not guarantee outcomes, and owners should verify stock, staff, pricing, and customer consent before acting.
-        </p>
-        {!isProtected && (
-          <ButtonLink className="w-full sm:w-auto" href="/technology-innovation" variant="secondary" icon={<IndianRupee className="size-4" />}>
-            See Technology
-          </ButtonLink>
-        )}
-      </div>
     </>
   );
 }

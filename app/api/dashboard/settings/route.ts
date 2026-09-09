@@ -7,6 +7,7 @@ import { parseBusinessImageDataUrl, type ParsedBusinessImage } from "@/lib/busin
 import { prisma } from "@/lib/prisma";
 import { dashboardSettingsSchema } from "@/lib/validations";
 import { resolveBusinessServiceType } from "@/lib/business-service-types.server";
+import { canonicalLaunchCity, canonicalLaunchState } from "@/lib/launch-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -94,8 +95,8 @@ export async function PATCH(request: Request) {
           email: parsed.data.email,
           phone: parsed.data.phone,
           address: parsed.data.address,
-          city: parsed.data.city,
-          state: parsed.data.state,
+          city: canonicalLaunchCity(parsed.data.city) ?? parsed.data.city,
+          state: canonicalLaunchState(parsed.data.state),
           businessHours: parsed.data.businessHours,
           isOpen: parsed.data.isOpen,
           minimumOrder: parsed.data.minimumOrder,

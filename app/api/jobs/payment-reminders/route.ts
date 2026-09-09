@@ -5,6 +5,8 @@ import { formatINR } from "@/lib/utils";
 import { businessWhatsappConfig } from "@/services/business-whatsapp";
 import { paymentCheckoutExpiresInMinutes } from "@/services/cashfree";
 import { sendWhatsAppTemplate } from "@/services/whatsapp";
+import { isEligibleLaunchBusinessLocation } from "@/lib/launch-policy";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +55,8 @@ async function handlePaymentReminders(request: Request) {
         customer: { whatsappOptIn: true },
         business: {
           whatsappConnected: true,
-          whatsappLiveEnabled: true
+          whatsappLiveEnabled: true,
+          subscriptions: { some: currentPaidSubscriptionWhere(now) }
         }
       }
     },
@@ -76,6 +79,11 @@ async function handlePaymentReminders(request: Request) {
   for (const payment of payments) {
     const { business, customer } = payment.order;
     const orderUrl = `${appUrl()}/order/${payment.order.publicToken}`;
+
+    if (!isEligibleLaunchBusinessLocation(business, { requireCoordinates: true })) {
+      failed += 1;
+      continue;
+    }
 
     try {
       const result = await sendWhatsAppTemplate({

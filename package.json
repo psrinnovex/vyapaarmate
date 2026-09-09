@@ -12,10 +12,13 @@
     "postinstall": "prisma generate",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:security && npm run test:payments && npm run test:chatbot && node --import tsx --test lib/business-intelligence.test.ts && node --import tsx --test lib/intelligence/ml/real-ai-intelligence.test.ts",
-    "test:payments": "node --import tsx --test services/payment-integrity.test.ts lib/order-tracking.test.ts lib/business-rules.test.ts lib/business-copy.test.ts lib/business-hours.test.ts",
+    "test": "npm run test:security && npm run test:platform && npm run test:payments && npm run test:appointments && npm run test:chatbot && node --import tsx --test lib/business-intelligence.test.ts && node --import tsx --test lib/intelligence/ml/real-ai-intelligence.test.ts",
+    "test:appointments": "node --import tsx --test lib/appointment-scheduling.test.ts",
+    "test:payments": "node --import tsx --test lib/catalog-validation.test.ts services/payment-integrity.test.ts lib/launch-policy.test.ts lib/subscription-access.test.ts lib/subscription-invoice.test.ts lib/order-tracking.test.ts lib/business-rules.test.ts lib/business-copy.test.ts lib/business-hours.test.ts lib/pilot-reporting.test.ts",
+    "test:platform": "node --import tsx --test lib/platform-access.test.ts",
     "test:chatbot": "node --import tsx --test lib/support-chatbot.test.ts lib/chatbot/chatbot-security.test.ts",
-    "test:security": "node --import tsx --test lib/rbac.test.ts lib/security/security.test.ts",
+    "test:security": "node --import tsx --test lib/client-export.test.ts lib/auth-portal.test.ts lib/account-deletion.test.ts lib/api-session.test.ts lib/customer-account-policy.test.ts lib/mobile-auth-policy.test.ts lib/mobile-client-contract.test.ts lib/mobile-commerce-policy.test.ts lib/mobile-order-idempotency.test.ts lib/rbac.test.ts lib/security/security.test.ts",
+    "test:retention-integration": "node --import tsx scripts/qa/account-retention-integration.ts",
     "intelligence:verify-benchmarks": "node scripts/verify-intelligence-benchmarks.mjs",
     "verify": "npm run lint && npm run typecheck && npm run build",
     "production:check": "node scripts/check-production-env.mjs",
@@ -24,7 +27,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "whatsapp:smoke": "tsx scripts/smoke-whatsapp-commerce.ts"
+    "whatsapp:smoke": "tsx scripts/smoke-whatsapp-commerce.ts",
+    "brand:generate": "node scripts/generate-brand-assets.mjs",
+    "test:pilot-integration": "node --import tsx scripts/qa/pilot-reporting-integration.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

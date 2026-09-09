@@ -1,14 +1,18 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { launchMarket, launchOffer } from "@/lib/launch-policy";
 import { siteConfig } from "@/lib/site";
 
-export const alt = "VyapaarMate direct local commerce dashboard";
+export const alt = `VyapaarMate ${launchMarket.displayName} launch for local businesses`;
 export const size = {
   width: 1200,
   height: 630
 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const logo = (await readFile(join(process.cwd(), "public/icons/icon-192.png"))).toString("base64");
   return new ImageResponse(
     (
       <div
@@ -49,7 +53,8 @@ export default function OpenGraphImage() {
                 fontWeight: 800
               }}
             >
-              VM
+              {/* next/og renders this server-side PNG directly. */}
+              <img alt="" width={82} height={82} src={`data:image/png;base64,${logo}`} />
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               <div style={{ fontSize: 34, fontWeight: 800 }}>{siteConfig.name}</div>
@@ -59,7 +64,7 @@ export default function OpenGraphImage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             <div style={{ maxWidth: 880, fontSize: 74, lineHeight: 0.96, fontWeight: 900 }}>
-              Direct local commerce for Indian businesses
+              Direct local commerce for local businesses
             </div>
             <div style={{ maxWidth: 900, color: "#475569", fontSize: 30, lineHeight: 1.35, fontWeight: 600 }}>
               Website orders, bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, and owner dashboards.
@@ -67,7 +72,13 @@ export default function OpenGraphImage() {
           </div>
 
           <div style={{ display: "flex", gap: 14, color: "#0f172a", fontSize: 22, fontWeight: 800 }}>
-            {["WhatsApp orders", "UPI QR", "CRM", "Campaigns", "Reports"].map((label) => (
+            {[
+              launchOffer.publiclyAdvertised ? "80% launch discount" : "Monthly plans",
+              "WhatsApp orders",
+              "UPI QR",
+              "CRM",
+              "Reports"
+            ].map((label) => (
               <div
                 key={label}
                 style={{

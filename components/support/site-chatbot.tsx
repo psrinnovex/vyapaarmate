@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Lottie from "lottie-react";
 import { Bot, Loader2, Send, ShieldCheck, Star, X } from "lucide-react";
 import { company } from "@/lib/constants";
+import { launchMarket } from "@/lib/launch-policy";
 import { cn, initials } from "@/lib/utils";
 
 type ChatAction = {
@@ -80,7 +81,18 @@ const launcherAnimationPath = "/lottie/hello-chat-bot.json";
 const customerSupportAlertPath = "/audio/support-agent-alert.mp3";
 const customerSupportAlertGain = 2;
 const storageKey = "vyapaarmate_chat_session";
-const hiddenPathPrefixes = ["/login", "/register", "/forgot-password", "/dashboard", "/admin", "/support", "/b/", "/order/"];
+const hiddenPathPrefixes = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/dashboard",
+  "/admin",
+  "/support",
+  "/b/",
+  "/order/",
+  "/mobile/",
+  "/account-deletion"
+];
 const defaultChatHighlightTerms = [
   "VyapaarBot",
   `${company.product} Support`,
@@ -89,7 +101,6 @@ const defaultChatHighlightTerms = [
   company.name.replace(/\s+Pvt\s+Ltd$/i, ""),
   "PSHR",
   "Sri Hari",
-  "Sri Sai Tiffins",
   "Fresh Bowl Cloud Kitchen",
   "Sweet Cravings Home Bakery"
 ];
@@ -1068,7 +1079,7 @@ function getPortalConfig(pathname: string | null): ChatPortalConfig {
         text: "Hi, I'm VyapaarBot. I can help with order or booking status, payments, store details, or contacting the business.",
         actions: [
           { label: "Contact", href: "/contact", tone: "primary" },
-          { label: "Demo store", href: "/b/sri-sai-tiffins" }
+          { label: "Demo store", href: "/b/fresh-bowl-cloud-kitchen" }
         ]
       }
     };
@@ -1076,11 +1087,11 @@ function getPortalConfig(pathname: string | null): ChatPortalConfig {
 
   return {
     portal,
-    starterPrompts: ["Pricing", "Book demo", "Payment help", "WhatsApp setup"],
+    starterPrompts: ["Pilot availability", "Launch pricing", "Book demo", "WhatsApp setup"],
     welcomeMessage: {
       id: "welcome-public",
       role: "assistant",
-      text: "Hi, I'm VyapaarBot. I can help with pricing, demos, payments, WhatsApp, orders, or setup.",
+      text: `Hi, I'm VyapaarBot. I can help with the current ${launchMarket.displayName} launch, pricing, demos, payments, WhatsApp, orders, or setup.`,
       actions: [
         { label: "Features", href: "/features", tone: "primary" },
         { label: "Contact", href: "/contact" }

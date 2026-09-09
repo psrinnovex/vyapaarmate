@@ -30,7 +30,7 @@ import { Card } from "@/components/ui/card";
 import { Section } from "@/components/ui/section";
 
 const featuresDescription =
-  "Explore VyapaarMate features for website ordering, bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, staff roles, analytics, and admin controls.";
+  "Explore VyapaarMate features for website ordering, bookings, UPI QR payments, WhatsApp updates, CRM, campaign drafts, staff roles, analytics, and admin controls.";
 
 export const metadata = createMetadata({
   title: "Features",
@@ -83,9 +83,10 @@ export default function FeaturesPage() {
       <main className="min-h-screen bg-mist">
         <PublicHeader />
         <Section
+          headingAs="h1"
           eyebrow="Features"
           title="A complete website commerce and WhatsApp updates platform for local businesses"
-          body="VyapaarMate combines ordering, payments, WhatsApp customer flow, CRM, campaigns, staff roles, analytics, and admin controls in one clean product."
+          body="VyapaarMate combines ordering, payments, WhatsApp customer flow, CRM, campaign drafts, staff roles, analytics, and admin controls in one clean product."
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureCards.map((feature, index) => (
@@ -121,13 +122,13 @@ export default function FeaturesPage() {
             ))}
           </div>
           <ButtonLink
-            href="/register"
+            href="/register?plan=STARTER"
             className="mt-8"
             icon={<ArrowRight className="size-5" variant="Bold" />}
             data-marketing-event="cta_click"
             data-marketing-location="features_controls"
             data-marketing-label="submit_for_approval"
-            data-marketing-destination="/register"
+            data-marketing-destination="/register?plan=STARTER"
           >
             Submit for Approval
           </ButtonLink>

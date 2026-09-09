@@ -74,7 +74,26 @@ const requiredOneOf = (names, hint = "") => {
 };
 
 const appUrl = required("NEXT_PUBLIC_APP_URL", 1, "Use the deployed HTTPS app origin, for example https://www.vyapaarmate.com.");
-required("JWT_SECRET", 32, "Generate a random 32+ character value and keep it server-only.");
+const jwtSecret = required("JWT_SECRET", 32, "Generate a random 32+ character value and keep it server-only.");
+const mobileJwtSecret = required("MOBILE_JWT_SECRET", 32, "Generate a separate random 32+ byte value for 10-minute native access tokens.");
+const mobileTokenPepper = required("MOBILE_TOKEN_PEPPER", 32, "Generate a separate random 32+ byte HMAC pepper for opaque authorization codes and refresh tokens.");
+const accountDeletionTokenPepper = required("ACCOUNT_DELETION_TOKEN_PEPPER", 32, "Generate a separate random 32+ byte HMAC pepper for single-use deletion email links.");
+const approvedRetentionPolicyVersion = required(
+  "ACCOUNT_RETENTION_POLICY_APPROVED_VERSION",
+  1,
+  "Set this only after the owner and qualified counsel approve the exact version shown in the account-retention notice."
+);
+if (approvedRetentionPolicyVersion && approvedRetentionPolicyVersion !== "2026-08-17") {
+  errors.push("ACCOUNT_RETENTION_POLICY_APPROVED_VERSION must exactly match the implemented notice version 2026-08-17.");
+}
+const mobileTokenIssuer = required("MOBILE_TOKEN_ISSUER", 1, "Use https://www.vyapaarmate.com for production mobile tokens.");
+if (mobileTokenIssuer && mobileTokenIssuer !== "https://www.vyapaarmate.com") {
+  errors.push("MOBILE_TOKEN_ISSUER must be exactly https://www.vyapaarmate.com in production.");
+}
+const distinctSecrets = [jwtSecret, mobileJwtSecret, mobileTokenPepper, accountDeletionTokenPepper].filter(Boolean);
+if (new Set(distinctSecrets).size !== distinctSecrets.length) {
+  errors.push("JWT_SECRET, MOBILE_JWT_SECRET, MOBILE_TOKEN_PEPPER, and ACCOUNT_DELETION_TOKEN_PEPPER must all use different values.");
+}
 required("ENCRYPTION_KEY", 32, "Generate a random 32+ character value for server-side encrypted fields.");
 required("CRON_SECRET", 32, "Generate a random 32+ character bearer secret for Vercel Cron/job routes.");
 const databaseUrl = required("DATABASE_URL", 1, "Use the Supabase Transaction Pooler URL on port 6543 with sslmode=require, pgbouncer=true, connection_limit, and pool_timeout.");
@@ -83,6 +102,36 @@ const redisRestUrl = required("UPSTASH_REDIS_REST_URL", 1, "Create an Upstash Re
 required("UPSTASH_REDIS_REST_TOKEN", 20, "Create an Upstash Redis database and copy the REST token.");
 requiredOneOf(["GOOGLE_PLACES_API_KEY", "GOOGLE_MAPS_API_KEY"], "Create a server-restricted Google Maps Platform key with Places API enabled for location search.");
 required("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY", 1, "Create a browser-restricted Google Maps JavaScript API key for the production domain.");
+
+const launchMarket = required(
+  "NEXT_PUBLIC_LAUNCH_MARKET",
+  1,
+  "Use pilot-cohorts for the separate Bengaluru and Andhra Pradesh pilots, bengaluru for one city, or all for national onboarding."
+)?.toLowerCase();
+if (launchMarket && !["pilot-cohorts", "bengaluru-ap", "bengaluru", "bangalore", "all", "india", "national"].includes(launchMarket)) {
+  errors.push("NEXT_PUBLIC_LAUNCH_MARKET must be pilot-cohorts, bengaluru, or all (aliases bengaluru-ap, bangalore, india, and national are also accepted).");
+}
+
+const bengaluruLaunchOffer = required(
+  "NEXT_PUBLIC_BENGALURU_LAUNCH_OFFER",
+  1,
+  "Use true to apply the Bengaluru 80% subscription offer or false to end it for future checkouts."
+)?.toLowerCase();
+if (bengaluruLaunchOffer && !["true", "false", "1", "0", "on", "off", "yes", "no"].includes(bengaluruLaunchOffer)) {
+  errors.push("NEXT_PUBLIC_BENGALURU_LAUNCH_OFFER must be a supported true or false value.");
+}
+
+const subscriptionGstRateBps = required(
+  "SUBSCRIPTION_GST_RATE_BPS",
+  1,
+  "Set the subscription GST rate in basis points after confirming the applicable tax treatment."
+);
+if (
+  subscriptionGstRateBps &&
+  (!/^\d+$/.test(subscriptionGstRateBps) || Number(subscriptionGstRateBps) > 10000)
+) {
+  errors.push("SUBSCRIPTION_GST_RATE_BPS must be a whole number from 0 to 10000.");
+}
 
 required("EMAIL_FROM", 1, "Use a verified sender/domain in your email provider.");
 if (!optional("RESEND_API_KEY") && !optional("EMAIL_API_KEY")) {
@@ -211,7 +260,7 @@ if (configuredCashfreeKeys.length > 0 && configuredCashfreeKeys.length !== cashf
 }
 for (const name of cashfreeKeys) required(name, 1, "Create production credentials in the Cashfree dashboard after KYC is approved.");
 if (optional("CASHFREE_ENV").toLowerCase() !== "production") {
-  warnings.push("Cashfree is not in production mode. Set CASHFREE_ENV=production before accepting real payments.");
+  errors.push("CASHFREE_ENV must be production before accepting real payments.");
 }
 if (optional("CASHFREE_SPLIT_ENABLED").toLowerCase() === "true") {
   errors.push("CASHFREE_SPLIT_ENABLED must stay false for the PSHR platform-wallet flow.");
@@ -227,7 +276,7 @@ if (cashfreePayoutsEnabled) {
   for (const name of cashfreePayoutKeys) required(name);
   required("CASHFREE_PAYOUTS_WEBHOOK_SECRET", 16, "Use a random webhook secret configured in Cashfree Payouts.");
   if (optional("CASHFREE_PAYOUTS_ENV").toLowerCase() !== "production") {
-    warnings.push("Cashfree Payouts is not in production mode. Set CASHFREE_PAYOUTS_ENV=production before real business payouts.");
+    errors.push("CASHFREE_PAYOUTS_ENV must be production before real business payouts.");
   }
   if (!optional("CASHFREE_PAYOUTS_PUBLIC_KEY")) {
     warnings.push("Cashfree Payouts public key is not set. Ensure your production runtime outbound IP is whitelisted by Cashfree, or set CASHFREE_PAYOUTS_PUBLIC_KEY for x-cf-signature.");
@@ -254,8 +303,13 @@ if (checkoutExpiryMinutes) {
   }
 }
 
-const settlementDays = Number(optional("PAYMENT_PROVIDER_SETTLEMENT_DAYS"));
-if (!Number.isInteger(settlementDays) || settlementDays < 0 || settlementDays > 30) {
+const paymentProviderSettlementDays = required(
+  "PAYMENT_PROVIDER_SETTLEMENT_DAYS",
+  1,
+  "Set 0 for the daily 9 AM IST payout batch within 24 hours, or an approved whole number of days from 0 to 30."
+);
+const settlementDays = paymentProviderSettlementDays ? Number(paymentProviderSettlementDays) : null;
+if (settlementDays !== null && (!Number.isInteger(settlementDays) || settlementDays < 0 || settlementDays > 30)) {
   errors.push("PAYMENT_PROVIDER_SETTLEMENT_DAYS must be a whole number from 0 to 30. Use 0 for the daily 9 AM IST payout batch within 24 hours.");
 }
 

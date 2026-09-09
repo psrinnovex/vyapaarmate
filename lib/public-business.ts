@@ -10,8 +10,10 @@ import {
   type DemoMenuItem
 } from "@/lib/demo-data";
 import { getBusinessLogoUrl } from "@/lib/business-image";
+import { isEligibleLaunchBusinessLocation, type LaunchBusinessLocation } from "@/lib/launch-policy";
 import { getMenuItemImageUrl } from "@/lib/menu-item-image";
 import { prisma } from "@/lib/prisma";
+import { currentPaidSubscriptionWhere, hasCurrentPaidSubscription } from "@/lib/subscription-access";
 import { orderGstRateBps } from "@/lib/billing";
 import { initials } from "@/lib/utils";
 import { canBusinessAcceptOnlinePayment, getOnlinePaymentConfig } from "@/services/online-payments";
@@ -20,6 +22,9 @@ type BusinessWithMenu = Prisma.BusinessGetPayload<{
   include: {
     logoImage: { select: { updatedAt: true } };
     menuItems: { include: { category: true; image: { select: { updatedAt: true } } } };
+    subscriptions: {
+      select: { status: true; paymentStatus: true; startDate: true; endDate: true };
+    };
   };
 }>;
 
@@ -43,6 +48,10 @@ function mapDemoBusiness(business: DemoBusiness): PublicBusiness {
   };
 }
 
+function isEligibleLaunchBusiness(business: LaunchBusinessLocation) {
+  return isEligibleLaunchBusinessLocation(business, { requireCoordinates: true });
+}
+
 function mapMenuItem(item: BusinessWithMenu["menuItems"][number], demo?: DemoBusiness): DemoMenuItem {
   const demoItem = demo?.menu.find((candidate) => candidate.id === item.id || candidate.name === item.name);
 
@@ -55,12 +64,17 @@ function mapMenuItem(item: BusinessWithMenu["menuItems"][number], demo?: DemoBus
     foodType: item.foodType,
     imageUrl: getMenuItemImageUrl(item) ?? demoItem?.imageUrl ?? null,
     isAvailable: item.isAvailable,
-    isBestSeller: item.isBestSeller
+    isBestSeller: item.isBestSeller,
+    appointmentEnabled: item.appointmentEnabled,
+    durationMinutes: item.durationMinutes,
+    bufferMinutes: item.bufferMinutes
   };
 }
 
 export const getPublicBusinessBySlug = cache(async (slug: string): Promise<PublicBusiness | null> => {
   const fallback = findDemoBusinessBySlug(slug);
+  const eligibleFallback = fallback && isEligibleLaunchBusiness(fallback) ? fallback : null;
+  const now = new Date();
 
   try {
     const businessQuery = prisma.business.findUnique({
@@ -70,19 +84,32 @@ export const getPublicBusinessBySlug = cache(async (slug: string): Promise<Publi
         menuItems: {
           orderBy: [{ category: { sortOrder: "asc" } }, { isBestSeller: "desc" }, { name: "asc" }],
           include: { category: true, image: { select: { updatedAt: true } } }
+        },
+        subscriptions: {
+          where: currentPaidSubscriptionWhere(now),
+          select: { status: true, paymentStatus: true, startDate: true, endDate: true },
+          take: 1
         }
       }
     });
     const paymentConfigQuery = fallback ? null : getOnlinePaymentConfig();
     const business = await businessQuery;
 
-    if (!business) return fallback ? mapDemoBusiness(fallback) : null;
+    if (!business) return eligibleFallback ? mapDemoBusiness(eligibleFallback) : null;
+
+    const hasPaidAccess = hasCurrentPaidSubscription(business.subscriptions, now);
+    if (!isEligibleLaunchBusiness(business) || !hasPaidAccess) return null;
 
     const paymentConfig = paymentConfigQuery ? await paymentConfigQuery : await getOnlinePaymentConfig();
 
     const demo = demoForBusiness(business);
     const isDemo = isDemoBusinessId(business.id) || isDemoBusinessSlug(business.slug);
-    const isApproved = business.isActive && business.isVerified && business.subscriptionStatus === "ACTIVE" && business.kycStatus === "APPROVED";
+    const isApproved =
+      business.isActive &&
+      business.isVerified &&
+      business.subscriptionStatus === "ACTIVE" &&
+      hasPaidAccess &&
+      business.kycStatus === "APPROVED";
 
     return {
       id: business.id,
@@ -114,6 +141,10 @@ export const getPublicBusinessBySlug = cache(async (slug: string): Promise<Publi
       allowsPayOnDelivery: business.allowsPayLater,
       onlinePaymentAvailable: canBusinessAcceptOnlinePayment(business, paymentConfig),
       whatsappAvailable: Boolean(business.whatsappDisplayPhone && business.whatsappConnected && business.whatsappLiveEnabled),
+      appointmentBookingEnabled: business.appointmentBookingEnabled,
+      appointmentAutoConfirm: business.appointmentAutoConfirm,
+      appointmentTimezone: business.appointmentTimezone,
+      appointmentMaxAdvanceDays: business.appointmentMaxAdvanceDays,
       orderGstRateBps: orderGstRateBps(),
       menu: business.menuItems.map((item) => mapMenuItem(item, demo)),
       source: "database",
@@ -121,6 +152,6 @@ export const getPublicBusinessBySlug = cache(async (slug: string): Promise<Publi
       canIndex: isApproved && !isDemo
     };
   } catch {
-    return fallback ? mapDemoBusiness(fallback) : null;
+    return eligibleFallback ? mapDemoBusiness(eligibleFallback) : null;
   }
 });

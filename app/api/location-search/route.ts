@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isInsideLaunchMarket, launchMarket, launchSingleCityRestricted } from "@/lib/launch-policy";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
 type SearchResult = {
@@ -57,7 +58,8 @@ function parseGooglePlacesResults(payload: GooglePlacesSearchResponse): SearchRe
       typeof latitude !== "number" ||
       typeof longitude !== "number" ||
       !Number.isFinite(latitude) ||
-      !Number.isFinite(longitude)
+      !Number.isFinite(longitude) ||
+      !isInsideLaunchMarket(latitude, longitude)
     ) {
       return [];
     }
@@ -83,6 +85,9 @@ function getGooglePlacesApiKey() {
 }
 
 async function searchGooglePlaces(query: string, apiKey: string) {
+  const textQuery = launchSingleCityRestricted
+    ? `${query}, ${launchMarket.city}, ${launchMarket.state}`
+    : query;
   const response = await fetch(GOOGLE_PLACES_SEARCH_URL, {
     method: "POST",
     headers: {
@@ -92,9 +97,22 @@ async function searchGooglePlaces(query: string, apiKey: string) {
     },
     cache: "no-store",
     body: JSON.stringify({
-      textQuery: query,
+      textQuery,
       languageCode: process.env.GOOGLE_PLACES_LANGUAGE_CODE?.trim() || "en",
       regionCode: process.env.GOOGLE_PLACES_REGION_CODE?.trim() || "IN",
+      ...(launchSingleCityRestricted
+        ? {
+            locationBias: {
+              circle: {
+                center: {
+                  latitude: launchMarket.center.latitude,
+                  longitude: launchMarket.center.longitude
+                },
+                radius: launchMarket.maximumBusinessDistanceKm * 1000
+              }
+            }
+          }
+        : {}),
       pageSize: 6
     })
   });

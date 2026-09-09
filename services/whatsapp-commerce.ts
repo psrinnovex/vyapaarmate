@@ -1,7 +1,9 @@
 import type { Business, Customer, Prisma } from "@prisma/client";
 import { fulfillmentFeeForOrder, fulfillmentModesFromFlags, isFoodBusinessType, type ActiveFulfillmentMode } from "@/lib/business-rules";
 import { buildOrderCouponBreakdown } from "@/lib/coupons";
+import { isEligibleLaunchBusinessLocation } from "@/lib/launch-policy";
 import { prisma } from "@/lib/prisma";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 import { parseScheduledServiceTime, scheduledServiceTimeFormatHelp } from "@/lib/scheduled-service-time";
 import { formatINR } from "@/lib/utils";
 import { businessWhatsappConfig } from "@/services/business-whatsapp";
@@ -16,10 +18,19 @@ import {
   type WhatsAppListSection,
   type WhatsAppOutboundResult
 } from "@/services/whatsapp";
+import { translateWhatsAppTemplate } from "@/lib/whatsapp-translations";
 
 const CART_MARKER = "[WA_CART]";
+
 const BOOKING_MARKER = "[WA_BOOKING]";
 const NATIVE_ORDER_MARKER = "[WA_NATIVE_ORDER]";
+
+function whatsappLanguage(business: Business) {
+  const configuredLanguage = (business as Business & { whatsappLanguage?: unknown }).whatsappLanguage;
+  return typeof configuredLanguage === "string" && configuredLanguage.trim()
+    ? configuredLanguage.trim()
+    : process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en";
+}
 
 type MenuItemWithCategory = Prisma.MenuItemGetPayload<{ include: { category: true } }>;
 type OrderWithItems = Prisma.OrderGetPayload<{ include: { customer: true; items: true; payment: true } }>;
@@ -68,64 +79,80 @@ function mapLookupKeys(message: WhatsAppInboundMessage) {
   ].filter((value): value is string => Boolean(value))));
 }
 
-async function findConfiguredBusiness(configuredBusiness: string | undefined) {
+function isEligibleLaunchBusiness(business: Business | null): business is Business {
+  return Boolean(business && isEligibleLaunchBusinessLocation(business, { requireCoordinates: true }));
+}
+
+function activePaidBusinessWhere(now: Date): Prisma.BusinessWhereInput {
+  return {
+    isActive: true,
+    isVerified: true,
+    subscriptionStatus: "ACTIVE",
+    kycStatus: "APPROVED",
+    subscriptions: { some: currentPaidSubscriptionWhere(now) }
+  };
+}
+
+async function findConfiguredBusiness(configuredBusiness: string | undefined, now: Date) {
   if (!configuredBusiness) return null;
 
-  return prisma.business.findFirst({
+  const business = await prisma.business.findFirst({
     where: {
-      isActive: true,
-      isVerified: true,
+      ...activePaidBusinessWhere(now),
       OR: [{ id: configuredBusiness }, { slug: configuredBusiness }]
     }
   });
+
+  return isEligibleLaunchBusiness(business) ? business : null;
 }
 
 async function resolveBusiness(message: WhatsAppInboundMessage) {
+  const now = new Date();
+  const paidBusinessWhere = activePaidBusinessWhere(now);
+
   if (message.phoneNumberId) {
     const business = await prisma.business.findFirst({
       where: {
-        isActive: true,
-        isVerified: true,
+        ...paidBusinessWhere,
         whatsappConnected: true,
         whatsappPhoneNumberId: message.phoneNumberId
       },
       orderBy: { updatedAt: "desc" }
     });
-    if (business) return business;
+    if (isEligibleLaunchBusiness(business)) return business;
   }
 
   if (message.displayPhoneNumber) {
     const displayPhone = normalizePhone(message.displayPhoneNumber);
     const business = await prisma.business.findFirst({
       where: {
-        isActive: true,
-        isVerified: true,
+        ...paidBusinessWhere,
         whatsappConnected: true,
         OR: [{ whatsappDisplayPhone: displayPhone }, { phone: displayPhone }]
       },
       orderBy: { updatedAt: "desc" }
     });
-    if (business) return business;
+    if (isEligibleLaunchBusiness(business)) return business;
   }
 
   const phoneMap = parseBusinessPhoneMap();
   const mappedBusiness = mapLookupKeys(message).map((key) => phoneMap[key]).find(Boolean);
 
   if (mappedBusiness) {
-    const business = await findConfiguredBusiness(mappedBusiness);
-    if (business) return business;
+    const business = await findConfiguredBusiness(mappedBusiness, now);
+    if (isEligibleLaunchBusiness(business)) return business;
   }
 
   if (message.displayPhoneNumber) {
     const displayPhone = normalizePhone(message.displayPhoneNumber);
     const business = await prisma.business.findFirst({
-      where: { isActive: true, isVerified: true, phone: displayPhone },
+      where: { ...paidBusinessWhere, phone: displayPhone },
       orderBy: { updatedAt: "desc" }
     });
-    if (business) return business;
+    if (isEligibleLaunchBusiness(business)) return business;
   }
 
-  const defaultBusiness = await findConfiguredBusiness(process.env.WHATSAPP_DEFAULT_BUSINESS_SLUG);
+  const defaultBusiness = await findConfiguredBusiness(process.env.WHATSAPP_DEFAULT_BUSINESS_SLUG, now);
   if (defaultBusiness) return defaultBusiness;
 
   return null;
@@ -144,12 +171,13 @@ async function upsertWhatsAppCustomer(business: Business, message: WhatsAppInbou
     },
     create: {
       businessId: business.id,
+      dataOrigin: business.dataOrigin,
+      trainingEligible: business.dataOrigin === "LIVE",
       name,
       phone,
       whatsappOptIn: true,
       marketingOptIn: false,
-      dataOrigin: "LIVE",
-      trainingEligible: true
+
     },
     update: {
       name,
@@ -344,12 +372,14 @@ async function sendImageAndLog(input: {
 async function sendCatalogMenu(business: Business, customer: Customer) {
   const sections = await catalogSections(business);
 
+  const lang = whatsappLanguage(business);
+
   if (sections.length === 0) {
     return sendTextAndLog({
       business,
       customer,
       templateName: "whatsapp_catalog_empty",
-      body: `${business.name} has not published any available items or services yet. You can reply here and the team will help you.`
+      body: translateWhatsAppTemplate("whatsapp_catalog_empty", lang, { businessName: business.name })
     });
   }
 
@@ -359,10 +389,12 @@ async function sendCatalogMenu(business: Business, customer: Customer) {
     templateName: "whatsapp_catalog_menu",
     header: business.name,
     body: isAppointmentBusiness(business)
-      ? "Choose a service. After selecting it, reply with your preferred date, time, and any notes. Reply clear to reset your selection."
-      : "Choose an item from the catalog. Reply menu to add more, pay when ready, or clear to empty the cart.",
-    footer: "Reply menu, pay, clear, or help anytime.",
-    buttonText: isAppointmentBusiness(business) ? "View services" : "View catalog",
+      ? translateWhatsAppTemplate("whatsapp_catalog_menu_body_appointment", lang)
+      : translateWhatsAppTemplate("whatsapp_catalog_menu_body_product", lang),
+    footer: translateWhatsAppTemplate("whatsapp_catalog_menu_footer", lang),
+    buttonText: isAppointmentBusiness(business)
+      ? translateWhatsAppTemplate("whatsapp_catalog_menu_button_appointment", lang)
+      : translateWhatsAppTemplate("whatsapp_catalog_menu_button_product", lang),
     sections
   });
 }
@@ -617,6 +649,8 @@ async function addItemToWhatsAppOrder(input: {
       const created = await tx.order.create({
         data: {
           businessId: input.business.id,
+          dataOrigin: input.business.dataOrigin,
+          trainingEligible: input.business.dataOrigin === "LIVE",
           customerId: input.customer.id,
           orderNumber: orderNumber(),
           subtotal,
@@ -630,8 +664,7 @@ async function addItemToWhatsAppOrder(input: {
             input.marker === BOOKING_MARKER
               ? `${BOOKING_MARKER} Awaiting preferred appointment date/time from WhatsApp.`
               : `${CART_MARKER} Customer is building this cart in WhatsApp.`,
-          dataOrigin: "LIVE",
-          trainingEligible: true,
+
           status: "NEW",
           paymentStatus: "PENDING",
           items: {
@@ -650,12 +683,13 @@ async function addItemToWhatsAppOrder(input: {
       await tx.payment.create({
         data: {
           businessId: input.business.id,
+          dataOrigin: input.business.dataOrigin,
+          trainingEligible: input.business.dataOrigin === "LIVE",
           orderId: created.id,
           provider: canBusinessAcceptOnlinePayment(input.business, paymentConfig) ? selectedOnlinePaymentProvider(paymentConfig) : "CASH",
           amount: totalAmount,
           status: "PENDING",
-          dataOrigin: "LIVE",
-          trainingEligible: true
+
         }
       });
       await tx.customer.update({
@@ -750,12 +784,14 @@ async function handleItemSelection(business: Business, customer: Customer, itemI
     include: { category: true }
   });
 
+  const lang = whatsappLanguage(business);
+
   if (!item) {
     await sendTextAndLog({
       business,
       customer,
       templateName: "whatsapp_item_unavailable",
-      body: "That item or service is not available right now. Reply menu to choose another option."
+      body: translateWhatsAppTemplate("whatsapp_item_unavailable", lang)
     });
     return { repliesSent: 1, ordersCreated: 0 };
   }
@@ -775,21 +811,25 @@ async function handleItemSelection(business: Business, customer: Customer, itemI
     orderId: order.id,
     templateName: appointment ? "whatsapp_booking_started" : "whatsapp_cart_updated",
     body: appointment
-      ? `${item.name} is selected for ${order.orderNumber}.\n\nReply with your preferred date/time, location if needed, and any notes. Reply clear to reset this selection.`
-      : `${orderSummary(order)}\n\nReply menu to add more items, pay when you are ready, or clear to empty this cart.`
+      ? translateWhatsAppTemplate("whatsapp_booking_started", lang, { itemName: item.name, orderNumber: order.orderNumber })
+      : translateWhatsAppTemplate("whatsapp_cart_updated", lang, { orderSummary: orderSummary(order) })
   });
 
   return { repliesSent: 1, ordersCreated: 1 };
 }
 
 async function handleClearCartRequest(business: Business, customer: Customer) {
+  const lang = whatsappLanguage(business);
+
   const order = await latestPendingWhatsAppSelection(customer);
   if (!order) {
     await sendTextAndLog({
       business,
       customer,
       templateName: "whatsapp_no_pending_clear_cart",
-      body: `There is no pending WhatsApp cart to clear. Reply menu to choose ${isAppointmentBusiness(business) ? "a service" : "items"}.`
+      body: isAppointmentBusiness(business)
+        ? translateWhatsAppTemplate("whatsapp_no_pending_clear_cart_appointment", lang)
+        : translateWhatsAppTemplate("whatsapp_no_pending_clear_cart_product", lang)
     });
     return true;
   }
@@ -801,7 +841,7 @@ async function handleClearCartRequest(business: Business, customer: Customer) {
       customer,
       orderId: order.id,
       templateName: "whatsapp_cart_clear_skipped",
-      body: "This WhatsApp cart was already updated. Reply menu to start again."
+      body: translateWhatsAppTemplate("whatsapp_cart_clear_skipped", lang)
     });
     return true;
   }

@@ -7,6 +7,8 @@ import { filterFulfillmentFlagsForBusinessType, fulfillmentModesFromFlags } from
 import { formatKycStatus, hasAllRequiredKycDocuments, kycDocumentRequirements, nextKycStatus } from "@/lib/kyc";
 import { prisma } from "@/lib/prisma";
 import { adminBusinessPatchSchema } from "@/lib/validations";
+import { isEligibleLaunchBusinessLocation, launchBusinessLocationError } from "@/lib/launch-policy";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +60,7 @@ function mapBusiness(business: {
   platformFeeBps: number;
   createdAt: Date;
   _count: { orders: number; customers: number };
+  subscriptions: Array<{ id: string }>;
   kycDocuments?: Array<{
     id: string;
     type: string;
@@ -151,7 +154,13 @@ function mapBusiness(business: {
     kycRequiredDocumentCount: kycDocumentRequirements.length,
     kycUploadedDocumentCount: business.kycDocuments?.length ?? 0,
     kycMissingDocumentCount: Math.max(0, kycDocumentRequirements.length - (business.kycDocuments?.length ?? 0)),
-    kycReadyForApproval: business.subscriptionStatus === "ACTIVE" && !business.isVerified && hasAllRequiredKycDocuments(business.kycDocuments ?? []),
+    kycReadyForApproval:
+      business.subscriptionStatus === "ACTIVE" &&
+      business.subscriptions.length > 0 &&
+      !business.isVerified &&
+      Boolean(business.setupCompletedAt && business.address.trim()) &&
+      isEligibleLaunchBusinessLocation(business, { requireCoordinates: true }) &&
+      hasAllRequiredKycDocuments(business.kycDocuments ?? []),
     kycSubmittedAt: business.kycSubmittedAt?.toISOString() ?? null,
     kycReviewedAt: business.kycReviewedAt?.toISOString() ?? null,
     kycRejectionReason: business.kycRejectionReason,
@@ -172,12 +181,19 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   const { businessId } = await context.params;
+  const now = new Date();
   const existing = await prisma.business.findUnique({
     where: { id: businessId },
     select: {
       id: true,
       name: true,
       businessType: true,
+      address: true,
+      city: true,
+      state: true,
+      latitude: true,
+      longitude: true,
+      setupCompletedAt: true,
       isActive: true,
       isVerified: true,
       whatsappConnected: true,
@@ -190,6 +206,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       platformFeeBps: true,
       subscriptionStatus: true,
       kycStatus: true,
+      subscriptions: {
+        where: currentPaidSubscriptionWhere(now),
+        select: { id: true },
+        take: 1
+      },
       kycDocuments: { select: { type: true } }
     }
   });
@@ -209,6 +230,19 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Enable at least one fulfillment option." }, { status: 400 });
     }
 
+    const marketError = launchBusinessLocationError(
+      {
+        city: existing.city,
+        state: existing.state,
+        latitude: parsed.data.latitude,
+        longitude: parsed.data.longitude
+      },
+      { requireCoordinates: true }
+    );
+    if (marketError) {
+      return NextResponse.json({ error: marketError }, { status: 400 });
+    }
+
     updateData = {
       deliveryFee: parsed.data.serviceVisitFee,
       latitude: parsed.data.latitude ?? null,
@@ -219,7 +253,14 @@ export async function PATCH(request: Request, context: RouteContext) {
       acceptsServiceAtLocation: fulfillmentFlags.acceptsServiceAtLocation
     };
   } else if (parsed.data.action === "approve") {
-    if (existing.subscriptionStatus !== "ACTIVE") {
+    const marketError = launchBusinessLocationError(existing, { requireCoordinates: true });
+    if (!existing.setupCompletedAt || !existing.address.trim()) {
+      return NextResponse.json({ error: "Business setup and operating address must be completed before approval." }, { status: 400 });
+    }
+    if (marketError) {
+      return NextResponse.json({ error: marketError }, { status: 400 });
+    }
+    if (existing.subscriptionStatus !== "ACTIVE" || existing.subscriptions.length === 0) {
       return NextResponse.json({ error: "Verify the selected subscription payment before approving KYC." }, { status: 400 });
     }
     if (!hasAllRequiredKycDocuments(existing.kycDocuments)) {
@@ -237,7 +278,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       kycRejectionReason: null
     };
   } else if (parsed.data.action === "reject") {
-    if (existing.subscriptionStatus !== "ACTIVE") {
+    if (existing.subscriptionStatus !== "ACTIVE" || existing.subscriptions.length === 0) {
       return NextResponse.json({ error: "Only businesses with an active subscription can be rejected for KYC review." }, { status: 400 });
     }
     if (!hasAllRequiredKycDocuments(existing.kycDocuments)) {
@@ -263,7 +304,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       isVerified: false,
       isOpen: false,
       kycStatus: nextKycStatus({
-        subscriptionStatus: existing.subscriptionStatus,
+        subscriptionStatus: existing.subscriptions.length > 0 ? existing.subscriptionStatus : "PAST_DUE",
         hasAllDocuments: hasAllRequiredKycDocuments(existing.kycDocuments)
       }),
       kycReviewedAt: null,
@@ -303,8 +344,15 @@ export async function PATCH(request: Request, context: RouteContext) {
       whatsappApprovedAt: setupChanged ? null : undefined
     };
   } else if (parsed.data.action === "approveWhatsapp") {
+    const marketError = launchBusinessLocationError(existing, { requireCoordinates: true });
+    if (marketError) {
+      return NextResponse.json({ error: marketError }, { status: 400 });
+    }
     if (!existing.isActive || !existing.isVerified) {
       return NextResponse.json({ error: "Approve the business before approving WhatsApp live sends." }, { status: 400 });
+    }
+    if (existing.subscriptionStatus !== "ACTIVE" || existing.subscriptions.length === 0) {
+      return NextResponse.json({ error: "A current paid subscription is required before approving WhatsApp live sends." }, { status: 400 });
     }
     if (!existing.whatsappConnected || !existing.whatsappPhoneNumberId || !existing.whatsappAccessTokenEnc) {
       return NextResponse.json({ error: "WhatsApp Cloud API details are incomplete for this business." }, { status: 400 });
@@ -330,6 +378,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     data: updateData,
     include: {
       _count: { select: { orders: true, customers: true } },
+      subscriptions: {
+        where: currentPaidSubscriptionWhere(now),
+        select: { id: true },
+        take: 1
+      },
       kycDocuments: {
         select: {
           id: true,

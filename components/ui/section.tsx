@@ -7,7 +7,8 @@ export function Section({
   title,
   body,
   children,
-  className
+  className,
+  headingAs: Heading = "h2"
 }: {
   id?: string;
   eyebrow?: string;
@@ -15,6 +16,7 @@ export function Section({
   body?: string;
   children: ReactNode;
   className?: string;
+  headingAs?: "h1" | "h2";
 }) {
   return (
     <section id={id} className={cn("min-w-0 overflow-x-hidden px-4 py-16 sm:px-6 lg:px-8", className)}>
@@ -22,7 +24,7 @@ export function Section({
         {(eyebrow || title || body) && (
           <div className="mb-10 w-[calc(100vw-2rem)] min-w-0 max-w-3xl sm:w-auto">
             {eyebrow && <p className="mb-3 text-sm font-bold uppercase text-emerald">{eyebrow}</p>}
-            {title && <h2 className="break-words text-3xl font-bold text-ink sm:text-4xl">{title}</h2>}
+            {title && <Heading className="break-words text-3xl font-bold text-ink sm:text-4xl">{title}</Heading>}
             {body && <p className="mt-4 break-words text-base leading-7 text-slate-600 sm:text-lg">{body}</p>}
           </div>
         )}

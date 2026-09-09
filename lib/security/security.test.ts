@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Role } from "@prisma/client";
-import { canAccessBusiness } from "@/lib/security/authz";
+import { canAccessBusiness, canPatchSupportTicket } from "@/lib/security/authz";
 import { isCronRequestAuthorized } from "@/lib/security/cron";
 import { sanitizeLogMetadata } from "@/lib/security/safe-logger";
 
@@ -10,6 +10,27 @@ test("tenant access allows owners only for their own business", () => {
   assert.equal(canAccessBusiness({ role: Role.OWNER, businessId: "biz_1" }, "biz_2"), false);
   assert.equal(canAccessBusiness({ role: Role.SUPPORT_AGENT, businessId: null }, "biz_1"), false);
   assert.equal(canAccessBusiness({ role: Role.SUPER_ADMIN, businessId: null }, "biz_1"), true);
+});
+
+test("support agents can patch only their assigned tickets or claim an unassigned ticket for themselves", () => {
+  const agent = { id: "agent_1", role: Role.SUPPORT_AGENT };
+
+  assert.equal(canPatchSupportTicket(agent, "agent_1", undefined), true);
+  assert.equal(canPatchSupportTicket(agent, "agent_1", null), true);
+  assert.equal(canPatchSupportTicket(agent, null, "agent_1"), true);
+  assert.equal(canPatchSupportTicket(agent, null, undefined), false);
+  assert.equal(canPatchSupportTicket(agent, null, "agent_2"), false);
+  assert.equal(canPatchSupportTicket(agent, "agent_2", undefined), false);
+  assert.equal(canPatchSupportTicket(agent, "agent_2", null), false);
+  assert.equal(canPatchSupportTicket(agent, "agent_1", "agent_2"), false);
+  assert.equal(canPatchSupportTicket({ id: "owner_1", role: Role.OWNER }, null, "owner_1"), false);
+});
+
+test("super admins can override support ticket assignment scope", () => {
+  const admin = { id: "admin_1", role: Role.SUPER_ADMIN };
+
+  assert.equal(canPatchSupportTicket(admin, "agent_1", "agent_2"), true);
+  assert.equal(canPatchSupportTicket(admin, null, undefined), true);
 });
 
 test("cron authorization uses the bearer secret when configured", () => {

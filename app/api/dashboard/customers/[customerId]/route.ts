@@ -15,6 +15,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
   const { session } = auth;
   const businessId = session.businessId;
 
+  const business = await prisma.business.findUnique({ where: { id: businessId }, select: { dataOrigin: true } });
+  if (!business || business.dataOrigin === "LIVE") {
+    return NextResponse.json({ error: "Customer and financial history cannot be permanently deleted from the dashboard. Use the account-data request process through support." }, { status: 409 });
+  }
+
   const { customerId } = await context.params;
   const deleted = await prisma.$transaction(async (tx) => {
     const customer = await tx.customer.findFirst({

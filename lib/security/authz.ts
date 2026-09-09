@@ -28,6 +28,21 @@ export function canAccessBusiness(user: Pick<SessionUser, "role" | "businessId">
   return Boolean(user.businessId && user.businessId === businessId);
 }
 
+export function canPatchSupportTicket(
+  user: Pick<SessionUser, "id" | "role">,
+  assignedToUserId: string | null,
+  requestedAssignedToUserId: string | null | undefined
+) {
+  if (user.role === "SUPER_ADMIN") return true;
+  if (user.role !== "SUPPORT_AGENT") return false;
+
+  if (assignedToUserId === user.id) {
+    return requestedAssignedToUserId === undefined || requestedAssignedToUserId === null || requestedAssignedToUserId === user.id;
+  }
+
+  return assignedToUserId === null && requestedAssignedToUserId === user.id;
+}
+
 export function assertTenantAccess(user: Pick<SessionUser, "role" | "businessId">, businessId: string) {
   if (!canAccessBusiness(user, businessId)) {
     throw new AuthorizationError("Forbidden: cross-tenant access is not allowed.");

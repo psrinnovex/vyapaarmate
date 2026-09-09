@@ -3,6 +3,7 @@ import { requireBusinessSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { menuCategorySchema } from "@/lib/validations";
+import { parseJsonRequest } from "@/lib/security/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +26,11 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
   const { session } = auth;
 
-  const body = await request.json();
-  const parsed = menuCategorySchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, menuCategorySchema);
+  if (parsed.response) return parsed.response;
+
+  const business = await prisma.business.findUnique({ where: { id: session.businessId }, select: { dataOrigin: true } });
+  if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 });
 
   const maxSort = await prisma.menuCategory.aggregate({
     where: { businessId: session.businessId },
@@ -40,10 +41,11 @@ export async function POST(request: Request) {
     const category = await prisma.menuCategory.create({
       data: {
         businessId: session.businessId,
+        dataOrigin: business.dataOrigin,
+        trainingEligible: business.dataOrigin === "LIVE",
         name: parsed.data.name,
         sortOrder: (maxSort._max.sortOrder ?? 0) + 1,
-        dataOrigin: "LIVE",
-        trainingEligible: true
+
       },
       include: { _count: { select: { items: true } } }
     });

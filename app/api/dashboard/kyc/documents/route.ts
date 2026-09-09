@@ -5,7 +5,9 @@ import { writeAuditLog } from "@/lib/audit";
 import { hasAllRequiredKycDocuments, kycDocumentRequirements, nextKycStatus } from "@/lib/kyc";
 import { parseKycDocumentDataUrl } from "@/lib/kyc-document.server";
 import { prisma } from "@/lib/prisma";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 import { kycDocumentUploadSchema } from "@/lib/validations";
+import { launchBusinessLocationError } from "@/lib/launch-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -31,21 +33,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const now = new Date();
   const business = await prisma.business.findUnique({
     where: { id: session.businessId },
     select: {
       id: true,
       subscriptionStatus: true,
       isVerified: true,
-      kycStatus: true
+      kycStatus: true,
+      address: true,
+      city: true,
+      state: true,
+      latitude: true,
+      longitude: true,
+      setupCompletedAt: true,
+      subscriptions: {
+        where: currentPaidSubscriptionWhere(now),
+        select: { id: true },
+        take: 1
+      }
     }
   });
 
   if (!business) {
     return NextResponse.json({ error: "Business not found" }, { status: 404 });
   }
-  if (business.subscriptionStatus !== "ACTIVE") {
+  if (business.subscriptionStatus !== "ACTIVE" || business.subscriptions.length === 0) {
     return NextResponse.json({ error: "Pay and activate your selected subscription before uploading KYC documents." }, { status: 402 });
+  }
+  const marketError = launchBusinessLocationError(business, { requireCoordinates: true });
+  if (!business.setupCompletedAt || !business.address.trim()) {
+    return NextResponse.json({ error: "Complete business setup and the operating location before uploading KYC documents." }, { status: 409 });
+  }
+  if (marketError) {
+    return NextResponse.json({ error: marketError }, { status: 400 });
   }
   if (business.isVerified || business.kycStatus === "APPROVED") {
     return NextResponse.json({ error: "KYC is already approved. Contact PSHR support to change approved documents." }, { status: 409 });

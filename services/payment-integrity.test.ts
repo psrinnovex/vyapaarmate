@@ -6,6 +6,7 @@ import { buildOrderCouponBreakdown } from "@/lib/coupons";
 import { isValidGstin, normalizeGstin } from "@/lib/gstin";
 import { publicOrderPaymentFailureReason } from "@/lib/order-receipt";
 import { buildSubscriptionCheckoutPayload } from "@/lib/subscription-checkout-payload";
+import { cappedSubscriptionUpgradeCredit } from "@/lib/subscription-billing";
 import { formatINR } from "@/lib/utils";
 import { adminPlatformPaymentSettingsSchema } from "@/lib/validations";
 import { nextPayoutBatchAt, walletAmounts, walletPayoutEligibleAt } from "@/services/business-wallet";
@@ -148,6 +149,76 @@ test("subscription GST is controlled by the configured rate", () => {
       process.env.SUBSCRIPTION_GST_RATE_BPS = originalRate;
     }
   }
+});
+
+test("Bengaluru launch pricing applies the exact 80% discount before subscription GST", () => {
+  const promotion = {
+    discountType: "PERCENTAGE" as const,
+    discountValue: 80,
+    maxDiscountAmount: null
+  };
+
+  assert.deepEqual(
+    buildSubscriptionBillingBreakdown({ plan: "STARTER", promotion, gstRateBps: 1800 }),
+    {
+      subtotal: 1499,
+      discount: 1199.2,
+      upgradeCredit: 0,
+      taxableAmount: 299.8,
+      gstRateBps: 1800,
+      gstAmount: 53.96,
+      total: 353.76
+    }
+  );
+  assert.deepEqual(
+    buildSubscriptionBillingBreakdown({ plan: "PRO", promotion, gstRateBps: 1800 }),
+    {
+      subtotal: 2999,
+      discount: 2399.2,
+      upgradeCredit: 0,
+      taxableAmount: 599.8,
+      gstRateBps: 1800,
+      gstAmount: 107.96,
+      total: 707.76
+    }
+  );
+});
+
+test("Bengaluru launch upgrades cap Starter credit at its discounted taxable price", () => {
+  const upgradeCredit = cappedSubscriptionUpgradeCredit({
+    currentPlan: "STARTER",
+    targetPlan: "PRO",
+    paidTaxableAmount: 1499,
+    promotionActive: true
+  });
+
+  assert.equal(upgradeCredit, 299.8);
+  assert.deepEqual(
+    buildSubscriptionBillingBreakdown({
+      plan: "PRO",
+      promotion: { discountType: "PERCENTAGE", discountValue: 80 },
+      upgradeCreditAmount: upgradeCredit,
+      gstRateBps: 1800
+    }),
+    {
+      subtotal: 2999,
+      discount: 2399.2,
+      upgradeCredit: 299.8,
+      taxableAmount: 300,
+      gstRateBps: 1800,
+      gstAmount: 54,
+      total: 354
+    }
+  );
+  assert.equal(
+    cappedSubscriptionUpgradeCredit({
+      currentPlan: "STARTER",
+      targetPlan: "PRO",
+      paidTaxableAmount: 120,
+      promotionActive: true
+    }),
+    120
+  );
 });
 
 test("subscription upgrade credit reduces the taxable plan amount", () => {

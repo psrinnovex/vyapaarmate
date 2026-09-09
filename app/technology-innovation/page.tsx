@@ -17,7 +17,7 @@ export const metadata: Metadata = createMetadata({
   title: "Technology & Innovation",
   description,
   path: "/technology-innovation",
-  keywords: ["VyapaarMate technology", "MSME intelligence engine", "PRISM ready startup innovation"]
+  keywords: ["VyapaarMate technology", "MSME intelligence engine", "MSME pilot development"]
 });
 
 const architectureSteps = [
@@ -96,7 +96,7 @@ export default function TechnologyInnovationPage() {
           <div className="mx-auto max-w-7xl">
             <Badge variant="emerald" className="gap-1.5">
               <ShieldCheck className="size-3.5" />
-              PRISM-ready innovation narrative
+              Product architecture and development
             </Badge>
             <h1 className="mt-4 max-w-4xl text-4xl font-extrabold leading-tight sm:text-5xl">Technology & Innovation</h1>
             <p className="mt-5 max-w-4xl text-base leading-7 text-slate-600 sm:text-lg">
@@ -145,7 +145,7 @@ export default function TechnologyInnovationPage() {
           </div>
         </Section>
 
-        <Section eyebrow="PRISM-ready explanation" title="Innovation beyond digitising orders" className="pt-0">
+        <Section eyebrow="Pilot validation" title="Decisions owners can explain and evaluate" className="pt-0">
           <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
             <Card className="bg-white text-base leading-7 text-slate-700">
               <p>

@@ -3720,7 +3720,7 @@ export function AdminSettingsPage() {
               <h2 className="font-bold text-ink">PSHR Innovex payment receiver</h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">Customer order payments use the configured platform gateway. The saved UPI receiver is only for manual fallback and direct UPI subscription requests.</p>
             </div>
-            {paymentSettings && <Badge variant={paymentSettings.activeProvider === "UPI" ? "amber" : "emerald"}>{paymentSettings.activeProvider === "UPI" ? "Direct UPI active" : "Cashfree active"}</Badge>}
+            {paymentSettings && <Badge variant={paymentSettings.activeProvider === "UPI" ? "amber" : "emerald"}>{paymentSettings.activeProvider === "UPI" ? "Direct UPI selected" : "Cashfree selected"}</Badge>}
           </div>
           {paymentSettings ? (
             <form key={`${paymentSettings.updatedAt}-${paymentSettings.activeProvider}`} className="mt-5 grid gap-4" onSubmit={savePaymentSettings}>

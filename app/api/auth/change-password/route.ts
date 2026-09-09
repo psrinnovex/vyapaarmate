@@ -53,12 +53,27 @@ export async function POST(request: Request) {
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id: user.id },
-      data: { passwordHash }
+      data: { passwordHash, sessionVersion: { increment: 1 } }
     });
     await tx.passwordResetToken.updateMany({
       where: { userId: user.id, usedAt: null },
       data: { usedAt: now }
     });
+    const mobileSessions = await tx.mobileSession.findMany({
+      where: { userId: user.id, revokedAt: null },
+      select: { id: true }
+    });
+    const mobileSessionIds = mobileSessions.map((mobileSession) => mobileSession.id);
+    if (mobileSessionIds.length) {
+      await tx.mobileSession.updateMany({
+        where: { id: { in: mobileSessionIds }, revokedAt: null },
+        data: { revokedAt: now, revocationReason: "password_changed" }
+      });
+      await tx.mobileRefreshToken.updateMany({
+        where: { sessionId: { in: mobileSessionIds }, revokedAt: null },
+        data: { revokedAt: now }
+      });
+    }
   });
 
   await writeAuditLog({

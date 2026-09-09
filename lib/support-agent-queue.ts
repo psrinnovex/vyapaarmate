@@ -69,7 +69,11 @@ export async function assignSupportTicketToAgent(
   ticketId: string,
   agentId: string,
   assignedByUserId?: string | null,
-  options: { source?: SupportAssignmentSource; reason?: string } = {}
+  options: {
+    source?: SupportAssignmentSource;
+    reason?: string;
+    expectedAssignedToUserId?: string | null;
+  } = {}
 ) {
   return prisma.$transaction(async (tx) => {
     const [ticket, agent] = await Promise.all([
@@ -89,14 +93,28 @@ export async function assignSupportTicketToAgent(
 
     const now = new Date();
     const changedAgent = ticket.assignedToUserId !== agent.id;
-    await tx.supportTicket.update({
-      where: { id: ticket.id },
-      data: {
-        assignedToUserId: agent.id,
-        assignedAt: changedAgent ? now : ticket.assignedAt,
-        status: ticket.status === "OPEN" ? "IN_REVIEW" : ticket.status
-      }
-    });
+    const assignmentData = {
+      assignedToUserId: agent.id,
+      assignedAt: changedAgent ? now : ticket.assignedAt,
+      status: ticket.status === "OPEN" ? "IN_REVIEW" as const : ticket.status
+    };
+    const assignmentGuarded = Object.prototype.hasOwnProperty.call(options, "expectedAssignedToUserId");
+
+    if (assignmentGuarded) {
+      const assigned = await tx.supportTicket.updateMany({
+        where: {
+          id: ticket.id,
+          assignedToUserId: options.expectedAssignedToUserId
+        },
+        data: assignmentData
+      });
+      if (assigned.count !== 1) return null;
+    } else {
+      await tx.supportTicket.update({
+        where: { id: ticket.id },
+        data: assignmentData
+      });
+    }
 
     if (changedAgent) {
       await tx.supportTicketMessage.create({

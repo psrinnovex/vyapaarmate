@@ -1,0 +1,46 @@
+{
+  "cli": {
+    "version": "22.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "node": "22.22.0",
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://www.vyapaarmate.com"
+      }
+    },
+    "ios-simulator": {
+      "extends": "development",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "node": "22.22.0",
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://www.vyapaarmate.com"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "node": "22.22.0",
+      "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://www.vyapaarmate.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
+      }
+    }
+  }
+}

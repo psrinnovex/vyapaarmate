@@ -691,6 +691,18 @@ export async function cancelOrderPaymentForBusinessCancellation(input: {
     });
     if (!order) return null;
 
+    await tx.appointment.updateMany({
+      where: {
+        orderId: order.id,
+        status: { in: ["REQUESTED", "CONFIRMED", "IN_PROGRESS"] }
+      },
+      data: {
+        status: "CANCELLED",
+        cancelledAt,
+        cancellationReason: input.cancelledByUserId ? "Cancelled by business" : "Cancelled by customer"
+      }
+    });
+
     const payment = order.payment
       ? await tx.payment.findUnique({
           where: { id: order.payment.id },

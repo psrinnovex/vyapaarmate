@@ -4,13 +4,28 @@ import { getOrderTrackingStatusLabel } from "@/lib/order-tracking";
 import { businessWhatsappConfig } from "@/services/business-whatsapp";
 import { sendWhatsAppTemplate } from "@/services/whatsapp";
 import { prisma } from "@/lib/prisma";
+import { isEligibleLaunchBusinessLocation } from "@/lib/launch-policy";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 
 type OrderForWhatsapp = Prisma.OrderGetPayload<{
-  include: { business: true; customer: true; items: true; payment: true };
+  include: {
+    business: { include: { subscriptions: { select: { id: true } } } };
+    customer: true;
+    items: true;
+    payment: true;
+    appointment: { include: { provider: true } };
+  };
 }>;
 
 function statusLabel(order: OrderForWhatsapp) {
-  return getOrderTrackingStatusLabel(order.business.businessType, order.orderType, order.status).toLowerCase();
+  const status = getOrderTrackingStatusLabel(order.business.businessType, order.orderType, order.status).toLowerCase();
+  if (!order.appointment) return status;
+  const scheduled = new Intl.DateTimeFormat("en-IN", {
+    timeZone: order.appointment.timezone,
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(order.appointment.startsAt);
+  return `${status}; ${scheduled} with ${order.appointment.provider.name}`;
 }
 
 function paymentLabel(order: OrderForWhatsapp) {
@@ -28,11 +43,31 @@ export async function sendOrderWhatsappUpdate(input: { businessId: string; order
       businessId: input.businessId,
       OR: [{ id: input.orderId }, { orderNumber: input.orderId }]
     },
-    include: { business: true, customer: true, items: true, payment: true }
+    include: {
+      business: {
+        include: {
+          subscriptions: {
+            where: currentPaidSubscriptionWhere(),
+            select: { id: true },
+            take: 1
+          }
+        }
+      },
+      customer: true,
+      items: true,
+      payment: true,
+      appointment: { include: { provider: true } }
+    }
   });
 
   if (!order) return { sent: false, reason: "not_found" as const };
   if (!order.customer.whatsappOptIn) return { sent: false, reason: "customer_not_opted_in" as const };
+  if (
+    order.business.subscriptions.length === 0 ||
+    !isEligibleLaunchBusinessLocation(order.business, { requireCoordinates: true })
+  ) {
+    return { sent: false, reason: "business_not_eligible" as const };
+  }
   const whatsappConfig = businessWhatsappConfig(order.business);
   if (!whatsappConfig.liveSendsEnabled) return { sent: false, reason: "business_whatsapp_not_live" as const };
 

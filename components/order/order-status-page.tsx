@@ -480,7 +480,9 @@ function PaymentOnlyPage({
 export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: string; initialOrder: PublicOrderReceipt }) {
   const [order, setOrder] = useState(initialOrder);
   const [cancellingPayment, setCancellingPayment] = useState(false);
+  const [cancellingAppointment, setCancellingAppointment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [appointmentError, setAppointmentError] = useState<string | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState(() => new Date(initialOrder.updatedAt));
   const [showCelebration, setShowCelebration] = useState(false);
   const refreshInFlight = useRef(false);
@@ -604,6 +606,25 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
     }
   }
 
+  async function cancelAppointment() {
+    if (!window.confirm("Cancel this appointment? Any eligible online payment will follow the cancellation and refund workflow.")) return;
+    setCancellingAppointment(true);
+    setAppointmentError(null);
+    try {
+      const response = await fetch(`/api/orders/${encodeURIComponent(publicToken)}/cancel`, { method: "POST" });
+      const payload = (await response.json().catch(() => ({}))) as { error?: unknown };
+      if (!response.ok) {
+        setAppointmentError(typeof payload.error === "string" ? payload.error : "Could not cancel this appointment.");
+        return;
+      }
+      await refresh();
+    } catch {
+      setAppointmentError("Could not reach the booking server. Try again.");
+    } finally {
+      setCancellingAppointment(false);
+    }
+  }
+
   const paymentMethodLabel = order.paymentMethod === "CASH" ? "Cash" : cashfreeCheckout ? (paid ? "Online payment" : "Cashfree checkout") : "PSHR Innovex UPI";
   const transactionTitle = label(tracking.transactionLabel);
   const heroCancelled = order.status === "CANCELLED";
@@ -691,6 +712,51 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
         )}
 
         <TrackingTimeline order={order} />
+
+        {order.appointment && (
+          <section className="order-tracker-enter mt-5 overflow-hidden rounded-[1.75rem] border border-emerald/20 bg-[linear-gradient(145deg,rgba(236,253,245,0.96),rgba(239,246,255,0.94))] p-5 shadow-soft print:border-line print:bg-white sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-emerald text-white shadow-sm">
+                  <CalendarCheck2 className="size-6" />
+                </span>
+                <div>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-emerald">Scheduled time</p>
+                  <h2 className="mt-1 text-xl font-extrabold text-ink">{dateTime(order.appointment.startsAt)}</h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {order.appointment.providerName} · {order.appointment.providerTitle}
+                  </p>
+                </div>
+              </div>
+              <Badge variant={["CANCELLED", "NO_SHOW"].includes(order.appointment.status) ? "red" : order.appointment.status === "REQUESTED" ? "amber" : "emerald"}>
+                {label(order.appointment.status)}
+              </Badge>
+            </div>
+            <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+              <div className="rounded-xl bg-white/85 p-3 shadow-sm">
+                <p className="text-xs font-semibold text-slate-500">Starts</p>
+                <p className="mt-1 font-extrabold text-ink">{dateTime(order.appointment.startsAt)}</p>
+              </div>
+              <div className="rounded-xl bg-white/85 p-3 shadow-sm">
+                <p className="text-xs font-semibold text-slate-500">Estimated finish</p>
+                <p className="mt-1 font-extrabold text-ink">{dateTime(order.appointment.endsAt)}</p>
+              </div>
+              <div className="rounded-xl bg-white/85 p-3 shadow-sm">
+                <p className="text-xs font-semibold text-slate-500">Confirmation</p>
+                <p className="mt-1 font-extrabold text-ink">{order.appointment.autoConfirmed ? "Confirmed automatically" : "Waiting for business"}</p>
+              </div>
+            </div>
+            {appointmentError && <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{appointmentError}</p>}
+            {order.appointment.canCancelOnline && (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-emerald/15 pt-4">
+                <p className="text-xs text-slate-500">Cancel online before {dateTime(order.appointment.cancellationCutoffAt)}.</p>
+                <Button variant="secondary" disabled={cancellingAppointment} onClick={cancelAppointment}>
+                  {cancellingAppointment ? "Cancelling…" : "Cancel appointment"}
+                </Button>
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="mt-5 grid gap-5 print:hidden lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="rounded-[1.75rem] border border-line bg-white p-5 shadow-sm sm:p-6">

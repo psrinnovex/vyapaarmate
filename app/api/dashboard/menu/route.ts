@@ -6,6 +6,7 @@ import { getMenuItemImageUrl } from "@/lib/menu-item-image";
 import { parseMenuItemImageDataUrl } from "@/lib/menu-item-image.server";
 import { prisma } from "@/lib/prisma";
 import { menuItemSchema } from "@/lib/validations";
+import { parseJsonRequest } from "@/lib/security/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,10 @@ function mapMenuItem(item: MenuItemWithDisplayImage) {
     foodType: item.foodType,
     imageUrl: getMenuItemImageUrl(item),
     isAvailable: item.isAvailable,
-    isBestSeller: item.isBestSeller
+    isBestSeller: item.isBestSeller,
+    appointmentEnabled: item.appointmentEnabled,
+    durationMinutes: item.durationMinutes,
+    bufferMinutes: item.bufferMinutes
   };
 }
 
@@ -71,15 +75,12 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
   const { session } = auth;
 
-  const body = await request.json();
-  const parsed = menuItemSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, menuItemSchema);
+  if (parsed.response) return parsed.response;
 
   const category = await prisma.menuCategory.findFirst({
     where: { id: parsed.data.categoryId, businessId: session.businessId },
-    select: { id: true }
+    select: { id: true, business: { select: { dataOrigin: true } } }
   });
   if (!category) {
     return NextResponse.json({ error: "Category not found" }, { status: 404 });
@@ -97,6 +98,8 @@ export async function POST(request: Request) {
   const item = await prisma.menuItem.create({
     data: {
       businessId: session.businessId,
+      dataOrigin: category.business.dataOrigin,
+      trainingEligible: category.business.dataOrigin === "LIVE",
       categoryId: category.id,
       name: parsed.data.name,
       description: parsed.data.description,
@@ -104,12 +107,27 @@ export async function POST(request: Request) {
       foodType: parsed.data.foodType,
       isAvailable: parsed.data.isAvailable,
       isBestSeller: parsed.data.isBestSeller,
-      dataOrigin: "LIVE",
-      trainingEligible: true,
+      appointmentEnabled: parsed.data.appointmentEnabled,
+      durationMinutes: parsed.data.appointmentEnabled ? parsed.data.durationMinutes : null,
+      bufferMinutes: parsed.data.appointmentEnabled ? parsed.data.bufferMinutes : 0,
+
       image: image ? { create: image } : undefined
     },
     include: { category: true, image: { select: { updatedAt: true } } }
   });
+
+  if (item.appointmentEnabled) {
+    const providers = await prisma.appointmentProvider.findMany({
+      where: { businessId: session.businessId, isActive: true },
+      select: { id: true }
+    });
+    if (providers.length) {
+      await prisma.appointmentProviderService.createMany({
+        data: providers.map((provider) => ({ providerId: provider.id, menuItemId: item.id })),
+        skipDuplicates: true
+      });
+    }
+  }
 
   await writeAuditLog({
     userId: session.id,

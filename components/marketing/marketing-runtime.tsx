@@ -134,13 +134,14 @@ export function MarketingRuntime({
   measurementId?: string;
 }) {
   const pathname = usePathname();
+  const suppressMarketing = pathname === "/account-deletion" || pathname?.startsWith("/mobile/") === true;
 
   useEffect(() => {
-    window.__vyapaarmateMarketingMode = mode;
-  }, [mode]);
+    window.__vyapaarmateMarketingMode = suppressMarketing ? "none" : mode;
+  }, [mode, suppressMarketing]);
 
   useEffect(() => {
-    if (mode === "none") return;
+    if (mode === "none" || suppressMarketing) return;
 
     const attribution = captureAttribution();
     const pagePath = pathname || "/";
@@ -167,10 +168,10 @@ export function MarketingRuntime({
     }
 
     trackMarketingEvent("page_view", pagePayload);
-  }, [measurementId, mode, pathname]);
+  }, [measurementId, mode, pathname, suppressMarketing]);
 
   useEffect(() => {
-    if (mode === "none") return;
+    if (mode === "none" || suppressMarketing) return;
 
     function handleClick(event: MouseEvent) {
       const target = event.target instanceof Element ? event.target : null;
@@ -185,10 +186,10 @@ export function MarketingRuntime({
 
     document.addEventListener("click", handleClick, { capture: true });
     return () => document.removeEventListener("click", handleClick, { capture: true });
-  }, [mode]);
+  }, [mode, suppressMarketing]);
 
   useReportWebVitals((metric) => {
-    if (mode === "none") return;
+    if (mode === "none" || suppressMarketing) return;
 
     trackMarketingEvent("web_vital", {
       metric_id: metric.id,

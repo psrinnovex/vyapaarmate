@@ -78,6 +78,11 @@ enum DataOrigin {
   TEST
 }
 
+enum PilotCohort {
+  BENGALURU
+  ANDHRA_PRADESH
+}
+
 enum OrderType {
   PICKUP
   DELIVERY
@@ -132,6 +137,22 @@ enum WhatsappStatus {
   FAILED
 }
 
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  CUSTOMER_WEB
+  DASHBOARD
+  WHATSAPP
+  AI_ASSISTED
+}
+
 enum SupportTicketPriority {
   LOW
   MEDIUM
@@ -160,6 +181,26 @@ enum SupportTicketMessageSender {
   SYSTEM
 }
 
+enum MobilePlatform {
+  IOS
+  ANDROID
+}
+
+enum AccountDeletionScope {
+  CUSTOMER
+  STAFF
+  BUSINESS
+}
+
+enum AccountDeletionStatus {
+  AWAITING_VERIFICATION
+  REQUESTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
 model User {
   id                       String                    @id @default(cuid())
   name                     String
@@ -177,6 +218,11 @@ model User {
   requestedSupportTickets  SupportTicket[]           @relation("SupportRequester")
   assignedSupportTickets   SupportTicket[]           @relation("SupportAssignee")
   supportTicketMessages    SupportTicketMessage[]    @relation("SupportMessageAuthor")
+  appointmentProviders     AppointmentProvider[]
+  mobileAuthorizationCodes MobileAuthorizationCode[]
+  mobileSessions           MobileSession[]
+  accountDeletionRequests  AccountDeletionRequest[]  @relation("AccountDeletionRequester")
+  sessionVersion           Int                       @default(0)
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
 
@@ -212,6 +258,59 @@ model PasswordResetToken {
   @@index([usedAt])
 }
 
+model MobileAuthorizationCode {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId      String    @db.VarChar(64)
+  redirectUri   String    @db.VarChar(500)
+  codeChallenge String    @db.VarChar(128)
+  codeHash      String    @unique @db.Char(64)
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt, usedAt])
+}
+
+model MobileSession {
+  id                String               @id @default(cuid())
+  userId            String
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId          String               @db.VarChar(64)
+  platform          MobilePlatform
+  deviceName        String?              @db.VarChar(100)
+  appVersion        String?              @db.VarChar(32)
+  absoluteExpiresAt DateTime
+  idleExpiresAt     DateTime
+  lastUsedAt        DateTime             @default(now())
+  revokedAt         DateTime?
+  revocationReason  String?              @db.VarChar(64)
+  refreshTokens     MobileRefreshToken[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@index([userId, revokedAt, idleExpiresAt])
+  @@index([absoluteExpiresAt])
+}
+
+model MobileRefreshToken {
+  id         String        @id @default(cuid())
+  sessionId  String
+  session    MobileSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  generation Int
+  tokenHash  String        @unique @db.Char(64)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@unique([sessionId, generation])
+  @@index([sessionId, usedAt, revokedAt])
+  @@index([expiresAt])
+}
+
 model PlatformPaymentSettings {
   id               String   @id @default("platform")
   directUpiEnabled Boolean  @default(false)
@@ -223,12 +322,17 @@ model PlatformPaymentSettings {
 }
 
 model Business {
-  id                          String                      @id @default(cuid())
+  campaignDrafts               CampaignDraft[]
+  dataOrigin                   DataOrigin         @default(LIVE)
+  pilotCohort                  PilotCohort?
+  pilotEnrolledAt              DateTime?
+  @@index([pilotCohort, dataOrigin])
+  id                          String                        @id @default(cuid())
   name                        String
-  slug                        String                      @unique
+  slug                        String                        @unique
   ownerName                   String
-  phone                       String                      @unique
-  email                       String                      @unique
+  phone                       String                        @unique
+  email                       String                        @unique
   address                     String
   city                        String
   state                       String
@@ -236,55 +340,66 @@ model Business {
   logoImage                   BusinessImage?
   businessType                String
   businessServiceTypeId       String?
-  businessServiceType         BusinessServiceType?        @relation(fields: [businessServiceTypeId], references: [id], onDelete: SetNull)
+  businessServiceType         BusinessServiceType?          @relation(fields: [businessServiceTypeId], references: [id], onDelete: SetNull)
   whatsappDisplayPhone        String?
-  whatsappPhoneNumberId       String?                     @unique
+  whatsappPhoneNumberId       String?                       @unique
   whatsappWabaId              String?
   whatsappAccessTokenEnc      String?
-  whatsappConnected           Boolean                     @default(false)
-  whatsappLiveEnabled         Boolean                     @default(false)
+  whatsappConnected           Boolean                       @default(false)
+  whatsappLiveEnabled         Boolean                       @default(false)
   whatsappApprovedAt          DateTime?
-  subscriptionPlan            SubscriptionPlan            @default(STARTER)
-  subscriptionStatus          SubscriptionStatus          @default(TRIAL)
-  kycStatus                   BusinessKycStatus           @default(PAYMENT_PENDING)
+  subscriptionPlan            SubscriptionPlan              @default(STARTER)
+  subscriptionStatus          SubscriptionStatus            @default(TRIAL)
+  kycStatus                   BusinessKycStatus             @default(PAYMENT_PENDING)
   kycSubmittedAt              DateTime?
   kycReviewedAt               DateTime?
   kycReviewedByUserId         String?
   kycRejectionReason          String?
-  isVerified                  Boolean                     @default(false)
-  isActive                    Boolean                     @default(true)
-  isOpen                      Boolean                     @default(true)
-  businessHours               String                      @default("Open today")
-  minimumOrder                Decimal                     @default(0) @db.Decimal(10, 2)
-  deliveryFee                 Decimal                     @default(0) @db.Decimal(10, 2)
-  latitude                    Decimal?                    @db.Decimal(9, 6)
-  longitude                   Decimal?                    @db.Decimal(9, 6)
-  serviceRadiusKm             Decimal                     @default(0) @db.Decimal(7, 2)
-  acceptsPickup               Boolean                     @default(true)
-  acceptsDineIn               Boolean                     @default(true)
-  acceptsServiceAtLocation    Boolean                     @default(false)
-  allowsPayLater              Boolean                     @default(true)
+  isVerified                  Boolean                       @default(false)
+  isActive                    Boolean                       @default(true)
+  isOpen                      Boolean                       @default(true)
+  businessHours               String                        @default("Open today")
+  minimumOrder                Decimal                       @default(0) @db.Decimal(10, 2)
+  deliveryFee                 Decimal                       @default(0) @db.Decimal(10, 2)
+  latitude                    Decimal?                      @db.Decimal(9, 6)
+  longitude                   Decimal?                      @db.Decimal(9, 6)
+  serviceRadiusKm             Decimal                       @default(0) @db.Decimal(7, 2)
+  acceptsPickup               Boolean                       @default(true)
+  acceptsDineIn               Boolean                       @default(true)
+  acceptsServiceAtLocation    Boolean                       @default(false)
+  allowsPayLater              Boolean                       @default(true)
+  appointmentBookingEnabled   Boolean                       @default(false)
+  appointmentAutoConfirm      Boolean                       @default(true)
+  appointmentTimezone         String                        @default("Asia/Kolkata")
+  appointmentSlotInterval     Int                           @default(15)
+  appointmentLeadTimeMinutes  Int                           @default(60)
+  appointmentMaxAdvanceDays   Int                           @default(60)
+  appointmentCancelNoticeMins Int                           @default(120)
   paymentUpiId                String?
   paymentUpiName              String?
-  payoutMethod                BusinessPayoutMethod        @default(UPI)
+  payoutMethod                BusinessPayoutMethod          @default(UPI)
   payoutUpiId                 String?
   payoutUpiName               String?
   payoutAccountHolderName     String?
   payoutBankName              String?
   payoutBankAccountNumber     String?
   payoutBankIfsc              String?
-  cashfreePayoutBeneficiaryId String?                     @unique
+  cashfreePayoutBeneficiaryId String?                       @unique
   setupCompletedAt            DateTime?
-  razorpayLinkedAccountId     String?                     @unique
-  razorpayRouteEnabled        Boolean                     @default(false)
-  cashfreeVendorId            String?                     @unique
-  cashfreeSplitEnabled        Boolean                     @default(false)
-  platformFeeBps              Int                         @default(0)
+  razorpayLinkedAccountId     String?                       @unique
+  razorpayRouteEnabled        Boolean                       @default(false)
+  cashfreeVendorId            String?                       @unique
+  cashfreeSplitEnabled        Boolean                       @default(false)
+  platformFeeBps              Int                           @default(0)
   users                       User[]
   categories                  MenuCategory[]
   menuItems                   MenuItem[]
   customers                   Customer[]
   orders                      Order[]
+  appointments                Appointment[]
+  appointmentProviders        AppointmentProvider[]
+  appointmentAvailability     AppointmentAvailabilityRule[]
+  appointmentTimeOff          AppointmentTimeOff[]
   payments                    Payment[]
   walletEntries               BusinessWalletEntry[]
   payouts                     BusinessPayout[]
@@ -302,8 +417,9 @@ model Business {
   intelligenceModelArtifacts  IntelligenceModelArtifact[]
   intelligenceTrainingRuns    IntelligenceTrainingRun[]
   intelligencePredictions     IntelligencePrediction[]
-  createdAt                   DateTime                    @default(now())
-  updatedAt                   DateTime                    @updatedAt
+  accountDeletionRequests     AccountDeletionRequest[]
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
 
   @@index([city, state])
   @@index([businessServiceTypeId])
@@ -316,6 +432,43 @@ model Business {
   @@index([whatsappConnected, whatsappLiveEnabled])
   @@index([setupCompletedAt])
   @@index([payoutMethod])
+}
+
+model AccountDeletionRequest {
+  id                      String                @id @default(cuid())
+  scope                   AccountDeletionScope
+  status                  AccountDeletionStatus @default(REQUESTED)
+  requesterUserId         String?
+  requester               User?                 @relation("AccountDeletionRequester", fields: [requesterUserId], references: [id], onDelete: SetNull)
+  businessId              String?
+  business                Business?             @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  idempotencyKeyHash      String?               @unique @db.Char(64)
+  verificationTokenHash   String?               @unique @db.Char(64)
+  verificationExpiresAt   DateTime?
+  verifiedAt              DateTime?
+  reason                  String?               @db.VarChar(500)
+  retentionNoticeVersion  String                @db.VarChar(32)
+  retentionNotice         String                @db.Text
+  scheduledFor            DateTime
+  processingAt            DateTime?
+  completedAt             DateTime?
+  cancelledAt             DateTime?
+  retentionReviewAt       DateTime?
+  retentionLastReviewedAt DateTime?
+  retentionReviewCount    Int                   @default(0)
+  retentionPurgeAfter     DateTime?
+  retentionPurgedAt       DateTime?
+  retentionHoldUntil      DateTime?
+  retentionHoldReason     String?               @db.VarChar(500)
+  result                  Json?
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  @@index([scope, status, scheduledFor])
+  @@index([requesterUserId, createdAt])
+  @@index([businessId, status, createdAt])
+  @@index([status, retentionReviewAt, retentionPurgedAt])
+  @@index([status, retentionPurgeAfter, retentionPurgedAt])
 }
 
 model BusinessImage {
@@ -375,25 +528,29 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id               String           @id @default(cuid())
-  businessId       String
-  business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  categoryId       String
-  category         MenuCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  name             String
-  description      String
-  price            Decimal          @db.Decimal(10, 2)
-  imageUrl         String?
-  image            MenuItemImage?
-  foodType         FoodType         @default(VEG)
-  isAvailable      Boolean          @default(true)
-  isBestSeller     Boolean          @default(false)
-  dataOrigin       DataOrigin       @default(LIVE)
-  trainingEligible Boolean          @default(true)
-  orderItems       OrderItem[]
-  demandForecasts  DemandForecast[]
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                 String                       @id @default(cuid())
+  businessId         String
+  business           Business                     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  categoryId         String
+  category           MenuCategory                 @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name               String
+  description        String
+  price              Decimal                      @db.Decimal(10, 2)
+  imageUrl           String?
+  image              MenuItemImage?
+  foodType           FoodType                     @default(VEG)
+  isAvailable        Boolean                      @default(true)
+  isBestSeller       Boolean                      @default(false)
+  dataOrigin         DataOrigin                   @default(LIVE)
+  trainingEligible   Boolean                      @default(true)
+  appointmentEnabled Boolean                      @default(false)
+  durationMinutes    Int?
+  bufferMinutes      Int                          @default(0)
+  orderItems         OrderItem[]
+  providerServices   AppointmentProviderService[]
+  demandForecasts    DemandForecast[]
+  createdAt          DateTime                     @default(now())
+  updatedAt          DateTime                     @updatedAt
 
   @@index([businessId, categoryId])
   @@index([businessId, isAvailable])
@@ -426,6 +583,7 @@ model Customer {
   totalSpent         Decimal                     @default(0) @db.Decimal(12, 2)
   lastOrderAt        DateTime?
   orders             Order[]
+  appointments       Appointment[]
   messages           WhatsappMessage[]
   intelligenceScores CustomerIntelligenceScore[]
   paymentPriorities  PaymentPriority[]
@@ -451,6 +609,8 @@ model Order {
   customerId               String
   customer                 Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
   orderNumber              String
+  mobileRequestKeyHash     String?           @unique @db.Char(64)
+  mobileRequestBodyHash    String?           @db.Char(64)
   status                   OrderStatus       @default(NEW)
   paymentStatus            PaymentStatus     @default(PENDING)
   subtotal                 Decimal           @db.Decimal(10, 2)
@@ -477,6 +637,7 @@ model Order {
   dataOrigin               DataOrigin        @default(LIVE)
   trainingEligible         Boolean           @default(true)
   items                    OrderItem[]
+  appointment              Appointment?
   payment                  Payment?
   paymentPriorities        PaymentPriority[]
   whatsappMessages         WhatsappMessage[]
@@ -508,6 +669,110 @@ model OrderItem {
 
   @@index([orderId])
   @@index([menuItemId])
+}
+
+model AppointmentProvider {
+  id                        String                        @id @default(cuid())
+  businessId                String
+  business                  Business                      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  userId                    String?
+  user                      User?                         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name                      String
+  title                     String
+  bio                       String?                       @db.Text
+  color                     String                        @default("#0F766E")
+  isActive                  Boolean                       @default(true)
+  acceptsAtBusiness         Boolean                       @default(true)
+  acceptsAtCustomerLocation Boolean                       @default(false)
+  sortOrder                 Int                           @default(0)
+  services                  AppointmentProviderService[]
+  availabilityRules         AppointmentAvailabilityRule[]
+  timeOff                   AppointmentTimeOff[]
+  appointments              Appointment[]
+  createdAt                 DateTime                      @default(now())
+  updatedAt                 DateTime                      @updatedAt
+
+  @@unique([businessId, userId])
+  @@index([businessId, isActive, sortOrder])
+}
+
+model AppointmentProviderService {
+  providerId              String
+  provider                AppointmentProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  menuItemId              String
+  menuItem                MenuItem            @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  durationOverrideMinutes Int?
+  bufferOverrideMinutes   Int?
+  createdAt               DateTime            @default(now())
+
+  @@id([providerId, menuItemId])
+  @@index([menuItemId, providerId])
+}
+
+model AppointmentAvailabilityRule {
+  id          String              @id @default(cuid())
+  businessId  String
+  business    Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  providerId  String
+  provider    AppointmentProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  weekday     Int
+  startMinute Int
+  endMinute   Int
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@unique([providerId, weekday, startMinute, endMinute], map: "AppointmentAvailabilityRule_providerId_weekday_startMinute_endM")
+  @@index([businessId, weekday, isActive])
+  @@index([providerId, weekday, isActive])
+}
+
+model AppointmentTimeOff {
+  id         String               @id @default(cuid())
+  businessId String
+  business   Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  providerId String?
+  provider   AppointmentProvider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  startsAt   DateTime             @db.Timestamptz(3)
+  endsAt     DateTime             @db.Timestamptz(3)
+  reason     String?
+  createdAt  DateTime             @default(now())
+
+  @@index([businessId, startsAt, endsAt])
+  @@index([providerId, startsAt, endsAt])
+}
+
+model Appointment {
+  id                 String              @id @default(cuid())
+  businessId         String
+  business           Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orderId            String              @unique
+  order              Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customerId         String
+  customer           Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  providerId         String
+  provider           AppointmentProvider @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  startsAt           DateTime            @db.Timestamptz(3)
+  endsAt             DateTime            @db.Timestamptz(3)
+  blockedUntil       DateTime            @db.Timestamptz(3)
+  timezone           String              @default("Asia/Kolkata")
+  status             AppointmentStatus   @default(REQUESTED)
+  source             AppointmentSource   @default(CUSTOMER_WEB)
+  autoConfirmed      Boolean             @default(false)
+  smartScore         Int?
+  smartReason        String?
+  confirmedAt        DateTime?           @db.Timestamptz(3)
+  cancelledAt        DateTime?           @db.Timestamptz(3)
+  completedAt        DateTime?           @db.Timestamptz(3)
+  reminderSentAt     DateTime?           @db.Timestamptz(3)
+  cancellationReason String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([businessId, startsAt, status])
+  @@index([providerId, startsAt, status])
+  @@index([customerId, startsAt])
+  @@index([status, reminderSentAt, startsAt])
 }
 
 model Payment {
@@ -677,8 +942,8 @@ model IntelligenceModelArtifact {
   @@unique([businessId, modelType, version])
   @@index([businessId, modelType])
   @@index([businessId, modelType, status])
-  @@index([businessId, modelType, lifecycleStatus])
-  @@index([businessId, driftStatus, lastDriftCheckedAt])
+  @@index([businessId, modelType, lifecycleStatus], map: "IntelligenceModelArtifact_businessId_modelType_lifecycleStatus_")
+  @@index([businessId, driftStatus, lastDriftCheckedAt], map: "IntelligenceModelArtifact_businessId_driftStatus_lastDriftCheck")
   @@index([businessId, status, createdAt])
   @@index([businessId, createdAt])
 }
@@ -724,7 +989,7 @@ model IntelligencePrediction {
 
   @@index([businessId, modelType])
   @@index([businessId, modelType, createdAt])
-  @@index([businessId, modelType, entityType, entityId])
+  @@index([businessId, modelType, entityType, entityId], map: "IntelligencePrediction_businessId_modelType_entityType_entityId")
   @@index([businessId, createdAt])
 }
 
@@ -837,6 +1102,19 @@ model PlatformSubscriptionCoupon {
   @@index([plan, isActive])
 }
 
+model CampaignDraft {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  title      String   @db.VarChar(120)
+  body       String   @db.VarChar(1200)
+  audience   String   @default("MARKETING_OPTED_IN") @db.VarChar(40)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([businessId, createdAt])
+}
+
 model WhatsappMessage {
   id                String         @id @default(cuid())
   businessId        String
@@ -860,6 +1138,8 @@ model WhatsappMessage {
 }
 
 model Subscription {
+  dataOrigin                  DataOrigin                  @default(LIVE)
+  @@index([dataOrigin, status, paymentStatus])
   id                          String                      @id @default(cuid())
   invoiceNumber               String?                     @unique
   businessId                  String
@@ -873,6 +1153,7 @@ model Subscription {
   gstRateBps                  Int                         @default(1800)
   gstAmount                   Decimal                     @default(0) @db.Decimal(10, 2)
   billingGstin                String?
+  billingBusinessSnapshot     Json?
   couponCode                  String?
   subscriptionCouponId        String?
   subscriptionCoupon          PlatformSubscriptionCoupon? @relation(fields: [subscriptionCouponId], references: [id], onDelete: SetNull)

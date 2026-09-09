@@ -3,6 +3,8 @@ import { z } from "zod";
 import { getSupportSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
+import { canPatchSupportTicket } from "@/lib/security/authz";
+import { parseJsonRequest } from "@/lib/security/validation";
 import { assignSupportTicketToAgent, autoAssignSupportQueue, SupportAgentBusyError } from "@/lib/support-agent-queue";
 
 export const dynamic = "force-dynamic";
@@ -21,8 +23,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   const session = await getSupportSession();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const parsed = supportTicketPatchSchema.safeParse(await request.json());
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  const parsed = await parseJsonRequest(request, supportTicketPatchSchema);
+  if (parsed.response) return parsed.response;
 
   const { ticketId } = await context.params;
   const existing = await prisma.supportTicket.findUnique({
@@ -31,6 +33,9 @@ export async function PATCH(request: Request, context: RouteContext) {
   });
 
   if (!existing) return NextResponse.json({ error: "Support ticket not found" }, { status: 404 });
+  if (!canPatchSupportTicket(session, existing.assignedToUserId, parsed.data.assignedToUserId)) {
+    return NextResponse.json({ error: "You can only update support tickets assigned to you." }, { status: 403 });
+  }
 
   if (parsed.data.assignedToUserId) {
     const agent = await prisma.user.findFirst({
@@ -55,11 +60,17 @@ export async function PATCH(request: Request, context: RouteContext) {
   };
 
   try {
-    if (parsed.data.assignedToUserId) {
-      await assignSupportTicketToAgent(existing.id, parsed.data.assignedToUserId, session.id, {
+    if (parsed.data.assignedToUserId && parsed.data.assignedToUserId !== existing.assignedToUserId) {
+      const assignment = await assignSupportTicketToAgent(existing.id, parsed.data.assignedToUserId, session.id, {
         source: session.role === "SUPER_ADMIN" ? "admin" : "manual",
-        reason: "support_ticket_patch"
+        reason: "support_ticket_patch",
+        ...(session.role === "SUPPORT_AGENT"
+          ? { expectedAssignedToUserId: existing.assignedToUserId }
+          : {})
       });
+      if (!assignment) {
+        return NextResponse.json({ error: "This support ticket assignment changed. Refresh and try again." }, { status: 409 });
+      }
     }
   } catch (error) {
     if (error instanceof SupportAgentBusyError) return NextResponse.json({ error: error.message }, { status: 409 });
@@ -67,10 +78,23 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   if (Object.keys(updateData).length > 0) {
-    await prisma.supportTicket.update({
-      where: { id: existing.id },
-      data: updateData
-    });
+    if (session.role === "SUPPORT_AGENT") {
+      const expectedAssignedToUserId = parsed.data.assignedToUserId === session.id
+        ? session.id
+        : existing.assignedToUserId;
+      const updated = await prisma.supportTicket.updateMany({
+        where: { id: existing.id, assignedToUserId: expectedAssignedToUserId },
+        data: updateData
+      });
+      if (updated.count !== 1) {
+        return NextResponse.json({ error: "This support ticket assignment changed. Refresh and try again." }, { status: 409 });
+      }
+    } else {
+      await prisma.supportTicket.update({
+        where: { id: existing.id },
+        data: updateData
+      });
+    }
   }
 
   if (parsed.data.status === "RESOLVED" || parsed.data.status === "CLOSED") {

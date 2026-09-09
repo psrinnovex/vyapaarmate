@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
+import { parseJsonRequest } from "@/lib/security/validation";
 import { Prisma, type Role } from "@prisma/client";
 import { requireBusinessSession } from "@/lib/api-session";
 import { hashPassword } from "@/lib/auth";
@@ -56,11 +57,8 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
   const { session } = auth;
 
-  const body = await request.json();
-  const parsed = staffInviteSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, staffInviteSchema);
+  if (parsed.response) return parsed.response;
 
   const passwordHash = await hashPassword(randomUUID());
 

@@ -1,4 +1,5 @@
 import { absoluteUrl, company, siteConfig } from "@/lib/site";
+import { launchMarket, launchMarketRestricted } from "@/lib/launch-policy";
 
 type BreadcrumbInput = {
   name: string;
@@ -30,7 +31,16 @@ export function organizationNode() {
     "@type": "ContactPoint",
     contactType: "customer support",
     email: company.supportEmail,
-    areaServed: "IN",
+    areaServed: launchMarketRestricted
+      ? {
+          "@type": "City",
+          name: launchMarket.city,
+          containedInPlace: {
+            "@type": "State",
+            name: launchMarket.state
+          }
+        }
+      : "IN",
     availableLanguage: ["en", "hi"],
     ...(company.phone ? { telephone: company.phone } : {})
   };

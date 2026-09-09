@@ -9,6 +9,7 @@ export type SessionUser = {
   email: string;
   role: Role;
   businessId?: string | null;
+  sessionVersion?: number;
 };
 
 function jwtSecret() {
@@ -24,7 +25,8 @@ export async function createSessionToken(user: SessionUser) {
     name: user.name,
     email: user.email,
     role: user.role,
-    businessId: user.businessId ?? null
+    businessId: user.businessId ?? null,
+    sessionVersion: user.sessionVersion ?? 0
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
@@ -42,7 +44,8 @@ export async function verifySessionToken(token: string): Promise<SessionUser | n
       name: String(payload.name),
       email: String(payload.email),
       role: payload.role as Role,
-      businessId: typeof payload.businessId === "string" ? payload.businessId : null
+      businessId: typeof payload.businessId === "string" ? payload.businessId : null,
+      sessionVersion: typeof payload.sessionVersion === "number" ? payload.sessionVersion : 0
     };
   } catch {
     return null;

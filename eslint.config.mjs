@@ -7,6 +7,7 @@ const config = [
       ".next/**",
       ".vercel/**",
       "node_modules/**",
+      "apps/mobile/**",
       ".npm-cache/**",
       "coverage/**",
       "dist/**",

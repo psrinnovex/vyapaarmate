@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { usePathname } from "next/navigation";
 import type { Role } from "@prisma/client";
 import { adminNav, company } from "@/lib/constants";
@@ -23,7 +24,6 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
   const supportNavItem = adminNav.find((item) => item.href === "/admin/support");
   const visibleNav = supportOnly && supportNavItem ? [{ ...supportNavItem, href: "/support" }] : adminNav;
   const shellHomeHref = supportOnly ? "/support" : "/admin";
-  const shellInitials = supportOnly ? "VS" : "PI";
   const shellTitle = supportOnly ? "VyapaarMate Support" : "PSHR Admin";
   const headerTitle = supportOnly ? "VyapaarMate Support" : "PSHR Innovex Admin Panel";
   const footerTitle = supportOnly ? "VyapaarMate Support" : company.name;
@@ -109,7 +109,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
       <aside className="hidden h-full min-h-0 min-w-0 overflow-hidden border-r border-white/10 bg-slate-950 lg:block">
         <div className="flex h-full min-h-0 min-w-0 flex-col p-3 xl:p-4">
           <Link href={shellHomeHref} className="flex min-w-0 shrink-0 items-center gap-3 rounded-lg bg-white p-3 font-bold text-ink">
-            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink text-sm text-white">{shellInitials}</span>
+            <BrandMark />
             <span className="min-w-0 truncate text-base">{shellTitle}</span>
           </Link>
           <div className="mt-4 shrink-0 rounded-lg border border-emerald/20 bg-emerald/10 p-3 text-xs leading-5 text-emerald-100">
@@ -199,7 +199,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
             >
               <div className="relative z-10 flex shrink-0 items-center justify-between gap-3">
                 <Link href={shellHomeHref} onClick={closeMobileNav} className="flex min-w-0 flex-1 items-center gap-3 rounded-lg bg-white p-3 font-bold text-ink transition hover:-translate-y-0.5">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ink text-sm text-white">{shellInitials}</span>
+                  <BrandMark />
                   <span className="min-w-0 truncate text-base">{shellTitle}</span>
                 </Link>
                 <button

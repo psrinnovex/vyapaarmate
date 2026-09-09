@@ -1,10 +1,13 @@
 export type CsvCell = string | number | boolean | null | undefined;
 export type CsvRow = Record<string, CsvCell>;
 
-function formatCsvCell(value: CsvCell) {
+export function formatCsvCell(value: CsvCell) {
   if (value === null || value === undefined) return "";
 
-  const text = String(value);
+  // Spreadsheet programs interpret untrusted string cells as formulas, including
+  // formulas preceded by whitespace. Numeric values should remain numeric.
+  const raw = String(value);
+  const text = typeof value === "string" && (/^\s*[=+@-]/.test(raw) || /^[\t\r\n]/.test(raw)) ? `'${raw}` : raw;
   return /[",\n\r]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
 }
 

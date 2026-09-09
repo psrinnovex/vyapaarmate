@@ -1,9 +1,23 @@
 import type { CouponDiscountType, SubscriptionPlan } from "@prisma/client";
+import { launchOffer } from "@/lib/launch-policy";
 
 export const subscriptionPlanAmounts: Record<SubscriptionPlan, number> = {
   STARTER: 1499,
   PRO: 2999
 };
+
+function launchSubscriptionAmount(amount: number) {
+  return Math.round(amount * (100 - launchOffer.discountPercent)) / 100;
+}
+
+export const subscriptionLaunchPlanAmounts: Record<SubscriptionPlan, number> = {
+  STARTER: launchSubscriptionAmount(subscriptionPlanAmounts.STARTER),
+  PRO: launchSubscriptionAmount(subscriptionPlanAmounts.PRO)
+};
+
+export const subscriptionSellingPlanAmounts: Record<SubscriptionPlan, number> = launchOffer.publiclyAdvertised
+  ? subscriptionLaunchPlanAmounts
+  : subscriptionPlanAmounts;
 
 export function formatSubscriptionPlan(plan: SubscriptionPlan | string) {
   return plan
@@ -90,14 +104,22 @@ export function calculateDiscount(amount: number, coupon: DiscountInput | null |
 export function buildSubscriptionBillingBreakdown(input: {
   plan: SubscriptionPlan;
   coupon?: DiscountInput | null;
+  promotion?: DiscountInput | null;
   upgradeCreditAmount?: number;
   gstRateBps?: number;
+  billingGstin?: string | null;
 }): BillingBreakdown {
   const subtotal = money(subscriptionPlanAmounts[input.plan]);
-  const discount = calculateDiscount(subtotal, input.coupon);
+  const discount = Math.max(
+    calculateDiscount(subtotal, input.coupon),
+    calculateDiscount(subtotal, input.promotion)
+  );
   const upgradeCredit = money(Math.min(Math.max(0, input.upgradeCreditAmount ?? 0), Math.max(0, subtotal - discount)));
   const taxableAmount = money(subtotal - discount - upgradeCredit);
-  const gstRateBps = Math.max(0, Math.min(10000, Math.round(input.gstRateBps ?? subscriptionGstRateBps())));
+
+  const baseGstRateBps = Math.max(0, Math.min(10000, Math.round(input.gstRateBps ?? subscriptionGstRateBps())));
+
+  const gstRateBps = baseGstRateBps;
   const gstAmount = money((taxableAmount * gstRateBps) / 10000);
 
   return {

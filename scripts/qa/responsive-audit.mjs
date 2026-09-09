@@ -48,32 +48,102 @@ function pickChromeDebugPort(value) {
 }
 
 const viewports = [
-  { name: "small-mobile-320", width: 320, height: 700, mobile: true, dpr: 3 },
-  { name: "iphone-375", width: 375, height: 812, mobile: true, dpr: 3 },
-  { name: "modern-phone-390", width: 390, height: 844, mobile: true, dpr: 3 },
-  { name: "large-phone", width: 430, height: 932, mobile: true, dpr: 3 },
-  { name: "tablet", width: 768, height: 1024, mobile: true, dpr: 2 },
-  { name: "small-desktop", width: 1024, height: 768, mobile: false, dpr: 1 },
-  { name: "desktop-1280", width: 1280, height: 832, mobile: false, dpr: 1 },
-  { name: "desktop", width: 1440, height: 900, mobile: false, dpr: 1 }
+  {
+    name: "small-mobile-320",
+    width: 320,
+    height: 700,
+    mobile: true,
+    dpr: 3,
+    platform: "Android",
+    userAgent: "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+  },
+  {
+    name: "iphone-375",
+    width: 375,
+    height: 812,
+    mobile: true,
+    dpr: 3,
+    platform: "iPhone",
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1"
+  },
+  {
+    name: "modern-phone-390",
+    width: 390,
+    height: 844,
+    mobile: true,
+    dpr: 3,
+    platform: "Android",
+    userAgent: "Mozilla/5.0 (Linux; Android 16; Pixel 10 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+  },
+  {
+    name: "large-phone",
+    width: 430,
+    height: 932,
+    mobile: true,
+    dpr: 3,
+    platform: "Android",
+    userAgent: "Mozilla/5.0 (Linux; Android 16; Pixel 10 Pro XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36"
+  },
+  {
+    name: "tablet",
+    width: 768,
+    height: 1024,
+    mobile: true,
+    dpr: 2,
+    platform: "iPad",
+    userAgent: "Mozilla/5.0 (iPad; CPU OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1"
+  },
+  {
+    name: "small-desktop",
+    width: 1024,
+    height: 768,
+    mobile: false,
+    dpr: 1,
+    platform: "Win32",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+  },
+  {
+    name: "desktop-1280",
+    width: 1280,
+    height: 832,
+    mobile: false,
+    dpr: 1,
+    platform: "Win32",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+  },
+  {
+    name: "desktop",
+    width: 1440,
+    height: 900,
+    mobile: false,
+    dpr: 1,
+    platform: "MacIntel",
+    userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+  }
 ];
 
 const routes = [
   { group: "public", path: "/" },
   { group: "public", path: "/features" },
   { group: "public", path: "/pricing" },
-  { group: "public", path: "/businesses" },
+  { group: "customer", path: "/businesses" },
   { group: "public", path: "/contact" },
+  { group: "public", path: "/install" },
   { group: "public", path: "/login" },
   { group: "public", path: "/register" },
-  { group: "public", path: "/b/sri-sai-tiffins" },
+  { group: "public", path: "/b/fresh-bowl-cloud-kitchen" },
   { group: "owner", path: "/dashboard" },
   { group: "owner", path: "/dashboard/ai-suggestions" },
+  { group: "owner", path: "/dashboard/appointments" },
   { group: "owner", path: "/dashboard/orders" },
   { group: "owner", path: "/dashboard/menu" },
   { group: "owner", path: "/dashboard/payments" },
   { group: "owner", path: "/dashboard/settings" },
   { group: "owner", path: "/dashboard/billing" },
+  { group: "customer", path: "/user" },
+  { group: "customer", path: "/user/bookings" },
+  { group: "customer", path: "/user/profile" },
+  { group: "customer", path: "/user/settings" },
   { group: "admin", path: "/admin" },
   { group: "admin", path: "/admin/businesses" },
   { group: "admin", path: "/admin/payments" },
@@ -88,18 +158,21 @@ const auditRoutes = routeFilter.size > 0 ? routes.filter((route) => routeFilter.
 const responsiveAuthEnvOrder = [
   "RESPONSIVE_OWNER_USER_ID",
   "RESPONSIVE_OWNER_BUSINESS_ID",
+  "RESPONSIVE_CUSTOMER_USER_ID",
   "RESPONSIVE_ADMIN_USER_ID",
   "RESPONSIVE_SUPPORT_USER_ID",
   "JWT_SECRET"
 ];
 const responsiveAuthEnvByGroup = {
   owner: ["RESPONSIVE_OWNER_USER_ID", "RESPONSIVE_OWNER_BUSINESS_ID", "JWT_SECRET"],
+  customer: ["RESPONSIVE_CUSTOMER_USER_ID", "JWT_SECRET"],
   admin: ["RESPONSIVE_ADMIN_USER_ID", "JWT_SECRET"],
   support: ["RESPONSIVE_SUPPORT_USER_ID", "JWT_SECRET"]
 };
 const routeRoleLabel = {
   public: "public",
   owner: "OWNER",
+  customer: "CUSTOMER",
   admin: "SUPER_ADMIN",
   support: "SUPPORT_AGENT"
 };
@@ -179,7 +252,7 @@ function validateResponsiveAuthEnv(routeGroups) {
 }
 
 async function validateResponsiveAuditRecords(routeGroups) {
-  if (!["owner", "admin", "support"].some((group) => routeGroups.has(group))) return;
+  if (!["owner", "customer", "admin", "support"].some((group) => routeGroups.has(group))) return;
 
   const prisma = new PrismaClient();
   const errors = [];
@@ -210,6 +283,48 @@ async function validateResponsiveAuditRecords(routeGroups) {
       } else {
         if (!business.isActive) errors.push("RESPONSIVE_OWNER_BUSINESS_ID points to an inactive business.");
         if (!business.isVerified) errors.push("RESPONSIVE_OWNER_BUSINESS_ID points to an unverified business.");
+      }
+    }
+
+    if (routeGroups.has("customer")) {
+      const customerUser = await prisma.user.findUnique({
+        where: { id: process.env.RESPONSIVE_CUSTOMER_USER_ID },
+        select: {
+          role: true,
+          businessId: true,
+          email: true,
+          phone: true,
+          emailVerifiedAt: true,
+          phoneVerifiedAt: true
+        }
+      });
+
+      if (!customerUser) {
+        errors.push("RESPONSIVE_CUSTOMER_USER_ID does not match a user in the configured DATABASE_URL.");
+      } else {
+        if (customerUser.role !== "CUSTOMER") {
+          errors.push(`RESPONSIVE_CUSTOMER_USER_ID must point to a CUSTOMER user, found ${customerUser.role}.`);
+        }
+        if (customerUser.businessId) {
+          errors.push("RESPONSIVE_CUSTOMER_USER_ID must not belong to a business tenant.");
+        }
+        if (!customerUser.emailVerifiedAt || !customerUser.phoneVerifiedAt) {
+          errors.push("RESPONSIVE_CUSTOMER_USER_ID must have verified email and phone timestamps.");
+        }
+        if (!customerUser.phone) {
+          errors.push("RESPONSIVE_CUSTOMER_USER_ID must have a phone number matching a local Customer record.");
+        } else {
+          const matchingCustomer = await prisma.customer.findFirst({
+            where: {
+              email: { equals: customerUser.email, mode: "insensitive" },
+              phone: customerUser.phone
+            },
+            select: { id: true }
+          });
+          if (!matchingCustomer) {
+            errors.push("RESPONSIVE_CUSTOMER_USER_ID must match a local Customer record by both email and phone.");
+          }
+        }
       }
     }
 
@@ -321,6 +436,23 @@ async function supportCookieForAudit() {
     role: "SUPPORT_AGENT",
     businessId: null
   });
+}
+
+async function customerCookieForAudit() {
+  return createSessionCookie({
+    id: process.env.RESPONSIVE_CUSTOMER_USER_ID,
+    name: process.env.RESPONSIVE_CUSTOMER_USER_NAME ?? "Audit Customer",
+    email: process.env.RESPONSIVE_CUSTOMER_USER_EMAIL ?? "audit.customer@example.test",
+    role: "CUSTOMER",
+    businessId: null
+  });
+}
+
+function viewportsForRoute(route) {
+  if (route.group === "admin" || route.group === "support") {
+    return viewports.filter((viewport) => viewport.width >= 1024);
+  }
+  return viewports;
 }
 
 class CdpSession {
@@ -719,6 +851,10 @@ async function navigateAndAudit(cdp, route, viewport, cookies) {
       deviceScaleFactor: viewport.dpr,
       mobile: viewport.mobile
     });
+    await cdp.send("Emulation.setUserAgentOverride", {
+      userAgent: viewport.userAgent,
+      platform: viewport.platform
+    });
 
     requestUrls.clear();
     documentRequestIds.clear();
@@ -881,8 +1017,9 @@ async function main() {
   let cdp;
   try {
     await waitForJson(`http://127.0.0.1:${port}/json/version`);
-    const [ownerCookie, adminCookie, supportCookie] = await Promise.all([
+    const [ownerCookie, customerCookie, adminCookie, supportCookie] = await Promise.all([
       routeGroups.has("owner") ? ownerCookieForAudit() : null,
+      routeGroups.has("customer") ? customerCookieForAudit() : null,
       routeGroups.has("admin") ? adminCookieForAudit() : null,
       routeGroups.has("support") ? supportCookieForAudit() : null
     ]);
@@ -899,9 +1036,14 @@ async function main() {
 
     const results = [];
     for (const route of auditRoutes) {
-      for (const viewport of viewports) {
+      for (const viewport of viewportsForRoute(route)) {
         console.log(`Checking route=${route.path} role=${routeRoleLabel[route.group] ?? route.group} viewport=${viewport.name}`);
-        const result = await navigateAndAudit(cdp, route, viewport, { owner: ownerCookie, admin: adminCookie, support: supportCookie });
+        const result = await navigateAndAudit(cdp, route, viewport, {
+          owner: ownerCookie,
+          customer: customerCookie,
+          admin: adminCookie,
+          support: supportCookie
+        });
         results.push(result);
         console.log(formatRouteResult(result));
         if (verbose && result.metrics.clippedControls.length > 0) {

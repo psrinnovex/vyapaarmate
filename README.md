@@ -29,9 +29,17 @@ Business owner:
 - Zod validation, RBAC, tenant isolation, rate limiting, audit logs
 - Cashfree, WhatsApp Cloud API, email, SMS, and storage placeholders
 
+## Bengaluru Launch
+
+The current product policy onboards Bengaluru businesses first and can apply an automatic 80% discount to the monthly Starter and Pro subscriptions. See [`docs/bengaluru-launch-operations.md`](docs/bengaluru-launch-operations.md) for eligibility, exact prices, production flags, exclusions, expansion controls, and the launch checklist.
+
+## Cross-Platform Access
+
+VyapaarMate is an installable responsive web app for customers and business teams on iPhone/iPad, Android, Windows, and macOS, while remaining available as the same website. Admin and support installation is offered only on Windows/macOS; their phone install prompt fails closed and is intentionally suppressed after server-side role confirmation. Manual browser installation is not an authorization boundary. See `/install` for user instructions and [`docs/cross-platform-delivery.md`](docs/cross-platform-delivery.md) for the role matrix, security model, verification gates, and the separate requirements for signed App Store/Play Store binaries.
+
 ## Main Routes
 
-- Public: `/`, `/pricing`, `/features`, `/contact`, `/privacy`, `/terms`, `/b/sri-sai-tiffins`
+- Public: `/`, `/pricing`, `/features`, `/contact`, `/privacy`, `/terms`, `/b/fresh-bowl-cloud-kitchen`
 - Auth: `/login`, `/register`, `/forgot-password`, `/reset-password`
 - Business dashboard: `/dashboard`, `/dashboard/orders`, `/dashboard/menu`, `/dashboard/customers`, `/dashboard/payments`, `/dashboard/campaigns`, `/dashboard/staff`, `/dashboard/reports`, `/dashboard/settings`, `/dashboard/billing`
 - PSHR admin: `/admin`, `/admin/businesses`, `/admin/orders`, `/admin/payments`, `/admin/subscriptions`, `/admin/support`, `/admin/logs`, `/admin/settings`
@@ -229,6 +237,8 @@ CASHFREE_SECRET_KEY=your-cashfree-secret-key
 CASHFREE_CURRENCY=INR
 PAYMENT_CHECKOUT_EXPIRES_MINUTES=30
 PAYMENT_REMINDER_AFTER_MINUTES=20
+# Send appointment reminders this many hours before the scheduled start.
+APPOINTMENT_REMINDER_HOURS=24
 # 0 means the next daily 9 AM IST payout batch, within 24 hours after online payment clears.
 PAYMENT_PROVIDER_SETTLEMENT_DAYS=0
 CRON_SECRET=replace-with-a-long-random-cron-secret
@@ -244,7 +254,7 @@ Configure the Cashfree webhook callback as `https://your-domain.com/api/webhooks
 Configure Cashfree Payouts callback separately as `https://your-domain.com/api/webhooks/cashfree-payouts` and enable transfer success, failure, reversed, and acknowledged events.
 For live Cashfree Payouts API calls, use either Cashfree IP whitelisting or set `CASHFREE_PAYOUTS_PUBLIC_KEY` so the app can generate the required `x-cf-signature` header from serverless environments.
 
-The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes VyapaarMate Intelligence outputs, checks first-party ML readiness, trains bounded shadow candidates, promotes only candidates that beat their baselines, monitors drift, generates active-model predictions, and preserves rules fallback. `vercel.json` runs this protected intelligence job daily; other job endpoints retain their existing external schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`. Vercel production builds verify that the runtime and migration URLs target the same Supabase project, apply pending Prisma migrations, and stop before promotion if migration fails; preview and local builds do not modify a database.
+The scheduled job at `/api/jobs/payment-reminders` sends one WhatsApp template reminder for pending payments between 20 and 30 minutes. `/api/jobs/appointment-reminders` sends protected reminders for upcoming appointments (24 hours by default). `/api/jobs/payment-transfers` reconciles missing wallet credits, releases wallet credits for the daily 9 AM IST payout batch, starts Cashfree automatic payouts when enabled, and reconciles in-flight payout transfers. `/api/jobs/intelligence-refresh` materializes VyapaarMate Intelligence outputs, checks first-party ML readiness, trains bounded shadow candidates, promotes only candidates that beat their baselines, monitors drift, generates active-model predictions, and preserves rules fallback. `vercel.json` runs this protected intelligence job daily; other job endpoints retain their existing external schedules. In production, requests must include `Authorization: Bearer $CRON_SECRET`. Vercel production builds verify that the runtime and migration URLs target the same Supabase project, apply pending Prisma migrations, and stop before promotion if migration fails; preview and local builds do not modify a database.
 
 VyapaarMate uses a hybrid intelligence engine. Production ML reads only training-eligible first-party records from approved origins. Registered external datasets are isolated to offline evaluation and never affect tenant training, readiness, health scores, predictions, or owner actions. When any model gate fails, VyapaarMate falls back to explainable rules/statistical recommendations and marks that model `needs_data`.
 
@@ -316,11 +326,11 @@ The latest migrations also revoke Supabase generated Data API grants for app tab
 
 Create a Vercel project with the repository root as the Root Directory. Vercel detects Next.js automatically; keep the default install and build commands. Node `22.x` is pinned in `package.json`, and `postinstall` generates Prisma Client.
 
-Keep all job endpoints protected with `Authorization: Bearer $CRON_SECRET`. The payment reminder and wallet transfer jobs retain their external 10-minute schedules. `vercel.json` runs `/api/jobs/intelligence-refresh` daily at 02:00 UTC with a default five-business batch; preview deployments do not run this schedule. See `docs/ml-production-deployment.md` for migration, preview, promotion, monitoring, and rollback checks.
+Keep all job endpoints protected with `Authorization: Bearer $CRON_SECRET`. The payment reminder, appointment reminder, and wallet transfer jobs retain their external 10-minute schedules. `/api/jobs/account-deletions` runs externally each day to finalize verified business requests after the 30-day waiting period. `vercel.json` runs `/api/jobs/intelligence-refresh` daily at 02:00 UTC with a default five-business batch; preview deployments do not run this schedule. See `docs/ml-production-deployment.md` for migration, preview, promotion, monitoring, and rollback checks.
 
 Set these variables for the Production environment:
 
-- Required: `NEXT_PUBLIC_APP_URL`, `DATABASE_URL`, `JWT_SECRET`, `ENCRYPTION_KEY`, `CRON_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
+- Required: `NEXT_PUBLIC_APP_URL`, `DATABASE_URL`, `JWT_SECRET`, `MOBILE_JWT_SECRET`, `MOBILE_TOKEN_PEPPER`, `MOBILE_TOKEN_ISSUER`, `ACCOUNT_DELETION_TOKEN_PEPPER`, `ENCRYPTION_KEY`, `CRON_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
 - Payments: `CASHFREE_ENV`, `CASHFREE_APP_ID`, `CASHFREE_SECRET_KEY`, `CASHFREE_CURRENCY`, `PAYMENT_CHECKOUT_EXPIRES_MINUTES`, `PAYMENT_UPI_QR_EXPIRES_MINUTES`, `PAYMENT_REMINDER_AFTER_MINUTES`, `PAYMENT_PROVIDER_SETTLEMENT_DAYS`
 - Automatic payouts: `CASHFREE_PAYOUTS_ENV`, `CASHFREE_PAYOUTS_CLIENT_ID`, `CASHFREE_PAYOUTS_CLIENT_SECRET`, `CASHFREE_PAYOUTS_PUBLIC_KEY`, `CASHFREE_PAYOUTS_AUTO_ENABLED`, `CASHFREE_PAYOUTS_MIN_AMOUNT`, `CASHFREE_PAYOUTS_BANK_TRANSFER_MODE`, `CASHFREE_PAYOUTS_WEBHOOK_SECRET`
 - WhatsApp live sending: `WHATSAPP_LIVE_SENDS_ENABLED`, `WHATSAPP_GRAPH_API_VERSION`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_WEBHOOK_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_TEMPLATE_LANGUAGE`

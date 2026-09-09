@@ -9,12 +9,14 @@ const { PrismaClient } = prismaPkg;
 loadEnvConfig(process.cwd());
 
 let prisma;
-const seedProvenance = { dataOrigin: "SEED", trainingEligible: false };
+const seedProvenance = { dataOrigin: "TEST", trainingEligible: false };
 
 const audit = {
   businessSlug: "audit-business",
   businessName: "Audit Business",
   ownerEmail: "audit.owner@example.test",
+  customerEmail: "audit.customer@example.test",
+  customerPhone: "+15550100020",
   adminEmail: "audit.admin@example.test",
   supportEmail: "audit.support@example.test"
 };
@@ -169,6 +171,7 @@ async function upsertSubscription(businessId, now) {
   const data = {
     businessId,
     plan: "PRO",
+    dataOrigin: "TEST",
     subtotalAmount: 2999,
     taxableAmount: 2999,
     gstRateBps: 0,
@@ -203,12 +206,17 @@ async function main() {
     where: { slug: audit.businessSlug },
     update: {
       name: audit.businessName,
+      dataOrigin: "TEST",
+      pilotCohort: "BENGALURU",
+      pilotEnrolledAt: now,
       ownerName: "Audit Owner",
       phone: "+15550100010",
       email: "audit.business@example.test",
       address: "Audit Local Street",
-      city: "Audit City",
-      state: "Audit State",
+      city: "Bengaluru",
+      state: "Karnataka",
+      latitude: 12.9716,
+      longitude: 77.5946,
       logoUrl: null,
       businessType: "Tiffin Center",
       whatsappDisplayPhone: "+15550100010",
@@ -239,13 +247,18 @@ async function main() {
     },
     create: {
       name: audit.businessName,
+      dataOrigin: "TEST",
+      pilotCohort: "BENGALURU",
+      pilotEnrolledAt: now,
       slug: audit.businessSlug,
       ownerName: "Audit Owner",
       phone: "+15550100010",
       email: "audit.business@example.test",
       address: "Audit Local Street",
-      city: "Audit City",
-      state: "Audit State",
+      city: "Bengaluru",
+      state: "Karnataka",
+      latitude: 12.9716,
+      longitude: 77.5946,
       logoUrl: null,
       businessType: "Tiffin Center",
       whatsappDisplayPhone: "+15550100010",
@@ -276,13 +289,22 @@ async function main() {
     }
   });
 
-  const [owner, admin, support] = await Promise.all([
+  const [owner, customerUser, admin, support] = await Promise.all([
     upsertAuditUser({
       email: audit.ownerEmail,
       name: "Audit Owner",
       phone: "+15550100011",
       role: "OWNER",
       businessId: business.id,
+      passwordHash,
+      verifiedAt: now
+    }),
+    upsertAuditUser({
+      email: audit.customerEmail,
+      name: "Audit Customer",
+      phone: audit.customerPhone,
+      role: "CUSTOMER",
+      businessId: null,
       passwordHash,
       verifiedAt: now
     }),
@@ -328,12 +350,12 @@ async function main() {
     where: {
       businessId_phone: {
         businessId: business.id,
-        phone: "+15550100020"
+        phone: audit.customerPhone
       }
     },
     update: {
       name: "Audit Customer",
-      email: "audit.customer@example.test",
+      email: audit.customerEmail,
       address: "Audit Customer Address",
       whatsappOptIn: false,
       marketingOptIn: false,
@@ -345,8 +367,8 @@ async function main() {
     create: {
       businessId: business.id,
       name: "Audit Customer",
-      phone: "+15550100020",
-      email: "audit.customer@example.test",
+      phone: audit.customerPhone,
+      email: audit.customerEmail,
       address: "Audit Customer Address",
       whatsappOptIn: false,
       marketingOptIn: false,
@@ -378,7 +400,7 @@ async function main() {
       totalAmount: 180,
       orderType: "PICKUP",
       deliveryAddress: null,
-      notes: "Local responsive audit order"
+      notes: "Local responsive audit order",
     },
     create: {
       businessId: business.id,
@@ -396,7 +418,7 @@ async function main() {
       totalAmount: 180,
       orderType: "PICKUP",
       deliveryAddress: null,
-      notes: "Local responsive audit order"
+      notes: "Local responsive audit order",
     }
   });
 
@@ -445,11 +467,11 @@ async function main() {
       source: "ADMIN",
       portal: "admin",
       businessId: business.id,
-      requesterUserId: owner.id,
+      requesterUserId: customerUser.id,
       assignedToUserId: support.id,
       requesterName: "Audit Customer",
-      requesterEmail: "audit.customer@example.test",
-      requesterPhone: "+15550100020",
+      requesterEmail: audit.customerEmail,
+      requesterPhone: audit.customerPhone,
       requesterBusinessName: audit.businessName,
       lastMessage: "Local-only responsive QA message.",
       safeHandlingNote: "Fake local audit data only.",
@@ -466,11 +488,11 @@ async function main() {
       intent: "handoff",
       portal: "admin",
       businessId: business.id,
-      requesterUserId: owner.id,
+      requesterUserId: customerUser.id,
       assignedToUserId: support.id,
       requesterName: "Audit Customer",
-      requesterEmail: "audit.customer@example.test",
-      requesterPhone: "+15550100020",
+      requesterEmail: audit.customerEmail,
+      requesterPhone: audit.customerPhone,
       requesterBusinessName: audit.businessName,
       lastMessage: "Local-only responsive QA message.",
       safeHandlingNote: "Fake local audit data only.",
@@ -486,7 +508,7 @@ async function main() {
         ticketId: ticket.id,
         sender: "CUSTOMER",
         body: "Local-only responsive QA message.",
-        authorUserId: owner.id
+        authorUserId: customerUser.id
       },
       {
         ticketId: ticket.id,
@@ -500,6 +522,7 @@ async function main() {
   console.log("Export these in the shell that will run scripts/qa/responsive-audit.mjs:");
   console.log(`export RESPONSIVE_OWNER_USER_ID=${owner.id}`);
   console.log(`export RESPONSIVE_OWNER_BUSINESS_ID=${business.id}`);
+  console.log(`export RESPONSIVE_CUSTOMER_USER_ID=${customerUser.id}`);
   console.log(`export RESPONSIVE_ADMIN_USER_ID=${admin.id}`);
   console.log(`export RESPONSIVE_SUPPORT_USER_ID=${support.id}`);
 }

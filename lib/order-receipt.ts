@@ -28,6 +28,17 @@ export type PublicOrderReceipt = {
   gstAmount: number;
   totalAmount: number;
   notes: string | null;
+  appointment: null | {
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    status: string;
+    autoConfirmed: boolean;
+    providerName: string;
+    providerTitle: string;
+    cancellationCutoffAt: string;
+    canCancelOnline: boolean;
+  };
   business: {
     name: string;
     type: string;
@@ -82,7 +93,8 @@ export async function getPublicOrderReceipt(publicToken: string): Promise<Public
       business: true,
       customer: true,
       items: true,
-      payment: true
+      payment: true,
+      appointment: { include: { provider: true } }
     }
   });
 
@@ -124,6 +136,9 @@ export async function getPublicOrderReceipt(publicToken: string): Promise<Public
       : null;
   const recordedFailureReason =
     failureMetadata && typeof failureMetadata.failureReason === "string" ? failureMetadata.failureReason : null;
+  const appointmentCancellationCutoff = order.appointment
+    ? new Date(order.appointment.startsAt.getTime() - order.business.appointmentCancelNoticeMins * 60_000)
+    : null;
 
   return {
     orderNumber: order.orderNumber,
@@ -157,6 +172,22 @@ export async function getPublicOrderReceipt(publicToken: string): Promise<Public
     gstAmount: Number(order.gstAmount),
     totalAmount: Number(order.totalAmount),
     notes: order.notes,
+    appointment: order.appointment
+      ? {
+          startsAt: order.appointment.startsAt.toISOString(),
+          endsAt: order.appointment.endsAt.toISOString(),
+          timezone: order.appointment.timezone,
+          status: order.appointment.status,
+          autoConfirmed: order.appointment.autoConfirmed,
+          providerName: order.appointment.provider.name,
+          providerTitle: order.appointment.provider.title,
+          cancellationCutoffAt: appointmentCancellationCutoff!.toISOString(),
+          canCancelOnline:
+            ["REQUESTED", "CONFIRMED"].includes(order.appointment.status) &&
+            order.status !== "CANCELLED" &&
+            appointmentCancellationCutoff!.getTime() >= Date.now()
+        }
+      : null,
     business: {
       name: order.business.name,
       type: order.business.businessType,

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { RegisterForm } from "@/components/auth/auth-pages";
 import { getSessionUser } from "@/lib/api-session";
+import { pricingPlans } from "@/lib/constants";
+import { launchMarket, launchOffer } from "@/lib/launch-policy";
 import { createMetadata, jsonLd } from "@/lib/seo";
 import { sessionHomePath } from "@/lib/session-routing";
 import { absoluteUrl } from "@/lib/site";
@@ -12,14 +14,15 @@ import {
   websiteNode
 } from "@/lib/structured-data";
 
-const registerDescription =
-  "Create a VyapaarMate user account or submit your Indian local business for approval and owner dashboard access.";
+const registerDescription = launchOffer.publiclyAdvertised
+  ? `Apply for the current ${launchMarket.displayName} launch. The automatic 80% discount makes Starter ${pricingPlans[0].price.toFixed(2)} INR and Pro ${pricingPlans[1].price.toFixed(2)} INR per month, plus GST.`
+  : `Create a VyapaarMate account or submit your ${launchMarket.displayName} business for approval and owner dashboard access.`;
 
 export const metadata = createMetadata({
   title: "Register",
   description: registerDescription,
   path: "/register",
-  keywords: ["register business on VyapaarMate", "submit local business", "business ordering setup India"]
+  keywords: ["register business on VyapaarMate", "Bengaluru business software", "Bangalore business onboarding"]
 });
 
 function registerStructuredData() {
@@ -58,6 +61,11 @@ export default async function RegisterPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(registerStructuredData()) }}
       />
+      {launchOffer.publiclyAdvertised && (
+        <section className="border-b border-emerald/20 bg-emerald/5 px-4 py-3 text-center text-sm leading-6 text-slate-700">
+          <strong className="text-ink">Bengaluru launch:</strong> 80% off is applied automatically to every monthly subscription while enabled, not only the first month. GST, setup, gateway, WhatsApp, and other provider charges are separate; coupons do not stack.
+        </section>
+      )}
       <RegisterForm />
     </>
   );

@@ -44,7 +44,8 @@ export async function POST(request: Request) {
     name: user.name,
     email: user.email,
     role: user.role,
-    businessId: user.businessId
+    businessId: user.businessId,
+    sessionVersion: user.sessionVersion
   });
   const cookie = sessionCookie(token);
 

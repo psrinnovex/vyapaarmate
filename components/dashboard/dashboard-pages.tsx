@@ -13,6 +13,7 @@ import {
   Building2,
   ChevronDown,
   CheckCircle2,
+  Clock3,
   CreditCard,
   Edit3,
   FileCheck2,
@@ -21,7 +22,6 @@ import {
   Landmark,
   LoaderCircle,
   Mail,
-  Megaphone,
   MessageCircle,
   Plus,
   ReceiptText,
@@ -40,6 +40,7 @@ import { PasswordChangeCard } from "@/components/auth/password-change-card";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
 import { fulfillmentModeIcons, getBusinessConsoleIcons } from "@/lib/business-console-icons";
 import { getBusinessStaffRoleLabel } from "@/lib/business-staff-copy";
+import { businessTypeSupportsAppointments } from "@/lib/appointment-scheduling";
 import { getNoShowEligibility } from "@/lib/booking-outcomes";
 import { orderStatuses, type LiveBillingHistoryItem, type LiveDashboardPayload, type LiveOrder, type LiveOrderStatus, type LivePayment, type LivePaymentStatus } from "@/lib/live-types";
 import { getOrderTrackingCopy, getOrderTrackingStatusActionLabel, getOrderTrackingStatusLabel } from "@/lib/order-tracking";
@@ -55,6 +56,7 @@ import {
 } from "@/lib/business-rules";
 import { optimizeMenuItemImage } from "@/lib/client-image";
 import { pricingPlans } from "@/lib/constants";
+import { launchMarket, launchSingleCityRestricted } from "@/lib/launch-policy";
 import { cn, formatINR } from "@/lib/utils";
 import { downloadCsv } from "@/lib/client-export";
 import { formChecked, formNumber, formOptionalNumber, formString } from "@/lib/form-data";
@@ -78,20 +80,6 @@ import { PaymentStatusAnimation } from "@/components/ui/payment-status-animation
 import { EmptyState } from "@/components/ui/empty-state";
 
 const selectClassName = "h-11 w-full rounded-lg border border-line bg-white px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
-const campaignTemplates = [
-  ["Status update template", "Confirmed, in-progress, ready, and completed updates."],
-  ["Payment reminder template", "Pending-payment notice that returns the customer to the secure website checkout."],
-  ["Repeat customer reminder", "Send only to marketing opted-in customers."],
-  ["Festival offer campaign", "Consent-safe offer campaigns for local festivals."]
-] as const;
-type Campaign = {
-  id: string;
-  title: string;
-  body: string;
-  audience: string;
-  status: string;
-};
-
 type ManagedMenuCategory = {
   id: string;
   name: string;
@@ -144,8 +132,7 @@ type DeleteTarget =
   | { type: "menu-item"; item: ManagedMenuItem }
   | { type: "menu-category"; category: ManagedMenuCategory }
   | { type: "customer"; customer: LiveDashboardPayload["customers"][number] }
-  | { type: "staff"; member: StaffMember }
-  | { type: "campaign"; campaign: Campaign };
+  | { type: "staff"; member: StaffMember };
 
 type PayoutMethod = "UPI" | "BANK_TRANSFER";
 
@@ -265,9 +252,12 @@ export function DashboardOverviewPage() {
             <Button
               variant="emerald"
               icon={<MessageCircle className="size-4" />}
-              onClick={() => setNotice({ tone: "success", message: `Daily WhatsApp summary queued for ${data.business.name}.` })}
+              onClick={() => {
+                downloadCsv(`daily-summary-${new Date().toISOString().slice(0, 10)}.csv`, [{ business: data.business.name, generatedAt: new Date().toISOString(), ordersToday: data.metrics.ordersToday, recordedPaymentsToday: data.metrics.revenueToday, pendingPayments: data.metrics.pendingPaymentsAmount }]);
+                setNotice({ tone: "success", message: "Daily summary downloaded. No WhatsApp message was sent." });
+              }}
             >
-              Send Daily Summary
+              Download Daily Summary
             </Button>
           </div>
         }
@@ -768,6 +758,8 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
               <Button
                 variant="danger"
                 icon={<Trash2 className="size-4" />}
+                disabled={data.source === "database"}
+                title="Use cancellation to correct live orders. Contact support for account-data requests."
                 onClick={() => setDeleteTarget({ type: "order", order: selected })}
               >
                 Delete {copy.transactionSingular}
@@ -802,6 +794,7 @@ export function MenuManagementPage() {
   const CategoryIcon = icons.categoryIcon;
   const ItemIcon = icons.itemIcon;
   const isFoodBusiness = isFoodBusinessType(data.business.businessType);
+  const supportsAppointments = businessTypeSupportsAppointments(data.business.businessType);
   const addCategoryLabel = `Add ${titleCaseLabel(copy.categorySingular)}`;
   const [items, setItems] = useState<ManagedMenuItem[]>([]);
   const [categories, setCategories] = useState<ManagedMenuCategory[]>([]);
@@ -939,7 +932,10 @@ export function MenuManagementPage() {
       foodType: formString(formData, "foodType", isFoodBusiness ? "VEG" : "NOT_APPLICABLE") as DemoMenuItem["foodType"],
       imageUrl: menuDialog?.mode === "edit" ? menuDialog.item.imageUrl : null,
       isAvailable: formChecked(formData, "isAvailable"),
-      isBestSeller: formChecked(formData, "isBestSeller")
+      isBestSeller: formChecked(formData, "isBestSeller"),
+      appointmentEnabled: supportsAppointments && formChecked(formData, "appointmentEnabled"),
+      durationMinutes: supportsAppointments ? formNumber(formData, "durationMinutes", 30) : null,
+      bufferMinutes: supportsAppointments ? formNumber(formData, "bufferMinutes", 0) : 0
     };
 
     setIsSavingMenuItem(true);
@@ -955,6 +951,9 @@ export function MenuManagementPage() {
           foodType: item.foodType,
           isAvailable: item.isAvailable,
           isBestSeller: Boolean(item.isBestSeller),
+          appointmentEnabled: Boolean(item.appointmentEnabled),
+          durationMinutes: item.appointmentEnabled ? item.durationMinutes ?? 30 : undefined,
+          bufferMinutes: item.appointmentEnabled ? item.bufferMinutes ?? 0 : 0,
           ...(pendingMenuImage === undefined ? {} : { imageDataUrl: pendingMenuImage })
         })
       });
@@ -1127,6 +1126,12 @@ export function MenuManagementPage() {
                     <div className="mt-3 min-w-0">
                       <h3 className="line-clamp-2 min-h-10 break-words text-sm font-bold leading-5 text-ink [overflow-wrap:anywhere]">{item.name}</h3>
                       <p className="mt-1 text-sm font-extrabold text-ocean">{formatINR(item.price)}</p>
+                      {item.appointmentEnabled && item.durationMinutes && (
+                        <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-emerald">
+                          <Clock3 className="size-3.5" /> {item.durationMinutes} min
+                          {(item.bufferMinutes ?? 0) > 0 ? ` + ${item.bufferMinutes} min buffer` : ""}
+                        </p>
+                      )}
                       <p className="mt-2 line-clamp-2 min-h-10 break-words text-xs leading-5 text-slate-600 [overflow-wrap:anywhere]">{item.description}</p>
                     </div>
                   </Card>
@@ -1255,6 +1260,46 @@ export function MenuManagementPage() {
                 </label>
               </div>
             </div>
+            {supportsAppointments && (
+              <div className="grid gap-4 rounded-lg border border-emerald/20 bg-emerald/5 p-4 sm:grid-cols-2">
+                <label className="flex items-start gap-3 sm:col-span-2">
+                  <input
+                    name="appointmentEnabled"
+                    type="checkbox"
+                    className="mt-1 size-4 accent-emerald"
+                    defaultChecked={menuDialog.mode !== "edit" || Boolean(menuDialog.item.appointmentEnabled)}
+                  />
+                  <span>
+                    <span className="block text-sm font-bold text-ink">Requires a date and time</span>
+                    <span className="mt-1 block text-xs leading-5 text-slate-600">
+                      Customers choose a professional and an available slot before checkout.
+                    </span>
+                  </span>
+                </label>
+                <div className="grid gap-2">
+                  <Label>Service duration (minutes)</Label>
+                  <Input
+                    name="durationMinutes"
+                    type="number"
+                    min="5"
+                    max="1440"
+                    step="5"
+                    defaultValue={menuDialog.mode === "edit" ? menuDialog.item.durationMinutes ?? 30 : 30}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Cleanup / travel buffer (minutes)</Label>
+                  <Input
+                    name="bufferMinutes"
+                    type="number"
+                    min="0"
+                    max="240"
+                    step="5"
+                    defaultValue={menuDialog.mode === "edit" ? menuDialog.item.bufferMinutes ?? 0 : 0}
+                  />
+                </div>
+              </div>
+            )}
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" disabled={isSavingMenuItem} onClick={closeMenuDialog}>Cancel</Button>
               <Button type="submit" variant="emerald" disabled={isProcessingMenuImage || isSavingMenuItem}>
@@ -1298,6 +1343,7 @@ export function MenuManagementPage() {
 }
 
 export function CustomersPage() {
+  const router = useRouter();
   const { data, setData, connected, error, loading, refresh } = useDashboardLive();
   const copy = getBusinessConsoleCopy(data.business.businessType);
   const icons = getBusinessConsoleIcons(data.business.businessType);
@@ -1400,14 +1446,16 @@ export function CustomersPage() {
                         size="sm"
                         variant="secondary"
                         icon={<Bell className="size-4" />}
-                        onClick={() => setNotice({ tone: "success", message: `Reminder queued for ${customer.name}.` })}
+                        onClick={() => router.push("/dashboard/campaigns")}
                       >
-                        Reminder
+                        Prepare message
                       </Button>
                       <Button
                         size="sm"
                         variant="danger"
                         icon={<Trash2 className="size-4" />}
+                        disabled={data.source === "database"}
+                        title="Use the account-data request process through support."
                         onClick={() => setDeleteTarget({ type: "customer", customer })}
                       >
                         Delete
@@ -1812,144 +1860,7 @@ export function InvoicesPage() {
   );
 }
 
-export function CampaignsPage() {
-  const [campaignDialog, setCampaignDialog] = useState<{ title: string; body: string } | null>(null);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-  const [notice, setNotice] = useState<ActionNoticeState>(null);
-  const newCampaignIdRef = useRef(0);
-  const campaignPagination = usePaginatedItems(campaigns, {
-    resetKey: `${campaigns.length}-${campaigns[0]?.id ?? "empty"}-${campaigns.at(-1)?.id ?? "empty"}`
-  });
-
-  function submitCampaign(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-    const campaign: Campaign = {
-      id: `campaign_local_${++newCampaignIdRef.current}`,
-      title: formString(formData, "title", "New campaign"),
-      body: formString(formData, "body", "Campaign message"),
-      audience: formString(formData, "audience", "Marketing opted-in customers"),
-      status: "Draft"
-    };
-
-    setCampaigns((current) => [campaign, ...current]);
-    setCampaignDialog(null);
-    setNotice({ tone: "success", message: `${campaign.title} campaign created.` });
-  }
-
-  return (
-    <>
-      <PageHeader
-        title="WhatsApp Campaigns"
-        body="Status updates are transactional. Marketing campaigns only target customers who opted in to offers."
-        action={
-          <Button variant="emerald" icon={<Megaphone className="size-4" />} onClick={() => setCampaignDialog({ title: "", body: "" })}>
-            Create Campaign
-          </Button>
-        }
-      />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {campaignTemplates.map(([title, body]) => (
-          <Card key={title}>
-            <MessageCircle className="size-7 text-emerald" />
-            <h2 className="mt-4 font-bold text-ink">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
-            <Button className="mt-5 w-full" variant="secondary" onClick={() => setCampaignDialog({ title, body })}>
-              Use Template
-            </Button>
-          </Card>
-        ))}
-      </div>
-      {campaigns.length > 0 && (
-        <Card className="mt-5">
-          <h2 className="font-bold text-ink">Created campaigns</h2>
-          <div className="mt-4 grid gap-3">
-            {campaignPagination.pageItems.map((campaign) => (
-              <div key={campaign.id} className="flex items-center justify-between gap-3 rounded-lg bg-mist p-3">
-                <div>
-                  <p className="font-semibold text-ink">{campaign.title}</p>
-                  <p className="text-xs text-slate-500">{campaign.audience}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusPill status={campaign.status} />
-                  <button
-                    type="button"
-                    aria-label={`Delete ${campaign.title}`}
-                    className="grid size-9 place-items-center rounded-lg bg-red-50 text-red-600 transition hover:bg-red-100"
-                    onClick={() => setDeleteTarget({ type: "campaign", campaign })}
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <PaginationControls
-            className="mt-4 rounded-lg border border-line bg-white"
-            page={campaignPagination.page}
-            pageCount={campaignPagination.pageCount}
-            totalItems={campaignPagination.totalItems}
-            startItem={campaignPagination.startItem}
-            endItem={campaignPagination.endItem}
-            itemLabel="campaigns"
-            onPageChange={campaignPagination.setPage}
-          />
-        </Card>
-      )}
-      {campaignDialog && (
-        <ActionDialog title="Create campaign" body="Prepare the campaign before sending it to opted-in customers." onClose={() => setCampaignDialog(null)}>
-          <form className="grid gap-4" onSubmit={submitCampaign}>
-            <div className="grid gap-2">
-              <Label>Campaign name</Label>
-              <Input name="title" required autoFocus defaultValue={campaignDialog.title} />
-            </div>
-            <div className="grid gap-2">
-              <Label>Message</Label>
-              <Textarea name="body" required defaultValue={campaignDialog.body} />
-            </div>
-            <div className="grid gap-2">
-              <Label>Audience</Label>
-              <select name="audience" className={selectClassName} defaultValue="Marketing opted-in customers">
-                <option>Marketing opted-in customers</option>
-                <option>Repeat customers</option>
-                <option>Pending payment customers</option>
-              </select>
-            </div>
-            <div className="flex flex-wrap justify-end gap-2">
-              <Button variant="secondary" onClick={() => setCampaignDialog(null)}>Cancel</Button>
-              <Button type="submit" variant="emerald">Create Campaign</Button>
-            </div>
-          </form>
-        </ActionDialog>
-      )}
-      {deleteTarget?.type === "campaign" && (
-        <ActionDialog
-          title="Delete campaign"
-          body={`${deleteTarget.campaign.title} will be removed from draft campaigns.`}
-          onClose={() => setDeleteTarget(null)}
-        >
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
-            <Button
-              variant="danger"
-              icon={<Trash2 className="size-4" />}
-              onClick={() => {
-                setCampaigns((current) => current.filter((campaign) => campaign.id !== deleteTarget.campaign.id));
-                setNotice({ tone: "success", message: `${deleteTarget.campaign.title} deleted.` });
-                setDeleteTarget(null);
-              }}
-            >
-              Delete Campaign
-            </Button>
-          </div>
-        </ActionDialog>
-      )}
-      <ActionNotice notice={notice} onClose={() => setNotice(null)} />
-    </>
-  );
-}
+export { CampaignDraftsPage as CampaignsPage } from "@/components/dashboard/campaign-drafts-page";
 
 export function StaffPage() {
   const { data, loading: liveLoading } = useDashboardLive();
@@ -2344,8 +2255,30 @@ export function BillingPage() {
   const [notice, setNotice] = useState<ActionNoticeState>(null);
   const [uploadingKycType, setUploadingKycType] = useState<string | null>(null);
   const [kycUploadFeedback, setKycUploadFeedback] = useState<KycUploadFeedback | null>(null);
+  const [cancelSubscriptionOpen, setCancelSubscriptionOpen] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const isPro = billing.plan === "PRO" && billing.status === "ACTIVE";
   const paymentRequired = billing.status !== "ACTIVE";
+
+  async function handleCancelSubscription() {
+    setIsCancelling(true);
+    setNotice(null);
+    try {
+      const response = await fetch("/api/dashboard/billing/cancel", { method: "POST" });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as { error?: string };
+        setNotice({ tone: "error", message: payload.error || "Could not cancel subscription." });
+        return;
+      }
+      await refresh();
+      setCancelSubscriptionOpen(false);
+      setNotice({ tone: "success", message: "Subscription cancelled successfully." });
+    } catch (error) {
+      setNotice({ tone: "error", message: error instanceof Error ? error.message : "Network error" });
+    } finally {
+      setIsCancelling(false);
+    }
+  }
   const billingHistoryPagination = usePaginatedItems(billing.history, {
     resetKey: `${billing.history.length}-${billing.history[0]?.id ?? "empty"}-${billing.history.at(-1)?.id ?? "empty"}`
   });
@@ -2434,18 +2367,29 @@ export function BillingPage() {
           <p className="mt-3 leading-7 text-slate-600">
             {currentPlan.description} Current subscription for {data.business.name}.
           </p>
-          <Button
-            className="mt-6"
-            variant="emerald"
-            icon={<ReceiptText className="size-4" />}
-            onClick={() => goToSubscriptionCheckout(primaryCheckoutPlan)}
-          >
-            {billing.status !== "ACTIVE"
-              ? `Review ${primaryCheckoutPlanDetails.name}`
-              : isPro
-                ? "Renew Pro"
-                : "Upgrade to Pro"}
-          </Button>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Button
+              variant="emerald"
+              icon={<ReceiptText className="size-4" />}
+              onClick={() => goToSubscriptionCheckout(primaryCheckoutPlan)}
+              disabled={billing.status === "ACTIVE" && isPro}
+            >
+              {billing.status !== "ACTIVE"
+                ? `Review ${primaryCheckoutPlanDetails.name}`
+                : isPro
+                  ? "Current Plan"
+                  : "Upgrade to Pro"}
+            </Button>
+            {billing.status === "ACTIVE" && (
+              <Button
+                variant="outline"
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setCancelSubscriptionOpen(true)}
+              >
+                Cancel Subscription
+              </Button>
+            )}
+          </div>
         </GlassPanel>
         <Card>
           <h2 className="font-bold text-ink">Subscription cycle</h2>
@@ -2545,8 +2489,11 @@ export function BillingPage() {
           {pricingPlans.map((plan) => {
             const planKey = plan.id;
             const active = billing.plan === planKey && billing.status === "ACTIVE";
+            const isProActive = billing.plan === "PRO" && billing.status !== "CANCELLED";
+            const blockStarter = planKey === "STARTER" && isProActive;
+
             return (
-              <div key={plan.name} className={cn("flex h-full flex-col rounded-lg border bg-mist p-4", active ? "border-emerald shadow-soft" : "border-line")}>
+              <div key={plan.name} className={cn("flex h-full flex-col rounded-lg border bg-mist p-4", active ? "border-emerald shadow-soft" : "border-line", blockStarter && "opacity-75 grayscale")}>
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
                   {active && <Badge variant="emerald">Active</Badge>}
@@ -2565,8 +2512,9 @@ export function BillingPage() {
                   className="mt-5 w-full"
                   variant={plan.name === "Pro" ? "emerald" : "primary"}
                   onClick={() => goToSubscriptionCheckout(planKey)}
+                  disabled={blockStarter || active}
                 >
-                  {active ? `Renew ${plan.name}` : `Start ${plan.name}`}
+                  {blockStarter ? "Unavailable on Pro" : active ? "Current Plan" : `Start ${plan.name}`}
                 </Button>
               </div>
             );
@@ -2608,6 +2556,20 @@ export function BillingPage() {
         />
       </Card>
       <KycUploadFeedbackDialog feedback={kycUploadFeedback} onClose={() => setKycUploadFeedback(null)} />
+      {cancelSubscriptionOpen && (
+        <ActionDialog
+          title="Cancel Subscription"
+          body="Are you sure you want to cancel your subscription? You can resubscribe at any time."
+          onClose={() => setCancelSubscriptionOpen(false)}
+        >
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="secondary" onClick={() => setCancelSubscriptionOpen(false)} disabled={isCancelling}>Cancel</Button>
+            <Button variant="danger" icon={isCancelling ? <LoaderCircle className="size-4 animate-spin" /> : undefined} onClick={handleCancelSubscription} disabled={isCancelling}>
+              Cancel Subscription
+            </Button>
+          </div>
+        </ActionDialog>
+      )}
       <ActionNotice notice={notice} onClose={() => setNotice(null)} />
     </>
   );
@@ -2944,11 +2906,19 @@ export function SettingsPage() {
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
                 <Label>City</Label>
-                <Input name="city" defaultValue={business.city} />
+                <Input
+                  name="city"
+                  defaultValue={launchSingleCityRestricted ? launchMarket.city : business.city}
+                  readOnly={launchSingleCityRestricted}
+                />
               </div>
               <div>
                 <Label>State</Label>
-                <Input name="state" defaultValue={business.state} />
+                <Input
+                  name="state"
+                  defaultValue={launchSingleCityRestricted ? launchMarket.state : business.state}
+                  readOnly={launchSingleCityRestricted}
+                />
               </div>
             </div>
             <div className="grid gap-2">
@@ -2958,11 +2928,16 @@ export function SettingsPage() {
                 defaultLatitude={business.latitude}
                 defaultLongitude={business.longitude}
                 address={businessAddressValue}
-                city={business.city}
-                state={business.state}
+                city={launchSingleCityRestricted ? launchMarket.city : business.city}
+                state={launchSingleCityRestricted ? launchMarket.state : business.state}
                 businessName={business.name}
                 onAddressSelect={setBusinessAddressDraft}
               />
+              {launchSingleCityRestricted && (
+                <p className="mt-2 text-xs font-semibold text-emerald">
+                  Business locations must remain inside the {launchMarket.displayName} launch area.
+                </p>
+              )}
             </div>
             <div className="grid gap-2">
               <Label>Business hours</Label>

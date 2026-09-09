@@ -187,7 +187,7 @@ export function PublicAuthActions({
         <span className="hidden sm:inline">View More</span>
       </Link>
       <Link
-        href="/register"
+        href="/register?plan=STARTER"
         aria-label="Register"
         title="Register"
         className={cn(
@@ -197,7 +197,7 @@ export function PublicAuthActions({
         data-marketing-event="cta_click"
         data-marketing-location="public_header"
         data-marketing-label="register"
-        data-marketing-destination="/register"
+        data-marketing-destination="/register?plan=STARTER"
       >
         <ArrowRight className="size-5 shrink-0" variant="Bold" />
         <span className="hidden min-[390px]:inline">Register</span>

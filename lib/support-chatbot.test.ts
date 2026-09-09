@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { launchMarketIncludesAndhraPradesh, launchOffer } from "./launch-policy";
 import { generateSupportReply, resolveSupportPortal, sanitizeSupportPath } from "@/lib/support-chatbot";
 import { extractSupportTicketDetails, formatSupportTicketChatReply } from "@/lib/support-tickets";
 
@@ -7,6 +8,51 @@ test("sanitizes chatbot paths to internal pathnames only", () => {
   assert.equal(sanitizeSupportPath("/user/bookings?tab=paid#top"), "/user/bookings");
   assert.equal(sanitizeSupportPath("https://example.com/admin"), null);
   assert.equal(sanitizeSupportPath("//admin/payments"), null);
+});
+
+test("public availability answers describe only the configured pilot locations", () => {
+  const reply = generateSupportReply({
+    message: "Is this available in Mumbai or across India?",
+    path: "/pricing"
+  });
+
+  assert.equal(reply.portal, "public");
+  assert.equal(reply.intent, "availability");
+  assert.match(reply.reply, launchMarketIncludesAndhraPradesh ? /only in Bengaluru and Andhra Pradesh/i : /only in Bengaluru \(Bangalore\)/i);
+  assert.match(reply.reply, /Other cities are not part of this launch yet/i);
+  assert.equal(reply.actions[0]?.href, "/register?plan=STARTER");
+});
+
+test("public pricing scopes Bengaluru promotions to the correct cohort", () => {
+  const reply = generateSupportReply({
+    message: "What is the Starter and Pro monthly launch pricing?",
+    path: "/pricing"
+  });
+
+  assert.equal(reply.intent, "pricing");
+  if (launchOffer.publiclyAdvertised) {
+    assert.match(reply.reply, /automatically every month/i);
+    assert.match(reply.reply, /not only the first month/i);
+    assert.match(reply.reply, /₹299\.80/);
+    assert.match(reply.reply, /₹599\.80/);
+    assert.match(reply.reply, /Coupons do not stack/i);
+  } else {
+    assert.match(reply.reply, /₹1,499\.00/);
+    assert.match(reply.reply, /₹2,999\.00/);
+    assert.match(reply.reply, /Bengaluru-only/i);
+    assert.match(reply.reply, /Andhra Pradesh/i);
+  }
+  assert.match(reply.reply, /plus GST/i);
+  assert.match(reply.reply, /(?:usage are|usage costs are) separate/i);
+  assert.ok(reply.reply.split(/\s+/).length <= 45);
+  assert.equal(reply.actions[1]?.href, "/register?plan=STARTER");
+});
+
+test("public demo actions use the Bengaluru Fresh Bowl demo", () => {
+  const reply = generateSupportReply({ message: "Book a demo", path: "/" });
+
+  assert.equal(reply.intent, "demo");
+  assert.equal(reply.actions[1]?.href, "/b/fresh-bowl-cloud-kitchen");
 });
 
 test("resolves protected portal modes from verified session roles", () => {

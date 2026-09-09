@@ -87,6 +87,7 @@ type LiveResourceState<T> = {
 
 function dashboardLiveScope(pathname: string | null) {
   if (!pathname || pathname === "/dashboard") return "overview";
+  if (pathname.startsWith("/dashboard/appointments")) return "appointments";
   if (pathname.startsWith("/dashboard/orders")) return "orders";
   if (pathname.startsWith("/dashboard/menu")) return "menu";
   if (pathname.startsWith("/dashboard/payments")) return "payments";

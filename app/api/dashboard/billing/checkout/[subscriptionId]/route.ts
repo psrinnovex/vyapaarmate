@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireBusinessSession } from "@/lib/api-session";
+import { rejectMobileBusinessSubscriptionRequest, requireBusinessSession } from "@/lib/api-session";
 import { writeAuditLog } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { expireSubscriptionPayment, syncCashfreeSubscriptionPayment } from "@/services/subscription-payments";
@@ -12,6 +12,8 @@ type RouteContext = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
+  const mobileDenied = await rejectMobileBusinessSubscriptionRequest();
+  if (mobileDenied) return mobileDenied;
   const auth = await requireBusinessSession("business:billing:read");
   if (auth.response) return auth.response;
   const { session } = auth;

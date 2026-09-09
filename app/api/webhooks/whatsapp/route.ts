@@ -9,6 +9,7 @@ import {
   verifyWhatsAppWebhookSignature,
   verifyWhatsAppWebhookToken
 } from "@/services/whatsapp";
+import { getClientIp, rateLimit } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -24,6 +25,12 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const bucket = await rateLimit(`whatsapp_webhook:${ip}`, 500, 60_000);
+  if (!bucket.allowed) {
+    return apiError("Too Many Requests", 429);
+  }
+
   const rawBody = await request.text();
   if (!verifyWhatsAppWebhookSignature(rawBody, request.headers.get("x-hub-signature-256"))) {
     safeLog("warn", "Rejected WhatsApp webhook signature", {

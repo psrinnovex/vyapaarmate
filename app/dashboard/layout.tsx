@@ -20,6 +20,7 @@ export const metadata: Metadata = createMetadata({
 
 function permissionForPath(pathname: string) {
   if (pathname.startsWith("/dashboard/ai-suggestions")) return "business:reports:read";
+  if (pathname.startsWith("/dashboard/appointments")) return "business:orders:read";
   if (pathname.startsWith("/dashboard/orders")) return "business:orders:read";
   if (pathname.startsWith("/dashboard/menu")) return "business:menu:read";
   if (pathname.startsWith("/dashboard/customers")) return "business:customers:read";
@@ -39,6 +40,7 @@ function firstAllowedDashboardPath(role: Role) {
   const candidates = [
     ["/dashboard", "business:overview:read"],
     ["/dashboard/ai-suggestions", "business:reports:read"],
+    ["/dashboard/appointments", "business:orders:read"],
     ["/dashboard/orders", "business:orders:read"],
     ["/dashboard/menu", "business:menu:read"],
     ["/dashboard/customers", "business:customers:read"],

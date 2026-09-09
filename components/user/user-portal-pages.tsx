@@ -1,16 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Building2, CalendarCheck2, Clock3, Home, Mail, MapPin, Phone, ReceiptText, Settings, ShieldCheck, UserRound, WalletCards } from "lucide-react";
+import { ArrowUpRight, Building2, CalendarCheck2, Clock3, Download, Home, Mail, MapPin, Phone, ReceiptText, Settings, ShieldCheck, Trash2, UserRound, WalletCards } from "lucide-react";
 import { useRouteRefreshOnStream } from "@/hooks/use-live-sync";
+import {
+  CUSTOMER_ACCOUNT_DELETE_CONFIRMATION,
+  CUSTOMER_ACCOUNT_RETENTION_NOTICE
+} from "@/lib/customer-account-copy";
 import type { getCustomerPortalBusinessProfiles, getCustomerPortalOrders, getCustomerPortalUser } from "@/lib/user-portal";
 import { fulfillmentLabelForBusinessType, type ActiveFulfillmentMode } from "@/lib/business-rules";
 import { cn, formatINR, initials } from "@/lib/utils";
 import { getOrderTrackingStatusLabel } from "@/lib/order-tracking";
 import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { PasswordChangeCard } from "@/components/auth/password-change-card";
 import { Card } from "@/components/ui/card";
+import { PasswordInput } from "@/components/ui/form-fields";
+import { Input, Label } from "@/components/ui/input";
 import { PaginationControls, usePaginatedItems } from "@/components/ui/pagination";
 import { StatusPill } from "@/components/ui/status-pill";
 import { OrderStatusAnimation } from "@/components/ui/order-status-animation";
@@ -46,6 +53,15 @@ function formatShortDate(value: Date | string | null) {
   return shortDateFormatter.format(date);
 }
 
+function formatScheduledAppointment(order: PortalOrder) {
+  if (!order.appointment) return null;
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: order.appointment.timezone,
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(normalizedDate(order.appointment.startsAt) as Date);
+}
+
 function orderItemsSummary(order: PortalOrder) {
   if (order.items.length === 0) return "No items";
   const firstItems = order.items.slice(0, 2).map((item) => `${item.quantity} x ${item.itemName}`);
@@ -56,6 +72,15 @@ function orderItemsSummary(order: PortalOrder) {
 function orderTypeLabel(order: PortalOrder) {
   if (order.orderType === "DELIVERY") return "Delivery";
   return fulfillmentLabelForBusinessType(order.business.businessType, order.orderType as ActiveFulfillmentMode);
+}
+
+async function readAccountActionError(response: Response, fallback: string) {
+  try {
+    const body = (await response.json()) as { error?: unknown };
+    return typeof body.error === "string" ? body.error : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function PortalPageShell({
@@ -175,7 +200,9 @@ function LatestBookingPanel({ order }: { order?: PortalOrder }) {
             ) : (
               <p className="mt-1 text-sm font-bold text-ink">No bookings recorded yet</p>
             )}
-            <p className="mt-1 text-xs font-semibold text-slate-500">{order ? formatDate(order.createdAt) : "New bookings will appear here."}</p>
+            <p className="mt-1 text-xs font-semibold text-slate-500">
+              {order ? formatScheduledAppointment(order) ?? formatDate(order.createdAt) : "New bookings will appear here."}
+            </p>
           </div>
         </div>
         {order && (
@@ -229,6 +256,7 @@ export function UserBookingsPage({ user, orders }: { user: PortalUser; orders: P
                   <th className="px-5 py-3 font-bold">Booking</th>
                   <th className="px-5 py-3 font-bold">Business</th>
                   <th className="px-5 py-3 font-bold">Items</th>
+                  <th className="px-5 py-3 font-bold">Appointment</th>
                   <th className="px-5 py-3 font-bold">Type</th>
                   <th className="px-5 py-3 font-bold">Status</th>
                   <th className="px-5 py-3 font-bold">Payment</th>
@@ -253,6 +281,16 @@ export function UserBookingsPage({ user, orders }: { user: PortalUser; orders: P
                     <td className="px-5 py-4 text-slate-600">
                       <p className="max-w-xs leading-5">{orderItemsSummary(order)}</p>
                       {order.notes && <p className="mt-1 line-clamp-1 max-w-xs text-xs text-slate-500">Note: {order.notes}</p>}
+                    </td>
+                    <td className="px-5 py-4">
+                      {order.appointment ? (
+                        <div className="min-w-40">
+                          <p className="font-bold text-ink">{formatScheduledAppointment(order)}</p>
+                          <p className="mt-1 text-xs text-slate-500">{order.appointment.provider.name} · {order.appointment.status.toLowerCase().replace("_", " ")}</p>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">No reserved time</span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <span className="font-semibold text-slate-700">
@@ -527,8 +565,185 @@ export function UserSettingsPage({
           title="User password"
           body="Change the password used for user portal sign-in."
         />
+
+        <CustomerAccountDataControls />
       </div>
     </PortalPageShell>
+  );
+}
+
+function CustomerAccountDataControls() {
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  async function downloadData() {
+    setExporting(true);
+    setExportError("");
+
+    try {
+      const response = await fetch("/api/user/data-export", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!response.ok) {
+        setExportError(await readAccountActionError(response, "We could not prepare your data export."));
+        return;
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get("content-disposition") ?? "";
+      const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] ?? "vyapaarmate-customer-data.json";
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError("We could not prepare your data export. Check your connection and try again.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function deleteAccount(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (confirmation !== CUSTOMER_ACCOUNT_DELETE_CONFIRMATION || currentPassword.length === 0) return;
+
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const response = await fetch("/api/user/delete", {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ currentPassword, confirmation })
+      });
+      if (!response.ok) {
+        setDeleteError(await readAccountActionError(response, "We could not delete your account."));
+        return;
+      }
+
+      window.location.replace("/");
+    } catch {
+      setDeleteError("We could not delete your account. Check your connection and try again.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <>
+      <Card className="bg-white lg:col-span-2">
+        <div className="flex items-start gap-3">
+          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-ocean text-white">
+            <Download className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold text-ink">Download your data</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Download a JSON copy of your account profile, linked customer records, bookings, payments, and support requests.
+            </p>
+          </div>
+        </div>
+        <Button
+          className="mt-5 w-full sm:w-auto"
+          type="button"
+          variant="secondary"
+          icon={<Download className="size-4" />}
+          disabled={exporting}
+          aria-busy={exporting}
+          onClick={downloadData}
+        >
+          {exporting ? "Preparing download" : "Download my data"}
+        </Button>
+        {exportError && (
+          <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
+            {exportError}
+          </p>
+        )}
+      </Card>
+
+      <Card className="border-red-200 bg-red-50/30 lg:col-span-2">
+        <div className="flex items-start gap-3">
+          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-red-600 text-white">
+            <Trash2 className="size-5" />
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold text-ink">Delete sign-in account</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600" id="customer-account-retention">
+              {CUSTOMER_ACCOUNT_RETENTION_NOTICE}
+            </p>
+          </div>
+        </div>
+
+        <form className="mt-5 grid gap-4" onSubmit={deleteAccount}>
+          <div className="grid gap-2">
+            <Label htmlFor="delete-account-current-password">Current password</Label>
+            <PasswordInput
+              id="delete-account-current-password"
+              name="currentPassword"
+              value={currentPassword}
+              autoComplete="current-password"
+              showLockIcon
+              required
+              aria-describedby="customer-account-retention"
+              onChange={(event) => setCurrentPassword(event.currentTarget.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="delete-account-confirmation">
+              Type <span className="font-extrabold text-red-700">{CUSTOMER_ACCOUNT_DELETE_CONFIRMATION}</span> to confirm
+            </Label>
+            <Input
+              id="delete-account-confirmation"
+              name="confirmation"
+              value={confirmation}
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              required
+              aria-describedby="delete-account-confirmation-help customer-account-retention"
+              onChange={(event) => setConfirmation(event.currentTarget.value)}
+            />
+            <p className="text-xs leading-5 text-slate-500" id="delete-account-confirmation-help">
+              This is permanent for the VyapaarMate login and account profile. The retained records described above are not erased.
+            </p>
+          </div>
+
+          {deleteError && (
+            <p className="rounded-lg bg-red-100 p-3 text-sm leading-6 text-red-800" role="alert">
+              {deleteError}
+            </p>
+          )}
+
+          <Button
+            className="w-full sm:w-auto sm:justify-self-start"
+            type="submit"
+            variant="danger"
+            icon={<Trash2 className="size-4" />}
+            disabled={
+              deleting ||
+              currentPassword.length === 0 ||
+              confirmation !== CUSTOMER_ACCOUNT_DELETE_CONFIRMATION
+            }
+            aria-busy={deleting}
+          >
+            {deleting ? "Deleting account" : "Permanently delete sign-in account"}
+          </Button>
+        </form>
+      </Card>
+    </>
   );
 }
 

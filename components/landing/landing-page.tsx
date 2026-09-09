@@ -28,6 +28,7 @@ import { PublicFooter } from "@/components/layout/public-footer";
 import { PublicHeader } from "@/components/layout/public-header";
 import { businessServiceTypeOptions } from "@/lib/business-service-types";
 import { featureCards, pricingPlans, pricingPolicy } from "@/lib/constants";
+import { launchMarket, launchMarketRestricted, launchOffer } from "@/lib/launch-policy";
 import { formatINR } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -43,10 +44,12 @@ const navLinks = [
   { href: "#faq", label: "FAQ" }
 ];
 
+const starterRegistrationHref = "/register?plan=STARTER";
+
 const heroStats = [
-  { label: "business categories", value: `${businessServiceTypeOptions.length}` },
-  { label: "platform commission", value: pricingPolicy.platformCommission },
-  { label: "plans start at", value: formatINR(pricingPlans[0].price) }
+  { label: "current launch market", value: launchMarket.displayName },
+  { label: launchOffer.publiclyAdvertised ? "monthly launch discount" : "subscription pricing", value: launchOffer.publiclyAdvertised ? "80%" : "Standard" },
+  { label: "plans start at", value: `${formatINR(pricingPlans[0].price)} + GST` }
 ];
 
 const heroBadges = ["Website checkout", "WhatsApp updates", "Cashfree payments", "UPI QR", "CRM", "Staff roles"];
@@ -115,7 +118,7 @@ const trustControls = [
   },
   {
     title: "Consent-first messaging",
-    body: "Order confirmations, status updates, payment-page reminders, and campaigns use separate WhatsApp consent paths.",
+    body: "Configured order updates and payment reminders follow consent settings. Campaign preparation currently saves drafts; campaign delivery is not enabled.",
     Icon: ShieldTick
   },
   {
@@ -135,19 +138,31 @@ const publicFeatureIcons: Icon[] = [Cup, MessageTick, CardIcon, Profile2User, No
 const proofCards = [
   ["Tiffin center", "Keeps daily meal orders, customer reminders, and pending UPI payments in one workflow."],
   ["Salon and spa", "Turns WhatsApp appointment requests into trackable bookings with client history."],
-  ["Grocery store", "Lets regular customers reorder essentials through WhatsApp without marketplace fees."]
+  ["Grocery store", "Lets regular customers reorder essentials through WhatsApp without depending on a marketplace."]
 ];
 
 const chargeRules = [
   ["Subscription", "Monthly SaaS access, dashboards, CRM, reports, staff roles, billing, and platform support."],
   ["Setup", "One-time onboarding based on catalog size, service areas, WhatsApp approval work, and payment configuration."],
-  ["Usage", "Payment gateway fees and WhatsApp message/template charges stay separate as provider pass-through costs."]
+  ["Usage", "Payment-gateway, WhatsApp, and other provider usage charges stay separate as pass-through costs."]
 ];
 
 export const faqItems = [
   [
+    "Where is VyapaarMate currently available?",
+    launchMarketRestricted
+      ? `The current launch is limited to businesses in ${launchMarket.displayName}. We can expand to other cities later, but they are not part of this launch.`
+      : `VyapaarMate is available to eligible businesses in ${launchMarket.country}.`
+  ],
+  [
+    "How does the 80% Bengaluru launch discount work?",
+    launchOffer.publiclyAdvertised
+      ? `It applies automatically to every monthly subscription while the launch offer is enabled: Starter is ${formatINR(pricingPlans[0].price)} and Pro is ${formatINR(pricingPlans[1].price)}, each plus GST. It is not first-month-only, needs no coupon, and does not stack with coupons.`
+      : `Starter is ${formatINR(pricingPlans[0].listPrice)} and Pro is ${formatINR(pricingPlans[1].listPrice)} per month, each plus GST.`
+  ],
+  [
     "Is VyapaarMate only for restaurants?",
-    "No. VyapaarMate (also written as Vyapaar Mate) supports food, retail, service, appointment, home-visit, and local membership businesses across India."
+    "No. The product supports food, retail and service workflows. The first pilot cohorts focus on food businesses so we can measure repeat use and support effort."
   ],
   [
     "Do customers need to use a website?",
@@ -159,7 +174,7 @@ export const faqItems = [
   ],
   [
     "Are payments and provider integrations live?",
-    "The app includes Cashfree, WhatsApp Cloud API, email, SMS, and storage-ready service layers so production credentials can be added during launch setup."
+    "Payment, WhatsApp, and other provider connections depend on business approval, provider approval, production credentials, and setup. Their gateway or usage charges are separate."
   ]
 ];
 
@@ -203,7 +218,7 @@ export function LandingPage() {
         <div className="relative z-[2] mx-auto flex max-w-7xl min-w-0 items-center px-4 py-10 sm:px-6 sm:py-12 lg:min-h-[min(700px,calc(100svh-96px))] lg:px-8 lg:py-12">
           <ScrollReveal className="min-w-0 w-full max-w-[22rem] sm:max-w-[570px]" direction="right">
             <Badge className="max-w-full whitespace-normal text-left" variant="emerald">
-              Direct commerce software for Indian local businesses
+              Now onboarding businesses in {launchMarket.displayName}
             </Badge>
             <h1 className="mt-4 max-w-full break-words text-[clamp(2rem,6.2vw,4rem)] font-extrabold leading-[0.96] text-ink">
               VyapaarMate
@@ -213,17 +228,17 @@ export function LandingPage() {
               Take website orders and bookings, collect payment, send WhatsApp updates, and run daily operations from one owner dashboard.
             </p>
             <p className="mt-3 max-w-full text-sm leading-6 text-slate-600 sm:max-w-[540px] sm:text-base sm:leading-7">
-              Built for restaurants, tiffin centers, cloud kitchens, salons, grocery stores, home services, pharmacies, fitness studios, and local retailers that already sell through WhatsApp.
+              We are building separate Bengaluru and Andhra Pradesh pilot cohorts, starting with direct orders and customer follow-up for local food businesses.
             </p>
             <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap">
               <ButtonLink
-                href="/register"
+                href={starterRegistrationHref}
                 className="w-full sm:w-auto"
                 icon={<ArrowRight className="size-5" variant="Bold" />}
                 data-marketing-event="cta_click"
                 data-marketing-location="home_hero"
                 data-marketing-label="submit_for_approval"
-                data-marketing-destination="/register"
+                data-marketing-destination={starterRegistrationHref}
               >
                 Submit for Approval
               </ButtonLink>
@@ -315,9 +330,9 @@ export function LandingPage() {
 
       <LandingSection
         id="businesses"
-        eyebrow="Business coverage"
+        eyebrow={`${launchMarket.displayName} business coverage`}
         title="Built for the categories already supported in the app"
-        body="VyapaarMate adapts catalog labels, fulfillment modes, customer language, and dashboard copy for food, retail, appointment, service, and membership businesses."
+        body={`The product supports businesses in ${launchMarket.displayName}. Catalogs and operating tools adapt to the business type; each pilot cohort is evaluated separately.`}
         className="bg-white"
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -343,13 +358,13 @@ export function LandingPage() {
                 </p>
               </div>
               <ButtonLink
-                href="/register"
+                href={starterRegistrationHref}
                 variant="emerald"
                 icon={<ArrowRight className="size-5" variant="Bold" />}
                 data-marketing-event="cta_click"
                 data-marketing-location="business_types"
                 data-marketing-label="submit_your_business"
-                data-marketing-destination="/register"
+                data-marketing-destination={starterRegistrationHref}
               >
                 Submit Your Business
               </ButtonLink>
@@ -407,9 +422,13 @@ export function LandingPage() {
 
       <LandingSection
         id="subscriptions"
-        eyebrow="Pricing"
-        title="Charge a clear subscription, then keep setup and usage separate"
-        body={`The recommended public pricing is Starter at ${formatINR(1499)}/month and Pro at ${formatINR(2999)}/month. This keeps entry affordable while protecting margin for support, payment workflows, WhatsApp setup, and admin review.`}
+        eyebrow={`${launchMarket.displayName} launch pricing`}
+        title={launchOffer.publiclyAdvertised ? "Get 80% off every monthly subscription while the launch offer is enabled" : "Clear monthly subscriptions with setup and usage kept separate"}
+        body={
+          launchOffer.publiclyAdvertised
+            ? `The discount is automatic, requires no coupon, and is not limited to the first month. Starter is ${formatINR(pricingPlans[0].price)} and Pro is ${formatINR(pricingPlans[1].price)} per month, each plus GST.`
+            : `Starter is ${formatINR(pricingPlans[0].listPrice)} and Pro is ${formatINR(pricingPlans[1].listPrice)} per month, each plus GST.`
+        }
         className="bg-mist"
       >
         <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-2">
@@ -429,8 +448,14 @@ export function LandingPage() {
                 </div>
                 <div className="mt-6">
                   <span className="text-4xl font-extrabold text-ink">{formatINR(plan.price)}</span>
-                  <span className="text-slate-500">/month</span>
+                  <span className="text-slate-500">/month + GST</span>
                   <p className="mt-1 text-xs font-bold uppercase text-slate-500">Monthly subscription</p>
+                  {launchOffer.publiclyAdvertised && (
+                    <p className="mt-2 text-sm text-slate-600">
+                      <span className="line-through">List {formatINR(plan.listPrice)}/month</span>
+                      <span className="ml-2 font-semibold text-emerald">80% off automatically</span>
+                    </p>
+                  )}
                 </div>
                 <ul className="mt-6 flex-1 space-y-3">
                   {plan.features.map((feature) => (
@@ -448,13 +473,13 @@ export function LandingPage() {
                   ))}
                 </div>
                 <ButtonLink
-                  href="/register"
+                  href={`/register?plan=${plan.id}`}
                   className="mt-6 w-full"
                   variant={plan.name === "Pro" ? "emerald" : "primary"}
                   data-marketing-event="cta_click"
                   data-marketing-location="home_pricing"
                   data-marketing-label={`register_${plan.id.toLowerCase()}`}
-                  data-marketing-destination="/register"
+                  data-marketing-destination={`/register?plan=${plan.id}`}
                   data-marketing-value={plan.price}
                 >
                   Register for {plan.name}
@@ -475,7 +500,7 @@ export function LandingPage() {
                   {pricingPolicy.setupFeeRange} depending on catalog size, onboarding, WhatsApp templates, service areas, and payment integration scope.
                 </p>
                 <p className="mt-2 text-xs font-semibold text-slate-500">
-                  {pricingPolicy.passThroughLabel} Annual plans can use a {pricingPolicy.annualDiscount} discount once renewals are stable.
+                  GST, payment-gateway fees, WhatsApp charges, and other provider usage are separate. Coupons do not stack with the Bengaluru launch discount.
                 </p>
               </div>
             </div>
@@ -504,7 +529,7 @@ export function LandingPage() {
       </LandingSection>
 
       <LandingSection
-        eyebrow="Proof points"
+        eyebrow="Example workflows"
         title="Designed for the businesses that already run on WhatsApp"
         body="The product keeps familiar customer behavior while giving owners a structured system for tracking work and growing repeat sales."
         className="bg-white"
@@ -538,21 +563,21 @@ export function LandingPage() {
       <section className="bg-ink px-4 py-14 text-white sm:px-6 lg:px-8">
         <ScrollReveal className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-sm font-bold text-emerald">Ready for direct local commerce</p>
+            <p className="text-sm font-bold text-emerald">Ready to explore the pilot</p>
             <h2 className="mt-3 max-w-3xl text-3xl font-bold leading-tight sm:text-4xl">
               Launch website checkout, connect WhatsApp updates, then manage every order or booking from one dashboard.
             </h2>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
             <ButtonLink
-              href="/register"
+              href={starterRegistrationHref}
               size="lg"
               variant="emerald"
               icon={<ArrowRight className="size-6" variant="Bold" />}
               data-marketing-event="cta_click"
               data-marketing-location="home_final_cta"
               data-marketing-label="submit_for_approval"
-              data-marketing-destination="/register"
+              data-marketing-destination={starterRegistrationHref}
             >
               Submit for Approval
             </ButtonLink>

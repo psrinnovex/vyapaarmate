@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const modules = [
   {
     title: "Demand Prediction",
-    body: "Predicts tomorrow's likely demand for top products or services based on past orders, day of week, time slot, and repeat trends.",
+    body: "Estimates upcoming demand from past orders and recent trends. Accuracy must be checked against actual merchant outcomes.",
     Icon: LineChart,
     tone: "bg-ocean/10 text-ocean"
   },
@@ -56,7 +56,7 @@ export function IntelligenceEngineSection() {
               VyapaarMate Intelligence Engine
             </Badge>
             <h2 className="mt-4 max-w-2xl text-3xl font-extrabold leading-tight text-ink sm:text-4xl">
-              AI-powered direct-commerce decision support for Indian MSMEs
+              Decision support that business owners can check
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
               Our MSME intelligence engine studies daily orders, customer repeats, unpaid payments, product demand,
@@ -65,11 +65,11 @@ export function IntelligenceEngineSection() {
             <div className="mt-5 grid gap-3 rounded-lg border border-line bg-mist p-4 text-sm leading-6 text-slate-600">
               <p className="flex gap-2">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald" />
-                Rule-based intelligence works without mandatory paid LLM APIs.
+                Early recommendations use explainable rules and scoring. Pilot businesses help test their usefulness.
               </p>
               <p className="flex gap-2">
                 <BrainCircuit className="mt-0.5 size-4 shrink-0 text-ocean" />
-                Outputs are explainable, owner-friendly, and built around Indian local commerce workflows.
+                Trained models require sufficient first-party data and measured performance for each business.
               </p>
             </div>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">

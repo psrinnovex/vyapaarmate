@@ -10,6 +10,9 @@ export type DemoMenuItem = {
   imageUrl: string | null;
   isAvailable: boolean;
   isBestSeller?: boolean;
+  appointmentEnabled?: boolean;
+  durationMinutes?: number | null;
+  bufferMinutes?: number;
 };
 
 export type DemoBusiness = {
@@ -37,6 +40,10 @@ export type DemoBusiness = {
   allowsPayOnDelivery: boolean;
   onlinePaymentAvailable: boolean;
   whatsappAvailable: boolean;
+  appointmentBookingEnabled: boolean;
+  appointmentAutoConfirm: boolean;
+  appointmentTimezone: string;
+  appointmentMaxAdvanceDays: number;
   orderGstRateBps?: number;
   coupons?: Array<{
     code: string;
@@ -73,6 +80,10 @@ export const demoBusinesses: DemoBusiness[] = [
     allowsPayOnDelivery: true,
     onlinePaymentAvailable: true,
     whatsappAvailable: true,
+    appointmentBookingEnabled: false,
+    appointmentAutoConfirm: true,
+    appointmentTimezone: "Asia/Kolkata",
+    appointmentMaxAdvanceDays: 60,
     menu: [
       {
         id: "item_1",
@@ -142,6 +153,10 @@ export const demoBusinesses: DemoBusiness[] = [
     allowsPayOnDelivery: false,
     onlinePaymentAvailable: true,
     whatsappAvailable: true,
+    appointmentBookingEnabled: false,
+    appointmentAutoConfirm: true,
+    appointmentTimezone: "Asia/Kolkata",
+    appointmentMaxAdvanceDays: 60,
     menu: [
       {
         id: "item_5",
@@ -190,6 +205,10 @@ export const demoBusinesses: DemoBusiness[] = [
     allowsPayOnDelivery: true,
     onlinePaymentAvailable: true,
     whatsappAvailable: false,
+    appointmentBookingEnabled: false,
+    appointmentAutoConfirm: true,
+    appointmentTimezone: "Asia/Kolkata",
+    appointmentMaxAdvanceDays: 60,
     menu: [
       {
         id: "item_7",

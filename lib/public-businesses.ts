@@ -3,7 +3,9 @@ import { calculateDistanceKm, fulfillmentModesFromFlags } from "@/lib/business-r
 import { isBusinessAcceptingNow } from "@/lib/business-hours";
 import { getBusinessLogoUrl } from "@/lib/business-image";
 import { demoBusinesses, isDemoBusinessId, isDemoBusinessSlug, shouldExposePublicDemoBusinesses } from "@/lib/demo-data";
+import { isEligibleLaunchBusinessLocation } from "@/lib/launch-policy";
 import { prisma } from "@/lib/prisma";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 import { initials } from "@/lib/utils";
 import { canBusinessAcceptOnlinePayment, getOnlinePaymentConfig, type OnlinePaymentConfig } from "@/services/online-payments";
 
@@ -118,6 +120,10 @@ function isDemoFixtureBusiness(business: { id: string; slug: string }) {
   return isDemoBusinessId(business.id) || isDemoBusinessSlug(business.slug);
 }
 
+function isEligibleLaunchBusiness(business: Pick<PublicBusinessListing, "city" | "state" | "latitude" | "longitude">) {
+  return isEligibleLaunchBusinessLocation(business, { requireCoordinates: true });
+}
+
 function mapDatabaseBusiness(business: ListingBusiness, options: ListingOptions, paymentConfig: OnlinePaymentConfig, now: Date): PublicBusinessListing {
   const latitude = business.latitude === null ? null : Number(business.latitude);
   const longitude = business.longitude === null ? null : Number(business.longitude);
@@ -198,6 +204,7 @@ export async function getPublicBusinessListings(options: ListingOptions = {}) {
           isActive: true,
           isVerified: true,
           subscriptionStatus: "ACTIVE",
+          subscriptions: { some: currentPaidSubscriptionWhere(now) },
           kycStatus: "APPROVED",
           isOpen: true,
           latitude: { not: null },
@@ -222,6 +229,7 @@ export async function getPublicBusinessListings(options: ListingOptions = {}) {
     return businesses
       .map((business) => mapDatabaseBusiness(business, options, paymentConfig, now))
       .filter((business) => !isDemoFixtureBusiness(business))
+      .filter(isEligibleLaunchBusiness)
       .filter((business) => business.open)
       .filter((business) => isInsideOwnerRadius(business, options))
       .filter((business) => matchesQuery(business, options.query ?? ""))
@@ -232,6 +240,7 @@ export async function getPublicBusinessListings(options: ListingOptions = {}) {
     return demoBusinesses
       .filter((business) => business.isApproved)
       .map((business) => mapDemoBusiness(business, options, now))
+      .filter(isEligibleLaunchBusiness)
       .filter((business) => business.open)
       .filter((business) => isInsideOwnerRadius(business, options))
       .filter((business) => matchesQuery(business, options.query ?? ""))

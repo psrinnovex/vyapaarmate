@@ -28,6 +28,7 @@ import { EmailInput, PhoneInput } from "@/components/ui/form-fields";
 import { PaginationControls, usePaginatedItems } from "@/components/ui/pagination";
 import { LazyLottieAnimation } from "@/components/ui/lottie-animation";
 import { CustomerLocationMapPicker } from "@/components/order/customer-location-map-picker";
+import { AppointmentScheduler, type AppointmentSelection } from "@/components/order/appointment-scheduler";
 import { orderAnimationPaths } from "@/lib/order-animations";
 
 type CartLine = DemoMenuItem & { quantity: number };
@@ -287,6 +288,7 @@ export function CustomerOrderPage({
   const [couponNotice, setCouponNotice] = useState<string | null>(null);
   const [couponChecking, setCouponChecking] = useState(false);
   const [descriptionModalItem, setDescriptionModalItem] = useState<DemoMenuItem | null>(null);
+  const [appointment, setAppointment] = useState<AppointmentSelection | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60_000);
@@ -353,6 +355,8 @@ export function CustomerOrderPage({
   });
 
   const cartLines = Object.values(cart);
+  const appointmentServices = cartLines.filter((line) => line.appointmentEnabled);
+  const appointmentRequired = business.appointmentBookingEnabled && appointmentServices.length > 0;
   const cartItemCount = cartLines.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cartLines.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const serviceFee = fulfillmentFeeForOrder({
@@ -371,14 +375,23 @@ export function CustomerOrderPage({
   const statusTotalLabel = checkoutStep === "billing" ? "Total payable" : "Selected total";
   const statusTotal = checkoutStep === "billing" ? billing.total : selectedTotal;
   const businessApproved = business.isApproved;
-  const businessOpen = businessApproved && business.open && isBusinessOpenAt(business.hours, now) && fulfillmentModes.length > 0;
+  const acceptingImmediateRequests =
+    businessApproved && business.open && isBusinessOpenAt(business.hours, now) && fulfillmentModes.length > 0;
+  const businessOpen =
+    businessApproved && fulfillmentModes.length > 0 && (acceptingImmediateRequests || appointmentRequired);
   const profileVerified = customerProfileIsBookingVerified(bookingProfile);
-  const bookingOpen = businessOpen && profileVerified;
+  const bookingOpen =
+    businessApproved &&
+    fulfillmentModes.length > 0 &&
+    (acceptingImmediateRequests || business.appointmentBookingEnabled) &&
+    profileVerified;
   const profileNotice = bookingProfileNotice(bookingProfile, copy);
   const profileAction = bookingProfileAction(bookingProfile);
   const unavailableMessage = !businessApproved
     ? "This business is pending PSHR admin approval. Services are not available yet."
-    : `This business is closed right now. You can browse, but ${transactionPluralLower} are paused until it opens.`;
+    : business.appointmentBookingEnabled
+      ? `Walk-in and immediate ${transactionPluralLower} are paused right now, but scheduled services can still be booked for an available time.`
+      : `This business is closed right now. You can browse, but ${transactionPluralLower} are paused until it opens.`;
   const serviceAtLocation = orderType === "SERVICE_AT_LOCATION";
   const orderTypeLabelLower = fulfillmentLabelForBusinessType(business.businessType, orderType).toLowerCase();
   const distanceKm = useMemo(() => {
@@ -552,6 +565,7 @@ export function CustomerOrderPage({
     removeCoupon();
     setSubmitError(null);
     setCheckoutStep("selection");
+    setAppointment(null);
     window.localStorage.removeItem(cartStorageKey);
   }
 
@@ -569,6 +583,10 @@ export function CustomerOrderPage({
     }
     if (!profileVerified) {
       setSubmitError(profileNotice ?? "Use a verified user profile before booking.");
+      return;
+    }
+    if (appointmentRequired && !appointment) {
+      setSubmitError("Choose an available professional, date, and time before continuing.");
       return;
     }
     if (serviceAtLocation && !serviceAddress.trim()) {
@@ -598,7 +616,7 @@ export function CustomerOrderPage({
     const form = new FormData(event.currentTarget);
     const requestedSchedule = String(form.get("scheduledFor") ?? "").trim();
     let scheduledFor: string | undefined;
-    if (requiresScheduledServiceTime(business.businessType) && !requestedSchedule) {
+    if (!appointmentRequired && requiresScheduledServiceTime(business.businessType) && !requestedSchedule) {
       setSubmitError(`Choose the requested ${transactionLower} date and time.`);
       return;
     }
@@ -632,6 +650,9 @@ export function CustomerOrderPage({
           notes: String(form.get("notes") ?? ""),
           paymentMethod,
           couponCode: appliedCouponCode ?? undefined,
+          appointment: appointmentRequired && appointment
+            ? { providerId: appointment.providerId, startsAt: appointment.startsAt }
+            : undefined,
           items: cartLines.map((line) => ({ menuItemId: line.id, quantity: line.quantity }))
         })
       });
@@ -659,6 +680,7 @@ export function CustomerOrderPage({
       };
       setConfirmedOrder(confirmation);
       setCart({});
+      setAppointment(null);
       removeCoupon();
       window.localStorage.removeItem(cartStorageKey);
       setCartOpen(false);
@@ -769,15 +791,17 @@ export function CustomerOrderPage({
               <p className="truncate text-sm font-extrabold text-ink sm:text-base">{business.name}</p>
               <p className="truncate text-xs font-semibold text-slate-500 sm:text-sm">{business.city}, {business.state}</p>
             </div>
-            <Button
-              variant="emerald"
-              size="sm"
-              className="h-11 shrink-0 rounded-lg bg-ink px-4 shadow-[0_18px_40px_rgba(13,19,33,0.18)] hover:bg-[#16382f]"
-              icon={<TransactionIcon className="size-4" />}
-              onClick={() => setCartOpen(true)}
-            >
-              {cartItemCount}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="emerald"
+                size="sm"
+                className="h-11 shrink-0 rounded-lg bg-ink px-4 shadow-[0_18px_40px_rgba(13,19,33,0.18)] hover:bg-[#16382f]"
+                icon={<TransactionIcon className="size-4" />}
+                onClick={() => setCartOpen(true)}
+              >
+                {cartItemCount}
+              </Button>
+            </div>
           </div>
         </header>
       </div>
@@ -818,8 +842,14 @@ export function CustomerOrderPage({
                     <BusinessIcon className="size-3.5 text-[#f4d58d]" />
                     {business.businessType}
                   </span>
-                  <Badge variant={businessOpen ? "emerald" : "red"} className={cn("border-white/20 bg-white/10 text-white", businessOpen && "border-emerald/30 bg-emerald/20 text-emerald-50")}>
-                    {businessOpen ? "Open now" : businessApproved ? "Closed" : "Pending approval"}
+                  <Badge variant={acceptingImmediateRequests ? "emerald" : business.appointmentBookingEnabled ? "amber" : "red"} className={cn("border-white/20 bg-white/10 text-white", acceptingImmediateRequests && "border-emerald/30 bg-emerald/20 text-emerald-50")}>
+                    {acceptingImmediateRequests
+                      ? "Open now"
+                      : businessApproved && business.appointmentBookingEnabled
+                        ? "Scheduled bookings available"
+                        : businessApproved
+                          ? "Closed"
+                          : "Pending approval"}
                   </Badge>
                 </div>
                 <h1 className="mt-3 text-2xl font-extrabold leading-tight text-white sm:text-4xl">
@@ -834,7 +864,7 @@ export function CustomerOrderPage({
                 <BusinessHoursDisclosure
                   businessId={business.id}
                   hours={business.hours}
-                  open={businessOpen}
+                  open={acceptingImmediateRequests}
                   now={now}
                   showSummary={false}
                   variant="hero"
@@ -863,7 +893,11 @@ export function CustomerOrderPage({
                 <div>
                   <p className="text-xs font-bold text-white/60">{copy.transactionSingular} status</p>
                   <p className="mt-1 text-lg font-extrabold text-white">
-                    {businessOpen ? `Ready for ${copy.transactionPlural.toLowerCase()}` : "Not accepting now"}
+                    {acceptingImmediateRequests
+                      ? `Ready for ${copy.transactionPlural.toLowerCase()}`
+                      : business.appointmentBookingEnabled && businessApproved
+                        ? "Scheduled bookings available"
+                        : "Not accepting now"}
                   </p>
                 </div>
                 <span className="grid size-11 place-items-center rounded-lg bg-emerald/20 text-emerald-100">
@@ -893,8 +927,13 @@ export function CustomerOrderPage({
         {checkoutStep === "selection" ? (
           <div className="min-w-0">
             <div className="public-order-sticky-controls sticky z-30 -mx-4 min-w-0 border-b border-white/70 bg-white/[0.82] px-4 py-4 shadow-[0_18px_46px_rgba(13,19,33,0.07)] backdrop-blur-2xl sm:mx-0 sm:rounded-lg sm:border">
-              {!businessOpen && (
-                <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {!acceptingImmediateRequests && (
+                <div className={cn(
+                  "mb-3 flex items-start gap-2 rounded-lg border p-3 text-sm",
+                  business.appointmentBookingEnabled && businessApproved
+                    ? "border-blue-200 bg-blue-50 text-blue-800"
+                    : "border-red-200 bg-red-50 text-red-700"
+                )}>
                   <AlertCircle className="mt-0.5 size-4 shrink-0" />
                   <span>{unavailableMessage}</span>
                 </div>
@@ -1092,6 +1131,10 @@ export function CustomerOrderPage({
               removeCoupon={removeCoupon}
               distanceKm={distanceKm}
               outsideServiceRadius={outsideServiceRadius}
+              appointmentRequired={appointmentRequired}
+              appointmentServices={appointmentServices}
+              appointment={appointment}
+              setAppointment={setAppointment}
               onClearCart={clearCart}
               onBack={() => setCheckoutStep("selection")}
               showSelectedServices={false}
@@ -1196,6 +1239,10 @@ export function CustomerOrderPage({
                 removeCoupon={removeCoupon}
                 distanceKm={distanceKm}
                 outsideServiceRadius={outsideServiceRadius}
+                appointmentRequired={appointmentRequired}
+                appointmentServices={appointmentServices}
+                appointment={appointment}
+                setAppointment={setAppointment}
                 onClearCart={clearCart}
                 onBack={() => setCheckoutStep("selection")}
               />
@@ -1576,6 +1623,10 @@ function BillingPanel({
   removeCoupon,
   distanceKm,
   outsideServiceRadius,
+  appointmentRequired,
+  appointmentServices,
+  appointment,
+  setAppointment,
   onClearCart,
   onBack,
   showSelectedServices = true
@@ -1619,6 +1670,10 @@ function BillingPanel({
   removeCoupon: () => void;
   distanceKm: number | null;
   outsideServiceRadius: boolean;
+  appointmentRequired: boolean;
+  appointmentServices: CartLine[];
+  appointment: AppointmentSelection | null;
+  setAppointment: (value: AppointmentSelection | null) => void;
   onClearCart: () => void;
   onBack: () => void;
   showSelectedServices?: boolean;
@@ -1638,7 +1693,7 @@ function BillingPanel({
   const transactionLower = copy.transactionSingular.toLowerCase();
   const onlinePaymentAvailable = business.onlinePaymentAvailable;
   const cashPaymentAvailable = business.allowsPayOnDelivery;
-  const scheduledTimeRequired = requiresScheduledServiceTime(business.businessType);
+  const scheduledTimeRequired = !appointmentRequired && requiresScheduledServiceTime(business.businessType);
   const paymentMethodAvailable = paymentMethod === "UPI" ? onlinePaymentAvailable : cashPaymentAvailable;
   const clearLabel = clearSelectionLabel(copy);
   const submitDisabled =
@@ -1648,6 +1703,7 @@ function BillingPanel({
     !cartLines.length ||
     subtotal < business.minimumOrder ||
     !paymentMethodAvailable ||
+    (appointmentRequired && !appointment) ||
     (serviceAtLocation && (!serviceAddress.trim() || !customerLocation || distanceKm === null || outsideServiceRadius));
   const submitLabel = !businessOpen
     ? "Unavailable"
@@ -1671,6 +1727,8 @@ function BillingPanel({
             ? "Outside service radius"
             : !paymentMethodAvailable
               ? "Payment unavailable"
+              : appointmentRequired && !appointment
+                ? "Choose date & time"
             : paymentMethod === "UPI"
               ? `Place ${copy.transactionSingular} and pay online`
               : `Place ${copy.transactionSingular} with cash`;
@@ -1771,6 +1829,21 @@ function BillingPanel({
           );
         })}
       </div>
+
+      {appointmentRequired && (
+        <AppointmentScheduler
+          businessSlug={business.slug}
+          businessType={business.businessType}
+          timeZone={business.appointmentTimezone}
+          maxAdvanceDays={business.appointmentMaxAdvanceDays}
+          autoConfirm={business.appointmentAutoConfirm}
+          services={appointmentServices}
+          orderType={orderType}
+          value={appointment}
+          onChange={setAppointment}
+          disabled={!businessOpen || !profileVerified}
+        />
+      )}
 
       <div className="mt-4 grid gap-3">
         <div className="grid gap-2">

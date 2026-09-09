@@ -62,7 +62,7 @@ API routes:
 | Payment security | warning | Cashfree webhook signature, amount, and currency checks exist and payment tests pass. Live/sandbox provider confirmation was not executed. |
 | WhatsApp security | warning | Webhook token/signature checks exist. Unsafe fallback business routing was removed. Live Meta webhook flow was not executed. |
 | Supabase/RLS | warning | Migration locks down anon/authenticated/service_role table access and enables RLS. No live Supabase policy verification was run. |
-| App store/mobile readiness | fail | Privacy/terms/contact exist, but account deletion UI/test reviewer flow/native packaging are not ready. |
+| App store/mobile readiness | fail | Customer, staff, and business-owner deletion flows exist in source, but deployed production verification, reviewer flow, physical-device testing, and native packaging are not ready. |
 | MSME Hackathon readiness | warning | Strong positioning and implemented prototype evidence exist, but submission claims must avoid overclaiming trained AI unless artifacts are verified. |
 
 ## Product Journey Status
@@ -100,7 +100,7 @@ API routes:
 - `npm run production:check` fails because production Redis and Google API keys are missing.
 - Protected responsive audit produced phone tall-content warnings on admin/support pages, but no hard responsive failures.
 - Live Cashfree, WhatsApp, Supabase/RLS, and end-to-end product journeys were not executed.
-- Mobile store readiness is blocked by missing account deletion flow and reviewer package.
+- Mobile store readiness remains blocked by unverified deployed deletion behavior, reviewer access/package, signed native artifacts, and production readiness; it is not blocked by a missing source-level account-deletion flow.
 
 ## Files Reviewed
 
@@ -122,7 +122,7 @@ Representative files reviewed:
 - Configure required production services/env and rerun `npm run production:check`.
 - Execute real end-to-end flows with seeded/local users: owner registration, setup, catalog, storefront checkout, payment confirmation, WhatsApp notification, admin support, and support ticket resolution.
 - Verify Supabase migrations/RLS against an actual target database.
-- Add an account deletion UI or authenticated deletion request flow before mobile store submission.
+- Verify authenticated and post-uninstall business-account deletion against the deployed production target, including immediate freeze, 30-day processing, session revocation, re-login denial, and retention handling, before mobile store submission.
 
 ## Manual Verification Required
 

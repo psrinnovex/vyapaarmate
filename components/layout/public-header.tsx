@@ -8,6 +8,7 @@ import { sessionHomePath } from "@/lib/session-routing";
 import type { SessionUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { PublicAuthActions } from "./public-auth-actions";
+import { BrandMark } from "@/components/ui/brand-mark";
 
 type PublicHeaderLink = {
   href: string;
@@ -21,15 +22,15 @@ type SessionResponse = {
 const defaultLinks: PublicHeaderLink[] = [
   { href: "/features", label: "Features" },
   { href: "/technology-innovation", label: "Technology" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/pricing", label: "Launch Pricing" },
   { href: "/contact", label: "Contact" }
 ];
 
 export function PublicHeader({
   session,
   links = defaultLinks,
-  demoHref = "/b/sri-sai-tiffins",
-  demoLabel = "Demo Store"
+  demoHref = "/b/fresh-bowl-cloud-kitchen",
+  demoLabel = "Book a Demo"
 }: {
   session?: SessionUser | null;
   links?: PublicHeaderLink[];
@@ -162,16 +163,10 @@ export function PublicHeader({
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <Link
             href="/"
+            aria-label="VyapaarMate home"
             className={cn("flex min-w-0 items-center gap-2 justify-self-start font-bold transition-colors", isScrolled ? "text-white" : "text-ink")}
           >
-            <span
-              className={cn(
-                "grid size-9 shrink-0 place-items-center rounded-lg transition-colors",
-                isScrolled ? "bg-emerald text-white" : "bg-ink text-white"
-              )}
-            >
-              VM
-            </span>
+            <BrandMark surface={isScrolled ? "dark" : "light"} />
             <span className="hidden sm:inline">{company.product}</span>
           </Link>
           {!isCustomer && (
@@ -313,16 +308,16 @@ export function PublicHeader({
                 ) : (
                   <>
                     <Link
-                      href="/register"
+                      href="/register?plan=STARTER"
                       onClick={closeMobileMenu}
                       className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-bold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-emerald focus:outline-none focus:ring-4 focus:ring-emerald/20"
                       data-marketing-event="cta_click"
                       data-marketing-location="public_mobile_menu"
-                      data-marketing-label="register"
-                      data-marketing-destination="/register"
+                      data-marketing-label="join_bengaluru_launch"
+                      data-marketing-destination="/register?plan=STARTER"
                     >
                       <UserPlus className="size-4" />
-                      <span>Register</span>
+                      <span>Join the Pilot</span>
                     </Link>
                     <Link
                       href="/login?type=user&next=%2Fbusinesses"

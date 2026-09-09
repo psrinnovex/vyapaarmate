@@ -2,6 +2,7 @@ import { ContactPageContent } from "@/components/contact/contact-page";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { PublicHeader } from "@/components/layout/public-header";
 import { createMetadata, jsonLd } from "@/lib/seo";
+import { launchAreasServed } from "@/lib/launch-policy";
 import { absoluteUrl, company } from "@/lib/site";
 import {
   breadcrumbListNode,
@@ -12,13 +13,13 @@ import {
 } from "@/lib/structured-data";
 
 const contactDescription =
-  "Contact PSHR INNOVEX PRIVATE LIMITED to book a VyapaarMate demo for direct website ordering, UPI QR payment tracking, WhatsApp updates, CRM, and local business workflows.";
+  "Book a VyapaarMate pilot demo for direct website ordering, UPI payment tracking, WhatsApp updates, CRM, and local business workflows.";
 
 export const metadata = createMetadata({
   title: "Contact",
   description: contactDescription,
   path: "/contact",
-  keywords: ["VyapaarMate demo", "PSHR INNOVEX PRIVATE LIMITED contact", "book business software demo"]
+  keywords: ["VyapaarMate pilot demo", "Bengaluru and Andhra Pradesh business software", "PSHR INNOVEX PRIVATE LIMITED contact"]
 });
 
 function contactStructuredData() {
@@ -49,7 +50,7 @@ function contactStructuredData() {
       "@id": `${absoluteUrl(path)}#support`,
       contactType: "sales and customer support",
       email: company.supportEmail,
-      areaServed: "IN",
+      areaServed: launchAreasServed,
       availableLanguage: ["en", "hi"],
       ...(company.phone ? { telephone: company.phone } : {})
     }

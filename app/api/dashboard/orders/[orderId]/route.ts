@@ -6,6 +6,7 @@ import { orderStatusSchema } from "@/lib/validations";
 import { getNoShowEligibility } from "@/lib/booking-outcomes";
 import { cancelOrderPaymentForBusinessCancellation } from "@/services/business-wallet";
 import { sendOrderWhatsappUpdate } from "@/services/order-whatsapp";
+import { parseJsonRequest } from "@/lib/security/validation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +26,8 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (auth.response) return auth.response;
   const { session } = auth;
 
-  const body = await request.json();
-  const parsed = orderStatusSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+  const parsed = await parseJsonRequest(request, orderStatusSchema);
+  if (parsed.response) return parsed.response;
 
   const { orderId } = await context.params;
   const existing = await prisma.order.findFirst({
@@ -41,6 +39,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   if (!existing) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  if (existing.status === parsed.data.status) {
+    return NextResponse.json({ order: { id: existing.id, orderNumber: existing.orderNumber, status: existing.status,
+      paymentStatus: existing.paymentStatus, updatedAt: existing.updatedAt }, idempotent: true });
   }
 
   if (existing.status === "CANCELLED" && parsed.data.status !== "CANCELLED") {
@@ -94,26 +97,31 @@ export async function PATCH(request: Request, context: RouteContext) {
   const outcomeAt = new Date();
   let order;
   if (isNoShow) {
-    const updated = await prisma.order.updateMany({
-      where: {
-        id: existing.id,
-        status: { in: ["ACCEPTED", "PREPARING", "READY"] },
-        scheduledFor: { lte: outcomeAt },
-        noShowAt: null
-      },
-      data: {
-        status: "CANCELLED",
-        cancelledAt: outcomeAt,
-        noShowAt: outcomeAt,
-        cancellationReason: parsed.data.reason ?? "CUSTOMER_NO_SHOW"
-      }
-    });
-    if (updated.count !== 1) {
-      return NextResponse.json({ error: "The booking changed before the no-show could be saved. Refresh and try again." }, { status: 409 });
-    }
-    order = await prisma.order.findUniqueOrThrow({
-      where: { id: existing.id },
-      include: { customer: true, items: true, payment: true }
+    order = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: {
+          id: existing.id,
+          businessId: session.businessId,
+          status: { in: ["ACCEPTED", "PREPARING", "READY"] },
+          scheduledFor: { lte: outcomeAt },
+          noShowAt: null
+        },
+        data: {
+          status: "CANCELLED",
+          cancelledAt: outcomeAt,
+          noShowAt: outcomeAt,
+          cancellationReason: parsed.data.reason ?? "CUSTOMER_NO_SHOW"
+        }
+      });
+      if (updated.count !== 1) return null;
+      await tx.appointment.updateMany({
+        where: { orderId: existing.id, status: { notIn: ["CANCELLED", "NO_SHOW", "COMPLETED"] } },
+        data: { status: "NO_SHOW", cancelledAt: outcomeAt, cancellationReason: parsed.data.reason ?? "CUSTOMER_NO_SHOW" }
+      });
+      return tx.order.findUniqueOrThrow({
+        where: { id: existing.id },
+        include: { customer: true, items: true, payment: true }
+      });
     });
   } else if (parsed.data.status === "CANCELLED") {
     order = await prisma.order.update({
@@ -125,15 +133,38 @@ export async function PATCH(request: Request, context: RouteContext) {
       include: { customer: true, items: true, payment: true }
     });
   } else {
-    order = await prisma.order.update({
-      where: { id: existing.id },
-      data: {
-        status: parsed.data.status,
-        completedAt: parsed.data.status === "DELIVERED" ? outcomeAt : undefined
-      },
-      include: { customer: true, items: true, payment: true }
+    order = await prisma.$transaction(async (tx) => {
+      const transition = await tx.order.updateMany({
+        where: { id: existing.id, businessId: session.businessId, status: existing.status },
+        data: { status: parsed.data.status, ...(parsed.data.status === "DELIVERED" ? { completedAt: outcomeAt } : {}) }
+      });
+      if (transition.count !== 1) return null;
+      const appointmentStatus =
+        parsed.data.status === "ACCEPTED"
+          ? "CONFIRMED"
+          : parsed.data.status === "PREPARING" || parsed.data.status === "READY"
+            ? "IN_PROGRESS"
+            : parsed.data.status === "DELIVERED"
+              ? "COMPLETED"
+              : null;
+      if (appointmentStatus) {
+        await tx.appointment.updateMany({
+          where: { orderId: existing.id, status: { notIn: ["CANCELLED", "NO_SHOW"] } },
+          data: {
+            status: appointmentStatus,
+            ...(appointmentStatus === "CONFIRMED" ? { confirmedAt: outcomeAt } : {}),
+            ...(appointmentStatus === "COMPLETED" ? { completedAt: outcomeAt } : {})
+          }
+        });
+      }
+
+      return tx.order.findUniqueOrThrow({
+        where: { id: existing.id },
+        include: { customer: true, items: true, payment: true }
+      });
     });
   }
+  if (!order) return NextResponse.json({ error: "This order changed while you were updating it. Refresh and try again." }, { status: 409 });
   const refundedAt = cancellation?.paymentAction === "refunded" ? cancellation.refundedAt.toISOString() : undefined;
   const [whatsapp] = await Promise.all([
     sendOrderWhatsappUpdate({ businessId: session.businessId, orderId: order.id }),
@@ -179,6 +210,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
   if (auth.response) return auth.response;
   const { session } = auth;
   const businessId = session.businessId;
+
+  const business = await prisma.business.findUnique({ where: { id: businessId }, select: { dataOrigin: true } });
+  if (!business || business.dataOrigin === "LIVE") {
+    return NextResponse.json({ error: "Live order history cannot be deleted from the dashboard. Use cancellation to correct an order; contact support for account-data requests." }, { status: 409 });
+  }
 
   const { orderId } = await context.params;
   const deleted = await prisma.$transaction(async (tx) => {

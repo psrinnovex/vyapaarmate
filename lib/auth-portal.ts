@@ -24,7 +24,18 @@ export function isAuthPortal(value: string | null | undefined): value is AuthPor
 export function safeInternalPath(value: string | string[] | null | undefined) {
   const path = Array.isArray(value) ? value[0] : value;
   if (!path || !path.startsWith("/") || path.startsWith("//")) return null;
-  return path;
+  // Browsers normalize backslashes and control characters before navigating.
+  // A string such as /\\example.com must never become an external login redirect.
+  if (/[\\\u0000-\u001f\u007f]/.test(path)) return null;
+  const base = "https://internal.invalid";
+  try {
+    const url = new URL(path, base);
+    if (url.origin !== base || /%2f|%5c/i.test(url.pathname)) return null;
+    // Normalize dot segments before enforcing the destination portal.
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
 }
 
 export function isAuthSurfacePath(path: string) {

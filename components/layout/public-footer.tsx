@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/ui/brand-mark";
 import { company } from "@/lib/constants";
 
 const developerWebsite = "https://pshrinnovex.com";
@@ -10,7 +11,7 @@ export function PublicFooter() {
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2 font-bold">
-              <span className="grid size-9 place-items-center rounded-lg bg-white text-ink">VM</span>
+              <BrandMark surface="dark" />
               <span>{company.product}</span>
             </div>
             <p className="mt-4 max-w-md text-sm leading-6 text-white/70">
@@ -22,6 +23,9 @@ export function PublicFooter() {
             <div className="mt-3 grid gap-2 text-sm text-white/70">
               <Link href="/contact" className="transition hover:text-white">
                 Contact
+              </Link>
+              <Link href="/install" className="transition hover:text-white">
+                Install VyapaarMate
               </Link>
               <Link href="/technology-innovation" className="transition hover:text-white">
                 Technology & Innovation

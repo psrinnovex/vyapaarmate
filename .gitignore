@@ -1,5 +1,6 @@
 .next
 .vercel
+.DS_Store
 node_modules
 .env
 .env*.local
@@ -10,3 +11,5 @@ prisma/dev.db
 .npm-cache
 *.tsbuildinfo
 .vercel
+.env*
+!.env.example

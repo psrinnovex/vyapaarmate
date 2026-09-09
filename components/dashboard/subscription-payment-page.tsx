@@ -39,6 +39,8 @@ export type SubscriptionPaymentData = {
   gstAmount: number;
   billingGstin: string | null;
   couponCode: string | null;
+  promotionCode: string | null;
+  discountLabel: string | null;
   status: string;
   paymentState: string;
   paymentProvider: string;
@@ -102,6 +104,8 @@ function normalizePaymentPayload(payload: PaymentPayload, current: SubscriptionP
     gstAmount: numberOr(payload.gstAmount, current.gstAmount),
     billingGstin: nullableStringOr(payload.billingGstin, current.billingGstin),
     couponCode: nullableStringOr(payload.couponCode, current.couponCode),
+    promotionCode: nullableStringOr(payload.promotionCode, current.promotionCode),
+    discountLabel: nullableStringOr(payload.discountLabel, current.discountLabel),
     status: stringOr(payload.status, current.status),
     paymentState: stringOr(payload.paymentState, current.paymentState),
     paymentProvider: stringOr(payload.paymentProvider, current.paymentProvider),
@@ -378,12 +382,15 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
         <div className="mt-4 ml-auto max-w-sm border-t border-line pt-3 text-sm">
           <div className="flex justify-between py-1 text-slate-600"><span>Subscription amount</span><span>{formatINR(payment.subtotalAmount)}</span></div>
           {payment.discountAmount > 0 && (
-            <div className="flex justify-between py-1 text-emerald"><span>Coupon {payment.couponCode ? `(${payment.couponCode})` : ""}</span><span>-{formatINR(payment.discountAmount)}</span></div>
+            <div className="flex justify-between py-1 text-emerald">
+              <span>{payment.discountLabel ?? "Discount"}{payment.couponCode ? ` (${payment.couponCode})` : ""}</span>
+              <span>-{formatINR(payment.discountAmount)}</span>
+            </div>
           )}
           {payment.upgradeCreditAmount > 0 && (
             <div className="flex justify-between py-1 text-emerald"><span>Current subscription credit</span><span>-{formatINR(payment.upgradeCreditAmount)}</span></div>
           )}
-          <div className="flex justify-between py-1 text-slate-600"><span>Taxable amount</span><span>{formatINR(payment.taxableAmount)}</span></div>
+
           <div className="flex justify-between py-1 text-slate-600"><span>GST {(payment.gstRateBps / 100).toFixed(2)}%</span><span>{formatINR(payment.gstAmount)}</span></div>
           <div className="mt-2 flex justify-between border-t border-line pt-3 text-base font-bold text-ink"><span>Total paid</span><span>{formatINR(payment.amount)}</span></div>
         </div>

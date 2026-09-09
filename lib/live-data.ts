@@ -21,11 +21,18 @@ import {
   type LiveSubscriptionStatus,
   type LiveTopItem
 } from "@/lib/live-types";
-import { formatSubscriptionPlan, paidSubscriptionAmount, subscriptionPlanAmounts, sumPaidSubscriptionAmounts } from "@/lib/billing";
+import { formatSubscriptionPlan, paidSubscriptionAmount, subscriptionPlanAmounts } from "@/lib/billing";
+import { recurringSubscriptionValue } from "@/lib/pilot-reporting";
+import { isEligibleLaunchBusinessLocation } from "@/lib/launch-policy";
 import { getBusinessLogoUrl } from "@/lib/business-image";
 import { formatKycStatus, hasAllRequiredKycDocuments, kycDocumentLabel, kycDocumentRequirements } from "@/lib/kyc";
 import { subscribeToLiveChanges, type LiveChangePayload } from "@/lib/postgres-live-events";
 import { prisma } from "@/lib/prisma";
+import {
+  currentPaidSubscriptionWhere,
+  effectiveSubscriptionStatus,
+  isCurrentPaidSubscription
+} from "@/lib/subscription-access";
 
 type OrderWithRelations = Prisma.OrderGetPayload<{
   select: {
@@ -79,19 +86,34 @@ type ReportOrder = {
 
 type SubscriptionRow = Prisma.SubscriptionGetPayload<Record<string, never>>;
 type BusinessCouponRow = Prisma.BusinessCouponGetPayload<Record<string, never>>;
-type DashboardBusinessRow = Prisma.BusinessGetPayload<{
-  include: { logoImage: { select: { updatedAt: true } } };
-}>;
 
 const dashboardBusinessInclude = {
-  logoImage: { select: { updatedAt: true } }
+  logoImage: { select: { updatedAt: true } },
+  subscriptions: {
+    where: { status: "ACTIVE", paymentStatus: "COMPLETED" },
+    orderBy: { endDate: "desc" },
+    take: 1,
+    select: {
+      status: true,
+      paymentStatus: true,
+      startDate: true,
+      endDate: true
+    }
+  }
 } satisfies Prisma.BusinessInclude;
+type DashboardBusinessRow = Prisma.BusinessGetPayload<{
+  include: typeof dashboardBusinessInclude;
+}>;
 const adminSubscriptionSelect = {
   id: true,
   invoiceNumber: true,
   businessId: true,
   plan: true,
   amount: true,
+  subtotalAmount: true,
+  discountAmount: true,
+  gstAmount: true,
+  upgradeCreditAmount: true,
   status: true,
   paymentStatus: true,
   paymentProvider: true,
@@ -263,6 +285,7 @@ type RawCustomerCountsRow = {
 export type DashboardLiveScope =
   | "full"
   | "overview"
+  | "appointments"
   | "orders"
   | "menu"
   | "payments"
@@ -280,6 +303,11 @@ export const DASHBOARD_ORDERS_STREAM_REFRESH_INTERVAL_MS = 12000;
 
 const businessScopedTables = new Set([
   "AIInsight",
+  "Appointment",
+  "AppointmentAvailabilityRule",
+  "AppointmentProvider",
+  "AppointmentProviderService",
+  "AppointmentTimeOff",
   "AuditLog",
   "Business",
   "BusinessCoupon",
@@ -308,6 +336,7 @@ const businessScopedTables = new Set([
 const globalTables = new Set(["BusinessServiceType", "PlatformPaymentSettings", "PlatformSubscriptionCoupon"]);
 const dashboardScopeTables: Record<DashboardLiveScope, Set<string>> = {
   full: new Set([...businessScopedTables, ...globalTables]),
+  appointments: new Set(["Appointment", "AppointmentAvailabilityRule", "AppointmentProvider", "AppointmentProviderService", "AppointmentTimeOff", "Customer", "MenuItem", "Order", "OrderItem", "Payment", "WhatsappMessage"]),
   overview: new Set(["Business", "BusinessImage", "BusinessWalletEntry", "BusinessPayout", "Customer", "MenuCategory", "MenuItem", "Order", "OrderItem", "Payment", "Subscription", "WhatsappMessage"]),
   orders: new Set(["Customer", "Order", "OrderItem", "Payment", "WhatsappMessage"]),
   menu: new Set(["Business", "MenuCategory", "MenuItem", "MenuItemImage", "Order", "OrderItem"]),
@@ -772,8 +801,9 @@ function mapKycDocument(document: KycDocumentRow, includeDownloadUrl = false): L
 }
 
 function effectiveKycStatus(business: DashboardBusinessRow, documents: KycDocumentRow[]): LiveKycStatus {
+  const subscriptionStatus = effectiveSubscriptionStatus(business.subscriptionStatus, business.subscriptions);
   if (business.isVerified) return "APPROVED";
-  if (business.subscriptionStatus !== "ACTIVE") return "PAYMENT_PENDING";
+  if (subscriptionStatus !== "ACTIVE") return "PAYMENT_PENDING";
   if (business.kycStatus === "REJECTED") return "REJECTED";
   if (hasAllRequiredKycDocuments(documents)) return "UNDER_REVIEW";
   return "DOCUMENTS_PENDING";
@@ -785,10 +815,16 @@ function buildKycPayload(
   options: { includeDownloadUrls?: boolean } = {}
 ): LiveDashboardPayload["kyc"] {
   const hasAllDocuments = hasAllRequiredKycDocuments(documents);
+  const subscriptionStatus = effectiveSubscriptionStatus(business.subscriptionStatus, business.subscriptions);
   const status = effectiveKycStatus(business, documents);
   const uploadedDocumentCount = kycDocumentRequirements.filter((requirement) =>
     documents.some((document) => document.type === requirement.type)
   ).length;
+  const launchLocationReady = Boolean(
+    business.setupCompletedAt &&
+    business.address.trim() &&
+    isEligibleLaunchBusinessLocation(business, { requireCoordinates: true })
+  );
 
   return {
     status,
@@ -799,8 +835,8 @@ function buildKycPayload(
     uploadedDocumentCount,
     missingDocumentCount: Math.max(0, kycDocumentRequirements.length - uploadedDocumentCount),
     hasAllDocuments,
-    canUpload: business.subscriptionStatus === "ACTIVE" && !business.isVerified,
-    readyForReview: business.subscriptionStatus === "ACTIVE" && !business.isVerified && hasAllDocuments,
+    canUpload: subscriptionStatus === "ACTIVE" && !business.isVerified && launchLocationReady,
+    readyForReview: subscriptionStatus === "ACTIVE" && !business.isVerified && hasAllDocuments && launchLocationReady,
     submittedAt: business.kycSubmittedAt?.toISOString() ?? null,
     reviewedAt: business.kycReviewedAt?.toISOString() ?? null,
     rejectionReason: business.kycRejectionReason
@@ -808,6 +844,7 @@ function buildKycPayload(
 }
 
 function mapDashboardBusiness(business: DashboardBusinessRow): LiveDashboardPayload["business"] {
+  const subscriptionStatus = effectiveSubscriptionStatus(business.subscriptionStatus, business.subscriptions);
   return {
     id: business.id,
     name: business.name,
@@ -821,7 +858,7 @@ function mapDashboardBusiness(business: DashboardBusinessRow): LiveDashboardPayl
     logoUrl: getBusinessLogoUrl(business),
     businessType: business.businessType,
     subscriptionPlan: business.subscriptionPlan,
-    subscriptionStatus: business.subscriptionStatus,
+    subscriptionStatus,
     kycStatus: business.kycStatus,
     isActive: business.isActive,
     isVerified: business.isVerified,
@@ -969,16 +1006,15 @@ function buildReportPayload({
 }
 
 function buildBillingPayload(business: DashboardBusinessRow, subscriptions: SubscriptionRow[]): LiveDashboardPayload["billing"] {
-  const currentSubscription =
-    subscriptions.find((subscription) => subscription.plan === business.subscriptionPlan && subscription.status === business.subscriptionStatus) ??
-    subscriptions.find((subscription) => subscription.status === "ACTIVE");
+  const currentSubscription = subscriptions.find((subscription) => isCurrentPaidSubscription(subscription));
+  const subscriptionStatus = effectiveSubscriptionStatus(business.subscriptionStatus, subscriptions);
   const monthlyAmount = currentSubscription
     ? paidSubscriptionAmount(currentSubscription)
     : subscriptionPlanAmounts[business.subscriptionPlan];
 
   return {
     plan: business.subscriptionPlan,
-    status: business.subscriptionStatus,
+    status: subscriptionStatus,
     monthlyAmount,
     setupFeeAmount: null,
     currentPeriodStart: currentSubscription?.startDate.toISOString() ?? null,
@@ -1383,7 +1419,7 @@ export async function getDashboardLivePayload(
     return getBusinessShellPayload(business);
   }
 
-  if (scope === "menu" || scope === "campaigns" || scope === "staff") {
+  if (scope === "appointments" || scope === "menu" || scope === "campaigns" || scope === "staff") {
     return getBusinessShellPayload(business);
   }
 
@@ -1652,7 +1688,8 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
     walletPayoutsByBusiness,
     recentAuditLogs,
     recentWhatsappLogs,
-    recentPaymentRows
+    recentPaymentRows,
+    totalBusinessCount
   ] = await prisma.$transaction([
     prisma.business.findMany({
       orderBy: { createdAt: "desc" },
@@ -1660,7 +1697,6 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
       include: {
         ...dashboardBusinessInclude,
         _count: { select: { orders: true, customers: true } },
-        subscriptions: { orderBy: { createdAt: "desc" }, take: 1 },
         kycDocuments: {
           orderBy: { uploadedAt: "desc" },
           select: {
@@ -1675,12 +1711,21 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
         }
       }
     }),
-    prisma.business.count({ where: { isActive: true, isVerified: true, subscriptionStatus: "ACTIVE", kycStatus: "APPROVED" } }),
+    prisma.business.count({
+      where: {
+        isActive: true,
+        isVerified: true,
+        subscriptionStatus: "ACTIVE",
+        kycStatus: "APPROVED",
+        subscriptions: { some: currentPaidSubscriptionWhere(now) }
+      }
+    }),
     prisma.subscription.findMany({
       where: {
-        status: "ACTIVE",
-        paymentStatus: "COMPLETED",
-        endDate: { gt: now }
+        ...currentPaidSubscriptionWhere(now),
+        dataOrigin: "LIVE",
+        paidAt: { lte: now },
+        business: { dataOrigin: "LIVE" }
       },
       orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }],
       select: adminSubscriptionSelect
@@ -1731,7 +1776,8 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
       orderBy: { createdAt: "desc" },
       take: 80,
       select: adminPaymentLogSelect
-    })
+    }),
+    prisma.business.count()
   ]);
 
   const revenueMap = new Map(revenueByBusiness.map((item) => [item.businessId, Number(item._sum?.amount ?? 0)]));
@@ -1758,6 +1804,7 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
   const currentSubscriptions = Array.from(currentSubscriptionsByBusiness.values());
   const liveBusinesses: LiveAdminBusiness[] = businesses.map((business) => {
     const kycPayload = buildKycPayload(business, business.kycDocuments, { includeDownloadUrls: true });
+    const subscriptionStatus = effectiveSubscriptionStatus(business.subscriptionStatus, business.subscriptions);
 
     return {
       id: business.id,
@@ -1768,8 +1815,8 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
       state: business.state,
       plan: formatSubscriptionPlan(business.subscriptionPlan),
       currentSubscriptionAmount: paidSubscriptionAmount(currentSubscriptionsByBusiness.get(business.id)),
-      subscriptionStatus: business.subscriptionStatus,
-      status: businessStatus(business.isActive, business.isVerified, business.subscriptionStatus, kycPayload.status),
+      subscriptionStatus,
+      status: businessStatus(business.isActive, business.isVerified, subscriptionStatus, kycPayload.status),
       businessType: business.businessType,
       isOpen: business.isOpen,
       serviceVisitFee: Number(business.deliveryFee),
@@ -1831,7 +1878,7 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
   currentSubscriptions.forEach((subscription) => {
     subscriptionPlanCounts[subscription.plan as LiveSubscriptionPlan] += 1;
   });
-  const monthlyRecurringRevenue = sumPaidSubscriptionAmounts(currentSubscriptions);
+  const monthlyRecurringRevenue = currentSubscriptions.reduce((sum, subscription) => sum + recurringSubscriptionValue(subscription), 0);
   const auditLogs = sortAdminLogs(recentAuditLogs.map(mapAdminAuditLog)).slice(0, 60);
   const whatsappLogs = sortAdminLogs(recentWhatsappLogs.map(mapAdminWhatsappLog)).slice(0, 60);
   const paymentLogs = sortAdminLogs([
@@ -1843,7 +1890,7 @@ export async function getAdminLivePayload(): Promise<LiveAdminPayload> {
     source: "database",
     syncedAt: new Date().toISOString(),
     metrics: {
-      totalBusinesses: businesses.length,
+      totalBusinesses: totalBusinessCount,
       activeBusinesses,
       activeSubscriptions: currentSubscriptions.length,
       monthlyRecurringRevenue,

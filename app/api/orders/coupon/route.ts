@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { fulfillmentFeeForOrder, fulfillmentModesFromFlags } from "@/lib/business-rules";
 import { buildOrderCouponBreakdown, validateBusinessCoupon } from "@/lib/coupons";
+import { isEligibleLaunchBusinessLocation } from "@/lib/launch-policy";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { currentPaidSubscriptionWhere } from "@/lib/subscription-access";
 import { orderCouponPreviewSchema } from "@/lib/validations";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const now = new Date();
   const business = await prisma.business.findUnique({
     where: { slug: parsed.data.businessSlug },
     select: {
@@ -28,14 +31,31 @@ export async function POST(request: Request) {
       subscriptionStatus: true,
       kycStatus: true,
       businessType: true,
+      city: true,
+      state: true,
+      latitude: true,
+      longitude: true,
       acceptsPickup: true,
       acceptsDineIn: true,
       acceptsServiceAtLocation: true,
-      deliveryFee: true
+      deliveryFee: true,
+      subscriptions: {
+        where: currentPaidSubscriptionWhere(now),
+        select: { id: true },
+        take: 1
+      }
     }
   });
 
-  if (!business || !business.isActive || !business.isVerified || business.subscriptionStatus !== "ACTIVE" || business.kycStatus !== "APPROVED") {
+  if (
+    !business ||
+    !business.isActive ||
+    !business.isVerified ||
+    business.subscriptionStatus !== "ACTIVE" ||
+    business.subscriptions.length === 0 ||
+    business.kycStatus !== "APPROVED" ||
+    !isEligibleLaunchBusinessLocation(business, { requireCoordinates: true })
+  ) {
     return NextResponse.json({ error: "This business is not accepting coupon checks right now." }, { status: 403 });
   }
 

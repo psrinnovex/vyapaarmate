@@ -10,6 +10,7 @@ const rolePermissions: Record<Role, string[]> = {
   MANAGER: [
     "business:overview:read",
     "business:orders:*",
+    "business:appointments:*",
     "business:menu:*",
     "business:customers:*",
     "business:payments:read",

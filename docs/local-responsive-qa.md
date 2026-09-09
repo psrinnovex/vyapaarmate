@@ -6,7 +6,7 @@ This flow does not bypass auth, RBAC, `proxy.ts`, or protected route checks. Pro
 
 Do not seed responsive audit fixtures into hosted Supabase by default. The seed script refuses any `DATABASE_URL` host that is not `localhost`, `127.0.0.1`, `::1`, or `0.0.0.0`.
 
-Before Chrome launches, the audit verifies that the `RESPONSIVE_*` IDs exist in the same `DATABASE_URL` used by `npm run dev`. This is required because protected pages call the real session API, which revalidates the signed cookie against the `User` table.
+Before Chrome launches, the audit verifies that the `RESPONSIVE_*` IDs exist in the same `DATABASE_URL` used by `npm run dev`. This is required because protected pages call the real session API, which revalidates the signed cookie against the `User` table. The customer preflight also requires a local `Customer` record whose email and phone both match the seeded customer user.
 
 ## Authenticated Audit Data
 
@@ -19,12 +19,14 @@ Protected routes use the real app session format:
 - JWT payload: `name`, `email`, `role`, `businessId`
 - Expiry: `7d`
 - Owner access: local owner user has `role=OWNER` and the seeded audit business ID
+- Customer access: local customer user has `role=CUSTOMER`, no business tenant, and verified email and phone values matching the seeded customer record
 - Admin access: local admin user has `role=SUPER_ADMIN`
 - Support access: local support user has `role=SUPPORT_AGENT`
 
 The seed script creates fake local audit data only:
 
 - `audit.owner@example.test`
+- `audit.customer@example.test`
 - `audit.admin@example.test`
 - `audit.support@example.test`
 - `Audit Business`
@@ -34,13 +36,14 @@ It prints export commands for:
 ```sh
 export RESPONSIVE_OWNER_USER_ID=...
 export RESPONSIVE_OWNER_BUSINESS_ID=...
+export RESPONSIVE_CUSTOMER_USER_ID=...
 export RESPONSIVE_ADMIN_USER_ID=...
 export RESPONSIVE_SUPPORT_USER_ID=...
 ```
 
 Export those IDs in the shell that runs `scripts/qa/responsive-audit.mjs`.
 
-The audit rejects missing IDs, placeholder-looking IDs, IDs that do not exist in the connected database, and IDs that point to the wrong role or business.
+The audit rejects missing IDs, placeholder-looking IDs, IDs that do not exist in the connected database, IDs that point to the wrong role or business, and a customer user without a matching local customer record.
 
 ## Path A - Supabase Local
 
@@ -87,14 +90,20 @@ npm run dev
 Run the authenticated responsive audit from another terminal with the same `JWT_SECRET` and the printed `RESPONSIVE_*` IDs:
 
 ```sh
-RESPONSIVE_BASE_URL=http://localhost:3000 RESPONSIVE_ROUTES=/dashboard,/dashboard/orders,/dashboard/menu,/dashboard/payments,/admin,/admin/payments,/admin/support,/support node scripts/qa/responsive-audit.mjs
+RESPONSIVE_BASE_URL=http://localhost:3000 \
+RESPONSIVE_ROUTES=/install,/b/fresh-bowl-cloud-kitchen,/dashboard,/dashboard/appointments,/dashboard/orders,/dashboard/menu,/dashboard/payments,/user,/user/bookings,/user/profile,/user/settings,/admin,/admin/payments,/admin/support,/support \
+node scripts/qa/responsive-audit.mjs
 ```
+
+Public, customer, and business routes run at 320, 375, 390, 430, 768, 1024, 1280, and 1440 pixels. Admin and support routes intentionally run only at the desktop widths of 1024, 1280, and 1440 pixels.
 
 If the default local Supabase `postgres` database is already non-empty from another local project, do not point the audit at hosted Supabase. Create an isolated database inside the local Supabase Postgres container, keep the host on `127.0.0.1`, and use that database for both `DATABASE_URL` and `DIRECT_URL` before running Prisma, the seed, the dev server, and the audit.
 
 ## Latest Verified Local Run
 
 Status: Protected responsive audit passed against local seeded database.
+
+This is historical evidence for the earlier owner/admin/support matrix. The expanded customer, appointment, install, and current demo-store routes require a new local run before they can be reported as verified.
 
 Verified on 2026-07-03 with:
 
@@ -148,7 +157,9 @@ node scripts/seed-responsive-audit-users.mjs
 Copy and run the printed `export RESPONSIVE_*` lines, start the local app with the same local DB and JWT env, then run:
 
 ```sh
-RESPONSIVE_BASE_URL=http://localhost:3000 RESPONSIVE_ROUTES=/dashboard,/dashboard/orders,/dashboard/menu,/dashboard/payments,/admin,/admin/payments,/admin/support,/support node scripts/qa/responsive-audit.mjs
+RESPONSIVE_BASE_URL=http://localhost:3000 \
+RESPONSIVE_ROUTES=/install,/b/fresh-bowl-cloud-kitchen,/dashboard,/dashboard/appointments,/dashboard/orders,/dashboard/menu,/dashboard/payments,/user,/user/bookings,/user/profile,/user/settings,/admin,/admin/payments,/admin/support,/support \
+node scripts/qa/responsive-audit.mjs
 ```
 
 ## Remote Refusal And Disposable Staging Override
@@ -178,5 +189,7 @@ For each route and viewport the audit prints:
 - document status
 - pass/fail reason
 - cookie diagnostics when a protected route redirects
+
+The viewport policy is role-aware: public, customer, and business routes use the full phone-to-desktop matrix, while admin and support routes use desktop viewports only.
 
 The audit rejects missing values and obvious placeholder-looking values before launching Chrome.

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/api-session";
+import { getSessionUser, isMobileBearerRequest } from "@/lib/api-session";
 import { liveStream } from "@/lib/live-data";
 import type { LiveChangePayload } from "@/lib/postgres-live-events";
 import { prisma } from "@/lib/prisma";
@@ -54,6 +54,12 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const stream = url.searchParams.get("stream") === "1";
+  if (stream && (await isMobileBearerRequest())) {
+    return NextResponse.json(
+      { error: "Use bounded polling from the mobile app.", code: "MOBILE_STREAM_NOT_AVAILABLE" },
+      { status: 409, headers: { "Cache-Control": "no-store" } }
+    );
+  }
   const skipInitial = url.searchParams.get("skipInitial") === "1";
   const scope = userLiveScope(url.searchParams.get("scope"));
   const payload = () => Promise.resolve({ syncedAt: new Date().toISOString() });

@@ -1,5 +1,6 @@
 import { LandingPage, faqItems } from "@/components/landing/landing-page";
 import { pricingPlans } from "@/lib/constants";
+import { launchAreasServed, launchOffer } from "@/lib/launch-policy";
 import { createMetadata, jsonLd } from "@/lib/seo";
 import { absoluteUrl, siteConfig } from "@/lib/site";
 import {
@@ -49,16 +50,18 @@ function homeStructuredData() {
       publisher: {
         "@id": organizationId
       },
-      areaServed: {
-        "@type": "Country",
-        name: "India"
-      },
+      areaServed: launchAreasServed,
       offers: pricingPlans.map((plan) => ({
         "@type": "Offer",
         name: plan.name,
         price: String(plan.price),
         priceCurrency: "INR",
-        category: "subscription"
+        category: "subscription",
+        url: absoluteUrl(`/register?plan=${plan.id}`),
+        description: launchOffer.publiclyAdvertised
+          ? `Automatic 80% Bengaluru launch discount from the ${plan.name} list price of ${plan.listPrice} INR; GST and separate charges are additional.`
+          : `${plan.name} monthly subscription; GST and separate charges are additional.`,
+        eligibleRegion: launchAreasServed
       }))
     },
     {

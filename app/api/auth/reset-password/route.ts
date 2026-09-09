@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
     await tx.user.update({
       where: { id: passwordResetToken.userId },
-      data: { passwordHash, emailVerifiedAt: now }
+      data: { passwordHash, emailVerifiedAt: now, sessionVersion: { increment: 1 } }
     });
 
     await tx.passwordResetToken.updateMany({
@@ -65,6 +65,22 @@ export async function POST(request: Request) {
       },
       data: { usedAt: now }
     });
+
+    const mobileSessions = await tx.mobileSession.findMany({
+      where: { userId: passwordResetToken.userId, revokedAt: null },
+      select: { id: true }
+    });
+    const mobileSessionIds = mobileSessions.map((mobileSession) => mobileSession.id);
+    if (mobileSessionIds.length) {
+      await tx.mobileSession.updateMany({
+        where: { id: { in: mobileSessionIds }, revokedAt: null },
+        data: { revokedAt: now, revocationReason: "password_reset" }
+      });
+      await tx.mobileRefreshToken.updateMany({
+        where: { sessionId: { in: mobileSessionIds }, revokedAt: null },
+        data: { revokedAt: now }
+      });
+    }
 
     return passwordResetToken;
   });
