@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Lottie from "lottie-react";
 import { Bot, Loader2, Send, ShieldCheck, Star, X } from "lucide-react";
 import { company } from "@/lib/constants";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { cn, initials } from "@/lib/utils";
 
 type ChatAction = {
@@ -483,7 +484,7 @@ export function SiteChatbot() {
                 {message.role !== "system" && (
                   <div className={cn("flex max-w-[92%] items-center gap-2 sm:max-w-[86%]", message.role === "user" && "flex-row-reverse")}>
                     <span className={cn("grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-extrabold", message.role === "user" ? "bg-ink text-white" : "bg-emerald text-white")}>
-                      {message.role === "user" ? "You" : message.authorInitials ?? "VM"}
+                      {message.role === "user" ? "You" : !message.authorInitials || message.authorInitials === "VM" ? <BrandMark surface="dark" size={24} /> : message.authorInitials}
                     </span>
                     <span className="truncate text-[11px] font-bold text-slate-500">{message.role === "user" ? "You" : message.authorName ?? "Support"}</span>
                   </div>
@@ -953,7 +954,7 @@ function showSupportChatNotification(alert: IncomingSupportAlert) {
     body: alert.kind === "agent-message"
       ? trimSupportChatNotificationText(alert.message?.body ?? "Your support agent sent a reply.")
       : `${alert.ticket.assignedToName ?? "Support"} connected to you.`,
-    icon: "/icon.svg",
+    icon: "/brand/vyapaarmate-logo-light.png",
     tag: `customer-support-${alert.ticket.id}`
   });
 

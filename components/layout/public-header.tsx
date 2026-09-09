@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BrandMark } from "@/components/brand/brand-mark";
 import { ArrowUpRight, Menu, Store, UserPlus, X } from "lucide-react";
 import { company } from "@/lib/constants";
 import { sessionHomePath } from "@/lib/session-routing";
@@ -162,16 +163,10 @@ export function PublicHeader({
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
           <Link
             href="/"
+            aria-label="VyapaarMate home"
             className={cn("flex min-w-0 items-center gap-2 justify-self-start font-bold transition-colors", isScrolled ? "text-white" : "text-ink")}
           >
-            <span
-              className={cn(
-                "grid size-9 shrink-0 place-items-center rounded-lg transition-colors",
-                isScrolled ? "bg-emerald text-white" : "bg-ink text-white"
-              )}
-            >
-              VM
-            </span>
+            <BrandMark surface={isScrolled ? "dark" : "light"} size={40} priority />
             <span className="hidden sm:inline">{company.product}</span>
           </Link>
           {!isCustomer && (
