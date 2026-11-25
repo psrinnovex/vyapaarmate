@@ -79,8 +79,8 @@ export function PublicAuthActions({
             aria-controls="user-portal-menu"
             onClick={() => setMenuOpen((value) => !value)}
             className={cn(
-              "grid size-10 shrink-0 place-items-center rounded-lg border transition hover:border-emerald/40 hover:text-emerald",
-              isHeaderScrolled ? "border-white/15 bg-white/10 text-white" : "border-line bg-white text-ink shadow-sm"
+              "grid size-10 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:text-emerald",
+              isHeaderScrolled && "shadow-none"
             )}
           >
             <Menu className="size-5" />
@@ -88,7 +88,7 @@ export function PublicAuthActions({
           {menuOpen && (
             <div
               id="user-portal-menu"
-              className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-lg border border-line bg-white shadow-[0_18px_55px_rgba(15,23,42,0.18)]"
+              className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-[1.5rem] border border-white bg-white shadow-clay-lg"
             >
               <div className="border-b border-line px-4 py-3">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">User Portal</p>
@@ -106,8 +106,8 @@ export function PublicAuthActions({
                       aria-current={active ? "page" : undefined}
                       onClick={() => setMenuOpen(false)}
                       className={cn(
-                        "flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition",
-                        active ? "bg-ink text-white" : "text-slate-700 hover:bg-mist hover:text-ink"
+                        "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-bold transition",
+                        active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-700 hover:bg-mist hover:text-ink"
                       )}
                     >
                       <Icon className="size-4 shrink-0" />
@@ -121,7 +121,7 @@ export function PublicAuthActions({
                   type="button"
                   disabled={loggingOut}
                   onClick={logout}
-                  className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-bold text-berry-deep transition hover:bg-berry-soft disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <LogOut className="size-4 shrink-0" />
                   <span>{loggingOut ? "Logging out" : "Logout"}</span>
@@ -140,8 +140,8 @@ export function PublicAuthActions({
           aria-label={workspaceLabel}
           title={workspaceLabel}
           className={cn(
-            "inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 text-sm font-semibold text-white transition hover:-translate-y-0.5",
-            isHeaderScrolled ? "bg-emerald shadow-glow hover:bg-emerald/90" : "bg-ink shadow-soft hover:bg-emerald"
+            "clay-press inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-clay-ink px-3.5 text-sm font-extrabold text-white [--clay-shadow:rgba(13,10,34,0.6)]",
+            isHeaderScrolled && "h-9"
           )}
           data-marketing-event="navigation_click"
           data-marketing-location="public_header"
@@ -159,8 +159,8 @@ export function PublicAuthActions({
           disabled={loggingOut}
           onClick={logout}
           className={cn(
-            "grid size-10 shrink-0 place-items-center rounded-lg border transition hover:border-red-200 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60",
-            isHeaderScrolled ? "border-white/15 bg-white/10 text-white/75" : "border-line bg-white text-slate-600"
+            "grid size-10 shrink-0 place-items-center rounded-xl border border-white bg-white text-slate-600 shadow-clay-sm transition hover:text-berry-deep disabled:cursor-not-allowed disabled:opacity-60",
+            isHeaderScrolled && "size-9"
           )}
         >
           <Logout className="size-5" variant="Bulk" />
@@ -176,23 +176,23 @@ export function PublicAuthActions({
         aria-label="Login to view more businesses"
         title="Login to view more businesses"
         className={cn(
-          "hidden h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg border px-3 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-emerald/40 sm:inline-flex",
-          isHeaderScrolled ? "border-white/15 bg-white/10 text-white/80 hover:text-white" : "border-line bg-white text-slate-700 hover:text-ink"
+          "hidden h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-3 text-sm font-extrabold text-slate-600 transition hover:bg-white hover:text-ink sm:inline-flex",
+          isHeaderScrolled && "h-9"
         )}
         data-marketing-event="cta_click"
         data-marketing-location="public_header"
         data-marketing-label="view_more"
         data-marketing-destination="/login?type=user&next=%2Fbusinesses"
       >
-        <span className="hidden sm:inline">View More</span>
+        <span className="hidden sm:inline">Browse shops</span>
       </Link>
       <Link
         href="/register?plan=STARTER"
         aria-label="Register"
         title="Register"
         className={cn(
-          "hidden h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 sm:inline-flex",
-          isHeaderScrolled ? "bg-emerald shadow-glow hover:bg-emerald/90" : "bg-ink shadow-soft hover:bg-emerald"
+          "clay-press hidden h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-clay-emerald px-3.5 text-sm font-extrabold text-white [--clay-shadow:rgba(8,128,74,0.6)] sm:inline-flex",
+          isHeaderScrolled && "h-9"
         )}
         data-marketing-event="cta_click"
         data-marketing-location="public_header"

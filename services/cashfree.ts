@@ -1,4 +1,5 @@
 import crypto, { randomUUID } from "crypto";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export type CashfreeEnvironment = "sandbox" | "production";
 
@@ -97,6 +98,8 @@ function cashfreeBaseUrl() {
 }
 
 export function isCashfreeConfigured() {
+  // The demo environment answers Cashfree calls in-process (services/demo-cashfree.ts).
+  if (isDemoMode()) return true;
   return Boolean(cleanEnv(process.env.CASHFREE_APP_ID) && cleanEnv(process.env.CASHFREE_SECRET_KEY));
 }
 
@@ -210,6 +213,11 @@ function cashfreeOrderTags(input: CashfreeOrderInput) {
 }
 
 async function cashfreeRequest<T>(path: string, init: RequestInit = {}) {
+  if (isDemoMode()) {
+    const { demoCashfreeRequest } = await import("./demo-cashfree");
+    return demoCashfreeRequest<T & CashfreeErrorResponse>(path, init);
+  }
+
   if (!isCashfreeConfigured()) {
     throw new Error("Cashfree is not configured. Set CASHFREE_APP_ID and CASHFREE_SECRET_KEY, then restart the app.");
   }

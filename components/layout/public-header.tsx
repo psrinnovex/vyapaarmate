@@ -29,8 +29,8 @@ const defaultLinks: PublicHeaderLink[] = [
 export function PublicHeader({
   session,
   links = defaultLinks,
-  demoHref = "/b/fresh-bowl-cloud-kitchen",
-  demoLabel = "Book a Demo"
+  demoHref = "/demo",
+  demoLabel = "Live demo"
 }: {
   session?: SessionUser | null;
   links?: PublicHeaderLink[];
@@ -39,6 +39,7 @@ export function PublicHeader({
 }) {
   const [clientSession, setClientSession] = useState<SessionUser | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
@@ -75,14 +76,33 @@ export function PublicHeader({
     };
   }, [session]);
 
+  // Smart header: condenses after a few pixels, slides away while scrolling down and
+  // comes back on the first scroll up. One rAF per frame, state only changes on flips.
   useEffect(() => {
-    const updateScrolledState = () => {
-      setIsScrolled(window.scrollY > 12);
+    let lastY = window.scrollY;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const delta = y - lastY;
+      setIsScrolled(y > 12);
+      if (Math.abs(delta) > 6) {
+        setIsHidden(delta > 0 && y > 160);
+        lastY = y;
+      }
     };
 
-    updateScrolledState();
-    window.addEventListener("scroll", updateScrolledState, { passive: true });
-    return () => window.removeEventListener("scroll", updateScrolledState);
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -152,35 +172,35 @@ export function PublicHeader({
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
+  const hidden = isHidden && !mobileMenuOpen;
+
   return (
-    <div className="h-16">
+    <div className="h-[4.75rem]">
       <nav
+        aria-label="Main"
         className={cn(
-          "fixed inset-x-0 top-0 z-40 w-full border-b px-3 backdrop-blur transition-colors duration-300 sm:px-6 lg:px-8",
-          isScrolled ? "border-white/10 bg-black/95 shadow-[0_18px_55px_rgba(0,0,0,0.28)]" : "border-line bg-white/95"
+          "fixed inset-x-0 top-0 z-40 px-3 pt-3 transition-transform duration-300 ease-out motion-reduce:transition-none sm:px-5",
+          // No transform while visible: a transformed parent would trap the fixed mobile menu.
+          hidden && "-translate-y-[130%]"
         )}
       >
-        <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
-          <Link
-            href="/"
-            aria-label="VyapaarMate home"
-            className={cn("flex min-w-0 items-center gap-2 justify-self-start font-bold transition-colors", isScrolled ? "text-white" : "text-ink")}
-          >
-            <BrandMark surface={isScrolled ? "dark" : "light"} />
+        <div
+          className={cn(
+            "glass mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.4rem] px-2.5 transition-[height,box-shadow,background-color] duration-300 sm:px-3",
+            isScrolled ? "h-14 shadow-[0_22px_50px_-24px_rgba(31,27,58,0.45)]" : "h-16"
+          )}
+        >
+          <Link href="/" aria-label="VyapaarMate home" className="flex min-w-0 items-center gap-2 justify-self-start rounded-xl pr-2 font-extrabold tracking-[-0.02em] text-ink">
+            <BrandMark surface="light" className={cn("transition-all duration-300", isScrolled ? "size-9" : "size-10")} />
             <span className="hidden sm:inline">{company.product}</span>
           </Link>
           {!isCustomer && (
-            <div
-              className={cn(
-                "hidden min-w-0 items-center justify-center gap-4 text-[13px] font-semibold transition-colors xl:flex 2xl:gap-6 2xl:text-sm",
-                isScrolled ? "text-white/75" : "text-slate-600"
-              )}
-            >
+            <div className="hidden min-w-0 items-center justify-center gap-0.5 text-[13px] font-bold text-slate-600 xl:flex 2xl:text-sm">
               {links.map((link) => (
                 <Link
                   key={`${link.href}-${link.label}`}
                   href={link.href}
-                  className={cn("transition", isScrolled ? "hover:text-white" : "hover:text-ink")}
+                  className="rounded-full px-3 py-2 transition hover:bg-white hover:text-ink hover:shadow-clay-sm"
                   data-marketing-event="navigation_click"
                   data-marketing-location="public_header"
                   data-marketing-label={link.label}
@@ -192,12 +212,13 @@ export function PublicHeader({
               <Link
                 href={demoHref}
                 rel={demoRel}
-                className="transition hover:text-emerald"
+                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-emerald-soft px-3 py-2 text-emerald-deep transition hover:bg-emerald hover:text-white"
                 data-marketing-event="navigation_click"
                 data-marketing-location="public_header"
                 data-marketing-label={demoLabel}
                 data-marketing-destination={demoHref}
               >
+                <span className="size-1.5 rounded-full bg-current" />
                 {demoLabel}
               </Link>
             </div>
@@ -212,12 +233,7 @@ export function PublicHeader({
                 aria-controls="public-mobile-navigation"
                 aria-haspopup="dialog"
                 onClick={() => setMobileMenuOpen((value) => !value)}
-                className={cn(
-                  "relative grid size-10 shrink-0 place-items-center rounded-lg border transition duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 xl:hidden",
-                  isScrolled
-                    ? "border-white/15 bg-white/10 text-white shadow-[0_16px_40px_rgba(0,0,0,0.24)] hover:border-white/35 focus:ring-white/15"
-                    : "border-line bg-white text-ink shadow-sm hover:border-emerald/40 hover:text-emerald focus:ring-emerald/15"
-                )}
+                className="relative grid size-10 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition duration-300 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 xl:hidden"
               >
                 <Menu
                   className={cn(
@@ -244,11 +260,11 @@ export function PublicHeader({
           </div>
         </div>
         {!isCustomer && mobileMenuOpen && (
-          <div className="fixed inset-x-0 bottom-0 top-16 z-50 xl:hidden">
+          <div className="fixed inset-x-0 bottom-0 top-0 z-[-1] xl:hidden">
             <button
               type="button"
               aria-label="Close site navigation"
-              className="absolute inset-0 bg-ink/45 backdrop-blur-sm motion-safe:animate-[public-mobile-backdrop-in_180ms_ease-out]"
+              className="absolute inset-0 bg-ink/35 backdrop-blur-sm motion-safe:animate-[public-mobile-backdrop-in_180ms_ease-out]"
               onClick={closeMobileMenu}
             />
             <div
@@ -256,15 +272,16 @@ export function PublicHeader({
               id="public-mobile-navigation"
               role="dialog"
               aria-modal="true"
-              className="safe-bottom relative mx-3 mt-3 max-h-[calc(100svh-5.5rem)] overflow-y-auto rounded-lg border border-white/75 bg-white shadow-[0_28px_90px_rgba(13,19,33,0.24)] motion-safe:animate-[public-mobile-panel-in_260ms_cubic-bezier(0.22,1,0.36,1)] sm:ml-auto sm:mr-6 sm:max-w-sm"
+              aria-label="Site navigation"
+              className="safe-bottom relative mx-3 mt-[5.25rem] max-h-[calc(100svh-6.5rem)] overflow-y-auto rounded-[1.75rem] border border-white bg-white/95 shadow-clay-lg backdrop-blur-xl motion-safe:animate-[public-mobile-panel-in_260ms_cubic-bezier(0.22,1,0.36,1)] sm:ml-auto sm:mr-5 sm:max-w-sm"
             >
-              <div className="grid gap-2 px-3 py-3">
+              <div className="grid gap-1.5 px-3 py-3">
                 {links.map((link, index) => (
                   <Link
                     key={`${link.href}-${link.label}-mobile`}
                     href={link.href}
                     onClick={closeMobileMenu}
-                    className="flex h-12 items-center justify-between gap-3 rounded-lg px-3 text-sm font-bold text-slate-700 transition hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
+                    className="flex h-12 items-center justify-between gap-3 rounded-2xl px-3.5 text-[15px] font-extrabold text-slate-700 transition hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
                     style={{ animationDelay: `${70 + index * 45}ms` }}
                     data-marketing-event="navigation_click"
                     data-marketing-location="public_mobile_menu"
@@ -279,7 +296,7 @@ export function PublicHeader({
                   href={demoHref}
                   rel={demoRel}
                   onClick={closeMobileMenu}
-                  className="flex h-12 items-center justify-between gap-3 rounded-lg px-3 text-sm font-bold text-slate-700 transition hover:bg-emerald/10 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
+                  className="flex h-12 items-center justify-between gap-3 rounded-2xl bg-emerald-soft px-3.5 text-[15px] font-extrabold text-emerald-deep transition hover:bg-emerald hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald/15 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
                   style={{ animationDelay: `${70 + links.length * 45}ms` }}
                   data-marketing-event="navigation_click"
                   data-marketing-location="public_mobile_menu"
@@ -287,16 +304,16 @@ export function PublicHeader({
                   data-marketing-destination={demoHref}
                 >
                   <span className="min-w-0 truncate">{demoLabel}</span>
-                  <Store className="size-4 shrink-0 text-emerald" />
+                  <Store className="size-4 shrink-0" />
                 </Link>
               </div>
 
-              <div className="grid gap-2 border-t border-line bg-mist/70 px-3 py-3">
+              <div className="grid gap-2 border-t border-line bg-mist/60 px-3 py-3">
                 {resolvedSession ? (
                   <Link
                     href={workspaceHref}
                     onClick={closeMobileMenu}
-                    className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-bold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-emerald focus:outline-none focus:ring-4 focus:ring-emerald/20"
+                    className="clay-press inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-extrabold text-white [--clay-shadow:rgba(13,10,34,0.6)]"
                     data-marketing-event="navigation_click"
                     data-marketing-location="public_mobile_menu"
                     data-marketing-label={workspaceLabel}
@@ -310,25 +327,25 @@ export function PublicHeader({
                     <Link
                       href="/register?plan=STARTER"
                       onClick={closeMobileMenu}
-                      className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-ink px-4 text-sm font-bold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-emerald focus:outline-none focus:ring-4 focus:ring-emerald/20"
+                      className="clay-press inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-clay-emerald px-4 text-sm font-extrabold text-white [--clay-shadow:rgba(8,128,74,0.6)]"
                       data-marketing-event="cta_click"
                       data-marketing-location="public_mobile_menu"
                       data-marketing-label="join_bengaluru_launch"
                       data-marketing-destination="/register?plan=STARTER"
                     >
                       <UserPlus className="size-4" />
-                      <span>Join the Pilot</span>
+                      <span>Register your shop</span>
                     </Link>
                     <Link
                       href="/login?type=user&next=%2Fbusinesses"
                       onClick={closeMobileMenu}
-                      className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-bold text-ink transition hover:-translate-y-0.5 hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
+                      className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white bg-white px-4 text-sm font-extrabold text-ink shadow-clay-sm transition hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
                       data-marketing-event="cta_click"
                       data-marketing-location="public_mobile_menu"
                       data-marketing-label="view_more"
                       data-marketing-destination="/login?type=user&next=%2Fbusinesses"
                     >
-                      <span>View More</span>
+                      <span>Browse shops</span>
                     </Link>
                   </>
                 )}

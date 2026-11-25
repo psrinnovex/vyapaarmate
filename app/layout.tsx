@@ -1,15 +1,26 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import { Suspense } from "react";
 import { MarketingTags } from "@/components/marketing/marketing-tags";
 import { RouteAwareSpeedInsights } from "@/components/marketing/route-aware-speed-insights";
 import { LazySiteChatbot } from "@/components/support/lazy-site-chatbot";
 import { SupportAgentAlerts } from "@/components/support/support-agent-alerts";
 import { AppInstall } from "@/components/pwa/app-install";
+import { DemoRibbon } from "@/components/demo/demo-ribbon";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { createMetadata, getSearchVerification } from "@/lib/seo";
 import { launchSingleCityRestricted } from "@/lib/launch-policy";
 import { company, getSiteOrigin, siteConfig } from "@/lib/site";
 import "./globals.css";
+
+// DM Sans (SIL OFL) bundled locally: one variable file covers every weight we use and
+// works offline, so pages never wait on a font CDN.
+const dmSans = localFont({
+  src: "./fonts/dm-sans-latin-var.woff",
+  variable: "--font-dm-sans",
+  weight: "100 1000",
+  display: "swap"
+});
 
 export const metadata: Metadata = {
   ...createMetadata({ path: null }),
@@ -57,7 +68,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={siteConfig.language} className="scroll-smooth font-sans" data-scroll-behavior="smooth">
+    <html lang={siteConfig.language} className={`${dmSans.variable} scroll-smooth font-sans`} data-scroll-behavior="smooth">
       <body>
         <TooltipProvider>
           <MarketingTags />
@@ -67,6 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AppInstall />
           </Suspense>
           <LazySiteChatbot />
+          <DemoRibbon />
           <RouteAwareSpeedInsights />
         </TooltipProvider>
       </body>

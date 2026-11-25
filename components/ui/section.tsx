@@ -23,8 +23,8 @@ export function Section({
       <div className="mx-auto max-w-7xl min-w-0">
         {(eyebrow || title || body) && (
           <div className="mb-10 w-[calc(100vw-2rem)] min-w-0 max-w-3xl sm:w-auto">
-            {eyebrow && <p className="mb-3 text-sm font-bold uppercase text-emerald">{eyebrow}</p>}
-            {title && <Heading className="break-words text-3xl font-bold text-ink sm:text-4xl">{title}</Heading>}
+            {eyebrow && <p className="mb-4 inline-flex rounded-full bg-emerald-soft px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-emerald-deep shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">{eyebrow}</p>}
+            {title && <Heading className="break-words text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-[2.6rem] sm:leading-[1.08]">{title}</Heading>}
             {body && <p className="mt-4 break-words text-base leading-7 text-slate-600 sm:text-lg">{body}</p>}
           </div>
         )}
@@ -48,7 +48,7 @@ export function PageHeader({
       <div className="min-w-0 flex-1">
         <h1
           className={cn(
-            "break-words font-bold leading-tight",
+            "break-words font-extrabold leading-tight tracking-[-0.03em]",
             isDark ? "text-xl text-white sm:text-2xl" : "text-2xl text-ink sm:text-3xl"
           )}
         >

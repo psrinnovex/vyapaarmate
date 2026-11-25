@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDemoMode } from "@/lib/demo-mode";
 import { cashfreeEnvironment } from "@/services/cashfree";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
 import { prisma } from "@/lib/prisma";
@@ -145,6 +146,11 @@ export async function GET(request: Request, context: RouteContext) {
 
   if (!order.payment.cashfreePaymentSessionId || !order.payment.paymentRequestExpiresAt || order.payment.paymentRequestExpiresAt.getTime() <= Date.now()) {
     return NextResponse.redirect(redirectUrl);
+  }
+
+  if (isDemoMode()) {
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin).replace(/\/$/, "");
+    return NextResponse.redirect(`${appUrl}/demo/pay/order/${encodeURIComponent(publicToken)}`);
   }
 
   return new Response(

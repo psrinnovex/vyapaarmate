@@ -196,10 +196,10 @@ export default function HeroScene() {
 
   return (
     <div ref={rootRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0 bg-[linear-gradient(116deg,#eef4f8_0%,#f8fbff_42%,#ecf7f1_100%)]" />
-      <div className="absolute inset-0 opacity-[0.34] [background-image:linear-gradient(rgba(13,19,33,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(13,19,33,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
-      <div className="absolute inset-y-0 left-0 z-[1] hidden w-full bg-[linear-gradient(90deg,#eef4f8_0%,rgba(238,244,248,0.98)_34%,rgba(238,244,248,0.72)_48%,rgba(238,244,248,0)_67%)] lg:block" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(0deg,#eef4f8_0%,rgba(238,244,248,0)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(116deg,#f1eefc_0%,#f7f5ff_42%,#ecf7f1_100%)]" />
+      <div className="absolute inset-0 opacity-[0.34] [background-image:linear-gradient(rgba(29,26,57,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(29,26,57,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
+      <div className="absolute inset-y-0 left-0 z-[1] hidden w-full bg-[linear-gradient(90deg,#f1eefc_0%,rgba(238,244,248,0.98)_34%,rgba(238,244,248,0.72)_48%,rgba(238,244,248,0)_67%)] lg:block" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(0deg,#f1eefc_0%,rgba(238,244,248,0)_100%)]" />
 
       <div className="absolute right-4 top-20 z-[1] w-[210px] opacity-35 sm:right-10 sm:w-[260px] lg:hidden">
         <AnimatedFlowMark />
@@ -226,7 +226,7 @@ export default function HeroScene() {
 
 function DashboardWindow() {
   return (
-    <div data-hero-intro data-float className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_34px_100px_rgba(18,70,160,0.2)] backdrop-blur">
+    <div data-hero-intro data-float className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_34px_100px_rgba(79,91,213,0.2)] backdrop-blur">
       <div className="flex items-center justify-between border-b border-line bg-slate-50/90 px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="size-2 rounded-full bg-red-400" />
@@ -343,7 +343,7 @@ function DashboardWindow() {
 
 function CustomerPhone() {
   return (
-    <div data-hero-intro data-float className="rounded-[2rem] border border-ink/10 bg-ink p-2 shadow-[0_28px_90px_rgba(13,19,33,0.3)]">
+    <div data-hero-intro data-float className="rounded-[2rem] border border-ink/10 bg-ink p-2 shadow-[0_28px_90px_rgba(29,26,57,0.3)]">
       <div className="overflow-hidden rounded-[1.55rem] bg-white">
         <div className="bg-ink px-4 py-5 text-white">
           <div className="flex items-center justify-between">
@@ -396,7 +396,7 @@ function CustomerPhone() {
 
 function BusinessModePanel() {
   return (
-    <div data-hero-intro data-float className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_24px_80px_rgba(18,70,160,0.18)] backdrop-blur">
+    <div data-hero-intro data-float className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_24px_80px_rgba(79,91,213,0.18)] backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Location className="size-6 text-emerald" variant="Bulk" />
@@ -422,12 +422,12 @@ function AnimatedFlowMark() {
       <svg viewBox="0 0 420 360" role="img" className="size-full overflow-visible">
         <defs>
           <linearGradient id="flowStroke" x1="44" x2="370" y1="60" y2="300" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#1246a0" />
-            <stop offset="0.52" stopColor="#6c3df4" />
-            <stop offset="1" stopColor="#11a66a" />
+            <stop stopColor="#4f5bd5" />
+            <stop offset="0.52" stopColor="#7c5cff" />
+            <stop offset="1" stopColor="#12b76a" />
           </linearGradient>
           <filter id="flowShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="16" floodColor="#1246a0" floodOpacity="0.18" stdDeviation="16" />
+            <feDropShadow dx="0" dy="16" floodColor="#4f5bd5" floodOpacity="0.18" stdDeviation="16" />
           </filter>
         </defs>
         <path data-flow-path d="M54 172C92 74 173 65 211 143C250 223 322 219 369 118" fill="none" stroke="url(#flowStroke)" strokeLinecap="round" strokeWidth="8" />
@@ -446,7 +446,7 @@ function AnimatedFlowMark() {
 function FlowNode({ x, y, icon }: { x: number; y: number; icon: ReactNode }) {
   return (
     <foreignObject x={x - 30} y={y - 30} width="60" height="60">
-      <div data-flow-node className="grid size-[60px] place-items-center rounded-lg border border-white/80 bg-white text-ocean shadow-[0_18px_50px_rgba(18,70,160,0.18)]">
+      <div data-flow-node className="grid size-[60px] place-items-center rounded-lg border border-white/80 bg-white text-ocean shadow-[0_18px_50px_rgba(79,91,213,0.18)]">
         {icon}
       </div>
     </foreignObject>

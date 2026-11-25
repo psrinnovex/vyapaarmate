@@ -328,7 +328,7 @@ export function DashboardShell({
             <div
               ref={mobilePanelRef}
               id="dashboard-mobile-navigation"
-              className="dashboard-mobile-drawer safe-bottom relative flex h-full max-h-[100svh] w-[min(88vw,22.5rem)] flex-col overflow-hidden border-r border-line bg-white p-4 shadow-[34px_0_90px_rgba(13,19,33,0.24)] motion-safe:animate-[admin-mobile-drawer-in_340ms_cubic-bezier(0.22,1,0.36,1)]"
+              className="dashboard-mobile-drawer safe-bottom relative flex h-full max-h-[100svh] w-[min(88vw,22.5rem)] flex-col overflow-hidden border-r border-line bg-white p-4 shadow-[34px_0_90px_rgba(29,26,57,0.24)] motion-safe:animate-[admin-mobile-drawer-in_340ms_cubic-bezier(0.22,1,0.36,1)]"
             >
               <div className="flex shrink-0 items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
@@ -354,7 +354,7 @@ export function DashboardShell({
                       aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex h-12 min-w-0 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
-                        active ? "bg-ocean text-white shadow-[0_18px_42px_rgba(18,70,160,0.16)]" : "text-slate-600 hover:bg-mist hover:text-ink"
+                        active ? "bg-ocean text-white shadow-[0_18px_42px_rgba(79,91,213,0.16)]" : "text-slate-600 hover:bg-mist hover:text-ink"
                       )}
                       onClick={() => setMobileNavOpen(false)}
                     >
@@ -384,7 +384,7 @@ export function DashboardShell({
           </main>
           {mobileQuickNav.length > 0 && (
             <nav
-              className="safe-bottom fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-lg border border-line bg-white/95 p-1 shadow-[0_20px_60px_rgba(13,19,33,0.18)] backdrop-blur-xl lg:hidden"
+              className="safe-bottom fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-lg border border-line bg-white/95 p-1 shadow-[0_20px_60px_rgba(29,26,57,0.18)] backdrop-blur-xl lg:hidden"
               aria-label="Dashboard quick navigation"
             >
               {mobileQuickNav.map((item) => {

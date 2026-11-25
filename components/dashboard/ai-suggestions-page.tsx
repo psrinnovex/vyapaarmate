@@ -31,7 +31,7 @@ import { Progress } from "@/components/ui/progress";
 
 type PaymentSort = "priority" | "amount" | "overdue" | "repeat";
 
-const chartColors = ["#1246a0", "#11a66a", "#6c3df4", "#f59e0b", "#0d1321", "#e11d48", "#0891b2", "#7c3aed"];
+const chartColors = ["#4f5bd5", "#12b76a", "#7c5cff", "#f59e0b", "#1d1a39", "#e11d48", "#0891b2", "#7c3aed"];
 
 function confidenceVariant(confidence: IntelligenceConfidence) {
   if (confidence === "High") return "emerald";
@@ -350,7 +350,7 @@ export function AiSuggestionsPage() {
           title="AI Suggestions"
           body="Demand forecasts, repeat-customer opportunities, payment priorities, health score, and next best owner actions."
         />
-        <Card className="border-red-200 bg-red-50 text-red-700">
+        <Card className="border-berry/20 bg-berry-soft text-berry-deep">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-1 size-5 shrink-0" />
@@ -390,7 +390,7 @@ export function AiSuggestionsPage() {
 
       <EngineReadinessPanel engine={data.engine} />
 
-      <Card className="mb-4 overflow-hidden border-ocean/15 bg-[linear-gradient(135deg,#f8fbff_0%,#eef7f2_54%,#ffffff_100%)] p-4 shadow-[0_18px_54px_rgba(13,19,33,0.08)]">
+      <Card className="mb-4 overflow-hidden border-ocean/15 bg-[linear-gradient(135deg,#f7f5ff_0%,#eef7f2_54%,#ffffff_100%)] p-4 shadow-[0_18px_54px_rgba(29,26,57,0.08)]">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -408,7 +408,7 @@ export function AiSuggestionsPage() {
               {health.explanation} Confidence is {health.confidence.toLowerCase()} from {health.observationCount} recorded transactions. Generated {formatGeneratedAt(data.generatedAt)} without paid AI API calls.
             </p>
           </div>
-          <div className="grid min-h-24 min-w-24 place-items-center rounded-lg border border-ocean/15 bg-white p-4 text-center shadow-[0_14px_36px_rgba(18,70,160,0.10)]">
+          <div className="grid min-h-24 min-w-24 place-items-center rounded-lg border border-ocean/15 bg-white p-4 text-center shadow-[0_14px_36px_rgba(79,91,213,0.10)]">
             <p className="text-4xl font-extrabold leading-none text-ink">{health.score}</p>
             <p className="mt-2 text-xs font-bold uppercase text-slate-500">Grade {health.grade} · {health.confidence} confidence</p>
           </div>
@@ -453,10 +453,10 @@ export function AiSuggestionsPage() {
               <div className="mt-4 h-56 rounded-lg border border-line bg-white p-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demandChartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#dce6f1" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e8e4f5" />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={11} />
                     <YAxis tickLine={false} axisLine={false} fontSize={11} />
-                    <Tooltip cursor={{ fill: "#f5f8fb" }} formatter={(value, _name, item) => [value, `${item.payload.slot} forecast`]} />
+                    <Tooltip cursor={{ fill: "#f6f4ff" }} formatter={(value, _name, item) => [value, `${item.payload.slot} forecast`]} />
                     <Bar dataKey="quantity" radius={[8, 8, 0, 0]}>
                       {demandChartData.map((_, index) => (
                         <Cell key={index} fill={chartColors[index % chartColors.length]} />

@@ -4045,7 +4045,7 @@ function BusinessApprovalActions({
         title={approvalTitle ?? `Approve ${business.name}`}
         disabled={approvalDisabled}
         onClick={() => onBusinessAction?.(business, "approve")}
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald/25 bg-emerald px-2.5 text-xs font-extrabold text-white shadow-[0_12px_28px_rgba(17,166,106,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald/90 disabled:translate-y-0 disabled:border-line disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald/25 bg-emerald px-2.5 text-xs font-extrabold text-white shadow-[0_12px_28px_rgba(18,183,106,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald/90 disabled:translate-y-0 disabled:border-line disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
       >
         <CheckCircle2 className="size-4" />
         Approve

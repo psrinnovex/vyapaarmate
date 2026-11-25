@@ -22,6 +22,7 @@ import type { DemoBusiness, DemoMenuItem } from "@/lib/demo-data";
 import { categoriesForBusiness } from "@/lib/demo-data";
 import { cn, formatINR } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ClayIllustration, illustrationNameForBusinessType } from "@/components/illustrations/clay-illustrations";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { EmailInput, PhoneInput } from "@/components/ui/form-fields";
@@ -99,7 +100,7 @@ function clearSelectionLabel(copy: BusinessConsoleCopy) {
   return copy.transactionSingular === "Order" ? "Clear cart" : "Clear";
 }
 
-const clearSelectionButtonClass = "h-8 px-2.5 text-xs border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100";
+const clearSelectionButtonClass = "h-8 px-2.5 text-xs border-berry/20 bg-berry-soft text-berry-deep hover:border-red-300 hover:bg-red-100";
 const publicMenuPageSize = 28;
 
 function gstRateLabel(rateBps: number) {
@@ -253,7 +254,6 @@ export function CustomerOrderPage({
   const selectionClearLabel = clearSelectionLabel(copy);
   const BusinessIcon = icons.businessIcon;
   const CategoryIcon = icons.categoryIcon;
-  const ItemIcon = icons.itemIcon;
   const TransactionIcon = icons.transactionIcon;
   const categories = categoriesForBusiness(business);
   const heroImageUrl = business.logoUrl || business.menu.find((item) => item.imageUrl)?.imageUrl || null;
@@ -782,9 +782,9 @@ export function CustomerOrderPage({
   return (
     <main className="public-order-shell min-h-screen pb-28 text-ink xl:pb-0">
       <div className="public-order-header-spacer">
-        <header className="public-order-fixed-header fixed inset-x-0 top-0 z-40 border-b border-white/70 bg-white/95 px-4 pb-3 shadow-[0_16px_40px_rgba(13,19,33,0.08)] backdrop-blur-2xl lg:pb-4">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
-            <Link href="/" className="grid size-11 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-emerald/30 focus:outline-none focus:ring-4 focus:ring-emerald/15">
+        <header className="public-order-fixed-header fixed inset-x-0 top-0 z-40 px-3 pb-2 sm:px-5">
+          <div className="glass mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[1.4rem] px-2 py-2">
+            <Link href="/" aria-label="Back" className="grid size-11 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15">
               <ArrowLeft className="size-5" />
             </Link>
             <div className="min-w-0 flex-1">
@@ -793,11 +793,12 @@ export function CustomerOrderPage({
             </div>
             <div className="flex items-center gap-2">
               <Button
-                variant="emerald"
+                variant="dark"
                 size="sm"
-                className="h-11 shrink-0 rounded-lg bg-ink px-4 shadow-[0_18px_40px_rgba(13,19,33,0.18)] hover:bg-[#16382f]"
+                className="h-11 shrink-0 rounded-xl px-4"
                 icon={<TransactionIcon className="size-4" />}
                 onClick={() => setCartOpen(true)}
+                aria-label={`Open ${selectionTitle.toLowerCase()} (${cartItemCount})`}
               >
                 {cartItemCount}
               </Button>
@@ -818,11 +819,12 @@ export function CustomerOrderPage({
             priority
           />
         )}
-        <div className="absolute inset-0 z-0 bg-[linear-gradient(90deg,rgba(13,19,33,0.92),rgba(13,19,33,0.76)_48%,rgba(13,19,33,0.9))]" />
+        <div className="absolute inset-0 z-0 bg-[linear-gradient(120deg,rgba(11,125,73,0.94)_0%,rgba(54,64,176,0.9)_58%,rgba(90,61,224,0.92)_100%)]" />
+        <div aria-hidden="true" className="vm-blob -right-16 -top-10 z-0 size-72 bg-mango opacity-30" />
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
             <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-4 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-x-5">
-              <div className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-lg border border-white/25 bg-white text-2xl font-extrabold text-ink shadow-[0_24px_70px_rgba(0,0,0,0.28)] sm:size-24">
+              <div className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-[1.6rem] border-4 border-white bg-white text-2xl font-extrabold text-ink shadow-clay-lg sm:size-24">
                 {business.logoUrl ? (
                   <Image
                     src={business.logoUrl}
@@ -888,7 +890,7 @@ export function CustomerOrderPage({
               </div>
             </div>
 
-            <div className="hidden rounded-lg border border-white/20 bg-white/[0.08] p-4 shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur-md lg:block">
+            <div className="glass-dark relative z-10 hidden rounded-[1.75rem] p-4 lg:block">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold text-white/60">{copy.transactionSingular} status</p>
@@ -900,7 +902,7 @@ export function CustomerOrderPage({
                         : "Not accepting now"}
                   </p>
                 </div>
-                <span className="grid size-11 place-items-center rounded-lg bg-emerald/20 text-emerald-100">
+                <span className="clay-orb size-11 rounded-2xl bg-clay-emerald text-white">
                   <Sparkles className="size-5" />
                 </span>
               </div>
@@ -926,20 +928,20 @@ export function CustomerOrderPage({
       <section className="mx-auto grid min-w-0 max-w-[100rem] gap-6 px-4 py-6 xl:grid-cols-[minmax(0,1fr)_420px]">
         {checkoutStep === "selection" ? (
           <div className="min-w-0">
-            <div className="public-order-sticky-controls sticky z-30 -mx-4 min-w-0 border-b border-white/70 bg-white/[0.82] px-4 py-4 shadow-[0_18px_46px_rgba(13,19,33,0.07)] backdrop-blur-2xl sm:mx-0 sm:rounded-lg sm:border">
+            <div className="public-order-sticky-controls glass sticky z-30 -mx-4 min-w-0 rounded-none px-4 py-3.5 sm:mx-0 sm:rounded-[1.75rem] sm:py-4">
               {!acceptingImmediateRequests && (
                 <div className={cn(
                   "mb-3 flex items-start gap-2 rounded-lg border p-3 text-sm",
                   business.appointmentBookingEnabled && businessApproved
-                    ? "border-blue-200 bg-blue-50 text-blue-800"
-                    : "border-red-200 bg-red-50 text-red-700"
+                    ? "border-ocean/15 bg-ocean-soft text-ocean-deep"
+                    : "border-berry/20 bg-berry-soft text-berry-deep"
                 )}>
                   <AlertCircle className="mt-0.5 size-4 shrink-0" />
                   <span>{unavailableMessage}</span>
                 </div>
               )}
               {businessOpen && profileNotice && (
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">
                   <span className="flex min-w-0 items-start gap-2">
                     <LockKeyhole className="mt-0.5 size-4 shrink-0" />
                     <span>{profileNotice}</span>
@@ -957,7 +959,7 @@ export function CustomerOrderPage({
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={copy.searchPlaceholder}
-                  className="h-12 border-white/80 bg-white/[0.92] pl-12 text-base shadow-sm focus:border-emerald focus:ring-emerald/20"
+                  className="h-12 border-white bg-white pl-12 text-base shadow-clay-inset focus:border-emerald focus:ring-emerald/20"
                 />
               </div>
               <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible">
@@ -967,10 +969,10 @@ export function CustomerOrderPage({
                     key={category}
                     onClick={() => setActiveCategory(category)}
                     className={cn(
-                      "flex h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-bold shadow-sm transition hover:-translate-y-0.5",
+                      "flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-extrabold transition hover:-translate-y-0.5",
                       category === activeCategory
-                        ? "border-ink bg-ink text-white shadow-[0_16px_34px_rgba(13,19,33,0.18)]"
-                        : "border-white/90 bg-white/[0.92] text-slate-700 hover:border-emerald/30"
+                        ? "border-transparent bg-clay-ink text-white shadow-clay-sm"
+                        : "border-white bg-white text-slate-600 shadow-clay-sm hover:text-ink"
                     )}
                   >
                     <CategoryIcon className="size-3.5" />
@@ -985,8 +987,8 @@ export function CustomerOrderPage({
                 const quantity = cart[item.id]?.quantity ?? 0;
                 const showFoodMarker = item.foodType !== "NOT_APPLICABLE";
                 return (
-                  <article key={item.id} className="public-service-card flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-white/[0.85] bg-white/[0.94] p-2.5 shadow-[0_18px_52px_rgba(13,19,33,0.08)] backdrop-blur sm:p-3">
-                    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-md bg-slate-100">
+                  <article key={item.id} className="public-service-card vm-reveal-on-scroll clay flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] p-2.5 sm:p-3">
+                    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-[1.2rem] bg-mist">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}
@@ -996,11 +998,11 @@ export function CustomerOrderPage({
                           className="object-cover transition duration-300 hover:scale-[1.03]"
                         />
                       ) : (
-                        <div className="grid h-full place-items-center bg-[linear-gradient(135deg,rgba(17,166,106,0.14),rgba(18,70,160,0.12),rgba(244,213,141,0.16))] text-ocean">
-                          <ItemIcon className="size-8" />
+                        <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f3f0ff_45%,#e3f7ec_100%)]">
+                          <ClayIllustration name={illustrationNameForBusinessType(business.businessType)} className="w-[62%]" />
                         </div>
                       )}
-                      {item.isBestSeller && <span className="absolute left-1.5 top-1.5 max-w-[calc(100%-0.75rem)] truncate rounded-full border border-white/70 bg-[#fff7df] px-2 py-0.5 text-[9px] font-extrabold text-[#6f4610] shadow-sm sm:left-2 sm:top-2 sm:px-2.5 sm:py-1 sm:text-[10px]">Best seller</span>}
+                      {item.isBestSeller && <span className="sticker absolute left-1.5 top-1.5 max-w-[calc(100%-0.75rem)] -rotate-3 truncate bg-clay-mango px-2 py-0.5 text-[9px] text-ink sm:left-2 sm:top-2 sm:px-2.5 sm:py-1 sm:text-[10px]">Best seller</span>}
                     </div>
                   <div className="flex min-w-0 flex-1 flex-col pt-2.5">
                     {(showFoodMarker || !item.isAvailable) && (
@@ -1023,7 +1025,7 @@ export function CustomerOrderPage({
                         <p className="min-w-0 truncate text-right text-base font-extrabold leading-tight text-ink sm:text-lg">{formatINR(item.price)}</p>
                       </div>
                       {quantity > 0 ? (
-                        <div className="grid h-9 grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] overflow-hidden rounded-lg border border-emerald/30 bg-emerald/10 shadow-sm">
+                        <div className="grid h-9 grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] overflow-hidden rounded-xl bg-emerald-soft shadow-clay-inset">
                           <button type="button" className="grid h-9 place-items-center text-emerald" onClick={() => decrement(item.id)} aria-label={`Remove one ${item.name}`}>
                             <Minus className="size-4" />
                           </button>
@@ -1033,7 +1035,7 @@ export function CustomerOrderPage({
                           </button>
                         </div>
                       ) : (
-                        <Button size="sm" variant="secondary" className="h-9 w-full border-emerald/25 bg-emerald/10 text-emerald hover:border-emerald/40 hover:bg-emerald/20" onClick={() => addItem(item)} disabled={!bookingOpen || !item.isAvailable}>
+                        <Button size="sm" variant="emerald" className="h-9 w-full" icon={<Plus className="size-4" />} onClick={() => addItem(item)} disabled={!bookingOpen || !item.isAvailable}>
                           Add
                         </Button>
                       )}
@@ -1143,13 +1145,37 @@ export function CustomerOrderPage({
         </aside>
       </section>
 
+      {cartItemCount > 0 && !cartOpen && (
+        <div className="safe-bottom fixed inset-x-3 bottom-0 z-40 pb-3 xl:hidden">
+          <button
+            type="button"
+            onClick={() => setCartOpen(true)}
+            className="clay-press flex w-full items-center justify-between gap-3 rounded-[1.4rem] bg-clay-ink px-3 py-2.5 text-left text-white [--clay-shadow:rgba(13,10,34,0.6)] motion-safe:animate-pop"
+          >
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10">
+                <TransactionIcon className="size-5" />
+              </span>
+              <span className="min-w-0 leading-tight">
+                <span className="block text-xs font-bold text-white/65">
+                  {cartItemCount} {cartItemCount === 1 ? copy.itemSingular.toLowerCase() : copy.itemPlural.toLowerCase()}
+                </span>
+                <span className="block text-base font-extrabold">{formatINR(statusTotal)}</span>
+              </span>
+            </span>
+            <span className="shrink-0 rounded-xl bg-clay-emerald px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">Continue</span>
+          </button>
+        </div>
+      )}
+
       {cartOpen && (
         <div className="fixed inset-0 z-50 bg-ink/40 xl:hidden">
-          <div className="safe-bottom absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-lg border-t border-white/70 bg-white/[0.94] p-4 shadow-[0_-24px_80px_rgba(13,19,33,0.22)] backdrop-blur-2xl">
+          <div className="safe-bottom absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-[2rem] border-t border-white bg-white/95 p-4 shadow-[0_-24px_80px_rgba(29,26,57,0.22)] backdrop-blur-2xl motion-safe:animate-[vm-sheet-in_320ms_cubic-bezier(0.22,1,0.36,1)]">
+            <span aria-hidden="true" className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-slate-200" />
             <div className="mb-3 flex items-center justify-between">
               {checkoutStep === "selection" ? (
                 <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink text-white shadow-[0_14px_32px_rgba(13,19,33,0.18)]">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink text-white shadow-[0_14px_32px_rgba(29,26,57,0.18)]">
                     <TransactionIcon className="size-4" />
                   </span>
                   <h2 className="truncate text-lg font-extrabold text-ink">
@@ -1253,7 +1279,7 @@ export function CustomerOrderPage({
 
       {descriptionModalItem && (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-ink/50 px-4 py-6 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="service-description-title">
-          <div className="w-full max-w-md rounded-lg border border-white/80 bg-white p-5 shadow-[0_24px_90px_rgba(13,19,33,0.28)]">
+          <div className="w-full max-w-md rounded-[1.75rem] border border-white bg-white p-5 shadow-clay-lg">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-bold text-emerald">{descriptionModalItem.category}</p>
@@ -1430,7 +1456,7 @@ function SelectionPanel({
         </div>
       ) : null}
       {cartLines.length === 0 ? (
-        <p className={cn("flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(17,166,106,0.08),rgba(18,70,160,0.06))] p-4 text-sm leading-6 text-slate-600", showSelectionHeading ? "mt-5" : "mt-0")}>
+        <p className={cn("flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(18,183,106,0.08),rgba(79,91,213,0.06))] p-4 text-sm leading-6 text-slate-600", showSelectionHeading ? "mt-5" : "mt-0")}>
           <ItemIcon className="mt-0.5 size-5 shrink-0 text-emerald" />
           <span>
             Add {copy.itemPlural.toLowerCase()} to place a {copy.transactionSingular.toLowerCase()} on the website.
@@ -1466,7 +1492,7 @@ function SelectionPanel({
 
       <SelectedItemsSummary subtotal={subtotal} />
 
-      <Button type="button" variant="emerald" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(17,166,106,0.28)] hover:bg-[#0f915f]" icon={<TransactionIcon className="size-4" />} disabled={continueDisabled} onClick={onContinue}>
+      <Button type="button" variant="emerald" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(18,183,106,0.28)] hover:bg-[#0f915f]" icon={<TransactionIcon className="size-4" />} disabled={continueDisabled} onClick={onContinue}>
         {continueLabel}
       </Button>
     </section>
@@ -1532,7 +1558,7 @@ function BillingSelectedServicesPanel({
       </div>
 
       {cartLines.length === 0 ? (
-        <p className="mt-5 flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(17,166,106,0.08),rgba(18,70,160,0.06))] p-4 text-sm leading-6 text-slate-600">
+        <p className="mt-5 flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(18,183,106,0.08),rgba(79,91,213,0.06))] p-4 text-sm leading-6 text-slate-600">
           <ItemIcon className="mt-0.5 size-5 shrink-0 text-emerald" />
           <span>
             Add {copy.itemPlural.toLowerCase()} to place a {copy.transactionSingular.toLowerCase()} on the website.
@@ -1549,7 +1575,7 @@ function BillingSelectedServicesPanel({
                   {line.imageUrl ? (
                     <Image src={line.imageUrl} alt={line.name} fill sizes="120px" className="object-cover" unoptimized={lineImageIsSvg} />
                   ) : (
-                    <div className="grid h-full place-items-center bg-[linear-gradient(135deg,rgba(17,166,106,0.14),rgba(18,70,160,0.12),rgba(244,213,141,0.16))] text-ocean">
+                    <div className="grid h-full place-items-center bg-[linear-gradient(135deg,rgba(18,183,106,0.14),rgba(79,91,213,0.12),rgba(244,213,141,0.16))] text-ocean">
                       <ItemIcon className="size-7" />
                     </div>
                   )}
@@ -1742,7 +1768,7 @@ function BillingPanel({
             {selectionTitle}
           </button>
           <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-ink text-white shadow-[0_18px_40px_rgba(13,19,33,0.18)]">
+            <span className="grid size-10 place-items-center rounded-lg bg-ink text-white shadow-[0_18px_40px_rgba(29,26,57,0.18)]">
               <ReceiptText className="size-5" />
             </span>
             <h2 className="text-lg font-extrabold text-ink">Billing details</h2>
@@ -1755,7 +1781,7 @@ function BillingPanel({
       </div>
       {showSelectedServices && (
         cartLines.length === 0 ? (
-          <p className="mt-5 flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(17,166,106,0.08),rgba(18,70,160,0.06))] p-4 text-sm leading-6 text-slate-600">
+          <p className="mt-5 flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(18,183,106,0.08),rgba(79,91,213,0.06))] p-4 text-sm leading-6 text-slate-600">
             <ItemIcon className="mt-0.5 size-5 shrink-0 text-emerald" />
             <span>
               Add {copy.itemPlural.toLowerCase()} to place a {copy.transactionSingular.toLowerCase()} on the website.
@@ -1798,7 +1824,7 @@ function BillingPanel({
       )}
 
       {businessOpen && profileNotice && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">
           <span className="flex min-w-0 items-start gap-2">
             <LockKeyhole className="mt-0.5 size-4 shrink-0" />
             <span>{profileNotice}</span>
@@ -1821,7 +1847,7 @@ function BillingPanel({
               key={type}
               type="button"
               onClick={() => setOrderType(type)}
-              className={cn("flex h-10 items-center justify-center gap-1.5 rounded-md text-sm font-bold transition", orderType === type ? "bg-white text-ink shadow-[0_10px_24px_rgba(13,19,33,0.10)]" : "text-slate-600 hover:text-ink")}
+              className={cn("flex h-10 items-center justify-center gap-1.5 rounded-md text-sm font-bold transition", orderType === type ? "bg-white text-ink shadow-[0_10px_24px_rgba(29,26,57,0.10)]" : "text-slate-600 hover:text-ink")}
             >
               <FulfillmentModeIcon mode={type} />
               {fulfillmentLabelForBusinessType(business.businessType, type)}
@@ -1941,7 +1967,7 @@ function BillingPanel({
       </div>
 
       {business.whatsappAvailable && (
-        <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#f8fbff] p-3 text-sm text-slate-700 shadow-sm">
+        <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#f7f5ff] p-3 text-sm text-slate-700 shadow-sm">
           <label className="flex items-start gap-3">
             <input className="mt-1 size-4 accent-emerald" type="checkbox" checked={whatsappOptIn} onChange={(event) => setWhatsappOptIn(event.target.checked)} />
             <span>Send {transactionLower} confirmation and business status updates on WhatsApp. Payment details stay on this website.</span>
@@ -1959,7 +1985,7 @@ function BillingPanel({
         </div>
       )}
 
-      <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#f8fbff] p-3 shadow-sm">
+      <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#f7f5ff] p-3 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-sm font-extrabold text-ink">
             <TicketPercent className="size-4 text-emerald" />
@@ -2063,7 +2089,7 @@ function BillingPanel({
         </div>
       )}
 
-      <Button type="submit" variant="emerald" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(17,166,106,0.28)] hover:bg-[#0f915f]" icon={<TransactionIcon className="size-4" />} disabled={submitDisabled}>
+      <Button type="submit" variant="emerald" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(18,183,106,0.28)] hover:bg-[#0f915f]" icon={<TransactionIcon className="size-4" />} disabled={submitDisabled}>
         {submitLabel}
       </Button>
     </form>

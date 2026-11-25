@@ -400,7 +400,7 @@ function CreateAppointmentForm({
           <label className="flex h-11 items-center gap-2 rounded-lg border border-line px-3 text-xs font-semibold"><input name="whatsappOptIn" type="checkbox" /> Customer agreed to WhatsApp updates</label>
         </div>
         {formError && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{formError}</p>}
-        {!payload.business.settings.enabled && <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Turn on customer booking in Booking rules before creating scheduled appointments.</p>}
+        {!payload.business.settings.enabled && <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">Turn on customer booking in Booking rules before creating scheduled appointments.</p>}
         <div className="flex justify-end gap-2"><Button type="button" variant="secondary" onClick={onClose}>Cancel</Button><Button disabled={busy || !payload.business.settings.enabled || !selection}>{busy ? "Creating…" : `Create ${payload.business.terminology.appointmentSingular.toLowerCase()}`}</Button></div>
       </form>
     </Card>
@@ -460,7 +460,7 @@ function RescheduleAppointmentForm({
             initialDate={appointmentDateKey(new Date(appointment.startsAt), payload.business.settings.timezone)}
           />
         ) : (
-          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">An original service is no longer bookable. Cancel this appointment and create a new one with current services.</p>
+          <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">An original service is no longer bookable. Cancel this appointment and create a new one with current services.</p>
         )}
         <div className="mt-5 flex justify-end gap-2"><Button type="button" variant="secondary" onClick={onClose}>Keep current time</Button><Button disabled={busy || !selection || !completeServiceSet}>{busy ? "Rescheduling…" : "Confirm new time"}</Button></div>
       </form>
@@ -990,7 +990,7 @@ export function AppointmentsPage() {
         </div>
       </div>
 
-      {message && <div role="status" className={cn("mb-4 flex items-start justify-between gap-3 rounded-lg border p-3 text-sm font-semibold", message.tone === "success" ? "border-emerald/20 bg-emerald/10 text-emerald" : "border-red-200 bg-red-50 text-red-700")}><span>{message.text}</span><button type="button" onClick={() => setMessage(null)} aria-label="Dismiss"><X className="size-4" /></button></div>}
+      {message && <div role="status" className={cn("mb-4 flex items-start justify-between gap-3 rounded-lg border p-3 text-sm font-semibold", message.tone === "success" ? "border-emerald/20 bg-emerald/10 text-emerald" : "border-berry/20 bg-berry-soft text-berry-deep")}><span>{message.text}</span><button type="button" onClick={() => setMessage(null)} aria-label="Dismiss"><X className="size-4" /></button></div>}
 
       {createOpen && (
         <CreateAppointmentForm

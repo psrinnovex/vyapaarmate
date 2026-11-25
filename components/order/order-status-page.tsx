@@ -32,6 +32,8 @@ import { fulfillmentLabelForBusinessType, type ActiveFulfillmentMode } from "@/l
 import { getBusinessConsoleIcons } from "@/lib/business-console-icons";
 import { cn, formatINR } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { WhatsappPreview } from "@/components/demo/whatsapp-preview";
+import { demoModeUiEnabled } from "@/lib/demo-mode";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { LazyLottieAnimation } from "@/components/ui/lottie-animation";
 import { getBusinessOrderStatusAnimationKind, orderAnimationPaths, usesOrderStatusAnimation, type OrderAnimationKind } from "@/lib/order-animations";
@@ -150,7 +152,7 @@ function PaymentCelebration({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="payment-celebration fixed inset-0 z-50 grid place-items-center overflow-hidden bg-ink/35 px-4 backdrop-blur-sm print:hidden" role="status" aria-live="polite">
-      <div className="payment-celebration-card relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/70 bg-white p-7 text-center shadow-[0_32px_100px_rgba(13,19,33,0.32)]">
+      <div className="payment-celebration-card relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/70 bg-white p-7 text-center shadow-[0_32px_100px_rgba(29,26,57,0.32)]">
         <OrderStepAnimation
           kind="paymentDone"
           icon={Check}
@@ -243,7 +245,7 @@ function TrackingTimeline({ order }: { order: PublicOrderReceipt }) {
                   kind={showCompleteIcon ? null : stageVisual.animationKind}
                   icon={showCompleteIcon ? Check : stageVisual.icon}
                   label={stage.label}
-                  className={cn("border bg-white transition-all duration-500", complete ? "border-emerald/25 text-emerald" : "border-ocean/25 text-ocean shadow-[0_10px_30px_rgba(18,70,160,0.16)]")}
+                  className={cn("border bg-white transition-all duration-500", complete ? "border-emerald/25 text-emerald" : "border-ocean/25 text-ocean shadow-[0_10px_30px_rgba(79,91,213,0.16)]")}
                   iconClassName={cn(showCompleteIcon && "stroke-[3]", stageVisual.spinIcon && active && "animate-spin")}
                   lottieClassName="tracking-lottie"
                 />
@@ -416,7 +418,7 @@ function PaymentOnlyPage({
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-ocean">{order.business.type}</p>
               <h1 className="mt-1 break-words text-xl font-extrabold text-ink">{order.business.name}</h1>
             </div>
-            <div className={cn("flex max-w-full items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-bold", paymentFailed ? "border-red-200 bg-red-50 text-red-700" : "border-emerald/20 bg-emerald/5 text-emerald")}>
+            <div className={cn("flex max-w-full items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-bold", paymentFailed ? "border-berry/20 bg-berry-soft text-berry-deep" : "border-emerald/20 bg-emerald/5 text-emerald")}>
               <span className={cn("size-2 rounded-full", shouldPoll && !paymentFailed ? "payment-pulse-dot" : "", paymentFailed ? "bg-red-500" : "bg-emerald")} />
               {shouldPoll ? `Checking · ${time(lastSyncedAt)}` : `Updated ${dateTime(order.updatedAt)}`}
             </div>
@@ -427,7 +429,7 @@ function PaymentOnlyPage({
               kind={paymentAnimationKind}
               icon={paymentFailed ? XCircle : ScanLine}
               label={paymentAnimationLabel}
-              className={cn("size-36 rounded-[1.75rem] border", paymentFailed ? "border-red-200 bg-red-50 text-red-700" : "border-ocean/15 bg-white text-ocean shadow-sm")}
+              className={cn("size-36 rounded-[1.75rem] border", paymentFailed ? "border-berry/20 bg-berry-soft text-berry-deep" : "border-ocean/15 bg-white text-ocean shadow-sm")}
               iconClassName="size-12"
               lottieClassName={paymentFailed ? "payment-failure-lottie" : "scan-pay-lottie"}
             />
@@ -466,7 +468,7 @@ function PaymentOnlyPage({
           <h2 className="font-extrabold text-ink">Need help?</h2>
           <p className="mx-auto mt-2 max-w-[18rem] break-words text-sm leading-6 text-slate-600 sm:mx-0 sm:max-w-none">Contact {order.business.name} if the payment is not updating.</p>
           <div className="mx-auto mt-4 grid w-full max-w-[17rem] gap-2 sm:mx-0 sm:max-w-none sm:grid-cols-2">
-            <a href={`tel:${order.business.phone}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-bold text-white transition hover:bg-black/90"><Phone className="size-4" /> Call {order.business.phone}</a>
+            <a href={`tel:${order.business.phone}`} className="clay-press inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-bold text-white [--clay-shadow:rgba(13,10,34,0.6)]"><Phone className="size-4" /> Call {order.business.phone}</a>
             <ButtonLink href={businessHref} variant="secondary" icon={<CalendarCheck2 className="size-4" />} className="w-full">
               {helpActionLabel}
             </ButtonLink>
@@ -662,10 +664,10 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
   }
 
   return (
-    <main className="min-h-screen bg-mesh-light px-4 py-6 print:bg-white print:p-0 sm:py-9">
+    <main className="min-h-screen px-4 py-6 print:bg-white print:p-0 sm:py-9">
       {showCelebration && <PaymentCelebration onDone={dismissCelebration} />}
       <div className="mx-auto max-w-5xl">
-        <section className={cn("order-hero-enter relative overflow-hidden rounded-[2rem] p-6 text-white shadow-[0_28px_90px_rgba(13,19,33,0.28)] print:hidden sm:p-8", heroCancelled ? "bg-gradient-to-br from-red-800 via-red-700 to-rose-900" : heroCompleted ? "bg-gradient-to-br from-emerald via-teal-700 to-ink" : "bg-gradient-to-br from-ink via-slate-900 to-ocean")}>
+        <section className={cn("order-hero-enter relative overflow-hidden rounded-[2rem] p-6 text-white shadow-[0_28px_90px_rgba(29,26,57,0.28)] print:hidden sm:p-8", heroCancelled ? "bg-[linear-gradient(135deg,#ff5c8a_0%,#d1335f_55%,#8f1d45_100%)]" : heroCompleted ? "bg-[linear-gradient(135deg,#12b76a_0%,#0b7d49_50%,#1d1a39_100%)]" : "bg-[linear-gradient(135deg,#1d1a39_0%,#3640b0_60%,#7c5cff_100%)]")}>
           <div className="order-hero-orb order-hero-orb-one" aria-hidden="true" /><div className="order-hero-orb order-hero-orb-two" aria-hidden="true" />
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-white/10 backdrop-blur-md"><Sparkles className="size-5 text-emerald-200" /></div><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">{order.business.type}</p><p className="font-bold">{order.business.name}</p></div></div>
@@ -705,7 +707,7 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
           <section id="invoice" className="payment-state-enter mt-5 flex flex-col items-stretch justify-between gap-4 rounded-2xl border border-emerald/25 bg-emerald/5 p-5 print:hidden sm:flex-row sm:items-center">
             <div className="flex items-center gap-4"><OrderStepAnimation kind="paymentDone" icon={BadgeCheck} label="Payment successful and verified" loop={false} className="payment-success-icon size-16 rounded-2xl border border-emerald/20 bg-white text-emerald shadow-sm" iconClassName="size-7" lottieClassName="payment-success-lottie scale-[1.1]" /><div><h2 className="font-extrabold text-ink">Payment successful and verified</h2><p className="mt-1 text-sm text-slate-600">{paymentMethodLabel}{order.paidAt ? ` · ${dateTime(order.paidAt)}` : ""}</p></div></div>
             <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
-              <a href={invoiceDownloadUrl} download className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-emerald px-3 text-xs font-bold text-white shadow-sm transition hover:bg-emerald/90 sm:w-auto"><Download className="size-4" /> Download invoice</a>
+              <a href={invoiceDownloadUrl} download className="clay-press inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-clay-emerald px-3 text-xs font-bold text-white [--clay-shadow:rgba(8,128,74,0.6)] sm:w-auto"><Download className="size-4" /> Download invoice</a>
               <div className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-emerald shadow-sm sm:w-auto"><ShieldCheck className="size-4" /> Secure payment</div>
             </div>
           </section>
@@ -759,7 +761,7 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
         )}
 
         <section className="mt-5 grid gap-5 print:hidden lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="rounded-[1.75rem] border border-line bg-white p-5 shadow-sm sm:p-6">
+          <div className="rounded-[1.75rem] border border-white/80 bg-white p-5 shadow-clay sm:p-6">
             <h2 className="font-extrabold text-ink">{transactionTitle} details</h2>
             <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
               <div className="flex items-start gap-3 rounded-2xl bg-mist/70 p-4">
@@ -809,11 +811,22 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
           </div>
 
           <aside className="grid content-start gap-4">
-            <div className="rounded-[1.5rem] border border-line bg-white p-5 shadow-sm">
+            {demoModeUiEnabled && (
+              <WhatsappPreview
+                businessName={order.business.name}
+                messages={[
+                  `Hi ${order.customer.name.split(" ")[0] || "there"}! Your ${tracking.transactionLabel} ${order.orderNumber} is ${(heroCancelled ? tracking.cancelledTitle : heroCompleted ? tracking.completedTitle : currentStage.label).toLowerCase()}.`,
+                  paid
+                    ? `Payment of ${formatINR(order.totalAmount)} received. Thank you!`
+                    : `Total ${formatINR(order.totalAmount)}. Payment is pending.`
+                ]}
+              />
+            )}
+            <div className="rounded-[1.5rem] border border-white/80 bg-white p-5 shadow-clay">
               <h2 className="font-extrabold text-ink">Need help?</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">Contact {order.business.name} about this {tracking.transactionLabel}.</p>
               <div className="mt-4 grid gap-2">
-                <a href={`tel:${order.business.phone}`} className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-bold text-white transition hover:bg-black/90"><Phone className="size-4" /> Call {order.business.phone}</a>
+                <a href={`tel:${order.business.phone}`} className="clay-press inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-bold text-white [--clay-shadow:rgba(13,10,34,0.6)]"><Phone className="size-4" /> Call {order.business.phone}</a>
                 <ButtonLink href={businessHref} variant="secondary" icon={<CalendarCheck2 className="size-4" />} className="w-full">
                   {customerReturnLabel}
                 </ButtonLink>

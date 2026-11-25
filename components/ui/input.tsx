@@ -9,7 +9,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     <input
       ref={ref}
       className={cn(
-        "h-11 w-full rounded-lg border border-line bg-white px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10",
+        "h-12 w-full rounded-2xl border border-line bg-white/90 px-4 text-sm text-ink shadow-clay-inset outline-none transition placeholder:text-slate-400 focus:border-emerald focus:bg-white focus:ring-4 focus:ring-emerald/15",
         className
       )}
       {...props}
@@ -25,7 +25,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
     <textarea
       ref={ref}
       className={cn(
-        "min-h-24 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10",
+        "min-h-24 w-full rounded-2xl border border-line bg-white/90 px-4 py-3 text-sm text-ink shadow-clay-inset outline-none transition placeholder:text-slate-400 focus:border-emerald focus:bg-white focus:ring-4 focus:ring-emerald/15",
         className
       )}
       {...props}
@@ -34,5 +34,5 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
 });
 
 export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
-  return <label className={cn("text-sm font-semibold text-slate-700", className)} {...props} />;
+  return <label className={cn("text-sm font-bold text-slate-700", className)} {...props} />;
 }

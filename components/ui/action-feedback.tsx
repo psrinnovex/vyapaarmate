@@ -83,7 +83,7 @@ export function ActionNotice({
         "action-notice fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+7.5rem)] z-[70] flex items-start gap-3 rounded-lg border p-4 text-sm font-semibold shadow-soft sm:inset-x-auto sm:bottom-5 sm:right-40 sm:max-w-sm lg:right-44",
         leaving && "action-notice-leaving",
         notice.tone === "success" && "border-emerald/20 bg-emerald text-white",
-        notice.tone === "warning" && "border-amber-200 bg-amber-50 text-amber-900",
+        notice.tone === "warning" && "border-mango/30 bg-mango-soft text-mango-deep",
         notice.tone === "error" && "border-red-200 bg-red-50 text-red-900"
       )}
     >

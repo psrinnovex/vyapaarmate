@@ -539,7 +539,7 @@ export function RegisterForm() {
             </div>
           )}
           {devCodes && (devCodes.email || devCodes.sms) && (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">
               Local test code: email <strong>{devCodes.email ?? "sent by provider"}</strong>
               {phoneVerificationRequired ? (
                 <>

@@ -450,7 +450,7 @@ export function SiteChatbot() {
         <section
           aria-label="VyapaarBot support chat"
           className={cn(
-            "fixed inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] top-[calc(env(safe-area-inset-top)+0.5rem)] flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_24px_90px_rgba(13,19,33,0.25)] sm:inset-x-auto sm:top-auto sm:bottom-5 sm:right-5 sm:h-[min(680px,calc(100dvh-2.5rem))] sm:w-[380px]"
+            "fixed inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] top-[calc(env(safe-area-inset-top)+0.5rem)] flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_24px_90px_rgba(29,26,57,0.25)] sm:inset-x-auto sm:top-auto sm:bottom-5 sm:right-5 sm:h-[min(680px,calc(100dvh-2.5rem))] sm:w-[380px]"
           )}
         >
           <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line bg-ink px-4 py-3 text-white">
@@ -520,7 +520,7 @@ export function SiteChatbot() {
                         className={cn(
                           "inline-flex h-8 items-center rounded-lg border px-3 text-xs font-bold transition",
                           action.tone === "urgent"
-                            ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                            ? "border-berry/20 bg-berry-soft text-berry-deep hover:bg-red-100"
                             : action.tone === "primary"
                               ? "border-emerald/20 bg-emerald/10 text-emerald hover:bg-emerald/15"
                               : "border-line bg-white text-ink hover:border-ocean/30"
@@ -632,7 +632,7 @@ export function SiteChatbot() {
               setIsOpen(true);
             }}
             className={cn(
-              "group relative grid place-items-center overflow-visible rounded-full border border-transparent !bg-transparent p-0 shadow-none drop-shadow-[0_18px_34px_rgba(13,19,33,0.24)] transition hover:-translate-y-0.5 hover:!bg-transparent hover:drop-shadow-[0_24px_46px_rgba(13,19,33,0.28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald/60",
+              "group relative grid place-items-center overflow-visible rounded-full border border-transparent !bg-transparent p-0 shadow-none drop-shadow-[0_18px_34px_rgba(29,26,57,0.24)] transition hover:-translate-y-0.5 hover:!bg-transparent hover:drop-shadow-[0_24px_46px_rgba(29,26,57,0.28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald/60",
               launcherButtonClassName
             )}
           >

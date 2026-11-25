@@ -62,7 +62,7 @@ export function LegalSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-line bg-white p-5 shadow-[0_16px_48px_rgba(13,19,33,0.05)] sm:p-7">
+    <section className="rounded-xl border border-line bg-white p-5 shadow-[0_16px_48px_rgba(29,26,57,0.05)] sm:p-7">
       <h2 className="text-xl font-bold text-ink">{title}</h2>
       <div className="mt-3 space-y-3 leading-7">{children}</div>
     </section>

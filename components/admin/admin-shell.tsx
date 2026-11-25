@@ -211,7 +211,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                   <X className="size-5" />
                 </button>
               </div>
-              <div className="relative z-10 mt-4 shrink-0 rounded-lg border border-emerald/25 bg-emerald/10 p-3 text-xs leading-5 text-emerald-50 shadow-[0_18px_48px_rgba(17,166,106,0.08)]">
+              <div className="relative z-10 mt-4 shrink-0 rounded-lg border border-emerald/25 bg-emerald/10 p-3 text-xs leading-5 text-emerald-50 shadow-[0_18px_48px_rgba(18,183,106,0.08)]">
                 {supportOnly ? "Support queue access only. Customer and payment details stay scoped to tickets." : "Super admin access only. All business-level data remains tenant scoped."}
               </div>
               <nav className="relative z-10 mt-5 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto pr-1">

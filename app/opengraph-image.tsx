@@ -20,7 +20,7 @@ export default async function OpenGraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          background: "#eef4f8",
+          background: "#f1eefc",
           color: "#0f172a",
           fontFamily: "Arial, sans-serif",
           padding: 64

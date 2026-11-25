@@ -70,7 +70,7 @@ export function SupportAgentAlerts() {
           <div
             key={alert.key}
             className={cn(
-              "rounded-lg border bg-white p-3 shadow-[0_18px_54px_rgba(13,19,33,0.22)]",
+              "rounded-lg border bg-white p-3 shadow-[0_18px_54px_rgba(29,26,57,0.22)]",
               latest ? "border-emerald/30 ring-4 ring-emerald/10" : "border-line"
             )}
           >

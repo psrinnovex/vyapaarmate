@@ -2598,7 +2598,7 @@ const settingsSectionAccentClasses: Record<
     line: "from-ocean/70 via-violet/60 to-transparent"
   },
   emerald: {
-    arrowOpen: "border-emerald/25 bg-emerald text-white shadow-[0_10px_28px_rgba(17,166,106,0.26)]",
+    arrowOpen: "border-emerald/25 bg-emerald text-white shadow-[0_10px_28px_rgba(18,183,106,0.26)]",
     arrowHover: "group-hover:border-emerald/25 group-hover:bg-emerald group-hover:text-white",
     icon: "text-emerald",
     iconShell: "border-emerald/15 bg-emerald/10",
@@ -2606,7 +2606,7 @@ const settingsSectionAccentClasses: Record<
     line: "from-emerald/70 via-ocean/55 to-transparent"
   },
   violet: {
-    arrowOpen: "border-violet/25 bg-violet text-white shadow-[0_10px_28px_rgba(108,61,244,0.24)]",
+    arrowOpen: "border-violet/25 bg-violet text-white shadow-[0_10px_28px_rgba(124,92,255,0.24)]",
     arrowHover: "group-hover:border-violet/25 group-hover:bg-violet group-hover:text-white",
     icon: "text-violet",
     iconShell: "border-violet/15 bg-violet/10",
@@ -2647,7 +2647,7 @@ function SettingsAccordionSection({
     <Card
       data-open={open ? "true" : "false"}
       data-settings-section-id={sectionId}
-      className="settings-accordion-card group relative scroll-mt-28 self-start overflow-hidden border-ocean/10 bg-white/95 p-0 shadow-[0_18px_55px_rgba(18,70,160,0.08)] transition duration-300 hover:-translate-y-0.5 hover:border-ocean/20 hover:shadow-[0_22px_70px_rgba(18,70,160,0.12)] data-[open=true]:border-ocean/25 data-[open=true]:shadow-[0_24px_80px_rgba(18,70,160,0.15)]"
+      className="settings-accordion-card group relative scroll-mt-28 self-start overflow-hidden border-ocean/10 bg-white/95 p-0 shadow-[0_18px_55px_rgba(79,91,213,0.08)] transition duration-300 hover:-translate-y-0.5 hover:border-ocean/20 hover:shadow-[0_22px_70px_rgba(79,91,213,0.12)] data-[open=true]:border-ocean/25 data-[open=true]:shadow-[0_24px_80px_rgba(79,91,213,0.15)]"
     >
       <button
         type="button"

@@ -47,7 +47,7 @@ export function KycUploadFeedbackDialog({
       aria-modal={completed ? true : undefined}
       className="payment-celebration fixed inset-0 z-[90] grid place-items-center overflow-hidden bg-ink/45 px-4 backdrop-blur-sm print:hidden"
     >
-      <div key={feedback.status} className="payment-celebration-card relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white p-6 text-center shadow-[0_32px_100px_rgba(13,19,33,0.32)]">
+      <div key={feedback.status} className="payment-celebration-card relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white p-6 text-center shadow-[0_32px_100px_rgba(29,26,57,0.32)]">
         <LazyLottieAnimation
           src={uploading ? orderAnimationPaths.serviceInProgress : orderAnimationPaths.serviceReady}
           label={title}

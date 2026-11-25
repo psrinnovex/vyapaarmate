@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { rejectMobileBusinessSubscriptionRequest, requireBusinessSession } from "@/lib/api-session";
 import { prisma } from "@/lib/prisma";
+import { isDemoMode } from "@/lib/demo-mode";
 import { cashfreeEnvironment } from "@/services/cashfree";
 
 export const dynamic = "force-dynamic";
@@ -155,6 +156,10 @@ export async function GET(request: Request, context: RouteContext) {
     subscription.paymentRequestExpiresAt.getTime() <= Date.now()
   ) {
     return NextResponse.redirect(redirectUrl);
+  }
+
+  if (isDemoMode()) {
+    return NextResponse.redirect(`${appUrl(request)}/demo/pay/subscription/${encodeURIComponent(subscription.id)}`);
   }
 
   return new Response(
