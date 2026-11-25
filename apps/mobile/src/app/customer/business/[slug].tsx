@@ -15,6 +15,7 @@ import {
   type BusinessDetail,
   type PlaceOrderInput,
 } from "@/api/customer";
+import { Illustration, illustrationForBusinessType } from "@/components/illustrations";
 import { Button, Card, Choice, LoadingState, PageHeader, Pill, Screen, StateView, TextField, BodyText } from "@/components/ui";
 import { useAppTheme } from "@/theme/theme";
 import { formatInr } from "@/utils/format";
@@ -171,7 +172,13 @@ export default function CustomerBusinessScreen() {
   return (
     <Screen>
       <Button label="Back to businesses" variant="ghost" onPress={() => router.back()} />
-      <PageHeader eyebrow={detail.businessType} title={detail.name} subtitle={`${detail.address}, ${detail.city} · ${detail.hours}`} action={<Pill label={detail.open ? "Open" : "Closed"} tone={detail.open ? "success" : "neutral"} />} />
+      <PageHeader
+        eyebrow={detail.businessType}
+        title={detail.name}
+        subtitle={`${detail.address}, ${detail.city} · ${detail.hours}`}
+        illustration={illustrationForBusinessType(detail.businessType)}
+        action={<Pill label={detail.open ? "Open" : "Closed"} tone={detail.open ? "success" : "neutral"} />}
+      />
       {detail.logoUrl ? <Image source={detail.logoUrl} style={styles.heroImage} contentFit="cover" /> : null}
 
       <Card>
@@ -179,7 +186,10 @@ export default function CustomerBusinessScreen() {
         {detail.menu.filter((item) => item.isAvailable).map((item) => {
           const quantity = quantities[item.id] ?? 0;
           return (
-            <View key={item.id} style={[styles.menuRow, { borderBottomColor: colors.border }]}>
+            <View key={item.id} style={[styles.menuRow, { backgroundColor: quantity > 0 ? colors.successSurface : colors.surfaceMuted }]}>
+              <View style={[styles.itemArt, { backgroundColor: colors.surface, boxShadow: colors.clayShadowSmall }]}>
+                <Illustration name={illustrationForBusinessType(detail.businessType)} size={40} />
+              </View>
               <View style={styles.flex}>
                 <View style={styles.inline}>
                   <Text style={[styles.itemName, { color: colors.text }]}>{item.name}</Text>
@@ -189,9 +199,9 @@ export default function CustomerBusinessScreen() {
                 <Text style={[styles.price, { color: colors.text }]}>{formatInr(item.price)}{item.appointmentEnabled ? ` · ${item.durationMinutes} min` : ""}</Text>
               </View>
               <View style={styles.counter}>
-                <Pressable accessibilityRole="button" accessibilityLabel={`Remove one ${item.name}`} onPress={() => setQuantity(item.id, quantity - 1)} style={[styles.counterButton, { borderColor: colors.border }]}><Text style={[styles.counterText, { color: colors.text }]}>−</Text></Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={`Remove one ${item.name}`} onPress={() => setQuantity(item.id, quantity - 1)} style={[styles.counterButton, { backgroundColor: colors.surface, boxShadow: colors.clayShadowSmall }]}><Text style={[styles.counterText, { color: colors.text }]}>−</Text></Pressable>
                 <Text accessibilityLabel={`${quantity} selected`} style={[styles.quantity, { color: colors.text }]}>{quantity}</Text>
-                <Pressable accessibilityRole="button" accessibilityLabel={`Add one ${item.name}`} onPress={() => setQuantity(item.id, quantity + 1)} style={[styles.counterButton, { borderColor: colors.border }]}><Text style={[styles.counterText, { color: colors.text }]}>+</Text></Pressable>
+                <Pressable accessibilityRole="button" accessibilityLabel={`Add one ${item.name}`} onPress={() => setQuantity(item.id, quantity + 1)} style={[styles.counterButton, { backgroundColor: colors.primary, boxShadow: `0px 3px 0px ${colors.primaryLip}` }]}><Text style={[styles.counterText, { color: colors.onPrimary }]}>+</Text></Pressable>
               </View>
             </View>
           );
@@ -229,9 +239,9 @@ export default function CustomerBusinessScreen() {
       ) : null}
 
       <Card>
-        <View style={styles.rowBetween}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Total</Text>
-          <Text style={[styles.total, { color: colors.text }]}>{formatInr(subtotal)}</Text>
+        <View style={[styles.totalBand, { backgroundColor: colors.contrast }]}>
+          <Text style={[styles.totalLabel, { color: colors.onContrast }]}>Total</Text>
+          <Text style={[styles.total, { color: colors.onContrast }]}>{formatInr(subtotal)}</Text>
         </View>
         {detail.minimumOrder > 0 && !minimumMet ? <BodyText muted>Minimum request value is {formatInr(detail.minimumOrder)}.</BodyText> : null}
         {!detail.allowsPayOnDelivery ? <BodyText muted>This business does not currently accept payment at fulfillment, so native checkout is unavailable. No website purchase link is presented inside the business app area.</BodyText> : <BodyText muted>Pay the business at pickup, dine-in, or service completion. Online payment is not offered in this mobile release.</BodyText>}
@@ -243,19 +253,21 @@ export default function CustomerBusinessScreen() {
 }
 
 const styles = StyleSheet.create({
-  heroImage: { width: "100%", height: 180, borderRadius: 20 },
-  sectionTitle: { fontSize: 19, fontWeight: "800" },
-  menuRow: { flexDirection: "row", gap: 12, alignItems: "center", paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth },
+  heroImage: { width: "100%", height: 190, borderRadius: 26 },
+  sectionTitle: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
+  menuRow: { flexDirection: "row", gap: 12, alignItems: "center", padding: 12, borderRadius: 20 },
+  itemArt: { width: 54, height: 54, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   flex: { flex: 1 },
-  inline: { flexDirection: "row", alignItems: "center", gap: 8 },
-  itemName: { flex: 1, fontSize: 16, fontWeight: "800" },
+  inline: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6 },
+  itemName: { flexShrink: 1, fontSize: 16, fontWeight: "800" },
   meta: { fontSize: 12, lineHeight: 18, marginTop: 3 },
   price: { fontSize: 14, fontWeight: "700", marginTop: 5 },
   counter: { flexDirection: "row", alignItems: "center", gap: 9 },
-  counterButton: { width: 38, height: 38, borderWidth: 1, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  counterButton: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
   counterText: { fontSize: 22, fontWeight: "700" },
   quantity: { minWidth: 20, textAlign: "center", fontWeight: "800" },
-  choices: { gap: 8 },
-  rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
-  total: { fontSize: 24, fontWeight: "800" },
+  choices: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  totalBand: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14 },
+  totalLabel: { fontSize: 15, fontWeight: "800" },
+  total: { fontSize: 26, fontWeight: "900", letterSpacing: -0.6 },
 });

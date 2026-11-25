@@ -1,8 +1,9 @@
+import { ArrowDown } from "lucide-react";
 import { ContactPageContent } from "@/components/contact/contact-page";
-import { PublicFooter } from "@/components/layout/public-footer";
-import { PublicHeader } from "@/components/layout/public-header";
+import { PageHeroBanner, PublicPage } from "@/components/marketing/page-kit";
+import { ButtonLink } from "@/components/ui/button";
 import { createMetadata, jsonLd } from "@/lib/seo";
-import { launchAreasServed } from "@/lib/launch-policy";
+import { launchAreasServed, launchMarket, launchMarketRestricted } from "@/lib/launch-policy";
 import { absoluteUrl, company } from "@/lib/site";
 import {
   breadcrumbListNode,
@@ -65,11 +66,32 @@ export default function ContactPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(contactStructuredData()) }}
       />
-      <main className="min-h-screen bg-mesh-light">
-        <PublicHeader />
+      <PublicPage>
+        <PageHeroBanner
+          eyebrow="Contact"
+          eyebrowTone="violet"
+          title="Book a VyapaarMate"
+          highlight="demo"
+          body={
+            launchMarketRestricted
+              ? `We are currently onboarding businesses in ${launchMarket.displayName}. Share your business type and workflow, and our team will contact you about your pilot cohort and setup.`
+              : "Share your city, business type, and workflow, and our team will contact you about product availability and setup."
+          }
+          art="phone"
+          sideArt={["shop", "calendar"]}
+          actions={
+            <>
+              <ButtonLink href="#demo-request" size="lg" icon={<ArrowDown className="size-5" />} iconPosition="end">
+                Request a demo
+              </ButtonLink>
+              <ButtonLink href="/demo" size="lg" variant="secondary">
+                Try the live demo now
+              </ButtonLink>
+            </>
+          }
+        />
         <ContactPageContent />
-        <PublicFooter />
-      </main>
+      </PublicPage>
     </>
   );
 }

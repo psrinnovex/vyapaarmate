@@ -74,7 +74,7 @@ export function KycUploadFeedbackDialog({
         </p>
         <h2 className="mt-2 text-2xl font-extrabold text-ink">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
-        <div className="mt-5 rounded-lg border border-line bg-mist p-3 text-left">
+        <div className="mt-5 rounded-2xl bg-mist/80 p-3 text-left">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{feedback.label}</p>
           <p className="mt-1 truncate text-sm font-bold text-ink">{feedback.fileName}</p>
         </div>

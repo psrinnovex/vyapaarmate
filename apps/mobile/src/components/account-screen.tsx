@@ -17,6 +17,11 @@ import { externalUrls } from "@/config/runtime";
 import { useAppTheme } from "@/theme/theme";
 import { formatDateTime } from "@/utils/format";
 
+function initialsOf(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : (parts[0] ?? "?").slice(0, 2)).toUpperCase();
+}
+
 export function AccountScreen() {
   const auth = useAuth();
   const { colors } = useAppTheme();
@@ -104,13 +109,16 @@ export function AccountScreen() {
 
   return (
     <Screen>
-      <PageHeader eyebrow="Account" title="Security and privacy" subtitle="Control this device session, export customer data, or permanently remove the account." />
+      <PageHeader eyebrow="Account" title="Security and privacy" subtitle="Control this device session, export customer data, or permanently remove the account." illustration="shield" />
 
       {account.isLoading ? <LoadingState label="Loading account…" /> : account.isError ? (
         <StateView title="Could not load account" message={account.error.message} action={<Button label="Try again" onPress={() => void account.refetch()} />} />
       ) : account.data ? (
         <Card>
           <View style={styles.rowBetween}>
+            <View style={[styles.avatar, { backgroundColor: colors.primary, boxShadow: `0px 4px 0px ${colors.primaryLip}` }]}>
+              <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{initialsOf(account.data.user.name)}</Text>
+            </View>
             <View style={styles.flex}>
               <Text style={[styles.name, { color: colors.text }]}>{account.data.user.name}</Text>
               <Text style={[styles.meta, { color: colors.textMuted }]}>{account.data.user.email}</Text>
@@ -137,7 +145,7 @@ export function AccountScreen() {
         <Button label="Sign out other devices" variant="secondary" loading={busy === "revoke"} disabled={busy !== null || !password} onPress={() => void revokeOtherSessions()} />
       </Card>
 
-      <Card style={{ borderColor: colors.danger }}>
+      <Card style={{ backgroundColor: colors.dangerSurface, borderColor: colors.dangerSurface }}>
         <Text style={[styles.sectionTitle, { color: colors.danger }]}>{isOwner ? "Delete business account" : "Delete account"}</Text>
         <BodyText muted>
           {isOwner
@@ -166,7 +174,9 @@ export function AccountScreen() {
 const styles = StyleSheet.create({
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   flex: { flex: 1 },
-  name: { fontSize: 19, fontWeight: "800" },
+  avatar: { width: 54, height: 54, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  avatarText: { fontSize: 19, fontWeight: "900" },
+  name: { fontSize: 19, fontWeight: "900", letterSpacing: -0.3 },
   meta: { fontSize: 13, marginTop: 4 },
-  sectionTitle: { fontSize: 19, fontWeight: "800" },
+  sectionTitle: { fontSize: 19, fontWeight: "900", letterSpacing: -0.3 },
 });

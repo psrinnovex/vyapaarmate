@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowRight, Gps, Location, SearchNormal1, Shop, WalletMoney } from "@/components/ui/iconsax";
+import { ArrowRight, Gps, Location, SearchNormal1, WalletMoney } from "@/components/ui/iconsax";
+import { ClayIllustration, illustrationNameForBusinessType, type ClayIllustrationName } from "@/components/illustrations/clay-illustrations";
 import { BusinessHoursDisclosure } from "@/components/businesses/business-hours-disclosure";
 import { useStreamRefresh } from "@/hooks/use-live-sync";
 import { isBusinessOpenAt } from "@/lib/business-hours";
@@ -12,12 +12,11 @@ import { fulfillmentLabelForBusinessType, type ActiveFulfillmentMode } from "@/l
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
 import { getBusinessConsoleIcons } from "@/lib/business-console-icons";
 import { queryBrowserGeolocationPermission, requestBrowserCoordinates } from "@/lib/browser-geolocation";
-import { cn, formatINR } from "@/lib/utils";
+import { cn, formatINR, initials } from "@/lib/utils";
 import { ScrollReveal } from "@/components/landing/scroll-reveal";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Button, ButtonLink } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Sticker } from "@/components/ui/sticker";
 import { PaginationControls, usePaginatedItems } from "@/components/ui/pagination";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 
@@ -38,6 +37,22 @@ const locationPermissionPromptMessage = "Location permission is not given yet. U
 const locationPermissionBlockedMessage = "Location is blocked for this site. Turn on Location in your browser or device settings, then try Use My Location again.";
 const locationUnavailableMessage = "Could not read your location. Turn on device location services, allow browser access, and try Use My Location again.";
 const featuredItemBubbleLimit = 3;
+
+const quickFilters: { label: string; term: string; art: ClayIllustrationName }[] = [
+  { label: "All", term: "", art: "shop" },
+  { label: "Tiffin", term: "tiffin", art: "tiffin" },
+  { label: "Restaurants", term: "restaurant", art: "bowl" },
+  { label: "Bakery", term: "bakery", art: "cake" },
+  { label: "Juice", term: "juice", art: "juice" },
+  { label: "Salon", term: "salon", art: "salon" },
+  { label: "Grocery", term: "grocery", art: "grocery" }
+];
+
+/** Storefront awning: stripes with a scalloped edge (one bump per stripe). */
+const awningMask =
+  "linear-gradient(#000 0 0) top / 100% calc(100% - 0.4rem) no-repeat, radial-gradient(circle 0.4rem at 50% 50%, #000 96%, transparent 100%) bottom / 0.8rem 0.8rem repeat-x";
+/** Stripe colours for the storefront awning on each card. */
+const awningColors = ["#12b76a", "#7c5cff", "#ff5c8a", "#ffad1f", "#33b5f5", "#4f5bd5"];
 
 function fulfillmentLabel(businessType: string, mode: string) {
   return fulfillmentLabelForBusinessType(businessType, mode as ActiveFulfillmentMode) ?? mode;
@@ -194,93 +209,143 @@ export function BusinessesPage({
   });
   const hasLocation = coordinates !== null && location.status === "ready";
 
+  function searchFor(term: string) {
+    setQuery(term);
+    void refreshBusinesses({ query: term });
+  }
+
   return (
-    <main className="min-h-screen bg-mist text-ink">
-      <section className="border-b border-line bg-white px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
-            <Badge variant="blue">User view</Badge>
-            <h1 className="mt-3 text-3xl font-extrabold leading-tight sm:text-4xl">Restaurants, hotels, and local businesses around you</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
-              Browse active VyapaarMate businesses, check who is open now, then view menus, services, products, or classes based on each business type.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:min-w-[330px]">
-            <div className="rounded-lg border border-line bg-mist p-3">
-              <p className="text-2xl font-extrabold">{openCount}</p>
-              <p className="text-xs font-semibold text-slate-500">open now</p>
+    <main className="min-h-screen overflow-x-clip text-ink">
+      <section className="px-4 pb-4 pt-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95)_0%,rgba(244,240,255,0.9)_52%,rgba(225,248,236,0.85)_100%)] p-5 shadow-clay sm:p-8 lg:p-10">
+          <div aria-hidden="true" className="vm-blob -right-10 -top-16 size-72 bg-violet opacity-40" />
+          <div aria-hidden="true" className="vm-blob -bottom-20 left-1/3 size-72 bg-emerald opacity-30" />
+          <div className="relative grid items-center gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+            <div className="min-w-0">
+              <Sticker tone="sky" tilt={-3}>Near you</Sticker>
+              <h1 className="mt-4 text-[clamp(1.9rem,4.6vw,3.3rem)] font-extrabold leading-[1.03] tracking-[-0.045em]">
+                Restaurants, hotels, and local businesses <span className="text-gradient-brand">around you</span>
+              </h1>
+              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-600 sm:text-base">
+                Browse active VyapaarMate businesses, check who is open now, then view menus, services, products, or classes based on each business type.
+              </p>
+
+              <form
+                className="glass mt-6 flex items-center gap-2 rounded-[1.6rem] p-2"
+                role="search"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void refreshBusinesses({ query });
+                }}
+              >
+                <SearchNormal1 className="ml-2 size-6 shrink-0 text-slate-400" variant="Bulk" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.currentTarget.value)}
+                  aria-label="Search businesses"
+                  className="h-12 min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-slate-400 sm:text-base"
+                  placeholder="Search by business, city, menu item, service, product, or class"
+                />
+                <Button type="submit" variant="dark" disabled={loading} className="shrink-0">
+                  {loading ? "Searching" : "Search"}
+                </Button>
+              </form>
+
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden" role="group" aria-label="Quick filters">
+                {quickFilters.map((filter) => {
+                  const selected = query.trim().toLowerCase() === filter.term;
+                  return (
+                    <button
+                      key={filter.label}
+                      type="button"
+                      onClick={() => searchFor(filter.term)}
+                      aria-pressed={selected}
+                      disabled={loading}
+                      className={cn(
+                        "flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 text-sm font-bold transition",
+                        selected ? "bg-clay-ink text-white shadow-clay-sm" : "bg-white/80 text-slate-600 shadow-clay-sm hover:bg-white"
+                      )}
+                    >
+                      <span className="size-7 rounded-full bg-mist p-0.5">
+                        <ClayIllustration name={filter.art} />
+                      </span>
+                      {filter.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="rounded-lg border border-line bg-mist p-3">
-              <p className="text-2xl font-extrabold">{whatsappCount}</p>
-              <p className="text-xs font-semibold text-slate-500">WhatsApp enabled</p>
+
+            <div className="relative mx-auto hidden aspect-square w-full max-w-[19rem] lg:block">
+              <div aria-hidden="true" className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_35%_28%,#ffffff_0%,#f3f0ff_55%,#e6e0fb_100%)] shadow-clay-inset" />
+              <div className="absolute inset-[16%] motion-safe:animate-float-slow">
+                <ClayIllustration name="shop" />
+              </div>
+              <div className="absolute left-0 top-[12%]">
+                <Sticker tone="emerald" tilt={-6}>{openCount} open now</Sticker>
+              </div>
+              <div className="absolute bottom-[10%] right-0">
+                <Sticker tone="white" tilt={5}>{whatsappCount} on WhatsApp</Sticker>
+              </div>
             </div>
           </div>
         </div>
-      </section>
 
-      <section className="border-b border-line bg-mist px-4 py-4 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-center">
-          <form
-            className="relative"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void refreshBusinesses({ query });
-            }}
+        <div className="mx-auto mt-4 flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p
+            role="status"
+            className={cn(
+              "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold",
+              location.status === "error" ? "bg-berry-soft text-berry-deep" : location.status === "ready" ? "bg-emerald-soft text-emerald-deep" : "bg-white/80 text-slate-600"
+            )}
           >
-            <SearchNormal1 className="pointer-events-none absolute left-3 top-2.5 size-6 text-slate-400" variant="Bulk" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.currentTarget.value)}
-              className="pl-11"
-              placeholder="Search by business, city, menu item, service, product, or class"
-            />
-          </form>
-          <Button variant="secondary" icon={<SearchNormal1 className="size-5" variant="Bulk" />} onClick={() => refreshBusinesses({ query })} disabled={loading}>
-            {loading ? "Searching" : "Search"}
-          </Button>
-          <Button variant="emerald" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation} disabled={location.status === "loading" || loading}>
-            {location.status === "loading" ? "Locating" : "Use My Location"}
-          </Button>
-          <p className={cn("text-sm font-semibold lg:col-span-3", location.status === "error" ? "text-red-700" : "text-slate-500")}>{location.label}</p>
+            <Location className="size-5 shrink-0" variant="Bulk" />
+            {location.label}
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-white/80 px-3 py-2 text-xs font-extrabold text-ink shadow-clay-sm lg:hidden">
+              {openCount} open · {whatsappCount} WhatsApp
+            </span>
+            <Button variant="emerald" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation} disabled={location.status === "loading" || loading}>
+              {location.status === "loading" ? "Locating" : "Use My Location"}
+            </Button>
+          </div>
         </div>
       </section>
 
-      <section className="px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="px-4 pb-14 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-2 xl:grid-cols-3">
           {!hasLocation && !loading ? (
-            <div className="col-span-full mx-auto max-w-2xl rounded-lg border border-red-100 bg-white p-8 text-center shadow-sm">
-              <Gps className="mx-auto size-12 text-red-600" variant="Bulk" />
-              <h2 className="mt-4 text-xl font-bold">Location required</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{location.label}</p>
+            <div className="clay col-span-full mx-auto w-full max-w-2xl rounded-[2.25rem] p-8 text-center">
+              <div className="relative mx-auto grid size-28 place-items-center">
+                <span aria-hidden="true" className="absolute inset-0 rounded-full bg-emerald/15 motion-safe:animate-ping [animation-duration:2.4s]" />
+                <span aria-hidden="true" className="absolute inset-4 rounded-full bg-emerald/20" />
+                <span className="clay-orb relative size-16 rounded-full bg-clay-emerald text-white">
+                  <Gps className="size-8" variant="Bulk" />
+                </span>
+              </div>
+              <h2 className="mt-5 text-2xl font-extrabold tracking-[-0.03em]">Location required</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-600">{location.label}</p>
               {showLocationRequiredAction && (
-                <Button className="mt-5" variant="emerald" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation}>
+                <Button className="mt-6" size="lg" variant="emerald" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation}>
                   Use My Location
                 </Button>
               )}
             </div>
           ) : loading ? (
             Array.from({ length: 6 }, (_, index) => (
-              <Card key={index} className="flex h-full flex-col bg-white">
-                <div className="flex items-start gap-4">
-                  <Skeleton className="size-16 shrink-0 rounded-lg" />
-                  <div className="min-w-0 flex-1">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="mt-3 h-4 w-2/3" />
+              <div key={index} className="clay flex h-full flex-col overflow-hidden rounded-[2rem]">
+                <Skeleton className="h-32 rounded-none" />
+                <div className="p-5">
+                  <Skeleton className="h-6 w-3/4" />
+                  <div className="mt-3 flex gap-2">
+                    <Skeleton className="h-7 w-24 rounded-full" />
+                    <Skeleton className="h-7 w-28 rounded-full" />
                   </div>
+                  <SkeletonText className="mt-5" lines={3} />
+                  <Skeleton className="mt-5 h-12 w-full rounded-2xl" />
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Skeleton className="h-7 w-24 rounded-full" />
-                  <Skeleton className="h-7 w-32 rounded-full" />
-                  <Skeleton className="h-7 w-20 rounded-full" />
-                </div>
-                <SkeletonText className="mt-5" lines={3} />
-                <div className="mt-5 grid gap-3">
-                  <Skeleton className="h-5 w-4/5" />
-                  <Skeleton className="h-5 w-5/6" />
-                  <Skeleton className="h-5 w-3/4" />
-                </div>
-                <Skeleton className="mt-5 h-11 w-full rounded-lg" />
-              </Card>
+              </div>
             ))
           ) : businessPagination.pageItems.map((business, index) => {
             const copy = getBusinessConsoleCopy(business.businessType);
@@ -288,82 +353,110 @@ export function BusinessesPage({
             const BusinessIcon = icons.businessIcon;
             const CatalogIcon = icons.catalogIcon;
             const visibleFeaturedItems = business.featuredItems.slice(0, featuredItemBubbleLimit);
+            const art = illustrationNameForBusinessType(business.businessType);
+            const awning = awningColors[index % awningColors.length];
 
             return (
               <ScrollReveal key={business.id} className="h-full" delay={index * 45}>
-                <Card className="flex h-full flex-col bg-white">
-                  <div className="flex items-start gap-4">
-                    <div className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-ink text-white">
+                <article className="clay group flex h-full flex-col overflow-hidden rounded-[2rem] transition hover:-translate-y-1 hover:shadow-clay-lg">
+                  <div className="relative h-32 bg-[linear-gradient(180deg,#faf8ff,#efeafd)]">
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-x-0 top-0 h-7"
+                      style={{
+                        backgroundImage: `repeating-linear-gradient(90deg, ${awning} 0 0.8rem, #ffffff 0.8rem 1.6rem)`,
+                        WebkitMask: awningMask,
+                        mask: awningMask
+                      }}
+                    />
+                    <div className="absolute bottom-0 left-5 size-[4.5rem] translate-y-1/3 overflow-hidden rounded-[1.4rem] border-4 border-white bg-white shadow-clay-sm">
                       {business.logoUrl ? (
                         <Image
                           src={business.logoUrl}
                           alt={`${business.name} image`}
                           fill
-                          sizes="64px"
+                          sizes="72px"
                           className="object-cover"
                           unoptimized={business.logoUrl.toLowerCase().split("?")[0].endsWith(".svg")}
                         />
                       ) : (
-                        <BusinessIcon className="size-8" />
+                        <span className="grid size-full place-items-center text-lg font-extrabold text-white" style={{ background: `linear-gradient(160deg, ${awning}, #1d1a39)` }}>
+                          {initials(business.name)}
+                        </span>
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h2 className="truncate text-lg font-bold">{business.name}</h2>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <Badge variant={business.open ? "emerald" : "red"}>{business.open ? "Open now" : "Closed"}</Badge>
-                        <Badge variant="blue" className="gap-1.5">
-                          <BusinessIcon className="size-4" />
-                          {business.businessType}
-                        </Badge>
-                      </div>
+                    <div aria-hidden="true" className="absolute bottom-1 right-4 w-24 transition duration-500 group-hover:-translate-y-1 group-hover:rotate-3">
+                      <ClayIllustration name={art} />
                     </div>
+                    <span
+                      className={cn(
+                        "absolute left-5 top-9 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold shadow-clay-sm",
+                        business.open ? "bg-emerald text-white" : "bg-berry text-white"
+                      )}
+                    >
+                      <span className={cn("size-1.5 rounded-full bg-white", business.open && "motion-safe:animate-pulse")} />
+                      {business.open ? "Open now" : "Closed"}
+                    </span>
                   </div>
 
-                  <div className="mt-4 flex min-h-12 items-start gap-2 text-sm leading-6 text-slate-600">
-                    <Location className="mt-0.5 size-5 shrink-0 text-ocean" variant="Bulk" />
-                    <span className="min-w-0 flex-1">{business.address || `${copy.catalogNavLabel} available from ${business.name}.`}</span>
-                  </div>
-
-                  <div className="mt-4 grid gap-2 text-sm text-slate-600">
-                    <BusinessHoursDisclosure businessId={business.id} hours={business.hours} open={business.open} now={now} showSchedule={showBusinessDays} />
-                    <p className="leading-6">
-                      <span className="font-semibold text-ink">
-                        {business.itemCount} {business.itemCount === 1 ? copy.itemSingular.toLowerCase() : copy.itemPlural.toLowerCase()}
-                      </span>{" "}
-                      - {business.fulfillmentModes.map((mode) => fulfillmentLabel(business.businessType, mode)).join(" / ")}
+                  <div className="flex flex-1 flex-col p-5 pt-8">
+                    <h2 className="truncate text-xl font-extrabold tracking-[-0.02em]">{business.name}</h2>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-violet-deep">
+                      <BusinessIcon className="size-4" />
+                      {business.businessType}
                     </p>
-                    <div className="flex items-center gap-2">
-                      <WalletMoney className="size-5 text-ocean" variant="Bulk" />
-                      <span>{copy.minimumValueLabel} {formatINR(business.minimumOrder)} - {business.allowsPayOnDelivery ? "Cash available" : "Online payment"}</span>
+
+                    <p className="mt-3 flex items-start gap-2 text-sm leading-6 text-slate-600">
+                      <Location className="mt-0.5 size-5 shrink-0 text-ocean" variant="Bulk" />
+                      <span className="min-w-0 flex-1">{business.address || `${copy.catalogNavLabel} available from ${business.name}.`}</span>
+                    </p>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-bold">
+                      <span className="rounded-2xl bg-mist/80 px-3 py-2.5 text-slate-600">
+                        <span className="block text-lg font-extrabold leading-6 text-ink">{business.itemCount}</span>
+                        {business.itemCount === 1 ? copy.itemSingular.toLowerCase() : copy.itemPlural.toLowerCase()}
+                      </span>
+                      <span className="rounded-2xl bg-mist/80 px-3 py-2.5 text-slate-600">
+                        <span className="block text-lg font-extrabold leading-6 text-ink">{formatINR(business.minimumOrder)}</span>
+                        {copy.minimumValueLabel.toLowerCase()}
+                      </span>
+                    </div>
+                    <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-500">
+                      <WalletMoney className="size-4 text-ocean" variant="Bulk" />
+                      {business.allowsPayOnDelivery ? "Cash available" : "Online payment"}
+                      <span aria-hidden="true">·</span>
+                      {business.fulfillmentModes.map((mode) => fulfillmentLabel(business.businessType, mode)).join(" / ")}
+                    </p>
+
+                    <div className="mt-3 text-sm text-slate-600">
+                      <BusinessHoursDisclosure businessId={business.id} hours={business.hours} open={business.open} now={now} showSchedule={showBusinessDays} />
+                    </div>
+
+                    {visibleFeaturedItems.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {visibleFeaturedItems.map((item) => (
+                          <span key={item} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600 shadow-clay-sm">
+                            <CatalogIcon className="size-4 text-emerald-deep" />
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="mt-auto pt-5">
+                      <ButtonLink href={`/b/${business.slug}`} variant="dark" className="w-full" icon={<ArrowRight className="size-5" variant="Bold" />} iconPosition="end">
+                        {cardActionLabel(copy.catalogNavLabel)}
+                      </ButtonLink>
                     </div>
                   </div>
-
-                  {visibleFeaturedItems.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {visibleFeaturedItems.map((item) => (
-                        <span key={item} className="inline-flex items-center gap-1.5 rounded-full bg-mist px-3 py-1 text-xs font-semibold text-slate-600">
-                          <CatalogIcon className="size-4" />
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <Link
-                    href={`/b/${business.slug}`}
-                    className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-black px-4 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-black/90"
-                  >
-                    <span>{cardActionLabel(copy.catalogNavLabel)}</span>
-                    <ArrowRight className="size-5" variant="Bold" />
-                  </Link>
-                </Card>
+                </article>
               </ScrollReveal>
             );
           })}
         </div>
         {hasLocation && !loading && (
           <PaginationControls
-            className="mx-auto mt-5 max-w-7xl rounded-lg border border-line bg-white"
+            className="mx-auto mt-6 max-w-7xl rounded-2xl border border-white/80 bg-white shadow-clay-sm"
             page={businessPagination.page}
             pageCount={businessPagination.pageCount}
             totalItems={businessPagination.totalItems}
@@ -375,11 +468,12 @@ export function BusinessesPage({
         )}
 
         {hasLocation && !loading && visibleBusinesses.length === 0 && (
-          <div className="mx-auto max-w-2xl rounded-lg border border-line bg-white p-8 text-center shadow-sm">
-            <Shop className="mx-auto size-12 text-ocean" variant="Bulk" />
-            <h2 className="mt-4 text-xl font-bold">No open businesses found</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Try another city, business type, or item search when more businesses are open.</p>
-          </div>
+          <EmptyState
+            className="mx-auto mt-2 max-w-2xl"
+            illustration="shop"
+            title="No open businesses found"
+            body="Try another city, business type, or item search when more businesses are open."
+          />
         )}
       </section>
     </main>

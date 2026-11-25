@@ -105,17 +105,17 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
   }
 
   return (
-    <div className="fixed inset-0 min-h-0 w-full max-w-full overflow-hidden bg-slate-950 text-white lg:grid lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[272px_minmax(0,1fr)]">
-      <aside className="hidden h-full min-h-0 min-w-0 overflow-hidden border-r border-white/10 bg-slate-950 lg:block">
-        <div className="flex h-full min-h-0 min-w-0 flex-col p-3 xl:p-4">
-          <Link href={shellHomeHref} className="flex min-w-0 shrink-0 items-center gap-3 rounded-lg bg-white p-3 font-bold text-ink">
+    <div className="fixed inset-0 min-h-0 w-full max-w-full overflow-hidden bg-[radial-gradient(70rem_40rem_at_8%_-10%,rgba(124,92,255,0.34),transparent_60%),radial-gradient(60rem_40rem_at_100%_0%,rgba(18,183,106,0.2),transparent_60%),linear-gradient(180deg,#14112b_0%,#1d1a39_100%)] text-white lg:grid lg:grid-cols-[256px_minmax(0,1fr)] xl:grid-cols-[288px_minmax(0,1fr)]">
+      <aside className="hidden h-full min-h-0 min-w-0 overflow-hidden p-3 pr-0 lg:block">
+        <div className="glass-dark flex h-full min-h-0 min-w-0 flex-col rounded-[1.75rem] p-3">
+          <Link href={shellHomeHref} className="flex min-w-0 shrink-0 items-center gap-3 rounded-[1.25rem] bg-white p-3 font-extrabold text-ink shadow-clay-sm">
             <BrandMark />
             <span className="min-w-0 truncate text-base">{shellTitle}</span>
           </Link>
-          <div className="mt-4 shrink-0 rounded-lg border border-emerald/20 bg-emerald/10 p-3 text-xs leading-5 text-emerald-100">
+          <div className="mt-3 shrink-0 rounded-2xl border border-emerald/25 bg-emerald/10 p-3 text-xs font-semibold leading-5 text-emerald-100">
             {supportOnly ? "Support queue access only. Customer and payment details stay scoped to tickets." : "Super admin access only. All business-level data remains tenant scoped."}
           </div>
-          <nav className="mt-5 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto pr-1">
+          <nav className="scrollbar-none mt-4 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto">
             {visibleNav.map((item) => {
               const active = isNavItemActive(pathname, item.href);
               return (
@@ -124,24 +124,26 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-11 min-w-0 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition",
-                    active ? "bg-white text-ink" : "text-white/70 hover:bg-white/10 hover:text-white"
+                    "group flex h-11 min-w-0 items-center gap-3 rounded-2xl px-2 text-sm font-bold transition",
+                    active ? "bg-white text-ink shadow-clay-sm" : "text-white/70 hover:bg-white/10 hover:text-white"
                   )}
                 >
-                  <item.icon className="size-4 shrink-0" />
+                  <span className={cn("grid size-8 shrink-0 place-items-center rounded-xl transition", active ? "bg-clay-emerald text-white" : "bg-white/10 text-white/70 group-hover:text-white")}>
+                    <item.icon className="size-4 shrink-0" />
+                  </span>
                   <span className="min-w-0 truncate">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
-          <div className="mt-5 shrink-0 rounded-lg bg-white/10 p-3">
+          <div className="mt-3 shrink-0 rounded-[1.25rem] bg-white/10 p-3">
             <p className="truncate text-sm font-bold">{footerTitle}</p>
             <p className="mt-1 text-xs text-white/50">{supportOnly ? "Support operations" : "Platform operations"}</p>
           </div>
         </div>
       </aside>
       <div className="flex h-full min-h-0 min-w-0 max-w-full flex-col overflow-hidden">
-        <header className="z-30 flex h-16 min-w-0 shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-slate-950/90 px-4 py-3 backdrop-blur-xl lg:px-6 xl:px-8">
+        <header className="glass-dark z-30 mx-3 mt-3 flex h-16 min-w-0 shrink-0 items-center justify-between gap-3 rounded-[1.4rem] px-3 py-3 lg:mx-4">
           <div className="flex min-w-0 items-center gap-3">
             <button
               ref={mobileButtonRef}
@@ -150,7 +152,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
               aria-expanded={mobileNavOpen}
               aria-controls="admin-mobile-navigation"
               onClick={() => setMobileNavOpen((value) => !value)}
-              className="relative grid size-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white shadow-[0_16px_36px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-0.5 hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
+              className="relative grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/10 text-white transition duration-300 hover:-translate-y-0.5 hover:text-emerald-300 focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
             >
               <Menu
                 className={cn(
@@ -165,7 +167,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                 )}
               />
             </button>
-            <div className="hidden size-10 shrink-0 place-items-center rounded-lg bg-emerald/15 text-emerald sm:grid">
+            <div className="clay-orb hidden size-10 shrink-0 rounded-xl bg-clay-emerald text-white sm:grid">
               <ShieldCheck className="size-5" />
             </div>
             <div className="min-w-0">
@@ -179,7 +181,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
             title="Log out"
             disabled={loggingOut}
             onClick={logout}
-            className="grid size-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition hover:border-red-300/40 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+            className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/10 text-white/80 transition hover:text-berry disabled:cursor-not-allowed disabled:opacity-60"
           >
             <LogOut className="size-4" />
           </button>

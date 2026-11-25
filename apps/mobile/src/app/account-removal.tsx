@@ -26,7 +26,7 @@ export default function AccountRemovalScreen() {
 
   return (
     <Screen>
-      <PageHeader eyebrow="Account control" title="Request deletion by email" subtitle="Use this if you no longer have a signed-in device." />
+      <PageHeader eyebrow="Account control" title="Request deletion by email" subtitle="Use this if you no longer have a signed-in device." illustration="shield" />
       <Card>
         <BodyText>For security, VyapaarMate sends a single-use link to the account email before any deletion or business closure is started.</BodyText>
         <TextField label="Account email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" />

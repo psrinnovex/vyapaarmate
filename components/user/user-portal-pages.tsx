@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Building2, CalendarCheck2, Clock3, Download, Home, Mail, MapPin, Phone, ReceiptText, Settings, ShieldCheck, Trash2, UserRound, WalletCards } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ArrowUpRight, CalendarCheck2, Clock3, Download, Home, Mail, MapPin, Phone, ReceiptText, Settings, ShieldCheck, Store, Trash2, UserRound, WalletCards } from "lucide-react";
+import { ClayIllustration, illustrationNameForBusinessType, type ClayIllustrationName } from "@/components/illustrations/clay-illustrations";
+import { ScrollReveal } from "@/components/landing/scroll-reveal";
 import { useRouteRefreshOnStream } from "@/hooks/use-live-sync";
 import {
   CUSTOMER_ACCOUNT_DELETE_CONFIRMATION,
@@ -12,10 +15,10 @@ import type { getCustomerPortalBusinessProfiles, getCustomerPortalOrders, getCus
 import { fulfillmentLabelForBusinessType, type ActiveFulfillmentMode } from "@/lib/business-rules";
 import { cn, formatINR, initials } from "@/lib/utils";
 import { getOrderTrackingStatusLabel } from "@/lib/order-tracking";
-import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { PasswordChangeCard } from "@/components/auth/password-change-card";
-import { Card } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Sticker } from "@/components/ui/sticker";
 import { PasswordInput } from "@/components/ui/form-fields";
 import { Input, Label } from "@/components/ui/input";
 import { PaginationControls, usePaginatedItems } from "@/components/ui/pagination";
@@ -83,29 +86,74 @@ async function readAccountActionError(response: Response, fallback: string) {
   }
 }
 
+const portalTabs = [
+  { href: "/user", label: "Browse", icon: Store },
+  { href: "/user/bookings", label: "Bookings", icon: CalendarCheck2 },
+  { href: "/user/profile", label: "Profile", icon: UserRound },
+  { href: "/user/settings", label: "Settings", icon: Settings }
+] as const;
+
+/** App-style segmented navigation shared by every user portal screen. */
+export function UserPortalTabs({ className }: { className?: string }) {
+  const pathname = usePathname();
+
+  return (
+    <nav aria-label="User portal" className={cn("glass mx-auto flex w-full max-w-xl gap-1 rounded-[1.4rem] p-1.5", className)}>
+      {portalTabs.map((tab) => {
+        const active = pathname === tab.href;
+        return (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-2xl px-2 py-2.5 text-xs font-extrabold transition sm:gap-2 sm:text-sm",
+              active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-500 hover:bg-white hover:text-ink"
+            )}
+          >
+            <tab.icon className="size-4 shrink-0" />
+            {tab.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 function PortalPageShell({
   eyebrow,
   title,
   body,
   action,
+  illustration,
   children
 }: {
   eyebrow: string;
   title: string;
   body: string;
   action?: React.ReactNode;
+  illustration: ClayIllustrationName;
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-mist text-ink">
-      <section className="border-b border-line bg-white px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div className="min-w-0">
-            <Badge variant="blue">{eyebrow}</Badge>
-            <h1 className="mt-3 break-words text-3xl font-extrabold leading-tight sm:text-4xl">{title}</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">{body}</p>
+    <main className="min-h-screen overflow-x-clip text-ink">
+      <section className="px-4 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl min-w-0">
+          <UserPortalTabs />
+          <div className="relative mt-4 overflow-hidden rounded-[2.25rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95)_0%,rgba(244,240,255,0.9)_55%,rgba(226,245,254,0.85)_100%)] p-5 shadow-clay sm:p-8">
+            <div aria-hidden="true" className="vm-blob -right-12 -top-16 size-64 bg-violet opacity-35" />
+            <div className="relative grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="min-w-0">
+                <Sticker tone="sky" tilt={-3}>{eyebrow}</Sticker>
+                <h1 className="mt-3 break-words text-[clamp(1.8rem,4.2vw,2.9rem)] font-extrabold leading-[1.05] tracking-[-0.04em]">{title}</h1>
+                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600 sm:text-base">{body}</p>
+                {action && <div className="mt-5">{action}</div>}
+              </div>
+              <div aria-hidden="true" className="hidden w-32 sm:block lg:w-40">
+                <ClayIllustration name={illustration} className="motion-safe:animate-float-slow" />
+              </div>
+            </div>
           </div>
-          {action}
         </div>
       </section>
       <section className="px-4 py-6 sm:px-6 lg:px-8">
@@ -115,107 +163,127 @@ function PortalPageShell({
   );
 }
 
-function SummaryTile({
+const statTones = {
+  ink: "bg-clay-ink text-white",
+  emerald: "bg-clay-emerald text-white",
+  ocean: "bg-clay-ocean text-white",
+  mango: "bg-clay-mango text-ink"
+} as const;
+
+type StatTone = keyof typeof statTones;
+
+function PortalStat({
   icon,
   label,
   value,
   detail,
-  tone = "ink"
+  tone = "ink",
+  delay = 0
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   detail: string;
-  tone?: "ink" | "emerald" | "ocean" | "amber";
+  tone?: StatTone;
+  delay?: number;
 }) {
-  const tones = {
-    ink: "bg-ink text-white",
-    emerald: "bg-emerald text-white",
-    ocean: "bg-ocean text-white",
-    amber: "bg-amber-500 text-white"
-  };
-
   return (
-    <Card className="grid min-h-32 gap-3 bg-white">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-500">{label}</p>
-        <span className={cn("grid size-10 place-items-center rounded-lg", tones[tone])}>{icon}</span>
-      </div>
-      <div>
-        <p className="text-2xl font-extrabold">{value}</p>
-        <p className="mt-1 text-xs font-semibold text-slate-500">{detail}</p>
-      </div>
-    </Card>
-  );
-}
-
-function ProfileMetric({
-  icon,
-  label,
-  value,
-  detail,
-  tone = "ink"
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  detail: string;
-  tone?: "ink" | "emerald" | "ocean" | "amber";
-}) {
-  const tones = {
-    ink: "bg-ink text-white",
-    emerald: "bg-emerald text-white",
-    ocean: "bg-ocean text-white",
-    amber: "bg-amber-500 text-white"
-  };
-
-  return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-line bg-white p-4">
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_2.25rem] items-start gap-3 sm:grid-cols-[minmax(0,1fr)_2.5rem]">
+    <ScrollReveal delay={delay} className="h-full min-w-0">
+      <div className="clay flex h-full min-w-0 items-start gap-4 rounded-[1.75rem] p-5">
+        <span className={cn("clay-orb size-12 shrink-0 rounded-2xl", statTones[tone])}>{icon}</span>
         <div className="min-w-0">
           <p className="text-sm font-bold text-slate-500">{label}</p>
-          <p className="mt-3 text-xl font-extrabold leading-tight text-ink [overflow-wrap:anywhere] sm:text-2xl sm:leading-tight">{value}</p>
+          <p className="mt-1 text-2xl font-extrabold leading-tight tracking-[-0.03em] [overflow-wrap:anywhere]">{value}</p>
+          <p className="mt-1 text-xs font-semibold text-slate-400">{detail}</p>
         </div>
-        <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg sm:size-10", tones[tone])}>{icon}</span>
       </div>
-      <p className="mt-3 text-xs font-semibold leading-5 text-slate-500">{detail}</p>
-    </div>
+    </ScrollReveal>
   );
 }
 
 function LatestBookingPanel({ order }: { order?: PortalOrder }) {
   return (
-    <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-line bg-white px-4 py-3">
-      <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-        <div className="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-center gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-mist text-ocean">
-            <Clock3 className="size-5" />
+    <div className="flex min-w-0 flex-col gap-3 rounded-[1.5rem] bg-white/10 p-4 ring-1 ring-white/15 sm:flex-row sm:items-center">
+      <span className="clay-orb size-11 shrink-0 rounded-2xl bg-white/15 text-white">
+        <Clock3 className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-white/55">Recent activity</p>
+        <p className="mt-1 truncate text-sm font-bold text-white">{order ? `${order.orderNumber} with ${order.business.name}` : "No bookings recorded yet"}</p>
+        <p className="mt-0.5 text-xs font-semibold text-white/60">
+          {order ? formatScheduledAppointment(order) ?? formatDate(order.createdAt) : "New bookings will appear here."}
+        </p>
+      </div>
+      {order && (
+        <ButtonLink href={`/order/${order.publicToken}`} variant="secondary" size="sm" icon={<ArrowUpRight className="size-3.5" />} iconPosition="end">
+          View booking
+        </ButtonLink>
+      )}
+    </div>
+  );
+}
+
+/** A torn-ticket card: details on the left, the amount and live status on the stub. */
+function BookingTicket({ order, index }: { order: PortalOrder; index: number }) {
+  const statusLabel = getOrderTrackingStatusLabel(order.business.businessType, order.orderType, order.status);
+  const art = illustrationNameForBusinessType(order.business.businessType);
+
+  return (
+    <ScrollReveal delay={Math.min(index, 6) * 40}>
+      <article className="clay relative grid min-w-0 overflow-hidden rounded-[2rem] md:grid-cols-[minmax(0,1fr)_16rem]">
+        <div className="flex min-w-0 gap-4 p-5 sm:p-6">
+          <span className="size-16 shrink-0 rounded-2xl bg-mist p-1.5 shadow-clay-inset">
+            <ClayIllustration name={art} />
           </span>
-          <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Recent activity</p>
-            {order ? (
-              <p className="mt-1 max-w-full truncate text-sm font-bold text-ink">
-                {order.orderNumber} with {order.business.name}
-              </p>
-            ) : (
-              <p className="mt-1 text-sm font-bold text-ink">No bookings recorded yet</p>
-            )}
-            <p className="mt-1 text-xs font-semibold text-slate-500">
-              {order ? formatScheduledAppointment(order) ?? formatDate(order.createdAt) : "New bookings will appear here."}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-clay-ink px-2.5 py-0.5 text-xs font-extrabold text-white">{order.orderNumber}</span>
+              <span className="text-xs font-bold text-slate-500">{formatDate(order.createdAt)}</span>
+            </div>
+            <Link href={`/b/${order.business.slug}`} className="mt-2 block truncate text-lg font-extrabold tracking-[-0.02em] text-ink transition hover:text-ocean">
+              {order.business.name}
+            </Link>
+            <p className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+              <MapPin className="size-3.5" />
+              {[order.business.city, order.business.state].filter(Boolean).join(", ") || "Local area"}
             </p>
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{orderItemsSummary(order)}</p>
+            {order.notes && <p className="mt-1 line-clamp-1 text-xs text-slate-500">Note: {order.notes}</p>}
+            <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
+              {orderTypeLabel(order) && <span className="rounded-full bg-mist px-2.5 py-1 text-slate-600">{orderTypeLabel(order)}</span>}
+              {order.appointment ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet/10 px-2.5 py-1 text-violet-deep">
+                  <CalendarCheck2 className="size-3.5" />
+                  {formatScheduledAppointment(order)} · {order.appointment.provider.name} · {order.appointment.status.toLowerCase().replace("_", " ")}
+                </span>
+              ) : (
+                <span className="rounded-full bg-mist px-2.5 py-1 text-slate-400">No reserved time</span>
+              )}
+            </div>
           </div>
         </div>
-        {order && (
-          <Link
-            href={`/order/${order.publicToken}`}
-            className="inline-flex h-9 w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:border-ocean/30 hover:text-ocean sm:w-auto"
-          >
-            View booking
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-        )}
-      </div>
-    </div>
+
+        <div className="relative border-t-2 border-dashed border-line md:border-l-2 md:border-t-0">
+          <span aria-hidden="true" className="absolute -left-3 -top-3 size-6 rounded-full bg-mist shadow-clay-inset md:-left-3 md:-top-3" />
+          <span aria-hidden="true" className="absolute -right-3 -top-3 size-6 rounded-full bg-mist shadow-clay-inset md:-bottom-3 md:-left-3 md:right-auto md:top-auto" />
+          <div className="flex h-full flex-col gap-3 p-5 sm:p-6">
+            <p className="text-3xl font-extrabold tracking-[-0.04em]">{formatINR(order.totalAmount)}</p>
+            <div className="flex items-center gap-2">
+              <OrderStatusAnimation status={order.status} businessType={order.business.businessType} orderType={order.orderType} label={statusLabel} className="size-8" />
+              <StatusPill status={order.status} label={statusLabel} />
+            </div>
+            <div className="flex items-center gap-2">
+              <PaymentStatusAnimation status={order.paymentStatus} provider={order.payment?.provider ?? "CASH"} label={`${order.paymentStatus.toLowerCase()} payment`} />
+              <StatusPill status={order.paymentStatus} />
+              <span className="text-xs font-bold text-slate-500">{order.payment?.provider ?? "CASH"}</span>
+            </div>
+            <ButtonLink href={`/order/${order.publicToken}`} variant="dark" className="mt-auto w-full" icon={<ArrowUpRight className="size-4" />} iconPosition="end">
+              View
+            </ButtonLink>
+          </div>
+        </div>
+      </article>
+    </ScrollReveal>
   );
 }
 
@@ -234,121 +302,47 @@ export function UserBookingsPage({ user, orders }: { user: PortalUser; orders: P
       eyebrow="Bookings"
       title="Your bookings"
       body={`Track every order, service request, and booking connected to ${user.email}.`}
-      action={<ButtonLink href="/user" variant="secondary" icon={<Home className="size-4" />}>Dashboard / Home</ButtonLink>}
+      illustration="bag"
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <SummaryTile icon={<CalendarCheck2 className="size-5" />} label="Total bookings" value={String(orders.length)} detail="Latest 100 records" tone="ink" />
-        <SummaryTile icon={<ReceiptText className="size-5" />} label="Active" value={String(activeBookings)} detail="Open status updates" tone="ocean" />
-        <SummaryTile icon={<WalletCards className="size-5" />} label="Pending payments" value={String(pendingPayments)} detail="Awaiting payment confirmation" tone="amber" />
-        <SummaryTile icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across matched bookings" tone="emerald" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <PortalStat icon={<CalendarCheck2 className="size-5" />} label="Total bookings" value={String(orders.length)} detail="Latest 100 records" tone="ink" />
+        <PortalStat icon={<ReceiptText className="size-5" />} label="Active" value={String(activeBookings)} detail="Open status updates" tone="ocean" delay={60} />
+        <PortalStat icon={<WalletCards className="size-5" />} label="Pending payments" value={String(pendingPayments)} detail="Awaiting payment confirmation" tone="mango" delay={120} />
+        <PortalStat icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across matched bookings" tone="emerald" delay={180} />
       </div>
 
-      <Card className="mt-5 overflow-hidden bg-white p-0">
-        <div className="border-b border-line px-5 py-4">
-          <h2 className="text-lg font-bold">Booking history</h2>
-          <p className="mt-1 text-sm text-slate-500">Sorted by most recent activity.</p>
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Booking history</h2>
+          <p className="mt-1 text-sm font-medium text-slate-500">Sorted by most recent activity.</p>
         </div>
-        {orders.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-[980px] w-full text-left text-sm">
-              <thead className="bg-mist text-xs uppercase tracking-[0.12em] text-slate-500">
-                <tr>
-                  <th className="px-5 py-3 font-bold">Booking</th>
-                  <th className="px-5 py-3 font-bold">Business</th>
-                  <th className="px-5 py-3 font-bold">Items</th>
-                  <th className="px-5 py-3 font-bold">Appointment</th>
-                  <th className="px-5 py-3 font-bold">Type</th>
-                  <th className="px-5 py-3 font-bold">Status</th>
-                  <th className="px-5 py-3 font-bold">Payment</th>
-                  <th className="px-5 py-3 text-right font-bold">Amount</th>
-                  <th className="px-5 py-3 font-bold">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {orderPagination.pageItems.map((order) => (
-                  <tr key={order.id} className="align-top transition hover:bg-mist/60">
-                    <td className="px-5 py-4">
-                      <p className="font-bold text-ink">{order.orderNumber}</p>
-                      <p className="mt-1 text-xs font-semibold text-slate-500">{formatDate(order.createdAt)}</p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <Link href={`/b/${order.business.slug}`} className="font-bold text-ocean hover:text-ink">{order.business.name}</Link>
-                      <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
-                        <MapPin className="size-3.5" />
-                        <span>{[order.business.city, order.business.state].filter(Boolean).join(", ") || "Local area"}</span>
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 text-slate-600">
-                      <p className="max-w-xs leading-5">{orderItemsSummary(order)}</p>
-                      {order.notes && <p className="mt-1 line-clamp-1 max-w-xs text-xs text-slate-500">Note: {order.notes}</p>}
-                    </td>
-                    <td className="px-5 py-4">
-                      {order.appointment ? (
-                        <div className="min-w-40">
-                          <p className="font-bold text-ink">{formatScheduledAppointment(order)}</p>
-                          <p className="mt-1 text-xs text-slate-500">{order.appointment.provider.name} · {order.appointment.status.toLowerCase().replace("_", " ")}</p>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-400">No reserved time</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="font-semibold text-slate-700">
-                        {orderTypeLabel(order)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <OrderStatusAnimation
-                          status={order.status}
-                          businessType={order.business.businessType}
-                          orderType={order.orderType}
-                          label={getOrderTrackingStatusLabel(order.business.businessType, order.orderType, order.status)}
-                          className="size-8"
-                        />
-                        <StatusPill status={order.status} label={getOrderTrackingStatusLabel(order.business.businessType, order.orderType, order.status)} />
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <PaymentStatusAnimation status={order.paymentStatus} provider={order.payment?.provider ?? "CASH"} label={`${order.paymentStatus.toLowerCase()} payment`} />
-                        <div className="grid gap-1">
-                          <StatusPill status={order.paymentStatus} />
-                          <span className="text-xs font-semibold text-slate-500">{order.payment?.provider ?? "CASH"}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-right font-extrabold">{formatINR(order.totalAmount)}</td>
-                    <td className="px-5 py-4">
-                      <Link href={`/order/${order.publicToken}`} className="inline-flex h-9 items-center justify-center rounded-lg border border-line bg-white px-3 text-xs font-bold text-ink transition hover:border-ocean/30 hover:text-ocean">
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="grid place-items-center px-5 py-14 text-center">
-            <div className="grid size-14 place-items-center rounded-lg bg-mist text-ocean">
-              <CalendarCheck2 className="size-7" />
-            </div>
-            <h2 className="mt-4 text-xl font-bold">No bookings yet</h2>
-            <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">Bookings made with this account email or phone will appear here.</p>
-            <ButtonLink href="/user" className="mt-5" icon={<Home className="size-4" />}>Browse businesses</ButtonLink>
-          </div>
-        )}
-        <PaginationControls
-          page={orderPagination.page}
-          pageCount={orderPagination.pageCount}
-          totalItems={orderPagination.totalItems}
-          startItem={orderPagination.startItem}
-          endItem={orderPagination.endItem}
-          itemLabel="bookings"
-          onPageChange={orderPagination.setPage}
+      </div>
+
+      {orders.length > 0 ? (
+        <div className="mt-4 grid gap-4">
+          {orderPagination.pageItems.map((order, index) => (
+            <BookingTicket key={order.id} order={order} index={index} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          className="mt-4"
+          illustration="calendar"
+          title="No bookings yet"
+          body="Bookings made with this account email or phone will appear here."
+          action={<ButtonLink href="/user" icon={<Home className="size-4" />}>Browse businesses</ButtonLink>}
         />
-      </Card>
+      )}
+      <PaginationControls
+        className="mt-5 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
+        page={orderPagination.page}
+        pageCount={orderPagination.pageCount}
+        totalItems={orderPagination.totalItems}
+        startItem={orderPagination.startItem}
+        endItem={orderPagination.endItem}
+        itemLabel="bookings"
+        onPageChange={orderPagination.setPage}
+      />
     </PortalPageShell>
   );
 }
@@ -376,97 +370,91 @@ export function UserProfilePage({
       eyebrow="Profile"
       title="Your profile"
       body="Account identity, contact details, and booking activity linked to this user portal."
-      action={<ButtonLink href="/user/settings" variant="secondary" icon={<Settings className="size-4" />}>Settings</ButtonLink>}
+      illustration="customers"
     >
-      <Card className="min-w-0 max-w-full overflow-hidden bg-white p-0">
-        <div className="grid min-w-0 max-w-full lg:grid-cols-[minmax(0,410px)_minmax(0,1fr)]">
-          <div className="min-w-0 border-b border-line p-5 sm:p-6 lg:border-b-0 lg:border-r">
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="grid size-16 shrink-0 place-items-center rounded-lg bg-ink text-lg font-extrabold text-white">{initials(user.name)}</div>
+      <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+        <ScrollReveal direction="right" className="min-w-0">
+          <div className="relative min-w-0 overflow-hidden rounded-[2.25rem] bg-[linear-gradient(150deg,#1d1a39_0%,#2b2160_55%,#4f3bb8_100%)] p-6 text-white shadow-clay-lg sm:p-7">
+            <div aria-hidden="true" className="vm-blob -right-16 -top-20 size-64 bg-emerald opacity-30" />
+            <div aria-hidden="true" className="absolute inset-0 opacity-20 [background-image:radial-gradient(rgba(255,255,255,0.45)_1px,transparent_1px)] [background-size:16px_16px]" />
+            <div className="relative flex min-w-0 items-center gap-4">
+              <div className="clay-orb size-16 shrink-0 rounded-[1.4rem] bg-clay-emerald text-xl font-extrabold text-white">{initials(user.name)}</div>
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="min-w-0 truncate text-2xl font-extrabold">{user.name}</h2>
-                  <Badge variant="blue">Customer</Badge>
-                </div>
-                <p className="mt-1 text-sm font-semibold text-slate-500">VyapaarMate account</p>
+                <h2 className="truncate text-2xl font-extrabold tracking-[-0.03em]">{user.name}</h2>
+                <p className="mt-0.5 text-sm font-semibold text-white/60">VyapaarMate account</p>
               </div>
             </div>
-            <div className="mt-6 grid gap-3 text-sm">
+            <div className="relative mt-2 flex justify-end">
+              <Sticker tone="mango" tilt={4}>Customer</Sticker>
+            </div>
+            <div className="relative mt-4 grid gap-2.5 text-sm">
               <ProfileLine icon={<Mail className="size-4" />} label="Email" value={user.email} />
               <ProfileLine icon={<Phone className="size-4" />} label="Phone" value={user.phone ?? "Not added"} />
               <ProfileLine icon={<ShieldCheck className="size-4" />} label="Member since" value={formatShortDate(user.createdAt)} />
             </div>
-          </div>
-
-          <div className="grid min-w-0 max-w-full content-start gap-4 bg-gradient-to-br from-white to-mist/70 p-4 sm:p-6">
-            <div className="grid min-w-0 gap-3 md:grid-cols-3">
-              <ProfileMetric icon={<ReceiptText className="size-5" />} label="Bookings" value={String(orders.length)} detail="Matched to this account" tone="ink" />
-              <ProfileMetric icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across booking history" tone="emerald" />
-              <ProfileMetric icon={<CalendarCheck2 className="size-5" />} label="Last booking" value={lastBooking ? formatShortDate(lastBooking) : "None"} detail="Most recent record" tone="ocean" />
+            <div className="relative mt-5">
+              <LatestBookingPanel order={orders[0]} />
             </div>
-            <LatestBookingPanel order={orders[0]} />
           </div>
-        </div>
-      </Card>
+        </ScrollReveal>
 
-      <Card className="mt-5 min-w-0 max-w-full overflow-hidden bg-white p-0">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4 sm:px-6">
-          <div className="min-w-0">
-            <h2 className="text-lg font-bold">Business profiles</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500">Customer records created when you booked with each business.</p>
+        <div className="grid min-w-0 content-start gap-4">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            <PortalStat icon={<ReceiptText className="size-5" />} label="Bookings" value={String(orders.length)} detail="Matched to this account" tone="ink" />
+            <PortalStat icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across booking history" tone="emerald" delay={60} />
+            <PortalStat icon={<CalendarCheck2 className="size-5" />} label="Last booking" value={lastBooking ? formatShortDate(lastBooking) : "None"} detail="Most recent record" tone="ocean" delay={120} />
           </div>
-          <Badge variant="neutral">{linkedCountLabel}</Badge>
-        </div>
-        <div className="p-5 sm:p-6">
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Business profiles</h2>
+              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">Customer records created when you booked with each business.</p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-slate-600 shadow-clay-sm">{linkedCountLabel}</span>
+          </div>
           {businessProfiles.length > 0 ? (
-            <div className="overflow-hidden rounded-lg border border-line">
-              <div className="divide-y divide-line">
-                {profilePagination.pageItems.map((profile) => {
-                  const bookingLabel = profile.totalOrders === 1 ? "booking" : "bookings";
-
-                  return (
-                    <div key={profile.id} className="grid gap-4 bg-white px-4 py-4 transition hover:bg-mist/60 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                      <div className="min-w-0">
-                        <Link href={`/b/${profile.business.slug}`} className="inline-flex max-w-full items-center gap-1 text-base font-bold text-ink transition hover:text-ocean">
-                          <span className="min-w-0 truncate">{profile.business.name}</span>
-                          <ArrowUpRight className="size-3.5 shrink-0" />
-                        </Link>
-                        <div className="mt-2 grid gap-2 text-sm font-semibold text-slate-600 md:grid-cols-3">
-                          <span className="inline-flex min-w-0 items-center gap-2">
-                            <ReceiptText className="size-4 shrink-0 text-slate-400" />
-                            <span className="truncate">{profile.totalOrders} {bookingLabel}</span>
-                          </span>
-                          <span className="inline-flex min-w-0 items-center gap-2">
-                            <WalletCards className="size-4 shrink-0 text-slate-400" />
-                            <span className="truncate">{formatINR(profile.totalSpent)}</span>
-                          </span>
-                          <span className="inline-flex min-w-0 items-center gap-2">
-                            <Clock3 className="size-4 shrink-0 text-slate-400" />
-                            <span className="truncate">{formatShortDate(profile.lastOrderAt)}</span>
-                          </span>
-                        </div>
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+              {profilePagination.pageItems.map((profile, index) => {
+                const bookingLabel = profile.totalOrders === 1 ? "booking" : "bookings";
+                return (
+                  <ScrollReveal key={profile.id} delay={Math.min(index, 6) * 40} className="h-full min-w-0">
+                    <article className="clay flex h-full min-w-0 flex-col rounded-[1.75rem] p-5">
+                      <Link href={`/b/${profile.business.slug}`} className="inline-flex max-w-full items-center gap-1 text-base font-extrabold text-ink transition hover:text-ocean">
+                        <span className="min-w-0 truncate">{profile.business.name}</span>
+                        <ArrowUpRight className="size-3.5 shrink-0" />
+                      </Link>
+                      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                        <span className="rounded-2xl bg-mist/80 px-2 py-2">
+                          <span className="block text-lg font-extrabold leading-6">{profile.totalOrders}</span>
+                          <span className="text-[11px] font-bold text-slate-500">{bookingLabel}</span>
+                        </span>
+                        <span className="rounded-2xl bg-mist/80 px-2 py-2">
+                          <span className="block truncate text-lg font-extrabold leading-6">{formatINR(profile.totalSpent)}</span>
+                          <span className="text-[11px] font-bold text-slate-500">spent</span>
+                        </span>
+                        <span className="rounded-2xl bg-mist/80 px-2 py-2">
+                          <span className="block truncate text-sm font-extrabold leading-6">{formatShortDate(profile.lastOrderAt)}</span>
+                          <span className="text-[11px] font-bold text-slate-500">last order</span>
+                        </span>
                       </div>
-                      <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <Badge variant={profile.whatsappOptIn ? "emerald" : "neutral"}>{profile.whatsappOptIn ? "WhatsApp on" : "WhatsApp off"}</Badge>
-                        <Badge variant={profile.marketingOptIn ? "blue" : "neutral"}>{profile.marketingOptIn ? "Offers on" : "Offers off"}</Badge>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <FlagChip on={profile.whatsappOptIn} label={profile.whatsappOptIn ? "WhatsApp on" : "WhatsApp off"} />
+                        <FlagChip on={profile.marketingOptIn} label={profile.marketingOptIn ? "Offers on" : "Offers off"} />
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    </article>
+                  </ScrollReveal>
+                );
+              })}
             </div>
           ) : (
-            <div className="grid place-items-center rounded-lg border border-dashed border-line bg-mist px-5 py-10 text-center">
-              <span className="grid size-14 place-items-center rounded-lg bg-white text-ocean">
-                <Building2 className="size-7" />
-              </span>
-              <h3 className="mt-4 text-lg font-bold">No business profiles linked</h3>
-              <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">Profiles appear after your first booking with a business.</p>
-              <ButtonLink href="/user" className="mt-5" icon={<Home className="size-4" />}>Browse businesses</ButtonLink>
-            </div>
+            <EmptyState
+              illustration="shop"
+              title="No business profiles linked"
+              body="Profiles appear after your first booking with a business."
+              action={<ButtonLink href="/user" icon={<Home className="size-4" />}>Browse businesses</ButtonLink>}
+            />
           )}
           <PaginationControls
-            className="mt-4 rounded-lg border border-line bg-white"
+            className="rounded-2xl border border-white/80 bg-white shadow-clay-sm"
             page={profilePagination.page}
             pageCount={profilePagination.pageCount}
             totalItems={profilePagination.totalItems}
@@ -476,8 +464,17 @@ export function UserProfilePage({
             onPageChange={profilePagination.setPage}
           />
         </div>
-      </Card>
+      </div>
     </PortalPageShell>
+  );
+}
+
+function FlagChip({ on, label }: { on: boolean; label: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold", on ? "bg-emerald-soft text-emerald-deep" : "bg-slate-100 text-slate-500")}>
+      <span className={cn("size-1.5 rounded-full", on ? "bg-emerald" : "bg-slate-400")} />
+      {label}
+    </span>
   );
 }
 
@@ -499,57 +496,39 @@ export function UserSettingsPage({
       eyebrow="Settings"
       title="User settings"
       body="Review account access, portal identity, and per-business communication status."
-      action={<ButtonLink href="/user/profile" variant="secondary" icon={<UserRound className="size-4" />}>Profile</ButtonLink>}
+      illustration="shield"
     >
       <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="bg-white">
-          <div className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-lg bg-ink text-white">
-              <ShieldCheck className="size-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-bold">Account access</h2>
-              <p className="mt-1 text-sm text-slate-500">Signed-in customer account.</p>
-            </div>
-          </div>
-          <div className="mt-5 divide-y divide-line rounded-lg border border-line">
+        <SettingsCard icon={<ShieldCheck className="size-5" />} tone="ink" title="Account access" body="Signed-in customer account.">
+          <div className="mt-5 grid gap-2">
             <SettingsLine label="Name" value={user.name} />
             <SettingsLine label="Email" value={user.email} />
             <SettingsLine label="Phone" value={user.phone ?? "Not added"} />
             <SettingsLine label="Role" value="Customer" />
           </div>
-        </Card>
+        </SettingsCard>
 
-        <Card className="bg-white">
-          <div className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-lg bg-ocean text-white">
-              <Settings className="size-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-bold">Communication status</h2>
-              <p className="mt-1 text-sm text-slate-500">Current booking communication flags.</p>
-            </div>
-          </div>
+        <SettingsCard icon={<Settings className="size-5" />} tone="ocean" title="Communication status" body="Current booking communication flags.">
           <div className="mt-5 grid gap-3">
             {businessProfiles.length > 0 ? (
               communicationPagination.pageItems.map((profile) => (
-                <div key={profile.id} className="rounded-lg border border-line bg-mist p-4">
+                <div key={profile.id} className="rounded-2xl bg-mist/80 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-bold">{profile.business.name}</p>
+                    <p className="font-extrabold">{profile.business.name}</p>
                     <p className="text-xs font-semibold text-slate-500">{profile.totalOrders} bookings</p>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Badge variant={profile.whatsappOptIn ? "emerald" : "neutral"}>WhatsApp {profile.whatsappOptIn ? "enabled" : "disabled"}</Badge>
-                    <Badge variant={profile.marketingOptIn ? "blue" : "neutral"}>Offers {profile.marketingOptIn ? "enabled" : "disabled"}</Badge>
+                    <FlagChip on={profile.whatsappOptIn} label={`WhatsApp ${profile.whatsappOptIn ? "enabled" : "disabled"}`} />
+                    <FlagChip on={profile.marketingOptIn} label={`Offers ${profile.marketingOptIn ? "enabled" : "disabled"}`} />
                   </div>
                 </div>
               ))
             ) : (
-              <p className="rounded-lg border border-line bg-mist p-4 text-sm font-semibold text-slate-600">No communication settings are linked yet.</p>
+              <p className="rounded-2xl bg-mist/80 p-4 text-sm font-semibold text-slate-600">No communication settings are linked yet.</p>
             )}
           </div>
           <PaginationControls
-            className="mt-4 rounded-lg border border-line bg-white"
+            className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
             page={communicationPagination.page}
             pageCount={communicationPagination.pageCount}
             totalItems={communicationPagination.totalItems}
@@ -558,7 +537,7 @@ export function UserSettingsPage({
             itemLabel="business profiles"
             onPageChange={communicationPagination.setPage}
           />
-        </Card>
+        </SettingsCard>
 
         <PasswordChangeCard
           portal="user"
@@ -569,6 +548,36 @@ export function UserSettingsPage({
         <CustomerAccountDataControls />
       </div>
     </PortalPageShell>
+  );
+}
+
+function SettingsCard({
+  icon,
+  tone,
+  title,
+  body,
+  className,
+  children
+}: {
+  icon: React.ReactNode;
+  tone: StatTone | "berry";
+  title: string;
+  body: React.ReactNode;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  const orb = tone === "berry" ? "bg-clay-berry text-white" : statTones[tone];
+  return (
+    <section className={cn("clay min-w-0 rounded-[2rem] p-5 sm:p-6", className)}>
+      <div className="flex items-start gap-3">
+        <span className={cn("clay-orb size-12 shrink-0 rounded-2xl", orb)}>{icon}</span>
+        <div className="min-w-0">
+          <h2 className="text-lg font-extrabold text-ink">{title}</h2>
+          <div className="mt-1 text-sm leading-6 text-slate-500">{body}</div>
+        </div>
+      </div>
+      {children}
+    </section>
   );
 }
 
@@ -644,18 +653,13 @@ function CustomerAccountDataControls() {
 
   return (
     <>
-      <Card className="bg-white lg:col-span-2">
-        <div className="flex items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-ocean text-white">
-            <Download className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-lg font-bold text-ink">Download your data</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              Download a JSON copy of your account profile, linked customer records, bookings, payments, and support requests.
-            </p>
-          </div>
-        </div>
+      <SettingsCard
+        className="self-start"
+        icon={<Download className="size-5" />}
+        tone="ocean"
+        title="Download your data"
+        body="Download a JSON copy of your account profile, linked customer records, bookings, payments, and support requests."
+      >
         <Button
           className="mt-5 w-full sm:w-auto"
           type="button"
@@ -668,61 +672,57 @@ function CustomerAccountDataControls() {
           {exporting ? "Preparing download" : "Download my data"}
         </Button>
         {exportError && (
-          <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
+          <p className="mt-3 rounded-2xl bg-berry-soft p-3 text-sm leading-6 text-berry-deep" role="alert">
             {exportError}
           </p>
         )}
-      </Card>
+      </SettingsCard>
 
-      <Card className="border-red-200 bg-red-50/30 lg:col-span-2">
-        <div className="flex items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-red-600 text-white">
-            <Trash2 className="size-5" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-lg font-bold text-ink">Delete sign-in account</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600" id="customer-account-retention">
-              {CUSTOMER_ACCOUNT_RETENTION_NOTICE}
-            </p>
-          </div>
-        </div>
-
+      <SettingsCard
+        className="border-2 border-berry/20 bg-[linear-gradient(180deg,#fff6f9_0%,#ffe8ef_100%)] lg:col-span-2"
+        icon={<Trash2 className="size-5" />}
+        tone="berry"
+        title="Delete sign-in account"
+        body={<span id="customer-account-retention" className="text-slate-600">{CUSTOMER_ACCOUNT_RETENTION_NOTICE}</span>}
+      >
         <form className="mt-5 grid gap-4" onSubmit={deleteAccount}>
-          <div className="grid gap-2">
-            <Label htmlFor="delete-account-current-password">Current password</Label>
-            <PasswordInput
-              id="delete-account-current-password"
-              name="currentPassword"
-              value={currentPassword}
-              autoComplete="current-password"
-              showLockIcon
-              required
-              aria-describedby="customer-account-retention"
-              onChange={(event) => setCurrentPassword(event.currentTarget.value)}
-            />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="delete-account-current-password">Current password</Label>
+              <PasswordInput
+                id="delete-account-current-password"
+                name="currentPassword"
+                value={currentPassword}
+                autoComplete="current-password"
+                showLockIcon
+                required
+                aria-describedby="customer-account-retention"
+                onChange={(event) => setCurrentPassword(event.currentTarget.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="delete-account-confirmation">
+                Type <span className="font-extrabold text-berry-deep">{CUSTOMER_ACCOUNT_DELETE_CONFIRMATION}</span> to confirm
+              </Label>
+              <Input
+                id="delete-account-confirmation"
+                name="confirmation"
+                value={confirmation}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                required
+                aria-describedby="delete-account-confirmation-help customer-account-retention"
+                onChange={(event) => setConfirmation(event.currentTarget.value)}
+              />
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="delete-account-confirmation">
-              Type <span className="font-extrabold text-red-700">{CUSTOMER_ACCOUNT_DELETE_CONFIRMATION}</span> to confirm
-            </Label>
-            <Input
-              id="delete-account-confirmation"
-              name="confirmation"
-              value={confirmation}
-              autoComplete="off"
-              autoCapitalize="characters"
-              spellCheck={false}
-              required
-              aria-describedby="delete-account-confirmation-help customer-account-retention"
-              onChange={(event) => setConfirmation(event.currentTarget.value)}
-            />
-            <p className="text-xs leading-5 text-slate-500" id="delete-account-confirmation-help">
-              This is permanent for the VyapaarMate login and account profile. The retained records described above are not erased.
-            </p>
-          </div>
+          <p className="text-xs leading-5 text-slate-500" id="delete-account-confirmation-help">
+            This is permanent for the VyapaarMate login and account profile. The retained records described above are not erased.
+          </p>
 
           {deleteError && (
-            <p className="rounded-lg bg-red-100 p-3 text-sm leading-6 text-red-800" role="alert">
+            <p className="rounded-2xl bg-berry-soft p-3 text-sm leading-6 text-berry-deep" role="alert">
               {deleteError}
             </p>
           )}
@@ -742,18 +742,18 @@ function CustomerAccountDataControls() {
             {deleting ? "Deleting account" : "Permanently delete sign-in account"}
           </Button>
         </form>
-      </Card>
+      </SettingsCard>
     </>
   );
 }
 
 function ProfileLine({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[2rem_minmax(0,1fr)] items-center gap-3 rounded-lg border border-line bg-mist px-3 py-2.5">
-      <span className="grid size-8 place-items-center rounded-md bg-white text-ocean">{icon}</span>
+    <div className="grid grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-3 rounded-2xl bg-white/10 px-3 py-2.5 ring-1 ring-white/10">
+      <span className="grid size-9 place-items-center rounded-xl bg-white/15 text-emerald-200">{icon}</span>
       <div className="min-w-0">
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-        <p className="font-semibold leading-5 text-slate-700 [overflow-wrap:anywhere]">{value}</p>
+        <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-white/50">{label}</p>
+        <p className="font-semibold leading-5 text-white [overflow-wrap:anywhere]">{value}</p>
       </div>
     </div>
   );
@@ -761,9 +761,9 @@ function ProfileLine({ icon, label, value }: { icon: React.ReactNode; label: str
 
 function SettingsLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 px-4 py-3 sm:grid-cols-[160px_1fr] sm:items-center">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="min-w-0 truncate text-sm font-semibold text-slate-700">{value}</p>
+    <div className="grid gap-1 rounded-2xl bg-mist/80 px-4 py-3 sm:grid-cols-[8rem_1fr] sm:items-center">
+      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">{label}</p>
+      <p className="min-w-0 truncate text-sm font-bold text-slate-700">{value}</p>
     </div>
   );
 }

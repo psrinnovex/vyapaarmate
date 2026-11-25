@@ -383,7 +383,7 @@ function supportAgentInviteNotice(name: string, invite?: SupportAgentInviteState
   return `${name} invited as a support agent.`;
 }
 
-const selectClassName = "h-11 w-full rounded-lg border border-line bg-white px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
+const selectClassName = "h-11 w-full rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
 const couponFilterToolbarClassName = "mt-4 flex min-w-0 flex-wrap items-center gap-3";
 const couponSearchControlClassName = "relative min-w-0 flex-[1_1_100%] sm:min-w-[240px] sm:flex-[2_1_240px]";
 const couponFilterControlClassName = "min-w-0 flex-[1_1_100%] sm:min-w-[150px] sm:flex-[1_1_150px]";
@@ -550,7 +550,7 @@ export function AdminOverviewPage() {
       <div className="mt-5 grid min-w-0 max-w-full gap-5 min-[1700px]:grid-cols-[minmax(0,1fr)_300px]">
         <Card className="min-w-0 overflow-hidden bg-white">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-ink">Registered businesses</h2>
+            <h2 className="text-lg font-extrabold text-ink">Registered businesses</h2>
             <Link href="/admin/businesses" className="text-sm font-bold text-ocean">Manage</Link>
           </div>
           <BusinessTable
@@ -1206,7 +1206,7 @@ export function AdminPaymentsPage() {
           onClose={() => setUpiVerificationTarget(null)}
         >
           <form className="grid gap-4" onSubmit={verifyUpiPayment}>
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
+            <div className="rounded-xl border border-berry/25 bg-berry-soft p-3 text-sm leading-6 text-red-800">
               Do not approve from a screenshot. Confirm the credit in the PSHR Innovex bank account, including exact amount and order reference.
             </div>
             <div className="grid gap-2">
@@ -1418,7 +1418,7 @@ export function AdminSubscriptionsPage() {
           onClose={() => setVerificationTarget(null)}
         >
           <form className="grid gap-4" onSubmit={verifySubscriptionPayment}>
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800">
+            <div className="rounded-xl border border-berry/25 bg-berry-soft p-3 text-sm leading-6 text-red-800">
               Confirm the payment in the PSHR Innovex bank account. Do not activate a subscription from a screenshot alone.
             </div>
             <div className="grid gap-2">
@@ -1443,7 +1443,7 @@ export function AdminSubscriptionsPage() {
             {pricingPlans.map((plan) => (
               <div
                 key={plan.id}
-                className="flex min-h-full flex-col rounded-lg border border-line bg-white p-5 shadow-sm sm:p-6"
+                className="flex min-h-full flex-col rounded-2xl border border-white/80 bg-white shadow-clay-sm p-5 shadow-clay-sm sm:p-6"
               >
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <h3 className="break-words text-2xl font-extrabold leading-8 text-ink">{plan.name}</h3>
@@ -1840,7 +1840,7 @@ export function AdminSupportPage({
                   className={cn(
                     "h-8 rounded-lg border px-3 text-xs font-bold transition",
                     statusFilter === status
-                      ? "border-emerald/20 bg-emerald/10 text-emerald"
+                      ? "border-emerald/20 bg-emerald-soft text-emerald-deep"
                       : "border-line bg-white text-slate-600 hover:border-ocean/30"
                   )}
                 >
@@ -1859,7 +1859,7 @@ export function AdminSupportPage({
               </div>
             )}
             {!loading && visibleTickets.length === 0 && (
-              <div className="rounded-lg border border-line bg-mist p-5 text-sm leading-6 text-slate-600">
+              <div className="rounded-2xl bg-mist/80 p-5 text-sm leading-6 text-slate-600">
                 No support tickets match this filter.
               </div>
             )}
@@ -1870,14 +1870,14 @@ export function AdminSupportPage({
                 onClick={() => setSelectedTicketId(ticket.id)}
                 className={cn(
                   "grid gap-3 rounded-lg border bg-mist p-4 text-left transition hover:border-ocean/30 hover:bg-white",
-                  ticket.isOverdue ? "border-red-200" : "border-line"
+                  ticket.isOverdue ? "border-berry/25" : "border-line"
                 )}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={supportPriorityVariant(ticket.priority)}>{supportPriorityLabel(ticket.priority)}</Badge>
                   <StatusPill status={ticket.status} label={supportStatusLabel(ticket.status)} />
                   <span className="text-xs font-bold uppercase text-slate-500">{ticket.code}</span>
-                  <span className={cn("ml-auto text-xs font-semibold", ticket.isOverdue ? "text-red-700" : "text-slate-500")}>{ticket.slaLabel} SLA</span>
+                  <span className={cn("ml-auto text-xs font-semibold", ticket.isOverdue ? "text-berry-deep" : "text-slate-500")}>{ticket.slaLabel} SLA</span>
                 </div>
                 <div className="grid gap-1">
                   <h3 className="font-bold text-ink">{ticket.subject}</h3>
@@ -1937,11 +1937,11 @@ export function AdminSupportPage({
               </ul>
             </div>
 
-            <div className="rounded-lg border border-line bg-white p-4">
+            <div className="rounded-2xl border border-white/80 bg-white shadow-clay-sm p-4">
               <h3 className="font-bold text-ink">Escalation Triggers</h3>
               <div className="mt-4 grid gap-3">
                 {supportEscalationRules.map((rule) => (
-                  <div key={rule} className="rounded-lg border border-line bg-mist p-3 text-sm leading-6 text-slate-700">
+                  <div key={rule} className="rounded-2xl bg-mist/80 p-3 text-sm leading-6 text-slate-700">
                     {rule}
                   </div>
                 ))}
@@ -1986,7 +1986,7 @@ export function AdminSupportPage({
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {supportChatbotIntents.map((intent) => (
-                <div key={intent.id} className="rounded-lg border border-line bg-mist p-4">
+                <div key={intent.id} className="rounded-2xl bg-mist/80 p-4">
                   <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
                     <h3 className="min-w-0 flex-1 break-words font-bold text-ink">{intent.label}</h3>
                     <Badge variant="neutral" className="shrink-0 whitespace-normal text-center leading-4">{intent.owner}</Badge>
@@ -2011,7 +2011,7 @@ export function AdminSupportPage({
           }}
         >
           <div className="grid gap-5">
-            <form className="grid gap-3 rounded-lg border border-line bg-mist p-4" onSubmit={createSupportAgent}>
+            <form className="grid gap-3 rounded-2xl bg-mist/80 p-4" onSubmit={createSupportAgent}>
               <div className="grid gap-3 md:grid-cols-[1fr_1fr_160px_auto] md:items-end">
                 <div className="grid gap-2">
                   <Label>Name</Label>
@@ -2148,7 +2148,7 @@ export function AdminSupportPage({
                 );
               })}
               {agents.length === 0 && (
-                <div className="rounded-lg border border-line bg-mist p-5 text-sm leading-6 text-slate-600">
+                <div className="rounded-2xl bg-mist/80 p-5 text-sm leading-6 text-slate-600">
                   No platform agents loaded.
                 </div>
               )}
@@ -2166,21 +2166,21 @@ export function AdminSupportPage({
         >
           <div className="grid gap-3 sm:gap-4">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-              <div className="rounded-lg bg-mist p-2.5 sm:p-3">
+              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
                 <p className="text-xs font-bold uppercase text-slate-500">Priority</p>
                 <p className="mt-1 text-sm font-semibold text-ink">{supportPriorityLabel(selectedTicket.priority)}</p>
               </div>
-              <div className="rounded-lg bg-mist p-2.5 sm:p-3">
+              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
                 <p className="text-xs font-bold uppercase text-slate-500">Agent</p>
                 <p className="mt-1 break-words text-sm font-semibold text-ink">{selectedTicket.assignedToName ?? "Unassigned"}</p>
               </div>
-              <div className="rounded-lg bg-mist p-2.5 sm:p-3">
+              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
                 <p className="text-xs font-bold uppercase text-slate-500">Status</p>
                 <p className="mt-1 text-sm font-semibold text-ink">{supportStatusLabel(selectedTicket.status)}</p>
               </div>
-              <div className="rounded-lg bg-mist p-2.5 sm:p-3">
+              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
                 <p className="text-xs font-bold uppercase text-slate-500">SLA</p>
-                <p className={cn("mt-1 text-sm font-semibold", selectedTicket.isOverdue ? "text-red-700" : "text-ink")}>{selectedTicket.slaLabel}</p>
+                <p className={cn("mt-1 text-sm font-semibold", selectedTicket.isOverdue ? "text-berry-deep" : "text-ink")}>{selectedTicket.slaLabel}</p>
               </div>
             </div>
             {selectedTicket.feedback && (
@@ -2207,9 +2207,9 @@ export function AdminSupportPage({
                 <p className="break-words text-sm leading-6 text-slate-600">{selectedTicket.path ?? "No page path"}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 sm:p-3">
-              <p className="text-xs font-bold uppercase text-amber-800">Secure handling</p>
-              <p className="mt-1 text-sm leading-6 text-amber-900">{selectedTicket.safeHandlingNote}</p>
+            <div className="rounded-lg border border-mango/30 bg-mango-soft p-2.5 sm:p-3">
+              <p className="text-xs font-bold uppercase text-mango-deep">Secure handling</p>
+              <p className="mt-1 text-sm leading-6 text-mango-deep">{selectedTicket.safeHandlingNote}</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-3 sm:gap-3">
               <div className="grid gap-2">
@@ -2504,7 +2504,7 @@ export function AdminLogsPage() {
             </div>
             <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-3">
               {sourceHealthItems.map((summary) => (
-                <div key={summary.source} className="min-w-0 rounded-lg border border-line bg-mist/50 p-3">
+                <div key={summary.source} className="min-w-0 rounded-2xl bg-mist/80/50 p-3">
                   <div className="flex min-w-0 flex-col gap-2">
                     <div className="min-w-0">
                       <p className="break-words font-bold leading-6 text-ink">{summary.label}</p>
@@ -2514,11 +2514,11 @@ export function AdminLogsPage() {
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                     <div className="min-w-0 rounded-lg bg-white px-1.5 py-2">
-                      <p className="text-lg font-bold text-ink">{summary.count}</p>
+                      <p className="text-lg font-extrabold text-ink">{summary.count}</p>
                       <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-slate-400 sm:text-[10px]">Events</p>
                     </div>
                     <div className="min-w-0 rounded-lg bg-white px-1.5 py-2">
-                      <p className="text-lg font-bold text-red-600">{summary.failedCount}</p>
+                      <p className="text-lg font-bold text-berry-deep">{summary.failedCount}</p>
                       <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-slate-400 sm:text-[10px]">Failed</p>
                     </div>
                     <div className="min-w-0 rounded-lg bg-white px-1.5 py-2">
@@ -2560,7 +2560,7 @@ export function AdminLogsPage() {
           <div className="border-b border-line p-4 sm:p-5">
             <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
-                <h2 className="text-lg font-bold text-ink">Unified log timeline</h2>
+                <h2 className="text-lg font-extrabold text-ink">Unified log timeline</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-600">Most recent operational events across audit, messaging, and payments.</p>
               </div>
               <Badge variant="blue">{filteredLogs.length} visible</Badge>
@@ -2585,7 +2585,7 @@ export function AdminLogsPage() {
                     className={cn(
                       "h-10 rounded-lg border px-3 text-sm font-bold transition",
                       sourceFilter === filter.value
-                        ? "border-ocean/30 bg-ocean/10 text-ocean"
+                        ? "border-ocean/30 bg-ocean-soft text-ocean-deep"
                         : "border-line bg-white text-slate-600 hover:border-ocean/20 hover:text-ink"
                     )}
                   >
@@ -2593,7 +2593,7 @@ export function AdminLogsPage() {
                   </button>
                 ))}
               </div>
-              <label className="flex min-w-0 items-center gap-2 rounded-lg border border-line bg-white px-3 sm:w-max">
+              <label className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 sm:w-max">
                 <SlidersHorizontal className="size-4 shrink-0 text-slate-400" />
                 <select
                   value={statusFilter}
@@ -3094,16 +3094,16 @@ export function AdminCouponsPage() {
         <MetricCard title="Total redemptions" value={String(totalCouponRedemptions)} detail="Subscription and checkout coupon usage" icon={TrendingUp} tone="purple" />
       </div>
 
-      <div className="coupon-mode-switch mt-5 overflow-hidden rounded-lg border border-line bg-white p-2 shadow-sm">
+      <div className="coupon-mode-switch mt-5 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-clay-sm p-2 shadow-clay-sm">
         <div className="relative grid min-h-20 grid-cols-2 gap-1 overflow-hidden rounded-md bg-slate-950/[0.03] p-1" role="tablist" aria-label="Coupon category">
           <span
             aria-hidden="true"
             className={cn(
-              "absolute inset-y-1 left-1 w-[calc(50%_-_0.25rem)] rounded-md bg-ink shadow-soft transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "absolute inset-y-1 left-1 w-[calc(50%_-_0.25rem)] rounded-md bg-ink shadow-clay transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
               couponView === "customer" && "translate-x-[calc(100%_+_0.5rem)]"
             )}
           />
-          <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md border border-white/80 bg-white text-ocean shadow-sm sm:grid">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md border border-white/80 bg-white text-ocean shadow-clay-sm sm:grid">
             <ArrowLeftRight className="size-4" />
           </span>
           {[
@@ -3151,7 +3151,7 @@ export function AdminCouponsPage() {
                   <span
                     className={cn(
                       "coupon-mode-icon grid size-9 shrink-0 place-items-center rounded-md border transition duration-300",
-                      selected ? "border-white/15 bg-white/15 text-white" : "border-line bg-white text-ocean shadow-sm"
+                      selected ? "border-white/15 bg-white/15 text-white" : "border-line bg-white text-ocean shadow-clay-sm"
                     )}
                   >
                     <OptionIcon className="size-4" />
@@ -3165,7 +3165,7 @@ export function AdminCouponsPage() {
                   <span
                     className={cn(
                       "shrink-0 rounded-md px-2 py-1 text-xs font-bold transition duration-300",
-                      selected ? "bg-white/15 text-white" : "bg-white text-slate-600 shadow-sm"
+                      selected ? "bg-white/15 text-white" : "bg-white text-slate-600 shadow-clay-sm"
                     )}
                   >
                     {option.activeCount}/{option.count}
@@ -3314,7 +3314,7 @@ export function AdminCouponsPage() {
             </table>
           </div>
           <PaginationControls
-            className="mt-4 rounded-lg border border-line bg-white"
+            className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
             page={subscriptionCouponPagination.page}
             pageCount={subscriptionCouponPagination.pageCount}
             totalItems={subscriptionCouponPagination.totalItems}
@@ -3484,7 +3484,7 @@ export function AdminCouponsPage() {
             </table>
           </div>
           <PaginationControls
-            className="mt-4 rounded-lg border border-line bg-white"
+            className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
             page={businessCouponPagination.page}
             pageCount={businessCouponPagination.pageCount}
             totalItems={businessCouponPagination.totalItems}
@@ -3741,7 +3741,7 @@ export function AdminSettingsPage() {
                 </span>
                 <input name="directUpiEnabled" type="checkbox" defaultChecked={paymentSettings.directUpiEnabled} className="size-5" />
               </label>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              <div className="rounded-xl border border-mango/30 bg-mango-soft p-4 text-sm leading-6 text-mango-deep">
                 Direct UPI QR payments do not provide this app a signed gateway webhook. Manual fallback rows are verified in Platform Payments; subscription payments are verified in Subscriptions. Nothing is credited or activated until a super admin confirms the exact bank credit and UTR.
               </div>
               <div className="flex justify-end">
@@ -3774,7 +3774,7 @@ export function AdminSettingsPage() {
           {announcements.length > 0 && (
             <div className="mt-5 grid gap-3">
               {announcementPagination.pageItems.map((announcement) => (
-                <div key={announcement.id} className="rounded-lg bg-mist p-3">
+                <div key={announcement.id} className="rounded-2xl bg-mist/80 p-3">
                   <p className="font-semibold text-ink">{announcement.title}</p>
                   <p className="mt-1 text-sm leading-6 text-slate-600">{announcement.message}</p>
                 </div>
@@ -3803,7 +3803,7 @@ export function AdminSettingsPage() {
               "Provider secrets encrypted",
               "No hardcoded API keys"
             ].map((item) => (
-              <div key={item} className="flex items-center gap-3 rounded-lg bg-mist p-3">
+              <div key={item} className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3">
                 <ShieldCheck className="size-5 text-emerald" />
                 <span className="text-sm font-semibold text-slate-700">{item}</span>
               </div>
@@ -3905,7 +3905,7 @@ function BusinessTable({
             <tr key={business.id}>
               <td className={cellClassName}>
                 <div className="flex items-center gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ocean/10 text-ocean">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ocean-soft text-ocean-deep">
                     <BusinessIcon className="size-5" />
                   </span>
                   <div className="min-w-0">
@@ -4031,7 +4031,7 @@ function BusinessApprovalActions({
 
   if (business.kycStatus === "REJECTED") {
     return (
-      <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-extrabold text-red-700">
+      <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-berry/25 bg-berry-soft px-2.5 text-xs font-extrabold text-berry-deep">
         <ShieldAlert className="size-4" />
         Rejected
       </span>
@@ -4055,7 +4055,7 @@ function BusinessApprovalActions({
         title={rejectTitle}
         disabled={rejectDisabled}
         onClick={() => onBusinessAction?.(business, "reject")}
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-red-200 bg-white px-2.5 text-xs font-extrabold text-red-700 shadow-[0_10px_24px_rgba(220,38,38,0.08)] transition hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 disabled:translate-y-0 disabled:border-line disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-berry/25 bg-white px-2.5 text-xs font-extrabold text-berry-deep shadow-[0_10px_24px_rgba(220,38,38,0.08)] transition hover:-translate-y-0.5 hover:border-red-300 hover:bg-berry-soft disabled:translate-y-0 disabled:border-line disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
       >
         <ShieldAlert className="size-4" />
         Reject
@@ -4262,7 +4262,7 @@ function BusinessActionsMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         title={`Manage ${business.name}`}
-        className="inline-grid size-9 place-items-center rounded-lg border border-line bg-white text-slate-600 transition hover:border-ocean/30 hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10"
+        className="inline-grid size-9 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-slate-600 transition hover:border-ocean/30 hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10"
         onClick={toggleMenu}
       >
         <EllipsisVertical className="size-5" />
@@ -4273,7 +4273,7 @@ function BusinessActionsMenu({
           ref={menuRef}
           role="menu"
           aria-label={`Manage ${business.name}`}
-          className="fixed z-[1000] max-h-[calc(100vh-1.5rem)] w-[248px] overflow-x-hidden overflow-y-auto rounded-lg border border-line bg-white py-1.5 text-left shadow-[0_20px_60px_rgba(15,23,42,0.18)]"
+          className="fixed z-[1000] max-h-[calc(100vh-1.5rem)] w-[248px] overflow-x-hidden overflow-y-auto rounded-2xl border border-white/80 bg-white shadow-clay-sm py-1.5 text-left shadow-[0_20px_60px_rgba(15,23,42,0.18)]"
           style={{ top: position.top, left: position.left }}
         >
           {items.map((item) => (
@@ -4286,7 +4286,7 @@ function BusinessActionsMenu({
               className={cn(
                 "flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45",
                 item.tone === "danger"
-                  ? "text-red-700 hover:bg-red-50"
+                  ? "text-berry-deep hover:bg-berry-soft"
                   : "text-ink hover:bg-mist"
               )}
               onClick={() => selectItem(item)}
@@ -4294,7 +4294,7 @@ function BusinessActionsMenu({
               <span
                 className={cn(
                   "grid size-7 shrink-0 place-items-center rounded-md",
-                  item.tone === "danger" ? "bg-red-50 text-red-600" : "bg-ocean/10 text-ocean"
+                  item.tone === "danger" ? "bg-berry-soft text-berry-deep" : "bg-ocean-soft text-ocean-deep"
                 )}
               >
                 {item.icon}
@@ -4338,7 +4338,7 @@ function BusinessServiceAreaDialog({
           <Badge variant={business.isOpen ? "emerald" : "red"}>{business.isOpen ? "Open now" : "Closed"}</Badge>
         </div>
 
-        <div className="grid gap-3 rounded-lg border border-line bg-mist p-3">
+        <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
           <Label>Fulfillment modes</Label>
           <div className="grid gap-3 sm:grid-cols-3">
             {fulfillmentProfile.allowedModes.map((mode: ActiveFulfillmentMode) => {
@@ -4522,20 +4522,20 @@ function BusinessKycReviewDialog({
         </div>
 
         {approvalBlockedReason && (
-          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-900">
+          <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm font-semibold leading-6 text-mango-deep">
             {approvalBlockedReason}
           </p>
         )}
 
         {business.kycRejectionReason && (
-          <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold leading-6 text-red-800">
+          <p className="rounded-lg border border-berry/25 bg-berry-soft p-3 text-sm font-semibold leading-6 text-red-800">
             {business.kycRejectionReason}
           </p>
         )}
 
         <div className="grid gap-3">
           {business.kycDocuments.map((document) => (
-            <div key={document.id} className="flex items-center justify-between gap-3 rounded-lg border border-line bg-mist p-3">
+            <div key={document.id} className="flex items-center justify-between gap-3 rounded-2xl bg-mist/80 p-3">
               <div className="min-w-0">
                 <p className="truncate font-bold text-ink">{document.label}</p>
                 <p className="truncate text-xs text-slate-500">
@@ -4555,7 +4555,7 @@ function BusinessKycReviewDialog({
             </div>
           ))}
           {business.kycDocuments.length === 0 && (
-            <p className="rounded-lg bg-mist p-3 text-sm text-slate-600">No KYC documents uploaded yet.</p>
+            <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-600">No KYC documents uploaded yet.</p>
           )}
         </div>
 

@@ -52,7 +52,7 @@ export default function BusinessOrdersScreen() {
         </View>
         <Text style={[styles.items, { color: colors.text }]}>{item.items}</Text>
         {item.notes ? <Text style={[styles.notes, { color: colors.textMuted }]}>Note: {item.notes}</Text> : null}
-        <View style={styles.rowBetween}>
+        <View style={[styles.amountBand, { backgroundColor: colors.surfaceMuted }]}>
           <Text style={[styles.meta, { color: colors.textMuted }]}>{formatDateTime(item.createdAt)}</Text>
           <Text style={[styles.amount, { color: colors.text }]}>{formatInr(item.amount)}</Text>
         </View>
@@ -76,22 +76,23 @@ export default function BusinessOrdersScreen() {
         refreshing={orders.isRefetching}
         onRefresh={() => void orders.refetch()}
         renderItem={({ item }) => <OrderCard item={item} />}
-        ListHeaderComponent={<PageHeader eyebrow="Operations" title="Orders" subtitle="Only status changes permitted for your role are accepted by the server." />}
-        ListEmptyComponent={orders.isLoading ? <LoadingState label="Loading orders…" /> : orders.isError ? <StateView title="Could not load orders" message={orders.error.message} action={<Button label="Try again" onPress={() => void orders.refetch()} />} /> : <StateView title="No active orders" message="Pull down to check again." />}
+        ListHeaderComponent={<PageHeader eyebrow="Operations" title="Orders" subtitle="Only status changes permitted for your role are accepted by the server." illustration="bag" />}
+        ListEmptyComponent={orders.isLoading ? <LoadingState label="Loading orders…" /> : orders.isError ? <StateView title="Could not load orders" message={orders.error.message} action={<Button label="Try again" onPress={() => void orders.refetch()} />} /> : <StateView title="No active orders" message="Pull down to check again." illustration="bag" />}
       />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 20, paddingBottom: 36, gap: 12 },
+  content: { padding: 20, paddingBottom: 36, gap: 16 },
+  amountBand: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10 },
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   flex: { flex: 1 },
-  number: { fontSize: 17, fontWeight: "800" },
+  number: { fontSize: 18, fontWeight: "900", letterSpacing: -0.3 },
   meta: { fontSize: 12, lineHeight: 18 },
   items: { fontSize: 14, lineHeight: 20 },
   notes: { fontSize: 13, lineHeight: 19 },
-  amount: { fontSize: 17, fontWeight: "800" },
+  amount: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   action: { minWidth: 120, flexGrow: 1 },
 });

@@ -72,7 +72,7 @@ function healthProgressValue(label: string, value: number) {
 
 function trendIcon(direction: BusinessIntelligencePayload["topProductTrend"]["trendDirection"]) {
   if (direction === "up") return <ArrowUpRight className="size-4 text-emerald" />;
-  if (direction === "down") return <ArrowDownRight className="size-4 text-red-600" />;
+  if (direction === "down") return <ArrowDownRight className="size-4 text-berry-deep" />;
   return <TrendingUp className="size-4 text-ocean" />;
 }
 
@@ -143,7 +143,7 @@ function EngineReadinessPanel({ engine }: { engine?: BusinessIntelligencePayload
         </div>
         <div className="grid min-w-0 gap-2 sm:grid-cols-3">
           {engine.modelStatuses.map((model) => (
-            <div key={model.modelType} className="min-w-0 rounded-lg border border-line bg-mist/80 p-3">
+            <div key={model.modelType} className="min-w-0 rounded-2xl bg-mist/80/80 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-bold text-ink">{modelLabel(model.modelType)}</p>
                 <Badge variant={modelStatusVariant(model.status)}>{model.status.replaceAll("_", " ")}</Badge>
@@ -390,30 +390,42 @@ export function AiSuggestionsPage() {
 
       <EngineReadinessPanel engine={data.engine} />
 
-      <Card className="mb-4 overflow-hidden border-ocean/15 bg-[linear-gradient(135deg,#f7f5ff_0%,#eef7f2_54%,#ffffff_100%)] p-4 shadow-[0_18px_54px_rgba(29,26,57,0.08)]">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+      <section className="relative mb-4 overflow-hidden rounded-[2rem] bg-[linear-gradient(150deg,#1d1a39_0%,#2b2160_52%,#3a2a8a_100%)] p-5 text-white shadow-clay-lg sm:p-7">
+        <div aria-hidden="true" className="vm-blob -right-16 -top-20 size-72 bg-emerald opacity-25" />
+        <div aria-hidden="true" className="vm-blob -bottom-24 left-1/4 size-72 bg-violet opacity-30" />
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="blue">
-                <BrainCircuit className="size-3" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold">
+                <BrainCircuit className="size-3.5" />
                 VyapaarMate Intelligence Engine
-              </Badge>
-              <Badge variant="secondary">{data.dataWindow}</Badge>
-              <Badge variant="neutral">No paid AI APIs</Badge>
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white/80">{data.dataWindow}</span>
+              <span className="rounded-full bg-emerald/25 px-3 py-1 text-xs font-bold text-emerald-100">No paid AI APIs</span>
             </div>
-            <h2 className="mt-3 max-w-3xl text-xl font-bold leading-tight text-ink sm:text-2xl">
+            <h2 className="mt-4 max-w-3xl text-2xl font-extrabold leading-tight tracking-[-0.03em] sm:text-3xl">
               {health.isPreliminary ? "Preliminary operational score" : "Operational health score"}: {health.score}/100.
             </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/70">
               {health.explanation} Confidence is {health.confidence.toLowerCase()} from {health.observationCount} recorded transactions. Generated {formatGeneratedAt(data.generatedAt)} without paid AI API calls.
             </p>
           </div>
-          <div className="grid min-h-24 min-w-24 place-items-center rounded-lg border border-ocean/15 bg-white p-4 text-center shadow-[0_14px_36px_rgba(79,91,213,0.10)]">
-            <p className="text-4xl font-extrabold leading-none text-ink">{health.score}</p>
-            <p className="mt-2 text-xs font-bold uppercase text-slate-500">Grade {health.grade} · {health.confidence} confidence</p>
+          <div
+            role="img"
+            aria-label={`Health score ${health.score} out of 100, grade ${health.grade}`}
+            className="relative mx-auto grid size-40 shrink-0 place-items-center rounded-full shadow-clay-lg sm:size-44"
+            style={{ background: `conic-gradient(from 210deg, #12b76a 0deg, #7c5cff ${Math.max(0, Math.min(100, health.score)) * 3}deg, rgba(255,255,255,0.12) ${Math.max(0, Math.min(100, health.score)) * 3}deg 300deg, transparent 300deg)` }}
+          >
+            <div className="grid size-[7.6rem] place-items-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#ffffff_0%,#f3f0ff_60%,#e6e0fb_100%)] text-center text-ink shadow-clay-inset sm:size-[8.4rem]">
+              <div>
+                <p className="text-5xl font-extrabold leading-none tracking-[-0.05em]">{health.score}</p>
+                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-500">Grade {health.grade}</p>
+                <p className="text-[11px] font-bold text-slate-400">{health.confidence} confidence</p>
+              </div>
+            </div>
           </div>
         </div>
-      </Card>
+      </section>
 
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <Card className="min-w-0 overflow-hidden p-4">
@@ -430,7 +442,7 @@ export function AiSuggestionsPage() {
             <>
               <div className="mt-4 grid gap-3">
                 {data.tomorrowDemandForecast.slice(0, 3).map((forecast) => (
-                  <div key={`${forecast.productName}-${forecast.timeSlot}-${forecast.forecastDate}`} className="rounded-lg border border-line bg-mist/80 p-3">
+                  <div key={`${forecast.productName}-${forecast.timeSlot}-${forecast.forecastDate}`} className="rounded-2xl bg-mist/80/80 p-3">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -450,7 +462,7 @@ export function AiSuggestionsPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-4 h-56 rounded-lg border border-line bg-white p-3">
+              <div className="mt-4 h-56 rounded-2xl border border-white/80 bg-white shadow-clay-sm p-3">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demandChartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e8e4f5" />
@@ -482,14 +494,14 @@ export function AiSuggestionsPage() {
             </div>
             <Target className="size-6 text-emerald" />
           </div>
-          <div className="mt-4 rounded-lg bg-mist/80 p-3">
+          <div className="mt-4 rounded-2xl bg-mist/80/80 p-3">
             <p className="text-3xl font-extrabold text-ink">{data.repeatCustomerOpportunities.count}</p>
             <p className="mt-1 text-sm text-slate-600">{data.repeatCustomerOpportunities.eligibleCount} customers have marketing consent.</p>
           </div>
           <div className="mt-4 grid gap-3">
             {data.repeatCustomerOpportunities.customers.length ? (
               data.repeatCustomerOpportunities.customers.slice(0, 4).map((customer) => (
-                <div key={customer.customerId} className="rounded-lg border border-line bg-white p-3">
+                <div key={customer.customerId} className="rounded-2xl border border-white/80 bg-white shadow-clay-sm p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-bold text-ink">{customer.customerName}</p>
@@ -554,7 +566,7 @@ export function AiSuggestionsPage() {
           <div className="mt-4 grid gap-3">
             {sortedPayments.length ? (
               sortedPayments.slice(0, 5).map((payment) => (
-                <div key={payment.paymentId} className="rounded-lg border border-line bg-mist/80 p-3">
+                <div key={payment.paymentId} className="rounded-2xl bg-mist/80/80 p-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate font-bold text-ink">{payment.customerName}</p>
@@ -618,8 +630,8 @@ export function AiSuggestionsPage() {
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <p className="font-bold text-amber-800">Risks</p>
+            <div className="rounded-lg border border-mango/30 bg-mango-soft p-3">
+              <p className="font-bold text-mango-deep">Risks</p>
               <ul className="mt-2 grid gap-2 text-sm leading-6 text-slate-600">
                 {(health.risks.length ? health.risks : ["No urgent risk flagged by current rules."]).slice(0, 3).map((risk) => (
                   <li key={risk} className="flex gap-2">
@@ -647,15 +659,15 @@ export function AiSuggestionsPage() {
             {trendIcon(data.topProductTrend.trendDirection)}
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg bg-mist/80 p-3">
+            <div className="rounded-2xl bg-mist/80/80 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Units</p>
               <p className="mt-2 text-xl font-extrabold text-ink">{data.topProductTrend.unitsSold}</p>
             </div>
-            <div className="rounded-lg bg-mist/80 p-3">
+            <div className="rounded-2xl bg-mist/80/80 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Repeat buyers</p>
               <p className="mt-2 text-xl font-extrabold text-ink">{data.topProductTrend.repeatBuyers}</p>
             </div>
-            <div className="rounded-lg bg-mist/80 p-3">
+            <div className="rounded-2xl bg-mist/80/80 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Trend</p>
               <p className="mt-2 text-xl font-extrabold text-ink">{formatSignedPercent(data.topProductTrend.changePercent)}</p>
             </div>
@@ -670,7 +682,7 @@ export function AiSuggestionsPage() {
           <h2 className="mt-4 text-xl font-bold text-ink">{data.campaignRecommendation.title}</h2>
           <div className="mt-4 grid gap-3 text-sm leading-6">
             {data.campaignRecommendations.slice(0, 2).map((campaign) => (
-              <div key={campaign.id} className="rounded-lg border border-line bg-mist/80 p-3">
+              <div key={campaign.id} className="rounded-2xl bg-mist/80/80 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-bold text-ink">{campaign.title}</p>
@@ -690,7 +702,7 @@ export function AiSuggestionsPage() {
               </div>
             ))}
           </div>
-          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-900">
+          <p className="mt-4 rounded-lg border border-mango/30 bg-mango-soft p-3 text-xs font-semibold leading-5 text-mango-deep">
             {data.campaignRecommendation.consentNote}
           </p>
           {data.campaignRecommendation.eligibleCustomerCount > 0 ? (
@@ -713,7 +725,7 @@ export function AiSuggestionsPage() {
           <div className="mt-4 grid gap-3">
             {data.nextBestActions.length ? (
               data.nextBestActions.map((action, index) => (
-                <div key={`${action.title}-${index}`} className="rounded-lg border border-line bg-mist/80 p-3">
+                <div key={`${action.title}-${index}`} className="rounded-2xl bg-mist/80/80 p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-bold text-ink">{action.title}</p>

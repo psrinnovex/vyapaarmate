@@ -60,7 +60,7 @@ export function BusinessImageUploadField({
   return (
     <div className="grid gap-2">
       <Label>Business image</Label>
-      <div className="grid gap-3 rounded-lg border border-line bg-mist/60 p-3 sm:grid-cols-[112px_1fr] sm:items-center">
+      <div className="grid gap-3 rounded-2xl bg-mist/70 p-3 sm:grid-cols-[112px_1fr] sm:items-center">
         <div className="relative aspect-square overflow-hidden rounded-lg bg-white">
           {preview ? (
             <Image
@@ -78,7 +78,7 @@ export function BusinessImageUploadField({
           )}
         </div>
         <div className="grid gap-2">
-          <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-ocean shadow-sm ring-1 ring-line transition hover:bg-slate-50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+          <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-ocean shadow-clay-sm ring-1 ring-line transition hover:bg-slate-50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
             {processing ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
             {processing ? "Optimizing..." : preview ? "Replace image" : "Add image"}
             <input
@@ -92,7 +92,7 @@ export function BusinessImageUploadField({
           {preview && (
             <button
               type="button"
-              className="h-10 rounded-lg px-4 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-10 rounded-lg px-4 text-sm font-bold text-berry-deep transition hover:bg-berry-soft disabled:cursor-not-allowed disabled:opacity-60"
               disabled={disabled || processing}
               onClick={() => {
                 setPreview(null);

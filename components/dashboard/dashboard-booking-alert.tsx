@@ -313,10 +313,10 @@ export function DashboardBookingAlert({
 
   return (
     <>
-      <section className="business-order-alert relative mb-5 overflow-hidden rounded-lg border border-amber-200 bg-white p-4 shadow-soft" role="alert" aria-live="assertive">
+      <section className="business-order-alert relative mb-5 overflow-hidden rounded-lg border border-amber-200 bg-white p-4 shadow-clay" role="alert" aria-live="assertive">
         <span className="business-order-alert-sweep" aria-hidden="true" />
         <div className="relative grid gap-4 lg:grid-cols-[116px_minmax(0,1fr)_minmax(220px,256px)] lg:items-center">
-          <div className="business-order-alert-visual relative mx-auto grid size-28 place-items-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 lg:mx-0">
+          <div className="business-order-alert-visual relative mx-auto grid size-28 place-items-center rounded-lg border border-mango/30 bg-mango-soft text-amber-700 lg:mx-0">
             <LazyLottieAnimation
               src={orderAnimationPaths.businessOrderAlert}
               label={`New ${copy.transactionSingular.toLowerCase()} alert`}
@@ -343,7 +343,7 @@ export function DashboardBookingAlert({
             </p>
             <p className="mt-1 break-words text-sm text-slate-500">{primaryOrder.items}</p>
             {alertSound.soundBlocked && (
-              <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+              <p className="mt-3 rounded-lg border border-mango/30 bg-mango-soft px-3 py-2 text-sm font-semibold text-mango-deep">
                 Click Enable sound to start the alert chime in this browser.
               </p>
             )}

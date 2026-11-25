@@ -46,7 +46,7 @@ function retentionState(request: RetentionRequest, now: number) {
     return { label: "Purge due", tone: "bg-red-100 text-red-800" };
   }
   if (request.retentionReviewAt && new Date(request.retentionReviewAt).getTime() <= now) {
-    return { label: "Review due", tone: "bg-amber-100 text-amber-800" };
+    return { label: "Review due", tone: "bg-mango-soft text-mango-deep" };
   }
   return { label: "Scheduled", tone: "bg-emerald-100 text-emerald-800" };
 }
@@ -141,7 +141,7 @@ export function AdminAccountRetentionPage() {
 
   return (
     <main className="min-h-0 flex-1 overflow-y-auto bg-slate-50 p-4 text-slate-950 sm:p-6 xl:p-8">
-      <header className="rounded-2xl bg-slate-950 p-6 text-white shadow-sm">
+      <header className="rounded-2xl bg-slate-950 p-6 text-white shadow-clay-sm">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">Privacy operations</p>
         <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -155,7 +155,7 @@ export function AdminAccountRetentionPage() {
       </header>
 
       {notice ? (
-        <div role="status" className={`mt-4 rounded-xl border p-4 text-sm font-semibold ${notice.tone === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-900"}`}>
+        <div role="status" className={`mt-4 rounded-xl border p-4 text-sm font-semibold ${notice.tone === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-berry/25 bg-berry-soft text-red-900"}`}>
           {notice.message}
         </div>
       ) : null}
@@ -174,7 +174,7 @@ export function AdminAccountRetentionPage() {
           const purgeDue = Boolean(request.retentionPurgeAfter && new Date(request.retentionPurgeAfter).getTime() <= now);
           const reviewDue = Boolean(request.retentionReviewAt && new Date(request.retentionReviewAt).getTime() <= now && !purgeDue);
           return (
-            <article key={request.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article key={request.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-clay-sm">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="truncate text-lg font-black">{request.business?.name ?? "Purged business record"}</h2>

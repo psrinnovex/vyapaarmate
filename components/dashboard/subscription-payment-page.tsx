@@ -271,8 +271,8 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
           </div>
         </Card>
       ) : failed ? (
-        <Card className="payment-state-enter border border-red-200 bg-red-50/70 text-center">
-          <div className="mx-auto grid size-16 place-items-center rounded-full bg-red-600 text-white shadow-soft">
+        <Card className="payment-state-enter border border-berry/25 bg-berry-soft/70 text-center">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-red-600 text-white shadow-clay">
             <XCircle className="size-9" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-ink">Payment not completed</h2>
@@ -292,15 +292,15 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
               <h2 className="mt-4 text-2xl font-bold text-ink">{isCashfree ? "Pay Online Now" : "Pay " + payment.receiverName}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{payment.message}</p>
               <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-clay-sm">
                   <span className="payment-pulse-dot size-2 rounded-full bg-emerald" /> Awaiting confirmation
                 </span>
                 {displayedRemainingSeconds !== null && (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-clay-sm">
                     <Clock3 className="size-4 text-ocean" /> {displayedRemainingSeconds > 0 ? "Expires in " + checkoutCountdown(displayedRemainingSeconds) : "Checking expiry"}
                   </span>
                 )}
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-sm">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-clay-sm">
                   {planDetails?.name ?? formatPlanName(payment.plan)} - {formatINR(payment.amount)}
                 </span>
               </div>
@@ -327,7 +327,7 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
             </div>
             <div className="mx-auto lg:mx-0">
               {payment.paymentQrImageUrl ? (
-                <div className="payment-qr-frame rounded-2xl border border-emerald/20 bg-white p-3 shadow-soft">
+                <div className="payment-qr-frame rounded-2xl border border-emerald/20 bg-white p-3 shadow-clay">
                   <Image
                     src={payment.paymentQrImageUrl}
                     alt={payment.receiverName + " subscription payment QR"}
@@ -339,7 +339,7 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
                   <span className="payment-qr-scanline" aria-hidden="true" />
                 </div>
               ) : (
-                <div className="grid size-64 place-items-center rounded-2xl border border-emerald/20 bg-white p-6 text-center shadow-soft">
+                <div className="grid size-64 place-items-center rounded-2xl border border-emerald/20 bg-white p-6 text-center shadow-clay">
                   <div>
                     <QrCode className="mx-auto size-12 text-ocean" />
                     <p className="mt-3 text-sm font-semibold text-slate-600">Payment link ready</p>
@@ -360,20 +360,20 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
           <StatusPill status={payment.paymentState} />
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg bg-mist p-3">
+          <div className="rounded-2xl bg-mist/80 p-3">
             <p className="text-xs font-semibold uppercase text-slate-500">Plan</p>
             <p className="mt-2 font-bold text-ink">{planDetails?.name ?? formatPlanName(payment.plan)}</p>
           </div>
-          <div className="rounded-lg bg-mist p-3">
+          <div className="rounded-2xl bg-mist/80 p-3">
             <p className="text-xs font-semibold uppercase text-slate-500">Final payable</p>
             <p className="mt-2 font-bold text-ink">{formatINR(payment.amount)}</p>
           </div>
-          <div className="rounded-lg bg-mist p-3">
+          <div className="rounded-2xl bg-mist/80 p-3">
             <p className="text-xs font-semibold uppercase text-slate-500">Provider</p>
             <p className="mt-2 font-bold text-ink">{payment.paymentProviderLabel}</p>
           </div>
           {payment.billingGstin && (
-            <div className="rounded-lg bg-mist p-3">
+            <div className="rounded-2xl bg-mist/80 p-3">
               <p className="text-xs font-semibold uppercase text-slate-500">GSTIN</p>
               <p className="mt-2 break-words font-bold text-ink">{payment.billingGstin}</p>
             </div>

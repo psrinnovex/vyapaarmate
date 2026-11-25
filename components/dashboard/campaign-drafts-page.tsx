@@ -69,7 +69,7 @@ export function CampaignDraftsPage() {
   }
   return <>
     <PageHeader title="Campaign drafts" body="Prepare and save messages for customers who have opted in to offers." action={<Button variant="secondary" icon={<RefreshCw className="size-4" />} disabled={busy} onClick={() => void load()}>Refresh</Button>} />
-    <Card className="mb-5 border-amber-200 bg-amber-50"><p className="font-bold text-ink">Draft preparation is available. Campaign delivery is not enabled.</p><p className="mt-2 text-sm leading-6 text-slate-700">Saved drafts stay with this business after refresh. No messages are sent or scheduled here. {eligible} customers currently have both WhatsApp updates and marketing consent enabled; eligibility must be checked again before any future send.</p></Card>
+    <Card className="mb-5 border-mango/30 bg-mango-soft"><p className="font-bold text-ink">Draft preparation is available. Campaign delivery is not enabled.</p><p className="mt-2 text-sm leading-6 text-slate-700">Saved drafts stay with this business after refresh. No messages are sent or scheduled here. {eligible} customers currently have both WhatsApp updates and marketing consent enabled; eligibility must be checked again before any future send.</p></Card>
     <div className="grid min-w-0 gap-5 xl:grid-cols-2">
       <Card><h2 className="text-xl font-bold">{editing ? "Edit draft" : "Prepare a draft"}</h2><form onSubmit={save} className="mt-5 grid gap-4">
         <div className="grid gap-2"><Label htmlFor="campaign-title">Campaign name</Label><Input id="campaign-title" value={title} onChange={event => setTitle(event.target.value)} minLength={2} maxLength={120} required /></div>

@@ -5,7 +5,7 @@ import { Card } from "./card";
 type SkeletonProps = HTMLAttributes<HTMLDivElement>;
 
 export function Skeleton({ className, ...props }: SkeletonProps) {
-  return <div aria-hidden="true" className={cn("skeleton-shimmer rounded-md", className)} {...props} />;
+  return <div aria-hidden="true" className={cn("skeleton-shimmer rounded-xl", className)} {...props} />;
 }
 
 export function SkeletonText({
@@ -41,13 +41,18 @@ export function PageHeaderSkeleton({
   const dark = tone === "dark";
 
   return (
-    <div className="mb-6 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div
+      className={cn(
+        "mb-6 flex min-w-0 flex-col gap-4 rounded-[2rem] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6",
+        dark ? "bg-[linear-gradient(135deg,#1d1a39_0%,#2b2160_60%,#3a2a8a_100%)]" : "border border-white/80 bg-white/70 shadow-clay"
+      )}
+    >
       <div className="min-w-0 flex-1">
-        <Skeleton className={cn("h-8 w-56", dark && "bg-white/20")} />
-        <Skeleton className={cn("mt-3 h-4 w-full max-w-2xl", dark && "bg-white/15")} />
-        <Skeleton className={cn("mt-2 h-4 w-full max-w-xl", dark && "bg-white/15")} />
+        <Skeleton className={cn("h-9 w-64 rounded-xl", dark && "bg-white/20")} />
+        <Skeleton className={cn("mt-3 h-4 w-full max-w-xl", dark && "bg-white/15")} />
+        {action && <Skeleton className={cn("mt-4 h-11 w-44 rounded-2xl", dark && "bg-white/15")} />}
       </div>
-      {action && <Skeleton className={cn("h-10 w-44", dark && "bg-white/15")} />}
+      <Skeleton className={cn("hidden size-28 shrink-0 rounded-[2rem] sm:block lg:size-32", dark && "bg-white/15")} />
     </div>
   );
 }
@@ -370,54 +375,44 @@ export function PublicHeaderSkeleton() {
 
 export function BusinessesPageSkeleton({ includeHeader = true }: { includeHeader?: boolean }) {
   return (
-    <main className="min-h-screen bg-mist text-ink">
+    <main className="min-h-screen text-ink">
       {includeHeader && <PublicHeaderSkeleton />}
-      <section className="border-b border-line bg-white px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+      <section className="px-4 pb-4 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl items-center gap-6 rounded-[2.5rem] border border-white/80 bg-white/80 p-5 shadow-clay sm:p-8 lg:grid-cols-[1.25fr_0.75fr] lg:p-10">
           <div>
-            <Skeleton className="h-7 w-24 rounded-full" />
-            <Skeleton className="mt-4 h-9 w-full max-w-2xl" />
-            <Skeleton className="mt-3 h-4 w-full max-w-3xl" />
-            <Skeleton className="mt-2 h-4 w-full max-w-2xl" />
+            <Skeleton className="h-8 w-28 rounded-full" />
+            <Skeleton className="mt-5 h-10 w-full max-w-2xl" />
+            <Skeleton className="mt-3 h-10 w-2/3 max-w-xl" />
+            <Skeleton className="mt-4 h-4 w-full max-w-xl" />
+            <Skeleton className="mt-6 h-16 w-full rounded-[1.6rem]" />
+            <div className="mt-3 flex gap-2">
+              {Array.from({ length: 5 }, (_, index) => (
+                <Skeleton key={index} className="h-10 w-24 rounded-full" />
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:min-w-[330px]">
-            <Skeleton className="h-24 rounded-lg" />
-            <Skeleton className="h-24 rounded-lg" />
-          </div>
+          <Skeleton className="mx-auto hidden aspect-square w-full max-w-[19rem] rounded-full lg:block" />
+        </div>
+        <div className="mx-auto mt-4 flex max-w-7xl items-center justify-between gap-3">
+          <Skeleton className="h-9 w-full max-w-md rounded-full" />
+          <Skeleton className="h-11 w-40 rounded-2xl" />
         </div>
       </section>
-      <section className="border-b border-line bg-mist px-4 py-4 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-3 lg:grid-cols-[1fr_auto_auto] lg:items-center">
-          <Skeleton className="h-11 rounded-lg" />
-          <Skeleton className="h-11 w-28 rounded-lg" />
-          <Skeleton className="h-11 w-40 rounded-lg" />
-          <Skeleton className="h-4 w-full max-w-md lg:col-span-3" />
-        </div>
-      </section>
-      <section className="px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="px-4 pb-14 pt-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
-            <Card key={index} className="flex h-full flex-col bg-white">
-              <div className="flex items-start gap-4">
-                <Skeleton className="size-16 shrink-0 rounded-lg" />
-                <div className="min-w-0 flex-1">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="mt-3 h-4 w-2/3" />
+            <div key={index} className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-clay">
+              <Skeleton className="h-32 rounded-none" />
+              <div className="p-5">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="mt-3 flex gap-2">
+                  <Skeleton className="h-7 w-24 rounded-full" />
+                  <Skeleton className="h-7 w-28 rounded-full" />
                 </div>
+                <SkeletonText className="mt-5" lines={3} />
+                <Skeleton className="mt-5 h-12 w-full rounded-2xl" />
               </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Skeleton className="h-7 w-24 rounded-full" />
-                <Skeleton className="h-7 w-32 rounded-full" />
-                <Skeleton className="h-7 w-20 rounded-full" />
-              </div>
-              <SkeletonText className="mt-5" lines={3} />
-              <div className="mt-5 grid gap-3">
-                <Skeleton className="h-5 w-4/5" />
-                <Skeleton className="h-5 w-5/6" />
-                <Skeleton className="h-5 w-3/4" />
-              </div>
-              <Skeleton className="mt-5 h-11 w-full rounded-lg" />
-            </Card>
+            </div>
           ))}
         </div>
       </section>

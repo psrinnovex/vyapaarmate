@@ -34,7 +34,9 @@ export default function BusinessAppointmentsScreen() {
           </View>
           <Pill label={item.status} tone={statusTone(item.status)} />
         </View>
-        <Text style={[styles.time, { color: colors.accent }]}>{formatDateTime(item.startsAt)} – {formatDateTime(item.endsAt)}</Text>
+        <View style={[styles.timeChip, { backgroundColor: colors.accentSurface }]}>
+          <Text style={[styles.time, { color: colors.accent }]}>{formatDateTime(item.startsAt)} – {formatDateTime(item.endsAt)}</Text>
+        </View>
         <Text style={[styles.meta, { color: colors.textMuted }]}>{item.provider.name} · {item.provider.title}</Text>
         <Text style={[styles.items, { color: colors.text }]}>{item.order.items.map((line) => `${line.quantity}× ${line.itemName}`).join(", ")}</Text>
         <Text style={[styles.amount, { color: colors.text }]}>{formatInr(item.order.totalAmount)}</Text>
@@ -59,22 +61,23 @@ export default function BusinessAppointmentsScreen() {
         refreshing={appointments.isRefetching}
         onRefresh={() => void appointments.refetch()}
         renderItem={({ item }) => <AppointmentCard item={item} />}
-        ListHeaderComponent={<PageHeader eyebrow="Operations" title="Bookings" subtitle="In-person appointment status and assigned professional." />}
-        ListEmptyComponent={appointments.isLoading ? <LoadingState label="Loading bookings…" /> : appointments.isError ? <StateView title="Could not load bookings" message={appointments.error.message} action={<Button label="Try again" onPress={() => void appointments.refetch()} />} /> : unsupported ? <StateView title="Appointments not used here" message="This business category does not use appointment scheduling." /> : <StateView title="No appointments" message="Pull down to check again." />}
+        ListHeaderComponent={<PageHeader eyebrow="Operations" title="Bookings" subtitle="In-person appointment status and assigned professional." illustration="calendar" />}
+        ListEmptyComponent={appointments.isLoading ? <LoadingState label="Loading bookings…" /> : appointments.isError ? <StateView title="Could not load bookings" message={appointments.error.message} action={<Button label="Try again" onPress={() => void appointments.refetch()} />} /> : unsupported ? <StateView title="Appointments not used here" message="This business category does not use appointment scheduling." illustration="calendar" /> : <StateView title="No appointments" message="Pull down to check again." illustration="calendar" />}
       />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  content: { padding: 20, paddingBottom: 36, gap: 12 },
+  content: { padding: 20, paddingBottom: 36, gap: 16 },
+  timeChip: { alignSelf: "flex-start", borderRadius: 14, paddingHorizontal: 10, paddingVertical: 6 },
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   flex: { flex: 1 },
-  customer: { fontSize: 17, fontWeight: "800" },
+  customer: { fontSize: 18, fontWeight: "900", letterSpacing: -0.3 },
   meta: { fontSize: 12, lineHeight: 18 },
   time: { fontSize: 14, fontWeight: "700" },
   items: { fontSize: 14, lineHeight: 20 },
-  amount: { fontSize: 17, fontWeight: "800" },
+  amount: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   action: { minWidth: 120, flexGrow: 1 },
 });

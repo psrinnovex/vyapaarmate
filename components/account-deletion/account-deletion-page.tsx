@@ -5,6 +5,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { AlertTriangle, CheckCircle2, Clock3, LockKeyhole, Mail, ShieldCheck, Trash2 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ClayIllustration } from "@/components/illustrations/clay-illustrations";
+import { LegalHeader } from "@/components/legal/mobile-legal-shell";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { company } from "@/lib/site";
 
@@ -151,11 +153,11 @@ function VerifiedEmailConfirmation({ token }: { token: string }) {
   if (completed) return <DeletionResult deletion={completed} />;
 
   return (
-    <Card className="border-red-200 bg-red-50/40">
+    <Card className="border-berry/25 bg-berry-soft/40">
       <div className="flex items-start gap-3">
         <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-red-600 text-white"><ShieldCheck className="size-5" /></span>
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.15em] text-red-700">Verified email link</p>
+          <p className="text-sm font-bold uppercase tracking-[0.15em] text-berry-deep">Verified email link</p>
           <h2 className="mt-1 text-xl font-bold text-ink">Review and confirm deletion</h2>
         </div>
       </div>
@@ -169,7 +171,7 @@ function VerifiedEmailConfirmation({ token }: { token: string }) {
             <p className="mt-2">{deletion.retentionNotice}</p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="verified-deletion-confirmation">Type <span className="font-extrabold text-red-700">{requiredConfirmation}</span> to confirm</Label>
+            <Label htmlFor="verified-deletion-confirmation">Type <span className="font-extrabold text-berry-deep">{requiredConfirmation}</span> to confirm</Label>
             <Input
               id="verified-deletion-confirmation"
               value={confirmation}
@@ -217,7 +219,7 @@ function AuthenticatedDeletion({
 
   if (!isOwner && !supportedPersonalRole) {
     return (
-      <Card className="border-amber-200 bg-amber-50">
+      <Card className="border-mango/30 bg-mango-soft">
         <h2 className="text-xl font-bold text-ink">Protected team account</h2>
         <p className="mt-2 leading-7 text-amber-950">Administrator and support-agent identities are not mobile product accounts and cannot use this deletion workflow. Contact the authorized platform account owner through general support.</p>
       </Card>
@@ -258,11 +260,11 @@ function AuthenticatedDeletion({
   if (result) return <DeletionResult deletion={result} />;
 
   return (
-    <Card className="border-red-200 bg-red-50/30">
+    <Card className="border-berry/25 bg-berry-soft/30">
       <div className="flex items-start gap-3">
         <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-red-600 text-white"><LockKeyhole className="size-5" /></span>
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.15em] text-red-700">Signed in</p>
+          <p className="text-sm font-bold uppercase tracking-[0.15em] text-berry-deep">Signed in</p>
           <h2 className="mt-1 text-xl font-bold text-ink">{isOwner ? "Request business-account deletion" : "Delete this account"}</h2>
           <p className="mt-1 text-sm text-slate-600">{session.name} · {session.email}</p>
         </div>
@@ -296,7 +298,7 @@ function AuthenticatedDeletion({
           </div>
         )}
         <div className="grid gap-2">
-          <Label htmlFor="authenticated-deletion-confirmation">Type <span className="font-extrabold text-red-700">{requiredConfirmation}</span> to confirm</Label>
+          <Label htmlFor="authenticated-deletion-confirmation">Type <span className="font-extrabold text-berry-deep">{requiredConfirmation}</span> to confirm</Label>
           <Input
             id="authenticated-deletion-confirmation"
             value={confirmation}
@@ -383,7 +385,7 @@ function PublicDeletionRequest() {
         </Button>
       </form>
       {message && <p className="mt-4 rounded-lg bg-emerald/10 p-3 text-sm font-semibold leading-6 text-emerald" role="status">{message}</p>}
-      {error && <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm font-semibold leading-6 text-red-700" role="alert">{error}</p>}
+      {error && <p className="mt-4 rounded-lg bg-berry-soft p-3 text-sm font-semibold leading-6 text-berry-deep" role="alert">{error}</p>}
       <p className="mt-4 text-xs leading-5 text-slate-500">The single-use link expires after 30 minutes. No account is changed unless the link is opened and the required confirmation phrase is entered.</p>
     </Card>
   );
@@ -422,11 +424,9 @@ export function AccountDeletionPageContent({
 
   return (
     <>
-      <header className="mb-8">
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-700">Account deletion</p>
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">Delete a VyapaarMate account and associated personal data</h1>
-        <p className="mt-5 max-w-3xl leading-7 text-slate-600">This public resource works after uninstalling the app. Request a single-use email link, or sign in and use password confirmation. Deactivation alone is not treated as account deletion.</p>
-      </header>
+      <LegalHeader eyebrow="Account deletion" eyebrowTone="berry" title="Delete a VyapaarMate account and associated personal data" art="shield">
+        This public resource works after uninstalling the app. Request a single-use email link, or sign in and use password confirmation. Deactivation alone is not treated as account deletion.
+      </LegalHeader>
 
       <div className="grid gap-5">
         {emailToken && <VerifiedEmailConfirmation token={emailToken} />}
@@ -440,26 +440,33 @@ export function AccountDeletionPageContent({
         <PublicDeletionRequest />
 
         {!session && (
-          <Card className="bg-mist">
-            <h2 className="text-xl font-bold text-ink">Prefer to sign in?</h2>
-            <p className="mt-2 leading-7 text-slate-600">Use the matching portal, then return here for password-confirmed deletion.</p>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <ButtonLink href="/login?type=user&next=%2Faccount-deletion" variant="secondary">Customer sign in</ButtonLink>
-              <ButtonLink href="/login?type=business&next=%2Faccount-deletion" variant="secondary">Business or staff sign in</ButtonLink>
+          <div className="clay grid items-center gap-5 rounded-[1.75rem] p-5 sm:grid-cols-[5rem_minmax(0,1fr)] sm:p-6">
+            <span aria-hidden="true" className="hidden size-20 rounded-[1.4rem] bg-mist p-2 sm:block">
+              <ClayIllustration name="customers" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-xl font-extrabold text-ink">Prefer to sign in?</h2>
+              <p className="mt-1 leading-7 text-slate-600">Use the matching portal, then return here for password-confirmed deletion.</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <ButtonLink href="/login?type=user&next=%2Faccount-deletion" variant="secondary">Customer sign in</ButtonLink>
+                <ButtonLink href="/login?type=business&next=%2Faccount-deletion" variant="secondary">Business or staff sign in</ButtonLink>
+              </div>
             </div>
-          </Card>
+          </div>
         )}
 
-        <Card className="bg-white">
+        <div className="clay clay-tint-mango rounded-[1.75rem] p-5 sm:p-6">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-1 size-5 shrink-0 text-amber-600" />
+            <span className="clay-orb size-11 shrink-0 rounded-2xl bg-clay-mango text-ink">
+              <AlertTriangle className="size-5" />
+            </span>
             <div>
-              <h2 className="text-xl font-bold text-ink">What may be retained</h2>
+              <h2 className="text-xl font-extrabold text-ink">What may be retained</h2>
               <p className="mt-2 leading-7 text-slate-600">Orders, appointments, invoices, payments, payouts, a minimal KYC verification outcome, tax, fraud-prevention, dispute, security, and audit records may be retained only for a documented legal, accounting, dispute, or security purpose. Uploaded KYC document files and personal fields not needed for an approved retention purpose are deleted or anonymized.</p>
               <p className="mt-3 text-sm leading-6 text-slate-600">For account recovery or general assistance, email <a className="font-semibold text-ocean hover:underline" href={`mailto:${company.supportEmail}?subject=${encodeURIComponent("VyapaarMate account deletion support")}`}>{company.supportEmail}</a>. Do not send a password, OTP, identity document, bank detail, or payment credential by email.</p>
             </div>
           </div>
-        </Card>
+        </div>
 
         <p className="text-center text-sm text-slate-500">Read the <Link className="font-semibold text-ocean hover:underline" href="/mobile/privacy">Mobile App Privacy Notice</Link> for data categories and choices.</p>
       </div>

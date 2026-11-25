@@ -520,9 +520,9 @@ export function SiteChatbot() {
                         className={cn(
                           "inline-flex h-8 items-center rounded-lg border px-3 text-xs font-bold transition",
                           action.tone === "urgent"
-                            ? "border-berry/20 bg-berry-soft text-berry-deep hover:bg-red-100"
+                            ? "border-berry/20 bg-berry-soft text-berry-deep hover:bg-berry/15"
                             : action.tone === "primary"
-                              ? "border-emerald/20 bg-emerald/10 text-emerald hover:bg-emerald/15"
+                              ? "border-emerald/20 bg-emerald-soft text-emerald-deep hover:bg-emerald/15"
                               : "border-line bg-white text-ink hover:border-ocean/30"
                         )}
                       >
@@ -534,7 +534,7 @@ export function SiteChatbot() {
               </div>
             ))}
             {isSending && (
-              <div className="flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 text-sm font-semibold text-slate-600">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-2 text-sm font-semibold text-slate-600">
                 <Loader2 className="size-4 animate-spin text-emerald" />
                 {activeTicket ? "Sending" : "Replying"}
               </div>
@@ -557,7 +557,7 @@ export function SiteChatbot() {
                       rows={2}
                       onChange={(event) => setFeedbackComment(event.target.value)}
                       placeholder="Optional feedback"
-                      className="min-h-12 resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm leading-5 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10"
+                      className="min-h-12 resize-none rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-2 text-sm leading-5 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10"
                     />
                     <div className="grid grid-cols-5 gap-2">
                       {[1, 2, 3, 4, 5].map((rating) => (
@@ -566,7 +566,7 @@ export function SiteChatbot() {
                           type="button"
                           disabled={feedbackSending}
                           onClick={() => void submitFeedback(rating)}
-                          className="grid h-10 place-items-center rounded-lg border border-line bg-mist text-amber-500 transition hover:border-amber-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="grid h-10 place-items-center rounded-2xl bg-mist/80 text-amber-500 transition hover:border-amber-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
                           aria-label={`Rate ${rating} out of 5`}
                           title={`${rating}/5`}
                         >
@@ -587,7 +587,7 @@ export function SiteChatbot() {
                   type="button"
                   disabled={isSending}
                   onClick={() => void submitMessage(undefined, prompt)}
-                  className="h-9 rounded-lg border border-line bg-mist px-3 text-xs font-bold text-slate-700 transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-9 rounded-2xl bg-mist/80 px-3 text-xs font-bold text-slate-700 transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {prompt}
                 </button>
@@ -603,7 +603,7 @@ export function SiteChatbot() {
                     onKeyDown={handleKeyDown}
                     onChange={(event) => setDraft(event.target.value)}
                     placeholder={activeTicket ? (activeTicket.assignedToName ? "Message your agent" : "Add details for the agent") : "Ask a short question"}
-                    className="h-14 min-h-14 max-h-28 flex-1 resize-none overflow-y-auto rounded-lg border border-line bg-white px-3 py-3 text-sm leading-5 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10"
+                    className="h-14 min-h-14 max-h-28 flex-1 resize-none overflow-y-auto rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-3 text-sm leading-5 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10"
                   />
                   <button
                     type="submit"
@@ -637,7 +637,7 @@ export function SiteChatbot() {
             )}
           >
             {unreadAgentMessages > 0 && (
-              <span className="absolute right-2 top-2 z-10 grid min-w-6 place-items-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-extrabold leading-5 text-white shadow-soft ring-2 ring-white">
+              <span className="absolute right-2 top-2 z-10 grid min-w-6 place-items-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-extrabold leading-5 text-white shadow-clay ring-2 ring-white">
                 {unreadAgentMessages > 9 ? "9+" : unreadAgentMessages}
               </span>
             )}

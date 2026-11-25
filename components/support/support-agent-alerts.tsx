@@ -96,7 +96,7 @@ export function SupportAgentAlerts() {
             </div>
 
             {alertFeed.error && latest && (
-              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold leading-5 text-red-700">{alertFeed.error}</p>
+              <p className="mt-3 rounded-lg bg-berry-soft px-3 py-2 text-xs font-semibold leading-5 text-berry-deep">{alertFeed.error}</p>
             )}
 
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -112,7 +112,7 @@ export function SupportAgentAlerts() {
                 type="button"
                 disabled={rejecting}
                 onClick={() => void alertFeed.rejectAlert(alert.key)}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-extrabold text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-65"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-berry/25 bg-berry-soft px-3 text-xs font-extrabold text-berry-deep transition hover:bg-berry/15 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-65"
               >
                 {rejecting ? <Loader2 className="size-4 animate-spin" /> : <XCircle className="size-4" />}
                 Reject

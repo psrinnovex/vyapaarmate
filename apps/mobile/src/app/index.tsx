@@ -10,6 +10,7 @@ export default function Index() {
     return (
       <Screen scroll={false}>
         <StateView
+          illustration="shield"
           title="Session could not be restored"
           message={`${auth.error} Your stored sign-in has not been discarded.`}
           action={<Button label="Try again" onPress={() => void auth.retryRestore()} />}

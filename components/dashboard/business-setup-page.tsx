@@ -474,7 +474,7 @@ export function BusinessSetupPage() {
         action={<Badge variant={setupStatus.badge}>{setupStatus.label}</Badge>}
       />
 
-      <section className="setup-progress-card mb-5 overflow-hidden rounded-lg border border-line bg-white p-4 shadow-sm">
+      <section className="setup-progress-card mb-5 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-clay-sm p-4 shadow-clay-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-ocean">
@@ -582,7 +582,7 @@ export function BusinessSetupPage() {
               <Label>WhatsApp display number</Label>
               <PhoneInput name="whatsappDisplayPhone" defaultValue={business.whatsappDisplayPhone ?? business.phone} />
             </div>
-            <label className="flex items-center justify-between gap-4 rounded-lg border border-line bg-mist p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Enable WhatsApp customer flow</span>
                 <span className="mt-1 block text-xs leading-5 text-slate-500">Admin approval is required before live sends.</span>
@@ -593,7 +593,7 @@ export function BusinessSetupPage() {
                 defaultChecked={Boolean(business.whatsappDisplayPhone || business.whatsappConnected || business.whatsappLiveEnabled)}
                 className="peer sr-only"
               />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
           </div>
         </Card>
@@ -663,7 +663,7 @@ export function BusinessSetupPage() {
                 <Input name="deliveryFee" type="number" min="0" defaultValue={business.deliveryFee} />
               </div>
             </div>
-            <div className="grid gap-3 rounded-lg border border-line bg-mist p-3">
+            <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
               <Label>Fulfillment options</Label>
               <div key={activeBusinessType} className="grid gap-3 sm:grid-cols-3">
                 {activeFulfillmentProfile.allowedModes.map((mode: ActiveFulfillmentMode) => (
@@ -682,17 +682,17 @@ export function BusinessSetupPage() {
               <Label>Service radius in km</Label>
               <Input name="serviceRadiusKm" type="number" min="0" step="0.1" defaultValue={business.serviceRadiusKm} />
             </div>
-            <label className="flex items-center gap-3 rounded-lg border border-line bg-mist p-3 text-sm font-semibold text-slate-700">
+            <label className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3 text-sm font-semibold text-slate-700">
               <input name="allowsPayLater" type="checkbox" defaultChecked={business.allowsPayLater} />
               Allow cash payment
             </label>
-            <label className="flex items-center justify-between gap-4 rounded-lg border border-line bg-mist p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Accept bookings after approval</span>
                 <span className="mt-1 block text-xs leading-5 text-slate-500">Customers only see it while this is on and the business hours above are open.</span>
               </span>
               <input name="isOpen" type="checkbox" defaultChecked={business.isOpen} className="peer sr-only" />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
           </div>
         </Card>
@@ -703,14 +703,14 @@ export function BusinessSetupPage() {
             Wallet payout destination
           </h2>
           <div className="mt-4 grid gap-4">
-            <div className="grid grid-cols-2 gap-2 rounded-lg border border-line bg-mist p-1">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-mist/80 p-1">
               {(["UPI", "BANK_TRANSFER"] as const).map((method) => {
                 const active = payoutMethod === method;
                 return (
                   <label
                     key={method}
                     className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-bold transition ${
-                      active ? "bg-ink text-white shadow-sm" : "text-slate-600 hover:bg-white"
+                      active ? "bg-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white"
                     }`}
                   >
                     <input
@@ -766,7 +766,7 @@ export function BusinessSetupPage() {
           </div>
         </Card>
 
-        <div className="setup-wizard-actions flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-white p-4 shadow-sm">
+        <div className="setup-wizard-actions flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white shadow-clay-sm p-4 shadow-clay-sm">
           <Button
             type="button"
             variant="secondary"
@@ -797,15 +797,15 @@ export function BusinessSetupPage() {
       {(setupSaved || activeStepId === "documents") && (
       <div className="grid gap-5">
         {setupSaved && (
-          <section className="setup-review-card grid gap-4 overflow-hidden rounded-lg border border-line bg-white p-5 shadow-sm lg:grid-cols-[120px_minmax(0,1fr)_auto] lg:items-center">
+          <section className="setup-review-card grid gap-4 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-clay-sm p-5 shadow-clay-sm lg:grid-cols-[120px_minmax(0,1fr)_auto] lg:items-center">
             <LazyLottieAnimation
               src={setupApproved ? orderAnimationPaths.DELIVERED : setupWaitingForApproval ? orderAnimationPaths.bankVerificationPending : orderAnimationPaths.serviceInProgress}
               label={setupApproved ? "Business setup completed" : setupWaitingForApproval ? "Waiting for admin approval" : "Document verification pending"}
               loop={!setupApproved}
-              className="mx-auto size-28 rounded-lg bg-mist lg:mx-0"
+              className="mx-auto size-28 rounded-2xl bg-mist/80 lg:mx-0"
               animationClassName="setup-completed-lottie"
               fallback={
-                <div className="grid size-20 place-items-center rounded-full border border-emerald/20 bg-emerald/10 text-emerald">
+                <div className="grid size-20 place-items-center rounded-full border border-emerald/20 bg-emerald-soft text-emerald-deep">
                   {setupApproved ? <CheckCircle2 className="size-10" /> : <ShieldCheck className="size-10" />}
                 </div>
               }
@@ -895,7 +895,7 @@ export function BusinessSetupPage() {
                   : "Upload Document";
 
             return (
-              <div key={requirement.type} className="min-w-0 overflow-hidden rounded-lg border border-line bg-mist p-4">
+              <div key={requirement.type} className="min-w-0 overflow-hidden rounded-2xl bg-mist/80 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="font-bold text-ink">{requirement.label}</h3>
@@ -963,7 +963,7 @@ function SetupStep({
       disabled={locked || !onClick}
       data-active={active}
       className={cn(
-        "setup-step-card flex min-w-0 items-center justify-between gap-3 rounded-lg border bg-white p-3 text-left shadow-sm transition",
+        "setup-step-card flex min-w-0 items-center justify-between gap-3 rounded-lg border bg-white p-3 text-left shadow-clay-sm transition",
         active ? "border-ocean/30 ring-4 ring-ocean/10" : "border-line",
         done && "border-emerald/30 bg-emerald/5",
         locked ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5 hover:border-ocean/30"
@@ -971,7 +971,7 @@ function SetupStep({
       onClick={onClick}
     >
       <div className="flex min-w-0 items-center gap-2">
-        <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", done ? "bg-emerald/10 text-emerald" : active ? "bg-ocean/10 text-ocean" : "bg-slate-100 text-slate-400")}>
+        <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", done ? "bg-emerald-soft text-emerald-deep" : active ? "bg-ocean-soft text-ocean-deep" : "bg-slate-100 text-slate-400")}>
           {icon}
         </span>
         <span className="min-w-0">

@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import type { DemoMenuItem } from "@/lib/demo-data";
 import { useDashboardLive } from "@/hooks/use-live-sync";
+import { useMinuteClock } from "@/hooks/use-minute-clock";
 import { BusinessImageUploadField } from "@/components/dashboard/business-image-upload-field";
 import { KycUploadFeedbackDialog, type KycUploadFeedback } from "@/components/dashboard/kyc-upload-feedback-dialog";
 import { PasswordChangeCard } from "@/components/auth/password-change-card";
@@ -57,12 +58,12 @@ import {
 import { optimizeMenuItemImage } from "@/lib/client-image";
 import { pricingPlans } from "@/lib/constants";
 import { launchMarket, launchSingleCityRestricted } from "@/lib/launch-policy";
-import { cn, formatINR } from "@/lib/utils";
+import { cn, formatINR, initials } from "@/lib/utils";
 import { downloadCsv } from "@/lib/client-export";
 import { formChecked, formNumber, formOptionalNumber, formString } from "@/lib/form-data";
 import { ActionDialog, ActionNotice, type ActionNoticeState } from "@/components/ui/action-feedback";
 import { Button } from "@/components/ui/button";
-import { Card, GlassPanel } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/form-fields";
 import { BusinessTypeSelect } from "@/components/ui/business-type-select";
@@ -79,8 +80,9 @@ import { PaginationControls, usePaginatedItems } from "@/components/ui/paginatio
 import { OrderStatusAnimation } from "@/components/ui/order-status-animation";
 import { PaymentStatusAnimation } from "@/components/ui/payment-status-animation";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ScrollReveal } from "@/components/landing/scroll-reveal";
 
-const selectClassName = "h-11 w-full rounded-lg border border-line bg-white px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
+const selectClassName = "h-11 w-full rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
 type ManagedMenuCategory = {
   id: string;
   name: string;
@@ -285,7 +287,7 @@ export function DashboardOverviewPage() {
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <Card>
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+            <h2 className="flex items-center gap-2 text-lg font-extrabold text-ink">
               <TransactionIcon className="size-5 text-ocean" />
               {copy.transactionSingular} status chart
             </h2>
@@ -316,7 +318,7 @@ export function DashboardOverviewPage() {
         <Card>
           <div className="flex items-center gap-2">
             <ItemIcon className="size-5 text-ocean" />
-            <h2 className="text-lg font-bold text-ink">{copy.topItemsTitle}</h2>
+            <h2 className="text-lg font-extrabold text-ink">{copy.topItemsTitle}</h2>
           </div>
           <div className="mt-4 grid gap-3">
             {data.topItems.map((item, index) => (
@@ -337,7 +339,7 @@ export function DashboardOverviewPage() {
 
       <Card className="mt-5">
         <div className="flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold text-ink">
             <TransactionIcon className="size-5 text-ocean" />
             {copy.recentTransactionsTitle}
           </h2>
@@ -370,7 +372,7 @@ function DashboardOrderLane({
   });
 
   return (
-    <Card className="min-w-0 overflow-hidden">
+    <Card className="min-w-0 overflow-hidden border-white/60 bg-white/55 backdrop-blur-xl">
       {header}
       <div className="mt-4 grid gap-3">
         {pagination.pageItems.map((order) => (
@@ -400,7 +402,7 @@ function DashboardOrderLane({
           </button>
         ))}
         {orders.length === 0 && (
-          <p className="rounded-lg bg-mist p-3 text-sm text-slate-500">No {transactionPlural.toLowerCase()} in this lane.</p>
+          <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-500">No {transactionPlural.toLowerCase()} in this lane.</p>
         )}
       </div>
       <PaginationControls
@@ -611,13 +613,20 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
             {statuses.map((status) => <StatusPill key={status} status={status} label={statusPillLabel(status)} className="shrink-0" />)}
           </div>
           <div className="mt-3 grid gap-4 lg:grid-cols-3">
-            {columns.map((column) => (
+            {columns.map((column, columnIndex) => (
               <DashboardOrderLane
                 key={column.title}
                 header={
-                  <div className="flex items-center gap-2">
-                    <TransactionIcon className="size-4 text-ocean" />
-                    <h2 className="font-bold text-ink">{column.title}</h2>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className={cn("clay-orb size-9 rounded-xl text-white", ["bg-clay-ocean", "bg-clay-mango !text-ink", "bg-clay-emerald"][columnIndex % 3])}>
+                        <TransactionIcon className="size-4" />
+                      </span>
+                      <h2 className="font-extrabold text-ink">{column.title}</h2>
+                    </div>
+                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-slate-600 shadow-clay-sm">
+                      {data.orders.filter((order) => column.statuses.includes(order.status)).length}
+                    </span>
                   </div>
                 }
                 orders={data.orders.filter((order) => column.statuses.includes(order.status))}
@@ -643,14 +652,14 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
           {data.orders.length > 0 ? (
             <ResponsiveOrderTable orders={data.orders} transactionLabel={copy.transactionSingular} businessType={data.business.businessType} />
           ) : (
-            <p className="mt-4 rounded-lg bg-mist p-4 text-sm text-slate-500">No {copy.transactionPlural.toLowerCase()} have been created yet.</p>
+            <p className="mt-4 rounded-2xl bg-mist/80 p-4 text-sm text-slate-500">No {copy.transactionPlural.toLowerCase()} have been created yet.</p>
           )}
         </Card>
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-50 grid place-items-end bg-ink/40 p-4 sm:place-items-center">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-5 shadow-soft">
+        <div className="fixed inset-0 z-50 flex justify-end bg-ink/30 backdrop-blur-sm" onClick={(event) => { if (event.target === event.currentTarget) closeSelectedOrder(); }}>
+          <div className="h-full w-full max-w-xl overflow-y-auto rounded-l-[2rem] border-l border-white bg-white/95 p-6 shadow-clay-lg backdrop-blur-xl motion-safe:animate-[vm-drawer-in_320ms_cubic-bezier(0.22,1,0.36,1)]">
             <div className="flex items-start justify-between">
               <div className="flex min-w-0 items-start gap-3">
                 <OrderStatusAnimation
@@ -667,10 +676,10 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                   </p>
                 </div>
               </div>
-              <button type="button" className="text-sm font-bold text-ocean" onClick={closeSelectedOrder}>Close</button>
+              <button type="button" className="rounded-xl bg-mist px-3 py-2 text-sm font-extrabold text-slate-600 transition hover:bg-white hover:shadow-clay-sm" onClick={closeSelectedOrder}>Close</button>
             </div>
             <div className="mt-5 grid gap-3">
-              <section className="rounded-lg border border-line bg-mist/60 p-4" aria-labelledby="selected-order-details-title">
+              <section className="rounded-2xl bg-mist/70 p-4" aria-labelledby="selected-order-details-title">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p id="selected-order-details-title" className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
@@ -805,7 +814,6 @@ export function MenuManagementPage() {
   const copy = getBusinessConsoleCopy(data.business.businessType);
   const icons = getBusinessConsoleIcons(data.business.businessType);
   const CategoryIcon = icons.categoryIcon;
-  const ItemIcon = icons.itemIcon;
   const isFoodBusiness = isFoodBusinessType(data.business.businessType);
   const supportsAppointments = businessTypeSupportsAppointments(data.business.businessType);
   const addCategoryLabel = `Add ${titleCaseLabel(copy.categorySingular)}`;
@@ -1061,10 +1069,10 @@ export function MenuManagementPage() {
         )}
 
         {categorySections.map((section) => (
-          <section key={section.id} className="border-t border-line pt-5 first:border-t-0 first:pt-0">
+          <section key={section.id} className="rounded-[2rem] border border-white/70 bg-white/55 p-4 shadow-clay-sm backdrop-blur-xl sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ocean/10 text-ocean">
+                <span className="clay-orb size-11 shrink-0 rounded-2xl bg-clay-violet text-white">
                   <CategoryIcon className="size-5" />
                 </span>
                 <div className="min-w-0">
@@ -1089,7 +1097,7 @@ export function MenuManagementPage() {
                     type="button"
                     aria-label={`Delete ${section.name}`}
                     title={`Delete ${section.name}`}
-                    className="grid size-9 shrink-0 place-items-center rounded-lg bg-red-50 text-red-600 transition hover:bg-red-100"
+                    className="grid size-9 shrink-0 place-items-center rounded-lg bg-berry-soft text-berry-deep transition hover:bg-berry/15"
                     onClick={() => setDeleteTarget({ type: "menu-category", category: section.category })}
                   >
                     <Trash2 className="size-4" />
@@ -1101,13 +1109,13 @@ export function MenuManagementPage() {
             {section.items.length > 0 ? (
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
                 {section.items.map((item) => (
-                  <Card key={item.id} className="p-3">
-                    <div className="relative aspect-[5/4] overflow-hidden rounded-lg bg-mist">
+                  <Card key={item.id} className="vm-reveal-on-scroll rounded-[1.6rem] p-3 transition hover:-translate-y-1 hover:shadow-clay-lg">
+                    <div className="relative aspect-[5/4] overflow-hidden rounded-[1.2rem] bg-mist/80">
                       {item.imageUrl ? (
                         <Image src={item.imageUrl} alt={item.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 220px" className="object-cover" />
                       ) : (
-                        <div className="grid h-full place-items-center text-ocean">
-                          <ItemIcon className="size-9" />
+                        <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f3f0ff_45%,#e3f7ec_100%)]">
+                          <ClayIllustration name={illustrationNameForBusinessType(data.business.businessType)} className="w-[58%]" />
                         </div>
                       )}
                       {item.isBestSeller && (
@@ -1120,7 +1128,7 @@ export function MenuManagementPage() {
                           type="button"
                           aria-label={`Edit ${item.name}`}
                           title={`Edit ${item.name}`}
-                          className="grid size-8 place-items-center rounded-lg bg-white/95 text-ink shadow-sm ring-1 ring-line transition hover:bg-slate-50"
+                          className="grid size-8 place-items-center rounded-lg bg-white/95 text-ink shadow-clay-sm ring-1 ring-line transition hover:bg-slate-50"
                           onClick={() => openMenuDialog({ mode: "edit", item })}
                         >
                           <Edit3 className="size-4" />
@@ -1129,7 +1137,7 @@ export function MenuManagementPage() {
                           type="button"
                           aria-label={`Delete ${item.name}`}
                           title={`Delete ${item.name}`}
-                          className="grid size-8 place-items-center rounded-lg bg-red-50/95 text-red-600 shadow-sm ring-1 ring-red-100 transition hover:bg-red-100"
+                          className="grid size-8 place-items-center rounded-lg bg-berry-soft/95 text-berry-deep shadow-clay-sm ring-1 ring-red-100 transition hover:bg-berry/15"
                           onClick={() => setDeleteTarget({ type: "menu-item", item })}
                         >
                           <Trash2 className="size-4" />
@@ -1202,7 +1210,7 @@ export function MenuManagementPage() {
             </div>
             <div className="grid gap-2">
               <Label>{copy.itemSingular} photo</Label>
-              <div className="grid gap-3 rounded-xl border border-line bg-mist/60 p-3 sm:grid-cols-[160px_1fr] sm:items-center">
+              <div className="grid gap-3 rounded-2xl bg-mist/70 p-3 sm:grid-cols-[160px_1fr] sm:items-center">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-white">
                   {menuImagePreview ? (
                     <Image
@@ -1220,7 +1228,7 @@ export function MenuManagementPage() {
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-ocean shadow-sm ring-1 ring-line transition hover:bg-slate-50">
+                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-ocean shadow-clay-sm ring-1 ring-line transition hover:bg-slate-50">
                     {isProcessingMenuImage ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
                     {isProcessingMenuImage ? "Optimizing..." : menuImagePreview ? "Replace photo" : "Add photo"}
                     <input
@@ -1234,7 +1242,7 @@ export function MenuManagementPage() {
                   {menuImagePreview && (
                     <button
                       type="button"
-                      className="h-10 rounded-lg px-4 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                      className="h-10 rounded-lg px-4 text-sm font-bold text-berry-deep transition hover:bg-berry-soft"
                       disabled={isProcessingMenuImage || isSavingMenuItem}
                       onClick={() => {
                         setMenuImagePreview(null);
@@ -1359,8 +1367,6 @@ export function CustomersPage() {
   const router = useRouter();
   const { data, setData, connected, error, loading, refresh } = useDashboardLive();
   const copy = getBusinessConsoleCopy(data.business.businessType);
-  const icons = getBusinessConsoleIcons(data.business.businessType);
-  const CustomerIcon = icons.customerIcon;
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [notice, setNotice] = useState<ActionNoticeState>(null);
   const customerPagination = usePaginatedItems(data.customers, {
@@ -1423,73 +1429,83 @@ export function CustomersPage() {
           </div>
         }
       />
-      <Card className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-left text-sm">
-            <thead className="bg-mist text-xs uppercase text-slate-500">
-              <tr>
-                {[copy.customerSingular, "Phone", copy.transactionPlural, "Spent", `Last ${copy.transactionSingular.toLowerCase()}`, "Favourite", "Consent", "Action"].map((head) => (
-                  <th key={head} className="px-4 py-3 font-bold">{head}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {customerPagination.pageItems.map((customer) => (
-                <tr key={customer.id}>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-2 font-bold text-ink">
-                      <CustomerIcon className="size-4 shrink-0 text-ocean" />
-                      <span>{customer.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-slate-600">{customer.phone}</td>
-                  <td className="px-4 py-4">{customer.totalOrders}</td>
-                  <td className="px-4 py-4 font-bold">{formatINR(customer.totalSpent)}</td>
-                  <td className="px-4 py-4 text-slate-600">{customer.lastOrdered}</td>
-                  <td className="px-4 py-4 text-slate-600">{customer.favouriteItems}</td>
-                  <td className="px-4 py-4">
-                    <div className="flex gap-1">
-                      {customer.whatsappOptIn && <Badge variant="emerald">Updates</Badge>}
-                      {customer.marketingOptIn && <Badge variant="purple">Offers</Badge>}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        icon={<Bell className="size-4" />}
-                        onClick={() => router.push("/dashboard/campaigns")}
-                      >
-                        Prepare message
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        icon={<Trash2 className="size-4" />}
-                        disabled={data.source === "database"}
-                        title="Use the account-data request process through support."
-                        onClick={() => setDeleteTarget({ type: "customer", customer })}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <PaginationControls
-          page={customerPagination.page}
-          pageCount={customerPagination.pageCount}
-          totalItems={customerPagination.totalItems}
-          startItem={customerPagination.startItem}
-          endItem={customerPagination.endItem}
-          itemLabel={copy.customerPlural.toLowerCase()}
-          onPageChange={customerPagination.setPage}
+      {customerPagination.pageItems.length === 0 ? (
+        <EmptyState
+          illustration="customers"
+          title={`No ${copy.customerPlural.toLowerCase()} yet`}
+          body={`${copy.customerPlural} appear here after their first ${copy.transactionSingular.toLowerCase()}.`}
         />
-      </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {customerPagination.pageItems.map((customer, index) => (
+            <article key={customer.id} className="vm-reveal-on-scroll clay flex min-w-0 flex-col rounded-[1.75rem] p-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <span
+                  className={cn(
+                    "clay-orb size-12 shrink-0 rounded-2xl text-base font-extrabold text-white",
+                    ["bg-clay-violet", "bg-clay-emerald", "bg-clay-ocean", "bg-clay-berry", "bg-clay-mango !text-ink"][index % 5]
+                  )}
+                >
+                  {customer.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-extrabold text-ink">{customer.name}</p>
+                  <p className="truncate text-sm font-semibold text-slate-500">{customer.phone}</p>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="rounded-2xl bg-mist/80 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-slate-400">{copy.transactionPlural}</p>
+                  <p className="mt-0.5 text-lg font-extrabold text-ink">{customer.totalOrders}</p>
+                </div>
+                <div className="rounded-2xl bg-mist/80 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-slate-400">Spent</p>
+                  <p className="mt-0.5 truncate text-lg font-extrabold text-ink">{formatINR(customer.totalSpent)}</p>
+                </div>
+              </div>
+              <p className="mt-3 text-xs font-semibold text-slate-500">
+                Last {copy.transactionSingular.toLowerCase()}: <span className="text-ink">{customer.lastOrdered}</span>
+              </p>
+              {customer.favouriteItems && <p className="mt-1 truncate text-xs font-semibold text-slate-500">Favourite: {customer.favouriteItems}</p>}
+              <div className="mt-3 flex min-h-6 flex-wrap gap-1">
+                {customer.whatsappOptIn && <Badge variant="emerald">Updates</Badge>}
+                {customer.marketingOptIn && <Badge variant="purple">Offers</Badge>}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-line/70 pt-4">
+                <Button size="sm" variant="secondary" icon={<Bell className="size-4" />} onClick={() => router.push("/dashboard/campaigns")}>
+                  Prepare message
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-berry-deep hover:bg-berry-soft"
+                  icon={<Trash2 className="size-4" />}
+                  disabled={data.source === "database"}
+                  title="Use the account-data request process through support."
+                  onClick={() => setDeleteTarget({ type: "customer", customer })}
+                >
+                  Delete
+                </Button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      <PaginationControls
+        className="mt-4 rounded-2xl border border-white/80 bg-white/70 shadow-clay-sm"
+        page={customerPagination.page}
+        pageCount={customerPagination.pageCount}
+        totalItems={customerPagination.totalItems}
+        startItem={customerPagination.startItem}
+        endItem={customerPagination.endItem}
+        itemLabel={copy.customerPlural.toLowerCase()}
+        onPageChange={customerPagination.setPage}
+      />
       {deleteTarget?.type === "customer" && (
         <ActionDialog
           title={`Delete ${copy.customerSingular.toLowerCase()}`}
@@ -1559,45 +1575,52 @@ export function PaymentsPage() {
         <MetricCard title="Pending payments" value={formatINR(data.metrics.pendingPaymentsAmount)} detail={`${data.metrics.pendingPaymentsCount} reminders due`} icon={CreditCard} tone="amber" />
       </div>
       <Card className="mt-5 overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[880px] text-left text-sm">
-            <thead className="bg-mist text-xs uppercase text-slate-500">
-              <tr>{[copy.transactionSingular, copy.customerSingular, "Amount", "Provider", "Payment ID", "Wallet", "Fee", "Payment", "Invoice", "Action"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {paymentPagination.pageItems.map((payment) => (
-                <tr key={payment.id}>
-                  <td className="px-4 py-4 font-bold text-ink">{payment.orderNumber}</td>
-                  <td className="px-4 py-4 text-slate-600">{payment.customer}</td>
-                  <td className="px-4 py-4 font-bold">{formatINR(payment.amount)}</td>
-                  <td className="px-4 py-4">{payment.provider}</td>
-                  <td className="px-4 py-4 text-slate-500">{payment.paymentId}</td>
-                  <td className="px-4 py-4">
-                    <p className="font-semibold text-ink">{payment.walletStatus}</p>
-                    {payment.walletAmount > 0 && <p className="mt-1 text-xs text-slate-500">{formatINR(payment.walletAmount)}</p>}
-                  </td>
-                  <td className="px-4 py-4 text-slate-600">{payment.platformFee > 0 ? formatINR(payment.platformFee) : "-"}</td>
-                  <td className="px-4 py-4">
-                    <div className="flex min-w-[124px] items-center gap-2">
-                      <PaymentStatusAnimation status={payment.status} provider={payment.provider} label={`${payment.status.toLowerCase()} payment`} className="size-8" />
-                      <div className="min-w-0">
-                        <StatusPill status={payment.status} className="px-2 py-0.5 text-[11px]" />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4"><a href={payment.invoiceUrl} target="_blank" rel="noreferrer" className="font-bold text-ocean">Open</a></td>
-                  <td className="px-4 py-4">
-                    {payment.canMarkPaid ? (
-                      <Button size="sm" variant="emerald" disabled={collectingPaymentId === payment.id} onClick={() => markPaymentCollected(payment.id, payment.orderNumber)}>
-                        {collectingPaymentId === payment.id ? "Saving" : "Mark Paid"}
-                      </Button>
-                    ) : payment.refundStatus}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex items-center justify-between gap-3 px-5 pt-5">
+          <h2 className="text-lg font-extrabold text-ink">Payment feed</h2>
+          <Badge variant="secondary">{paymentPagination.totalItems} total</Badge>
         </div>
+        {paymentPagination.pageItems.length === 0 ? (
+          <EmptyState illustration="upi" className="m-4 shadow-none" title="No payments yet" body={`Payments appear here as ${copy.transactionPlural.toLowerCase()} are paid.`} />
+        ) : (
+          <ul className="grid gap-2 p-3 sm:p-4">
+            {paymentPagination.pageItems.map((payment) => (
+              <li
+                key={payment.id}
+                className="vm-reveal-on-scroll grid min-w-0 gap-3 rounded-[1.4rem] border border-white bg-white p-3 shadow-clay-sm sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"
+              >
+                <PaymentStatusAnimation status={payment.status} provider={payment.provider} label={`${payment.status.toLowerCase()} payment`} className="size-11" />
+                <div className="min-w-0">
+                  <p className="flex flex-wrap items-center gap-2 font-extrabold text-ink">
+                    {payment.orderNumber}
+                    <StatusPill status={payment.status} className="px-2 py-0.5 text-[11px]" />
+                  </p>
+                  <p className="mt-0.5 truncate text-sm font-semibold text-slate-500">
+                    {payment.customer} · {payment.provider}
+                    {payment.paymentId ? ` · ${payment.paymentId}` : ""}
+                  </p>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-400">
+                    Wallet: {payment.walletStatus}
+                    {payment.walletAmount > 0 ? ` ${formatINR(payment.walletAmount)}` : ""}
+                    {payment.platformFee > 0 ? ` · Fee ${formatINR(payment.platformFee)}` : ""}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
+                  <span className="text-lg font-extrabold tracking-[-0.02em] text-ink">{formatINR(payment.amount)}</span>
+                  <a href={payment.invoiceUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-mist px-3 py-2 text-xs font-extrabold text-ocean-deep transition hover:bg-ocean-soft">
+                    Invoice
+                  </a>
+                  {payment.canMarkPaid ? (
+                    <Button size="sm" variant="emerald" disabled={collectingPaymentId === payment.id} onClick={() => markPaymentCollected(payment.id, payment.orderNumber)}>
+                      {collectingPaymentId === payment.id ? "Saving" : "Mark paid"}
+                    </Button>
+                  ) : (
+                    payment.refundStatus && <span className="text-xs font-bold text-slate-500">{payment.refundStatus}</span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
         <PaginationControls
           page={paymentPagination.page}
           pageCount={paymentPagination.pageCount}
@@ -1660,6 +1683,9 @@ function mapBusinessInvoiceRow(invoice: LiveBillingHistoryItem, businessName: st
     invoiceUrl: invoice.invoiceUrl
   };
 }
+
+/** Torn-receipt bottom edge for invoice cards (zig-zag via conic-gradient mask). */
+const receiptEdgeMask = "conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 1.1rem 100%";
 
 export function InvoicesPage() {
   const { data, connected, error, loading } = useDashboardLive();
@@ -1765,7 +1791,7 @@ export function InvoicesPage() {
             <h2 className="mt-2 text-xl font-bold text-ink">{modeCopy.title}</h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">{modeCopy.description}</p>
           </div>
-          <div className="invoice-mode-switch relative grid min-h-[4.5rem] grid-cols-2 rounded-lg border border-line bg-white/80 p-1 shadow-inner">
+          <div className="invoice-mode-switch relative grid min-h-[4.5rem] grid-cols-2 rounded-2xl border border-white/80 bg-mist/80 p-1 shadow-clay-inset">
             <span
               aria-hidden="true"
               className={cn(
@@ -1808,65 +1834,78 @@ export function InvoicesPage() {
           <MetricCard title="Paid invoices" value={formatINR(paidAmount)} detail={modeCopy.paidDetail} icon={CheckCircle2} tone="emerald" />
           <MetricCard title="Attention needed" value={String(pendingInvoiceRows.length + failedInvoiceRows.length)} detail={modeCopy.attentionDetail} icon={FileCheck2} tone="amber" />
         </div>
-        <Card className="mt-5 overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="bg-mist text-xs uppercase text-slate-500">
-                <tr>{["Invoice", modeCopy.ownerHeading, "Issued", "Amount", "Provider", modeCopy.paymentHeading, "Status", "Action"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {invoicePagination.pageItems.map((invoice, index) => (
-                  <tr
-                    key={invoice.id}
-                    className="invoice-table-row transition hover:bg-mist/70"
-                    style={{ animationDelay: `${Math.min(index, 8) * 34}ms` }}
+        {invoiceRows.length > 0 ? (
+          <div className="mt-5 grid gap-x-5 gap-y-6 md:grid-cols-2 2xl:grid-cols-3">
+            {invoicePagination.pageItems.map((invoice, index) => (
+              <div
+                key={invoice.id}
+                className="invoice-table-row drop-shadow-[0_18px_22px_rgba(55,41,130,0.14)]"
+                style={{ animationDelay: `${Math.min(index, 8) * 34}ms` }}
+              >
+                <article className="relative rounded-t-[1.6rem] bg-white px-5 pb-9 pt-5" style={{ WebkitMask: receiptEdgeMask, mask: receiptEdgeMask }}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className={cn("clay-orb size-11 shrink-0 rounded-2xl text-white", invoice.kind === "customer" ? "bg-clay-ocean" : "bg-clay-ink")}>
+                        <ReceiptText className="size-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-extrabold text-ink">{invoice.reference}</p>
+                        <p className="truncate text-xs font-semibold text-slate-500">{invoice.subReference}</p>
+                      </div>
+                    </div>
+                    {invoice.kind === "customer" ? (
+                      <PaymentStatusAnimation status={invoice.status as LivePaymentStatus} label={`${invoice.statusLabel.toLowerCase()} payment`} className="size-9 shrink-0" />
+                    ) : null}
+                  </div>
+                  <div className="mt-4 rounded-2xl bg-mist/70 px-3 py-2.5">
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400">{modeCopy.ownerHeading}</p>
+                    <p className="truncate text-sm font-bold text-slate-700">{invoice.party}</p>
+                    <p className="truncate text-xs text-slate-500">{invoice.partyDetail}</p>
+                  </div>
+                  <div className="mt-4 flex items-end justify-between gap-3 border-t-2 border-dashed border-line pt-4">
+                    <p className="text-3xl font-extrabold tracking-[-0.04em] text-ink">{formatINR(invoice.amount)}</p>
+                    <StatusPill status={invoice.status} label={invoice.statusLabel} />
+                  </div>
+                  <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <dt className="font-bold text-slate-400">Issued</dt>
+                      <dd className="mt-0.5 font-bold text-slate-700">{formatDateLabel(invoice.issuedAt)}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-slate-400">Provider</dt>
+                      <dd className="mt-0.5 truncate font-bold text-slate-700">{invoice.provider}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-slate-400">{modeCopy.paymentHeading}</dt>
+                      <dd className="mt-0.5 truncate font-bold text-slate-700">{invoice.paymentLabel}</dd>
+                    </div>
+                  </dl>
+                  <a
+                    href={invoice.invoiceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink text-sm font-bold text-white shadow-clay-sm transition hover:-translate-y-0.5"
                   >
-                    <td className="px-4 py-4">
-                      <p className="font-bold text-ink">{invoice.reference}</p>
-                      <p className="mt-1 text-xs text-slate-500">{invoice.subReference}</p>
-                    </td>
-                    <td className="px-4 py-4">
-                      <p className="font-semibold text-slate-700">{invoice.party}</p>
-                      <p className="mt-1 text-xs text-slate-500">{invoice.partyDetail}</p>
-                    </td>
-                    <td className="px-4 py-4 text-slate-600">{formatDateLabel(invoice.issuedAt)}</td>
-                    <td className="px-4 py-4 font-bold text-ink">{formatINR(invoice.amount)}</td>
-                    <td className="px-4 py-4 text-slate-600">{invoice.provider}</td>
-                    <td className="px-4 py-4 text-slate-600">{invoice.paymentLabel}</td>
-                    <td className="px-4 py-4">
-                      {invoice.kind === "customer" ? (
-                        <div className="flex items-center gap-2">
-                          <PaymentStatusAnimation status={invoice.status as LivePaymentStatus} label={`${invoice.statusLabel.toLowerCase()} payment`} className="size-8" />
-                          <StatusPill status={invoice.status} label={invoice.statusLabel} />
-                        </div>
-                      ) : (
-                        <StatusPill status={invoice.status} label={invoice.statusLabel} />
-                      )}
-                    </td>
-                    <td className="px-4 py-4">
-                      <a href={invoice.invoiceUrl} target="_blank" rel="noreferrer" className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-white px-3 text-sm font-bold text-ocean transition hover:-translate-y-0.5 hover:border-ocean/40 hover:shadow-sm">
-                        Open
-                        <ArrowUpRight className="size-3.5" />
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    Open invoice
+                    <ArrowUpRight className="size-4" />
+                  </a>
+                </article>
+              </div>
+            ))}
           </div>
-          <PaginationControls
-            page={invoicePagination.page}
-            pageCount={invoicePagination.pageCount}
-            totalItems={invoicePagination.totalItems}
-            startItem={invoicePagination.startItem}
-            endItem={invoicePagination.endItem}
-            itemLabel={modeCopy.itemLabel}
-            onPageChange={invoicePagination.setPage}
-          />
-          {invoiceRows.length === 0 && (
-            <div className="border-t border-line p-4 text-sm text-slate-500">{modeCopy.empty}</div>
-          )}
-        </Card>
+        ) : (
+          <EmptyState className="mt-5" illustration="bag" title={modeCopy.empty} />
+        )}
+        <PaginationControls
+          className="mt-5 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
+          page={invoicePagination.page}
+          pageCount={invoicePagination.pageCount}
+          totalItems={invoicePagination.totalItems}
+          startItem={invoicePagination.startItem}
+          endItem={invoicePagination.endItem}
+          itemLabel={modeCopy.itemLabel}
+          onPageChange={invoicePagination.setPage}
+        />
       </div>
       <ActionNotice notice={notice} onClose={() => setNotice(null)} />
     </>
@@ -1874,6 +1913,14 @@ export function InvoicesPage() {
 }
 
 export { CampaignDraftsPage as CampaignsPage } from "@/components/dashboard/campaign-drafts-page";
+
+function staffBadgeTone(role: string) {
+  const value = role.toUpperCase();
+  if (value.includes("OWNER")) return { band: "bg-clay-ink", orb: "bg-clay-violet", chip: "bg-violet/10 text-violet-deep" };
+  if (value.includes("MANAGER")) return { band: "bg-clay-ocean", orb: "bg-clay-ocean", chip: "bg-ocean/10 text-ocean" };
+  if (value.includes("DELIVERY") || value.includes("SERVICE")) return { band: "bg-clay-mango", orb: "bg-clay-mango", chip: "bg-mango-soft text-mango-deep" };
+  return { band: "bg-clay-emerald", orb: "bg-clay-emerald", chip: "bg-emerald-soft text-emerald-deep" };
+}
 
 export function StaffPage() {
   const { data, loading: liveLoading } = useDashboardLive();
@@ -2018,63 +2065,89 @@ export function StaffPage() {
           </Button>
         }
       />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {staffPagination.pageItems.map((member) => {
+      <div className="grid gap-x-5 gap-y-8 pt-4 sm:grid-cols-2 xl:grid-cols-4">
+        {staffPagination.pageItems.map((member, index) => {
           const editable = member.role !== "Owner" && member.roleValue !== "OWNER";
+          const tone = staffBadgeTone(member.roleValue ?? member.role);
 
           return (
-            <Card key={member.id}>
-              <div className="flex items-start justify-between gap-3">
-                <StaffIcon className="size-7 text-ocean" />
-                {editable && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      aria-label={`Resend invite to ${member.name}`}
-                      title="Resend invite"
-                      disabled={resendingInviteId === member.id}
-                      className="grid size-9 place-items-center rounded-lg bg-blue-50 text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      onClick={() => resendStaffInvite(member)}
-                    >
-                      {resendingInviteId === member.id ? <LoaderCircle className="size-4 animate-spin" /> : <Mail className="size-4" />}
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Change role for ${member.name}`}
-                      title="Change role"
-                      className="grid size-9 place-items-center rounded-lg bg-slate-100 text-slate-700 transition hover:bg-slate-200"
-                      onClick={() => setRoleTarget(member)}
-                    >
-                      <Edit3 className="size-4" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Delete ${member.name}`}
-                      title="Delete staff"
-                      className="grid size-9 place-items-center rounded-lg bg-red-50 text-red-600 transition hover:bg-red-100"
-                      onClick={() => setDeleteTarget({ type: "staff", member })}
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
+            <ScrollReveal key={member.id} delay={Math.min(index, 7) * 50} className="h-full">
+              <article className="relative flex h-full flex-col">
+                <span aria-hidden="true" className="absolute -top-4 left-1/2 z-10 h-7 w-12 -translate-x-1/2 rounded-b-xl rounded-t-md bg-clay-ink shadow-clay-sm" />
+                <div className="clay relative flex h-full flex-col overflow-hidden rounded-[2rem] pt-3 text-center">
+                  <div className={cn("mx-3 h-16 rounded-[1.4rem]", tone.band)}>
+                    <span aria-hidden="true" className="mx-auto mt-2 block h-2 w-10 rounded-full bg-white/60 shadow-clay-inset" />
                   </div>
-                )}
-              </div>
-              <h2 className="mt-4 font-bold text-ink">{member.name}</h2>
-              <p className="mt-1 text-sm text-slate-500">{roleLabel(member.roleValue ?? member.role, data.business.businessType)}</p>
-              {member.email && <p className="mt-1 break-all text-xs text-slate-500">{member.email}</p>}
-              <p className="mt-4 min-h-12 text-sm leading-6 text-slate-600">{member.permissions}</p>
-              <StatusPill status={member.status} />
-            </Card>
+                  <div className="-mt-9 flex justify-center">
+                    <span className={cn("clay-orb size-[4.5rem] rounded-[1.6rem] border-4 border-white text-xl font-extrabold text-white", tone.orb)}>{initials(member.name)}</span>
+                  </div>
+                  <div className="flex flex-1 flex-col px-5 pb-5">
+                    <h2 className="mt-3 truncate text-lg font-extrabold text-ink">{member.name}</h2>
+                    <div className="mt-1 flex justify-center">
+                      <span className={cn("rounded-full px-3 py-1 text-xs font-extrabold", tone.chip)}>{roleLabel(member.roleValue ?? member.role, data.business.businessType)}</span>
+                    </div>
+                    {member.email && <p className="mt-2 break-all text-xs font-semibold text-slate-500">{member.email}</p>}
+                    <p className="mt-3 flex-1 rounded-2xl bg-mist/70 px-3 py-2.5 text-left text-xs font-semibold leading-5 text-slate-600">{member.permissions}</p>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <StatusPill status={member.status} />
+                      {editable && (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            aria-label={`Resend invite to ${member.name}`}
+                            title="Resend invite"
+                            disabled={resendingInviteId === member.id}
+                            className="grid size-9 place-items-center rounded-xl bg-ocean/10 text-ocean transition hover:bg-ocean/15 disabled:cursor-not-allowed disabled:opacity-60"
+                            onClick={() => resendStaffInvite(member)}
+                          >
+                            {resendingInviteId === member.id ? <LoaderCircle className="size-4 animate-spin" /> : <Mail className="size-4" />}
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Change role for ${member.name}`}
+                            title="Change role"
+                            className="grid size-9 place-items-center rounded-xl bg-mist text-slate-700 transition hover:bg-white hover:shadow-clay-sm"
+                            onClick={() => setRoleTarget(member)}
+                          >
+                            <Edit3 className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Delete ${member.name}`}
+                            title="Delete staff"
+                            className="grid size-9 place-items-center rounded-xl bg-berry-soft text-berry-deep transition hover:bg-berry/15"
+                            onClick={() => setDeleteTarget({ type: "staff", member })}
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </ScrollReveal>
           );
         })}
-        {staff.length === 0 && (
-          <Card>
-            <p className="text-sm text-slate-500">No staff users loaded.</p>
-          </Card>
-        )}
+        <button
+          type="button"
+          onClick={() => setDialogOpen(true)}
+          className="group grid min-h-[17rem] place-items-center rounded-[2rem] border-2 border-dashed border-violet/25 bg-white/40 p-6 text-center transition hover:border-emerald/50 hover:bg-white/70"
+        >
+          <span>
+            <span className="clay-orb mx-auto size-14 rounded-2xl bg-clay-emerald text-white transition group-hover:scale-105">
+              <Plus className="size-6" />
+            </span>
+            <span className="mt-3 block text-base font-extrabold text-ink">Add staff</span>
+            <span className="mt-1 block text-xs font-semibold text-slate-500">Invite by email and pick a role</span>
+          </span>
+        </button>
       </div>
+      {staff.length === 0 && (
+        <p className="mt-4 rounded-2xl bg-white/70 p-4 text-sm font-semibold text-slate-500">No staff users loaded.</p>
+      )}
       <PaginationControls
-        className="mt-4 rounded-lg border border-line bg-white"
+        className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
         page={staffPagination.page}
         pageCount={staffPagination.pageCount}
         totalItems={staffPagination.totalItems}
@@ -2201,11 +2274,11 @@ export function ReportsPage() {
             <h2 className="text-base font-bold text-ink sm:text-lg">Monthly sales</h2>
             <Badge variant="blue" className="shrink-0">{formatINR(reports.monthlySales)}</Badge>
           </div>
-          <div className="mt-5 grid h-64 grid-cols-12 items-end gap-2 sm:mt-6 sm:gap-3">
+          <div className="mt-5 grid h-64 grid-cols-12 items-end gap-2 rounded-[1.4rem] bg-[repeating-linear-gradient(180deg,transparent_0,transparent_51px,rgba(29,26,57,0.06)_51px,rgba(29,26,57,0.06)_52px)] px-1 sm:mt-6 sm:gap-3">
             {reports.monthlyTrend.map((point) => (
               <div key={point.label} className="flex min-w-0 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-t-md bg-gradient-to-t from-ocean to-emerald sm:rounded-t-lg"
+                  className="vm-grow-on-scroll w-full rounded-t-[0.8rem] bg-[linear-gradient(180deg,#7c5cff_0%,#4f5bd5_45%,#12b76a_100%)] shadow-[inset_0_2px_0_rgba(255,255,255,0.45)] transition hover:brightness-110"
                   title={`${point.label}: ${formatINR(point.revenue)} from ${point.orders} orders`}
                   style={{ height: `${trendBarHeight(point.revenue, maxRevenue)}px` }}
                 />
@@ -2215,15 +2288,15 @@ export function ReportsPage() {
           </div>
         </Card>
         <Card>
-          <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+          <h2 className="flex items-center gap-2 text-lg font-extrabold text-ink">
             <ItemIcon className="size-5 text-ocean" />
             {copy.topItemsTitle} revenue
           </h2>
           <div className="mt-4 grid gap-3">
             {data.topItems.map((item, index) => (
-              <div key={item.id} className="flex items-center justify-between gap-3 rounded-lg bg-mist p-3">
+              <div key={item.id} className="vm-reveal-on-scroll flex items-center justify-between gap-3 rounded-2xl bg-mist/80 p-3">
                 <div className="flex items-center gap-3">
-                  <span className="grid size-8 place-items-center rounded-lg bg-white text-sm font-bold text-ocean">{index + 1}</span>
+                  <span className={cn("clay-orb size-9 rounded-xl text-sm font-extrabold text-white", index === 0 ? "bg-clay-mango !text-ink" : index === 1 ? "bg-clay-violet" : "bg-clay-ocean")}>{index + 1}</span>
                   <div>
                     <p className="font-semibold text-ink">{item.name}</p>
                     <p className="text-xs text-slate-500">{item.quantitySold} {copy.transactionPlural.toLowerCase()}</p>
@@ -2233,7 +2306,7 @@ export function ReportsPage() {
               </div>
             ))}
             {data.topItems.length === 0 && (
-              <p className="rounded-lg bg-mist p-3 text-sm text-slate-500">No paid {copy.itemSingular.toLowerCase()} data yet.</p>
+              <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-500">No paid {copy.itemSingular.toLowerCase()} data yet.</p>
             )}
           </div>
         </Card>
@@ -2257,6 +2330,15 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Share of the current billing period that has elapsed (0–1); 0 when the dates are missing. */
+function billingPeriodProgress(start: string | Date | null | undefined, end: string | Date | null | undefined, now: number) {
+  if (!start || !end) return 0;
+  const from = new Date(start).getTime();
+  const to = new Date(end).getTime();
+  if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) return 0;
+  return Math.min(1, Math.max(0, (now - from) / (to - from)));
+}
+
 export function BillingPage() {
   const router = useRouter();
   const { data, connected, error, loading, refresh } = useDashboardLive();
@@ -2270,8 +2352,11 @@ export function BillingPage() {
   const [kycUploadFeedback, setKycUploadFeedback] = useState<KycUploadFeedback | null>(null);
   const [cancelSubscriptionOpen, setCancelSubscriptionOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const viewedAt = useMinuteClock();
   const isPro = billing.plan === "PRO" && billing.status === "ACTIVE";
   const paymentRequired = billing.status !== "ACTIVE";
+  const periodProgress = billingPeriodProgress(billing.currentPeriodStart, billing.currentPeriodEnd, viewedAt);
+  const kycProgress = kyc.requiredDocumentCount > 0 ? Math.min(1, kyc.uploadedDocumentCount / kyc.requiredDocumentCount) : 0;
 
   async function handleCancelSubscription() {
     setIsCancelling(true);
@@ -2355,32 +2440,43 @@ export function BillingPage() {
         action={<LiveSyncStatus connected={connected} source={data.source} error={error} />}
       />
       {paymentRequired && (
-        <Card className="mb-5 border border-amber-200 bg-amber-50">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <Badge variant="amber">Payment required</Badge>
-              <h2 className="mt-3 text-xl font-bold text-ink">Pay {formatPlanName(billing.plan)} to continue KYC</h2>
-              <p className="mt-1 text-sm leading-6 text-amber-900">
-                Your business stays hidden from customers until subscription payment, KYC document upload, and PSHR admin approval are complete.
-              </p>
-            </div>
-            <Button variant="emerald" icon={<ReceiptText className="size-4" />} onClick={() => goToSubscriptionCheckout(billing.plan)}>
-              Review billing
-            </Button>
+        <div className="clay clay-tint-mango mb-5 grid items-center gap-4 rounded-[2rem] p-5 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:p-6">
+          <span aria-hidden="true" className="hidden size-20 sm:block">
+            <ClayIllustration name="bell" />
+          </span>
+          <div className="min-w-0">
+            <Badge variant="amber">Payment required</Badge>
+            <h2 className="mt-3 text-xl font-extrabold text-ink">Pay {formatPlanName(billing.plan)} to continue KYC</h2>
+            <p className="mt-1 text-sm leading-6 text-mango-deep">
+              Your business stays hidden from customers until subscription payment, KYC document upload, and PSHR admin approval are complete.
+            </p>
           </div>
-        </Card>
+          <Button variant="emerald" icon={<ReceiptText className="size-4" />} onClick={() => goToSubscriptionCheckout(billing.plan)}>
+            Review billing
+          </Button>
+        </div>
       )}
-      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <GlassPanel>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="purple">{formatPlanName(billing.plan)} plan</Badge>
-            <StatusPill status={billing.status} />
+      <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="relative min-h-[15rem] overflow-hidden rounded-[2rem] bg-[linear-gradient(150deg,#1d1a39_0%,#2b2160_50%,#4f3bb8_100%)] p-6 text-white shadow-clay-lg sm:p-7">
+          <div aria-hidden="true" className="vm-blob -right-14 -top-20 size-64 bg-emerald opacity-30" />
+          <div aria-hidden="true" className="absolute inset-0 opacity-15 [background-image:radial-gradient(rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:16px_16px]" />
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.1em]">{formatPlanName(billing.plan)} plan</span>
+              <StatusPill status={billing.status} />
+            </div>
+            <span aria-hidden="true" className="grid h-9 w-12 grid-cols-3 gap-0.5 rounded-lg bg-[linear-gradient(135deg,#ffe7a3,#ffad1f)] p-1.5 shadow-clay-sm">
+              {Array.from({ length: 6 }, (_, cell) => <span key={cell} className="rounded-[2px] bg-mango-deep/35" />)}
+            </span>
           </div>
-          <h2 className="mt-4 text-3xl font-bold text-ink">{formatINR(billing.monthlyAmount)}/month</h2>
-          <p className="mt-3 leading-7 text-slate-600">
+          <p className="relative mt-6 text-4xl font-extrabold tracking-[-0.05em]">
+            {formatINR(billing.monthlyAmount)}
+            <span className="text-base font-bold text-white/60">/month</span>
+          </p>
+          <p className="relative mt-2 max-w-md text-sm font-medium leading-6 text-white/70">
             {currentPlan.description} Current subscription for {data.business.name}.
           </p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="relative mt-6 flex flex-wrap items-center gap-3">
             <Button
               variant="emerald"
               icon={<ReceiptText className="size-4" />}
@@ -2395,46 +2491,75 @@ export function BillingPage() {
             </Button>
             {billing.status === "ACTIVE" && (
               <Button
-                variant="outline"
-                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                variant="ghost"
+                className="text-white ring-1 ring-white/30 hover:bg-white/10 hover:text-white"
                 onClick={() => setCancelSubscriptionOpen(true)}
               >
                 Cancel Subscription
               </Button>
             )}
           </div>
-        </GlassPanel>
-        <Card>
-          <h2 className="font-bold text-ink">Subscription cycle</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg bg-mist p-3">
-              <p className="text-xs font-semibold uppercase text-slate-500">Period start</p>
-              <p className="mt-2 font-bold text-ink">{formatDateLabel(billing.currentPeriodStart)}</p>
+        </div>
+        <div className="clay rounded-[2rem] p-6 sm:p-7">
+          <h2 className="text-lg font-extrabold text-ink">Subscription cycle</h2>
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400">
+              <span>Period start</span>
+              <span>Period end</span>
             </div>
-            <div className="rounded-lg bg-mist p-3">
-              <p className="text-xs font-semibold uppercase text-slate-500">Next renewal</p>
-              <p className="mt-2 font-bold text-ink">{formatDateLabel(billing.nextRenewalDate)}</p>
+            <div className="relative mt-2 h-3 rounded-full bg-mist shadow-clay-inset">
+              <div className="h-full rounded-full bg-[linear-gradient(90deg,#12b76a,#7c5cff)]" style={{ width: `${Math.max(3, periodProgress * 100)}%` }} />
+              <span
+                aria-hidden="true"
+                className="absolute top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-violet shadow-clay-sm"
+                style={{ left: `${Math.max(3, periodProgress * 100)}%` }}
+              />
             </div>
-            <div className="rounded-lg bg-mist p-3">
-              <p className="text-xs font-semibold uppercase text-slate-500">Setup fee</p>
-              <p className="mt-2 font-bold text-ink">{billing.setupFeeAmount === null ? "Not set" : formatINR(billing.setupFeeAmount)}</p>
+            <div className="mt-2 flex items-center justify-between text-sm font-bold text-ink">
+              <span>{formatDateLabel(billing.currentPeriodStart)}</span>
+              <span>{formatDateLabel(billing.currentPeriodEnd)}</span>
             </div>
           </div>
-          <div className="mt-4 rounded-lg bg-white p-3 text-sm text-slate-600">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-mist/80 p-4">
+              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400">Next renewal</p>
+              <p className="mt-1.5 text-lg font-extrabold text-ink">{formatDateLabel(billing.nextRenewalDate)}</p>
+            </div>
+            <div className="rounded-2xl bg-mist/80 p-4">
+              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400">Setup fee</p>
+              <p className="mt-1.5 text-lg font-extrabold text-ink">{billing.setupFeeAmount === null ? "Not set" : formatINR(billing.setupFeeAmount)}</p>
+            </div>
+          </div>
+          <p className="mt-4 text-sm text-slate-600">
             Current billing period ends on <span className="font-bold text-ink">{formatDateLabel(billing.currentPeriodEnd)}</span>.
-          </div>
-        </Card>
+          </p>
+        </div>
       </div>
-      <Card className="mt-5 min-w-0 overflow-hidden">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
+
+      <section className="clay mt-5 min-w-0 overflow-hidden rounded-[2rem] p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-5">
+          <div
+            role="img"
+            aria-label={`${kyc.uploadedDocumentCount} of ${kyc.requiredDocumentCount} documents uploaded`}
+            className="relative grid size-24 shrink-0 place-items-center rounded-full"
+            style={{ background: `conic-gradient(#12b76a ${kycProgress * 360}deg, #ece6ff 0deg)` }}
+          >
+            <span className="grid size-[4.6rem] place-items-center rounded-full bg-white shadow-clay-inset">
+              <span className="text-xl font-extrabold text-ink">
+                {kyc.uploadedDocumentCount}
+                <span className="text-sm text-slate-400">/{kyc.requiredDocumentCount}</span>
+              </span>
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={kyc.status === "APPROVED" ? "emerald" : kyc.status === "REJECTED" ? "red" : kyc.status === "UNDER_REVIEW" ? "purple" : "amber"}>
                 {kyc.label}
               </Badge>
               <Badge variant="blue">{kyc.uploadedDocumentCount}/{kyc.requiredDocumentCount} documents</Badge>
+              {kyc.status === "UNDER_REVIEW" && <Badge variant="purple">Admin review</Badge>}
             </div>
-            <h2 className="mt-3 text-xl font-bold text-ink">Business KYC documents</h2>
+            <h2 className="mt-2 text-xl font-extrabold text-ink">Business KYC documents</h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
               {billing.status !== "ACTIVE"
                 ? "Complete subscription payment to unlock document upload."
@@ -2445,7 +2570,6 @@ export function BillingPage() {
                     : "Upload every required document for PSHR admin review."}
             </p>
           </div>
-          {kyc.status === "UNDER_REVIEW" && <Badge variant="purple">Admin review</Badge>}
         </div>
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
           {kyc.requiredDocuments.map((requirement) => {
@@ -2454,26 +2578,33 @@ export function BillingPage() {
             const disabled = !kyc.canUpload || uploadingKycType !== null;
 
             return (
-              <div key={requirement.type} className="min-w-0 overflow-hidden rounded-lg border border-line bg-mist p-4">
-                <div className="flex items-start justify-between gap-3">
+              <div
+                key={requirement.type}
+                className={cn(
+                  "min-w-0 overflow-hidden rounded-[1.5rem] border-2 p-4 transition",
+                  document ? "border-emerald/30 bg-emerald-soft/40" : "border-dashed border-violet/25 bg-mist/60"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <span className={cn("clay-orb size-11 shrink-0 rounded-2xl", document ? "bg-clay-emerald text-white" : "bg-white text-slate-300")}>
+                    {document ? <CheckCircle2 className="size-5" /> : <FileCheck2 className="size-5" />}
+                  </span>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-ink">{requirement.label}</h3>
-                    <p className="mt-1 text-xs leading-5 text-slate-500 [overflow-wrap:anywhere]">{requirement.description}</p>
+                    <h3 className="font-extrabold text-ink">{requirement.label}</h3>
+                    <p className="mt-0.5 text-xs leading-5 text-slate-500 [overflow-wrap:anywhere]">{requirement.description}</p>
                   </div>
-                  {document ? <FileCheck2 className="size-5 shrink-0 text-emerald" /> : <FileCheck2 className="size-5 shrink-0 text-slate-300" />}
                 </div>
                 {document && (
-                  <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-lg bg-white p-3 text-xs leading-5 text-slate-600">
+                  <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-xl bg-white p-3 text-xs leading-5 text-slate-600 shadow-clay-sm">
                     <p className="block max-w-full truncate font-bold text-ink" title={document.fileName}>{document.fileName}</p>
                     <p>{formatFileSize(document.fileSize)} · {new Date(document.uploadedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
                   </div>
                 )}
                 <label
-                  className={`mt-4 inline-flex h-10 w-full min-w-0 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
-                    disabled
-                      ? "cursor-not-allowed bg-slate-200 text-slate-500"
-                      : "cursor-pointer bg-black text-white hover:bg-black/90"
-                  }`}
+                  className={cn(
+                    "mt-4 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition",
+                    disabled ? "cursor-not-allowed bg-slate-200 text-slate-500" : "cursor-pointer bg-clay-ink text-white shadow-clay-sm hover:-translate-y-0.5"
+                  )}
                 >
                   {uploading ? <LoaderCircle className="size-4 shrink-0 animate-spin" /> : <UploadCloud className="size-4 shrink-0" />}
                   <span className="min-w-0 truncate">{uploading ? "Uploading" : document ? "Replace Document" : "Upload Document"}</span>
@@ -2489,76 +2620,95 @@ export function BillingPage() {
             );
           })}
         </div>
-      </Card>
-      <Card className="mt-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-bold text-ink">Choose a subscription plan</h2>
-            <p className="mt-1 text-sm text-slate-600">Start a plan here, then review billing details and apply coupons on the next page.</p>
-          </div>
-          <Badge variant="blue">Next: billing details</Badge>
-        </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {pricingPlans.map((plan) => {
-            const planKey = plan.id;
-            const active = billing.plan === planKey && billing.status === "ACTIVE";
-            const isProActive = billing.plan === "PRO" && billing.status !== "CANCELLED";
-            const blockStarter = planKey === "STARTER" && isProActive;
+      </section>
 
-            return (
-              <div key={plan.name} className={cn("flex h-full flex-col rounded-lg border bg-mist p-4", active ? "border-emerald shadow-soft" : "border-line", blockStarter && "opacity-75 grayscale")}>
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
-                  {active && <Badge variant="emerald">Active</Badge>}
-                </div>
-                <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">{plan.description}</p>
-                <p className="mt-4 text-3xl font-extrabold text-ink">{formatINR(plan.price)}<span className="text-sm font-medium text-slate-500">/month</span></p>
-                <ul className="mt-4 flex-1 space-y-2">
-                  {plan.features.slice(0, 4).map((feature) => (
-                    <li key={feature} className="flex gap-2 text-sm text-slate-700">
-                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className="mt-5 w-full"
-                  variant={plan.name === "Pro" ? "emerald" : "primary"}
-                  onClick={() => goToSubscriptionCheckout(planKey)}
-                  disabled={blockStarter || active}
-                >
-                  {blockStarter ? "Unavailable on Pro" : active ? "Current Plan" : `Start ${plan.name}`}
-                </Button>
-              </div>
-            );
-          })}
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-ink">Choose a subscription plan</h2>
+          <p className="mt-1 text-sm font-medium text-slate-500">Start a plan here, then review billing details and apply coupons on the next page.</p>
         </div>
-      </Card>
-      <Card className="mt-5">
+        <Badge variant="blue">Next: billing details</Badge>
+      </div>
+      <div className="mt-4 grid gap-5 md:grid-cols-2">
+        {pricingPlans.map((plan) => {
+          const planKey = plan.id;
+          const active = billing.plan === planKey && billing.status === "ACTIVE";
+          const isProActive = billing.plan === "PRO" && billing.status !== "CANCELLED";
+          const blockStarter = planKey === "STARTER" && isProActive;
+          const pro = planKey === "PRO";
+
+          return (
+            <div
+              key={plan.name}
+              className={cn(
+                "relative flex h-full flex-col rounded-[2rem] p-6",
+                pro ? "bg-clay-ink text-white shadow-clay-lg" : "clay text-ink",
+                active && "ring-4 ring-emerald/40",
+                blockStarter && "opacity-75 grayscale"
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-lg font-extrabold">{plan.name}</h3>
+                {active && <Badge variant="emerald">Active</Badge>}
+              </div>
+              <p className={cn("mt-2 min-h-12 text-sm leading-6", pro ? "text-white/65" : "text-slate-600")}>{plan.description}</p>
+              <p className="mt-4 text-4xl font-extrabold tracking-[-0.05em]">
+                {formatINR(plan.price)}
+                <span className={cn("text-sm font-bold", pro ? "text-white/60" : "text-slate-500")}>/month</span>
+              </p>
+              <ul className="mt-4 flex-1 space-y-2">
+                {plan.features.slice(0, 4).map((feature) => (
+                  <li key={feature} className={cn("flex gap-2 text-sm font-semibold", pro ? "text-white/85" : "text-slate-700")}>
+                    <CheckCircle2 className={cn("mt-0.5 size-4 shrink-0", pro ? "text-emerald-300" : "text-emerald")} />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                className="mt-5 w-full"
+                variant={pro ? "emerald" : "dark"}
+                onClick={() => goToSubscriptionCheckout(planKey)}
+                disabled={blockStarter || active}
+              >
+                {blockStarter ? "Unavailable on Pro" : active ? "Current Plan" : `Start ${plan.name}`}
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="clay mt-5 rounded-[2rem] p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-bold text-ink">Billing history</h2>
+          <h2 className="text-lg font-extrabold text-ink">Billing history</h2>
           <Badge variant={billingStatusVariant(billing.status)}>{billing.history.length} rows</Badge>
         </div>
-        <div className="mt-4 grid gap-3">
+        <ol className="relative mt-5 grid gap-3 pl-7">
           {billingHistoryPagination.pageItems.map((invoice) => (
-            <div key={invoice.id} className="grid gap-3 rounded-lg bg-mist p-3 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
-              <div>
-                <p className="font-semibold text-ink">{invoice.label}</p>
-                <p className="text-xs text-slate-500">
-                  {invoice.reference} · {formatDateLabel(invoice.periodStart)} to {formatDateLabel(invoice.periodEnd)}
-                </p>
+            <li key={invoice.id} className="relative">
+              <span aria-hidden="true" className="absolute -left-7 top-0 h-full w-0.5 translate-x-[0.4rem] bg-line" />
+              <span aria-hidden="true" className="absolute -left-7 top-5 size-3.5 rounded-full border-[3px] border-white bg-violet shadow-clay-sm" />
+              <div className="grid gap-3 rounded-2xl bg-mist/70 p-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
+                <div className="min-w-0">
+                  <p className="font-bold text-ink">{invoice.label}</p>
+                  <p className="text-xs text-slate-500">
+                    {invoice.reference} · {formatDateLabel(invoice.periodStart)} to {formatDateLabel(invoice.periodEnd)}
+                  </p>
+                </div>
+                <p className="text-lg font-extrabold text-ink">{formatINR(invoice.amount)}</p>
+                <StatusPill status={invoice.status} />
+                <a href={invoice.invoiceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-ocean">
+                  Invoice
+                  <ArrowUpRight className="size-3.5" />
+                </a>
               </div>
-              <p className="font-bold text-ink">{formatINR(invoice.amount)}</p>
-              <StatusPill status={invoice.status} />
-              <a href={invoice.invoiceUrl} target="_blank" rel="noreferrer" className="text-sm font-bold text-ocean">Invoice</a>
-            </div>
+            </li>
           ))}
-          {billing.history.length === 0 && (
-            <p className="rounded-lg bg-mist p-3 text-sm text-slate-500">No subscription invoice rows are available yet.</p>
-          )}
-        </div>
+        </ol>
+        {billing.history.length === 0 && (
+          <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-500">No subscription invoice rows are available yet.</p>
+        )}
         <PaginationControls
-          className="mt-4 rounded-lg border border-line bg-white"
+          className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
           page={billingHistoryPagination.page}
           pageCount={billingHistoryPagination.pageCount}
           totalItems={billingHistoryPagination.totalItems}
@@ -2567,7 +2717,7 @@ export function BillingPage() {
           itemLabel="billing rows"
           onPageChange={billingHistoryPagination.setPage}
         />
-      </Card>
+      </div>
       <KycUploadFeedbackDialog feedback={kycUploadFeedback} onClose={() => setKycUploadFeedback(null)} />
       {cancelSubscriptionOpen && (
         <ActionDialog
@@ -2660,7 +2810,7 @@ function SettingsAccordionSection({
     <Card
       data-open={open ? "true" : "false"}
       data-settings-section-id={sectionId}
-      className="settings-accordion-card group relative scroll-mt-28 self-start overflow-hidden border-ocean/10 bg-white/95 p-0 shadow-[0_18px_55px_rgba(79,91,213,0.08)] transition duration-300 hover:-translate-y-0.5 hover:border-ocean/20 hover:shadow-[0_22px_70px_rgba(79,91,213,0.12)] data-[open=true]:border-ocean/25 data-[open=true]:shadow-[0_24px_80px_rgba(79,91,213,0.15)]"
+      className="settings-accordion-card group relative scroll-mt-28 self-start overflow-hidden rounded-[1.75rem] border-white/80 bg-white/90 p-0 shadow-clay transition duration-300 hover:-translate-y-0.5 hover:shadow-clay-lg data-[open=true]:shadow-clay-lg"
     >
       <button
         type="button"
@@ -2670,7 +2820,7 @@ function SettingsAccordionSection({
         onClick={() => onToggle(sectionId)}
       >
         <span className="flex min-w-0 flex-1 items-center gap-3">
-          <span className={cn("relative grid size-11 shrink-0 place-items-center rounded-lg border", accentClasses.iconShell)}>
+          <span className={cn("relative grid size-11 shrink-0 place-items-center rounded-2xl border shadow-clay-sm", accentClasses.iconShell)}>
             <span className={cn("absolute right-2 top-2 size-1.5 rounded-full shadow-[0_0_14px_currentColor] motion-safe:animate-pulse", accentClasses.signal)} />
             <span className={accentClasses.icon}>{icon}</span>
           </span>
@@ -2687,7 +2837,7 @@ function SettingsAccordionSection({
           <span
             aria-hidden="true"
             className={cn(
-              "grid size-10 shrink-0 place-items-center rounded-lg border border-line bg-white text-slate-600 shadow-sm transition duration-300",
+              "grid size-10 shrink-0 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-slate-600 shadow-clay-sm transition duration-300",
               accentClasses.arrowHover,
               open && accentClasses.arrowOpen
             )}
@@ -2960,13 +3110,13 @@ export function SettingsPage() {
               <Label>WhatsApp number</Label>
               <PhoneInput name="phone" defaultValue={business.phone} />
             </div>
-            <label className="flex items-center justify-between gap-4 rounded-lg border border-line bg-mist p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Accept bookings</span>
                 <span className="mt-1 block text-xs leading-5 text-slate-500">Customers only see it while this is on and the business hours above are open.</span>
               </span>
               <input name="isOpen" type="checkbox" defaultChecked={business.isOpen} className="peer sr-only" />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
         </SettingsAccordionSection>
         <SettingsAccordionSection
@@ -2980,14 +3130,14 @@ export function SettingsPage() {
           saveLabel="Save Payout Details"
           saving={saving}
         >
-            <div className="grid grid-cols-2 gap-2 rounded-lg border border-line bg-mist p-1">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-mist/80 p-1">
               {(["UPI", "BANK_TRANSFER"] as const).map((method) => {
                 const active = payoutMethod === method;
                 return (
                   <label
                     key={method}
                     className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-bold transition ${
-                      active ? "bg-ink text-white shadow-sm" : "text-slate-600 hover:bg-white"
+                      active ? "bg-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white"
                     }`}
                   >
                     <input
@@ -3057,7 +3207,7 @@ export function SettingsPage() {
           saveLabel="Save WhatsApp Settings"
           saving={saving}
         >
-            <label className="flex items-center justify-between gap-4 rounded-lg border border-line bg-mist p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Enable WhatsApp customer flow</span>
                 <span className="mt-1 block text-xs leading-5 text-slate-500">When off, public ordering stays website-only and WhatsApp buttons are hidden.</span>
@@ -3068,7 +3218,7 @@ export function SettingsPage() {
                 defaultChecked={Boolean(business.whatsappDisplayPhone || business.whatsappConnected || business.whatsappLiveEnabled)}
                 className="peer sr-only"
               />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
             <div className="grid gap-2">
               <Label>WhatsApp display number</Label>
@@ -3096,7 +3246,7 @@ export function SettingsPage() {
                 <Input name="deliveryFee" type="number" min="0" defaultValue={business.deliveryFee} />
               </div>
             </div>
-            <div className="grid gap-3 rounded-lg border border-line bg-mist p-3">
+            <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
               <Label>Fulfillment options</Label>
               <div key={activeBusinessType} className="grid gap-3 sm:grid-cols-3">
                 {activeFulfillmentProfile.allowedModes.map((mode: ActiveFulfillmentMode) => {
@@ -3116,7 +3266,7 @@ export function SettingsPage() {
                 })}
               </div>
             </div>
-            <div className="grid gap-3 rounded-lg border border-line bg-mist p-3">
+            <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
               <div>
                 <p className="text-sm font-bold text-ink">Platform online payments</p>
                 <p className="mt-1 text-xs leading-5 text-slate-500">
@@ -3124,7 +3274,7 @@ export function SettingsPage() {
                 </p>
               </div>
             </div>
-            <label className="flex items-center gap-3 rounded-lg border border-line bg-mist p-3 text-sm font-semibold text-slate-700">
+            <label className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3 text-sm font-semibold text-slate-700">
               <input name="allowsPayLater" type="checkbox" defaultChecked={business.allowsPayLater} />
               Allow cash payment
             </label>
@@ -3265,67 +3415,102 @@ export function CustomerCouponsPage() {
         <MetricCard title="Active coupons" value={String(activeCouponCount)} detail="Available on public checkout" icon={CheckCircle2} tone="emerald" />
         <MetricCard title="Total redemptions" value={String(totalRedemptions)} detail="Claims across all coupons" icon={TrendingUp} tone="purple" />
       </div>
-      <Card className="mt-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-bold text-ink">Coupon list</h2>
-            <p className="mt-1 text-sm text-slate-600">Use the status switch to activate or pause coupons, or remove unused entries.</p>
-          </div>
-          <Badge variant="blue">{data.coupons.length} coupons</Badge>
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-ink">Coupon list</h2>
+          <p className="mt-1 text-sm font-medium text-slate-500">Use the status switch to activate or pause coupons, or remove unused entries.</p>
         </div>
-        <div className="mt-4 grid gap-3">
-          {couponPagination.pageItems.map((coupon) => {
+        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-slate-600 shadow-clay-sm">{data.coupons.length} coupons</span>
+      </div>
+      {data.coupons.length > 0 ? (
+        <div className="mt-4 grid gap-5 lg:grid-cols-2">
+          {couponPagination.pageItems.map((coupon, index) => {
             const busy = couponActionId === coupon.id;
-            const discountLabel = coupon.discountType === "PERCENTAGE"
+            const percent = coupon.discountType === "PERCENTAGE";
+            const discountLabel = percent
               ? `${coupon.discountValue}%${coupon.maxDiscountAmount ? ` up to ${formatINR(coupon.maxDiscountAmount)}` : ""}`
               : formatINR(coupon.discountValue);
+            const usage = coupon.redemptionLimit ? Math.min(1, coupon.redeemedCount / coupon.redemptionLimit) : null;
             return (
-              <div key={coupon.id} className="grid gap-3 rounded-lg border border-line bg-mist p-3 md:grid-cols-[1fr_auto_auto] md:items-center">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-bold text-ink">{coupon.code}</p>
-                    <Badge variant={coupon.isActive ? "emerald" : "neutral"}>{coupon.isActive ? "Active" : "Inactive"}</Badge>
-                    <Badge variant="blue">{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</Badge>
+              <ScrollReveal key={coupon.id} delay={Math.min(index, 7) * 50}>
+                <article className={cn("relative grid min-h-[11rem] grid-cols-[7.5rem_minmax(0,1fr)] overflow-hidden rounded-[1.75rem] bg-white shadow-clay transition sm:grid-cols-[9rem_minmax(0,1fr)]", !coupon.isActive && "saturate-[0.35]")}>
+                  <div className={cn("relative grid place-items-center px-3 text-center text-white", percent ? "bg-clay-violet" : "bg-clay-emerald")}>
+                    <div aria-hidden="true" className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:12px_12px]" />
+                    <p className="relative">
+                      <span className="block text-[2rem] font-extrabold leading-none tracking-[-0.05em] sm:text-[2.4rem]">{percent ? `${coupon.discountValue}%` : formatINR(coupon.discountValue).replace(/\.00$/, "")}</span>
+                      <span className="mt-1 block text-xs font-extrabold uppercase tracking-[0.16em] text-white/80">off</span>
+                    </p>
                   </div>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {discountLabel} off{coupon.minimumOrderAmount > 0 ? ` above ${formatINR(coupon.minimumOrderAmount)}` : ""}{coupon.expiresAt ? ` · expires ${formatDateLabel(coupon.expiresAt)}` : ""}
-                  </p>
-                  {coupon.description && <p className="mt-1 text-xs text-slate-500">{coupon.description}</p>}
-                </div>
-                <StatusSwitch
-                  checked={coupon.isActive}
-                  loading={busy}
-                  aria-label={`Turn coupon ${coupon.code} ${coupon.isActive ? "inactive" : "active"}`}
-                  onCheckedChange={(isActive) => updateBusinessCoupon(coupon.id, { isActive }, isActive ? `Coupon ${coupon.code} activated.` : `Coupon ${coupon.code} paused.`)}
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="danger"
-                  icon={busy ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-                  disabled={busy}
-                  onClick={() => deleteBusinessCoupon(coupon.id, coupon.code)}
-                >
-                  Remove
-                </Button>
-              </div>
+                  <span aria-hidden="true" className="absolute left-[7.5rem] top-0 h-full -translate-x-1/2 border-l-2 border-dashed border-white/80 sm:left-[9rem]" />
+                  <span aria-hidden="true" className="absolute -top-3 left-[7.5rem] size-6 -translate-x-1/2 rounded-full bg-mist shadow-clay-inset sm:left-[9rem]" />
+                  <span aria-hidden="true" className="absolute -bottom-3 left-[7.5rem] size-6 -translate-x-1/2 rounded-full bg-mist shadow-clay-inset sm:left-[9rem]" />
+                  <div className="flex min-w-0 flex-col p-4 sm:p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="rounded-xl border-2 border-dashed border-violet/30 bg-violet/5 px-3 py-1 font-mono text-base font-extrabold tracking-[0.08em] text-ink">{coupon.code}</span>
+                      <StatusSwitch
+                        checked={coupon.isActive}
+                        loading={busy}
+                        aria-label={`Turn coupon ${coupon.code} ${coupon.isActive ? "inactive" : "active"}`}
+                        onCheckedChange={(isActive) => updateBusinessCoupon(coupon.id, { isActive }, isActive ? `Coupon ${coupon.code} activated.` : `Coupon ${coupon.code} paused.`)}
+                      />
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-slate-600">
+                      {discountLabel} off{coupon.minimumOrderAmount > 0 ? ` above ${formatINR(coupon.minimumOrderAmount)}` : ""}{coupon.expiresAt ? ` · expires ${formatDateLabel(coupon.expiresAt)}` : ""}
+                    </p>
+                    {coupon.description && <p className="mt-1 truncate text-xs text-slate-500">{coupon.description}</p>}
+                    <div className="mt-auto pt-3">
+                      <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-500">
+                        <span className={coupon.isActive ? "text-emerald-deep" : "text-slate-400"}>{coupon.isActive ? "Active" : "Inactive"}</span>
+                        <span>{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</span>
+                      </div>
+                      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist">
+                        <div
+                          className={cn("h-full rounded-full", percent ? "bg-[linear-gradient(90deg,#7c5cff,#4f5bd5)]" : "bg-[linear-gradient(90deg,#12b76a,#0b8a50)]")}
+                          style={{ width: `${usage === null ? (coupon.redeemedCount > 0 ? 100 : 4) : Math.max(4, usage * 100)}%`, opacity: usage === null ? 0.35 : 1 }}
+                        />
+                      </div>
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="text-berry-deep hover:bg-berry-soft"
+                          icon={busy ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                          disabled={busy}
+                          onClick={() => deleteBusinessCoupon(coupon.id, coupon.code)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </ScrollReveal>
             );
           })}
-          {data.coupons.length === 0 && (
-            <p className="rounded-lg bg-mist p-3 text-sm text-slate-500">No customer coupons are configured yet.</p>
-          )}
         </div>
-        <PaginationControls
-          className="mt-4 rounded-lg border border-line bg-white"
-          page={couponPagination.page}
-          pageCount={couponPagination.pageCount}
-          totalItems={couponPagination.totalItems}
-          startItem={couponPagination.startItem}
-          endItem={couponPagination.endItem}
-          itemLabel="coupons"
-          onPageChange={couponPagination.setPage}
+      ) : (
+        <EmptyState
+          className="mt-4"
+          illustration="success"
+          title="No customer coupons are configured yet."
+          action={
+            <Button type="button" variant="emerald" icon={<Plus className="size-4" />} onClick={() => setCreateCouponOpen(true)}>
+              Create coupon
+            </Button>
+          }
         />
-      </Card>
+      )}
+      <PaginationControls
+        className="mt-5 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
+        page={couponPagination.page}
+        pageCount={couponPagination.pageCount}
+        totalItems={couponPagination.totalItems}
+        startItem={couponPagination.startItem}
+        endItem={couponPagination.endItem}
+        itemLabel="coupons"
+        onPageChange={couponPagination.setPage}
+      />
       {createCouponOpen && (
         <ActionDialog
           title="Create coupon"
@@ -3416,7 +3601,7 @@ function ResponsiveOrderTable({
     <>
       <div className="mt-4 grid gap-3 md:hidden">
         {orderPagination.pageItems.map((order) => (
-          <div key={`${order.id}-mobile`} className="rounded-lg border border-line bg-white p-3 shadow-sm">
+          <div key={`${order.id}-mobile`} className="rounded-2xl border border-white/80 bg-white shadow-clay-sm p-3 shadow-clay-sm">
             <div className="flex min-w-0 items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-bold text-ink">{order.orderNumber}</p>
@@ -3488,7 +3673,7 @@ function ResponsiveOrderTable({
         </table>
       </div>
       <PaginationControls
-        className="mt-3 rounded-lg border border-line bg-white"
+        className="mt-3 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
         page={orderPagination.page}
         pageCount={orderPagination.pageCount}
         totalItems={orderPagination.totalItems}
@@ -3508,7 +3693,7 @@ function statusBarColor(status: LiveOrderStatus) {
     PREPARING: "bg-amber-500",
     READY: "bg-emerald",
     DELIVERED: "bg-slate-500",
-    CANCELLED: "bg-red-500"
+    CANCELLED: "bg-berry-soft0"
   };
   return colors[status];
 }

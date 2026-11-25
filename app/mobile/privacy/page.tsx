@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LegalSection, MobileLegalShell } from "@/components/legal/mobile-legal-shell";
+import { LegalHeader, LegalSection, MobileLegalShell } from "@/components/legal/mobile-legal-shell";
 import { createMetadata } from "@/lib/seo";
 import { company } from "@/lib/site";
 
@@ -15,14 +15,9 @@ export const metadata = createMetadata({
 export default function MobilePrivacyPage() {
   return (
     <MobileLegalShell activePath="/mobile/privacy">
-      <header className="mb-8">
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-ocean">Mobile privacy</p>
-        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">VyapaarMate Mobile App Privacy Notice</h1>
-        <p className="mt-3 text-sm font-semibold text-slate-500">Last updated: 17 August 2026</p>
-        <p className="mt-5 max-w-3xl leading-7 text-slate-600">
-          This notice explains the data handled when customers and approved business users use the VyapaarMate iOS or Android app. It also explains how to request access, correction, export, or deletion.
-        </p>
-      </header>
+      <LegalHeader eyebrow="Mobile privacy" title="VyapaarMate Mobile App Privacy Notice" updated="17 August 2026" art="shield">
+        This notice explains the data handled when customers and approved business users use the VyapaarMate iOS or Android app. It also explains how to request access, correction, export, or deletion.
+      </LegalHeader>
 
       <div className="grid gap-5">
         <LegalSection title="Who provides VyapaarMate">

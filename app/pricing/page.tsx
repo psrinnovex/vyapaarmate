@@ -1,6 +1,10 @@
-import { Money, TickCircle } from "@/components/ui/iconsax";
-import { PublicFooter } from "@/components/layout/public-footer";
-import { PublicHeader } from "@/components/layout/public-header";
+import { ArrowRight, Calculator } from "lucide-react";
+import { ClayIllustration } from "@/components/illustrations/clay-illustrations";
+import { PlanCards } from "@/components/landing/pricing-section";
+import { ScrollReveal } from "@/components/landing/scroll-reveal";
+import { BreakEvenCalculator } from "@/components/marketing/break-even-calculator";
+import { CtaBand, PageHeroBanner, PublicPage, SectionTitle, tintClass } from "@/components/marketing/page-kit";
+import { Sticker } from "@/components/ui/sticker";
 import { pricingPlans, pricingPolicy } from "@/lib/constants";
 import { launchAreasServed, launchMarket, launchMarketRestricted, launchOffer } from "@/lib/launch-policy";
 import { createMetadata, jsonLd } from "@/lib/seo";
@@ -13,12 +17,8 @@ import {
   webPageNode,
   websiteNode
 } from "@/lib/structured-data";
-import { formatINR } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { cn, formatINR } from "@/lib/utils";
 import { ButtonLink } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Section } from "@/components/ui/section";
-import { ScrollReveal } from "@/components/landing/scroll-reveal";
 
 const pricingDescription = launchMarketRestricted
   ? `Compare VyapaarMate Starter and Pro monthly plans for businesses currently onboarding in ${launchMarket.displayName}, with any location-specific promotion confirmed at checkout.`
@@ -80,6 +80,29 @@ function pricingStructuredData() {
 }
 
 export default function PricingPage() {
+  const costs = [
+    {
+      title: "Subscription",
+      art: "upi" as const,
+      tint: "violet" as const,
+      body: launchOffer.publiclyAdvertised
+        ? `Starter is ${formatINR(pricingPlans[0].price)}/month and Pro is ${formatINR(pricingPlans[1].price)}/month during the enabled launch offer; list prices remain ${formatINR(pricingPlans[0].listPrice)} and ${formatINR(pricingPlans[1].listPrice)}. GST is additional.`
+        : `Starter is ${formatINR(pricingPlans[0].listPrice)}/month and Pro is ${formatINR(pricingPlans[1].listPrice)}/month, plus GST.`
+    },
+    {
+      title: "Setup",
+      art: "rocket" as const,
+      tint: "mango" as const,
+      body: `${pricingPolicy.setupFeeRange} one time for catalog import, service areas, WhatsApp templates, payment setup, and launch support. It is separate from the subscription.`
+    },
+    {
+      title: "Usage",
+      art: "phone" as const,
+      tint: "emerald" as const,
+      body: "Payment-gateway fees, WhatsApp charges, and any other provider usage costs are billed separately from the subscription and setup fee."
+    }
+  ];
+
   return (
     <>
       <script
@@ -87,132 +110,95 @@ export default function PricingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(pricingStructuredData()) }}
       />
-      <main className="min-h-screen overflow-x-hidden bg-mesh-light">
-        <PublicHeader />
-        <Section
-          headingAs="h1"
+      <PublicPage>
+        <PageHeroBanner
           eyebrow={launchMarketRestricted ? `${launchMarket.displayName} pilot pricing` : "Pricing"}
-          title={launchOffer.publiclyAdvertised ? "Automatic 80% off every monthly subscription" : "Plans built around real local-business margins"}
+          title={launchOffer.publiclyAdvertised ? `${launchOffer.discountPercent}% off` : "Plans built around"}
+          highlight={launchOffer.publiclyAdvertised ? "every monthly subscription" : "real shop margins"}
           body={
             launchOffer.publiclyAdvertised
               ? `The ${launchMarket.displayName} launch price applies automatically while the offer is enabled. It is not a first-month-only discount and no coupon is required.`
               : "Keep subscription simple, charge setup separately, and pass payment or WhatsApp usage costs through transparently."
           }
-        >
+          art="upi"
+          sideArt={["bag", "success"]}
+        />
+
         {launchOffer.publiclyAdvertised && (
-          <ScrollReveal className="mx-auto mb-6 max-w-5xl">
-            <Card className="border-emerald/20 bg-emerald/5">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="emerald">80% Bengaluru launch discount</Badge>
-                <span className="text-sm font-semibold text-ink">Applied automatically to every monthly subscription while enabled</span>
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <ScrollReveal>
+              <div className="glass flex flex-col gap-3 rounded-[1.75rem] p-5 sm:flex-row sm:items-center sm:gap-5">
+                <Sticker tone="emerald" tilt={-4}>
+                  {launchOffer.discountPercent}% {launchMarket.city} launch discount
+                </Sticker>
+                <p className="text-sm font-semibold leading-6 text-slate-600">
+                  Applied automatically to every monthly subscription while enabled. Coupons do not stack with this offer. Standard list prices stay at {formatINR(pricingPlans[0].listPrice)} for Starter and {formatINR(pricingPlans[1].listPrice)} for Pro. GST, one-time setup, payment-gateway fees, WhatsApp charges, and other provider usage are separate.
+                </p>
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Coupons do not stack with this offer. Standard list prices stay at {formatINR(pricingPlans[0].listPrice)} for Starter and {formatINR(pricingPlans[1].listPrice)} for Pro. GST, one-time setup, payment-gateway fees, WhatsApp charges, and other provider usage are separate.
-              </p>
-            </Card>
-          </ScrollReveal>
+            </ScrollReveal>
+          </div>
         )}
-        <div className="mx-auto grid max-w-5xl min-w-0 gap-5 md:grid-cols-2">
-          {pricingPlans.map((plan, index) => (
-            <ScrollReveal key={plan.name} className="h-full w-[calc(100vw-2rem)] min-w-0 md:w-auto" delay={index * 90}>
-              <Card className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white/90">
-                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-xl font-bold text-ink">{plan.name}</h2>
-                  {plan.name === "Pro" && <Badge variant="purple">Recommended</Badge>}
-                </div>
-                <p className="mt-3 min-h-16 break-words text-sm leading-6 text-slate-600">{plan.description}</p>
-                <div className="mt-4 rounded-lg bg-mist p-3">
-                  <p className="text-xs font-bold uppercase text-slate-500">Best for</p>
-                  <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink">{plan.bestFor}</p>
-                </div>
-                <p className="mt-6 break-words text-4xl font-extrabold text-ink">
-                  {formatINR(plan.price)}
-                  <span className="text-base font-medium text-slate-500">/month + GST</span>
-                </p>
-                {launchOffer.publiclyAdvertised && (
-                  <p className="mt-2 text-sm text-slate-600">
-                    <span className="line-through">List {formatINR(plan.listPrice)}/month</span>
-                    <span className="ml-2 font-semibold text-emerald">80% off automatically</span>
+
+        <section aria-label="Plans" className="px-4 py-12 sm:px-6 lg:px-8">
+          <PlanCards detailed location="pricing_plan" />
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <SectionTitle eyebrow="What you pay" title="Three simple parts," highlight="nothing hidden" />
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {costs.map((cost, index) => (
+              <ScrollReveal key={cost.title} delay={index * 80} className="h-full">
+                <article className="clay flex h-full flex-col overflow-hidden rounded-[2rem]">
+                  <div className={cn("grid h-36 place-items-center", tintClass[cost.tint])}>
+                    <ClayIllustration name={cost.art} className="h-28 w-28" />
+                  </div>
+                  <div className="p-6">
+                    <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">{cost.title}</h2>
+                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{cost.body}</p>
+                  </div>
+                </article>
+              </ScrollReveal>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-[linear-gradient(160deg,#1d1a39_0%,#2b2160_55%,#3a2a8a_100%)] p-6 text-white shadow-clay-lg sm:p-10">
+              <div aria-hidden="true" className="vm-blob -left-20 -top-24 size-80 bg-violet opacity-30" />
+              <div className="relative grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+                <div>
+                  <span className="clay-orb size-14 rounded-2xl bg-clay-emerald text-white">
+                    <Calculator className="size-6" />
+                  </span>
+                  <h2 className="mt-5 text-[clamp(1.8rem,4vw,2.8rem)] font-extrabold leading-[1.05] tracking-[-0.04em]">Simple break-even check</h2>
+                  <p className="mt-3 max-w-md text-sm font-medium leading-6 text-white/70">
+                    Compare the monthly software fee with your contribution margin from direct orders or bookings. Setup, GST, gateway charges, WhatsApp usage, and other provider costs should be included separately in your own calculation.
                   </p>
-                )}
-                <ul className="mt-6 flex-1 space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex min-w-0 gap-2 text-sm text-slate-700">
-                      <TickCircle className="mt-0.5 size-5 shrink-0 text-emerald" variant="Bold" />
-                      <span className="min-w-0 break-words">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5 grid gap-2">
-                  {plan.limits.map((limit) => (
-                    <span key={limit} className="min-w-0 break-words rounded-lg bg-mist px-3 py-2 text-xs font-semibold leading-5 text-slate-600">
-                      {limit}
-                    </span>
-                  ))}
+                  <ButtonLink
+                    href="/contact"
+                    variant="secondary"
+                    className="mt-6"
+                    data-marketing-event="cta_click"
+                    data-marketing-location="pricing_break_even"
+                    data-marketing-label="talk_to_pshr_innovex"
+                    data-marketing-destination="/contact"
+                  >
+                    Contact PSHR INNOVEX
+                  </ButtonLink>
                 </div>
-                <ButtonLink
-                  href={`/register?plan=${plan.id}`}
-                  className="mt-6 w-full"
-                  variant={plan.name === "Pro" ? "emerald" : "primary"}
-                  data-marketing-event="cta_click"
-                  data-marketing-location="pricing_plan"
-                  data-marketing-label={`register_${plan.id.toLowerCase()}`}
-                  data-marketing-destination={`/register?plan=${plan.id}`}
-                  data-marketing-value={plan.price}
-                >
-                  Submit for Approval
-                </ButtonLink>
-              </Card>
-            </ScrollReveal>
-          ))}
-        </div>
-        <div className="mt-6 grid min-w-0 gap-4 md:grid-cols-3">
-          {[
-            [
-              "Subscription",
-              launchOffer.publiclyAdvertised
-                ? `Starter is ${formatINR(pricingPlans[0].price)}/month and Pro is ${formatINR(pricingPlans[1].price)}/month during the enabled launch offer; list prices remain ${formatINR(pricingPlans[0].listPrice)} and ${formatINR(pricingPlans[1].listPrice)}. GST is additional.`
-                : `Starter is ${formatINR(pricingPlans[0].listPrice)}/month and Pro is ${formatINR(pricingPlans[1].listPrice)}/month, plus GST.`
-            ],
-            ["Setup", `${pricingPolicy.setupFeeRange} one time for catalog import, service areas, WhatsApp templates, payment setup, and launch support. It is separate from the subscription.`],
-            ["Usage", "Payment-gateway fees, WhatsApp charges, and any other provider usage costs are billed separately from the subscription and setup fee."]
-          ].map(([title, body], index) => (
-            <ScrollReveal key={title} className="w-[calc(100vw-2rem)] min-w-0 md:w-auto" delay={index * 70}>
-              <Card className="h-full w-full min-w-0 overflow-hidden bg-white/90">
-                <h2 className="font-bold text-ink">{title}</h2>
-                <p className="mt-2 break-words text-sm leading-6 text-slate-600">{body}</p>
-              </Card>
-            </ScrollReveal>
-          ))}
-        </div>
-        <ScrollReveal className="mt-6 w-[calc(100vw-2rem)] sm:w-auto">
-          <Card className="flex min-w-0 flex-col gap-4 overflow-hidden bg-ink text-white sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="grid size-12 shrink-0 place-items-center rounded-lg bg-white/10">
-                <Money className="size-6" variant="Bulk" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="font-bold">Simple break-even check</h3>
-                <p className="mt-1 break-words text-sm leading-6 text-white/70">
-                  Compare the monthly software fee with your contribution margin from direct orders or bookings. Setup, GST, gateway charges, WhatsApp usage, and other provider costs should be included separately in your own calculation.
-                </p>
+                <BreakEvenCalculator />
               </div>
             </div>
-            <ButtonLink
-              href="/contact"
-              variant="secondary"
-              data-marketing-event="cta_click"
-              data-marketing-location="pricing_break_even"
-              data-marketing-label="talk_to_pshr_innovex"
-              data-marketing-destination="/contact"
-            >
-              Contact PSHR INNOVEX
-            </ButtonLink>
-          </Card>
-        </ScrollReveal>
-        </Section>
-        <PublicFooter />
-      </main>
+          </ScrollReveal>
+        </section>
+
+        <CtaBand title="Try it before you pay." body="Run a full order and Demo UPI payment in the live demo." art="success">
+          <ButtonLink href="/demo" size="lg" variant="secondary" icon={<ArrowRight className="size-5" />} iconPosition="end">
+            Try the live demo
+          </ButtonLink>
+        </CtaBand>
+      </PublicPage>
     </>
   );
 }
