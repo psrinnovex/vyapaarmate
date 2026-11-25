@@ -55,18 +55,18 @@ export function PasswordInput({
 
   return (
     <div className="relative">
-      {showLockIcon && <LockKeyhole className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />}
+      {showLockIcon && <LockKeyhole className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />}
       <Input
         {...props}
         type={visible ? "text" : "password"}
         autoComplete={autoComplete}
-        className={cn(showLockIcon && "pl-10", className, "pr-11")}
+        className={cn(showLockIcon && "pl-11", className, "pr-11")}
       />
       <button
         type="button"
         aria-label={visible ? "Hide password" : "Show password"}
         aria-pressed={visible}
-        className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10"
+        className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-xl text-slate-500 transition hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10"
         onClick={() => setVisible((current) => !current)}
       >
         <Icon className="size-4" />

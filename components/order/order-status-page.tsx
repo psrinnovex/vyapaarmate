@@ -815,7 +815,7 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
               <WhatsappPreview
                 businessName={order.business.name}
                 messages={[
-                  `Hi ${order.customer.name.split(" ")[0] || "there"}! Your ${tracking.transactionLabel} ${order.orderNumber} is ${(heroCancelled ? tracking.cancelledTitle : heroCompleted ? tracking.completedTitle : currentStage.label).toLowerCase()}.`,
+                  `Hi ${order.customer.name.split(" ")[0] || "there"}! Update on ${order.orderNumber}: ${heroCancelled ? tracking.cancelledTitle : heroCompleted ? tracking.completedTitle : currentStage.label}.`,
                   paid
                     ? `Payment of ${formatINR(order.totalAmount)} received. Thank you!`
                     : `Total ${formatINR(order.totalAmount)}. Payment is pending.`

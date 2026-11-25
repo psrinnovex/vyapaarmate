@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { BrandMark } from "@/components/ui/brand-mark";
+import { ShopIllustration } from "@/components/illustrations/clay-illustrations";
+import { Sticker } from "@/components/ui/sticker";
+import { demoModeUiEnabled } from "@/lib/demo-mode";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, CreditCard, KeyRound, LogIn, Mail, MapPin, RefreshCw, ShieldCheck } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -145,7 +148,7 @@ function AuthPortalSwitch({
   const gridColumns = portals.length === 3 ? "grid-cols-3" : "grid-cols-2";
 
   return (
-    <div className={`mt-5 grid ${gridColumns} rounded-lg border border-line bg-mist p-1 text-sm font-bold`}>
+    <div className={`mt-5 grid ${gridColumns} rounded-2xl bg-mist p-1 text-sm font-extrabold shadow-clay-inset`}>
       {portals.map((option) => {
         const active = portal === option;
 
@@ -154,8 +157,8 @@ function AuthPortalSwitch({
             key={option}
             href={authPath(page, option, nextPathForPortal(option, nextPath))}
             aria-current={active ? "page" : undefined}
-            className={`flex h-10 items-center justify-center rounded-md transition ${
-              active ? "bg-ink text-white shadow-sm" : "text-slate-600 hover:bg-white hover:text-ink"
+            className={`flex h-10 items-center justify-center rounded-xl transition ${
+              active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white hover:text-ink"
             }`}
           >
             {portalNames[option]}
@@ -182,30 +185,63 @@ function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="grid min-h-screen min-w-0 grid-cols-[minmax(0,1fr)] place-items-center bg-mesh-light px-4 py-10">
-      <div className="w-full min-w-0 max-w-md">
-        {lockedToApp ? (
-          <div className="mb-6 flex items-center justify-center gap-2 font-bold text-ink" aria-label="VyapaarMate secure app sign in">
-            <BrandMark />
-            <span>VyapaarMate</span>
-          </div>
-        ) : (
-          <Link href="/" className="mb-6 flex items-center justify-center gap-2 font-bold text-ink">
-            <BrandMark />
+    <main className="grid min-h-screen min-w-0 grid-cols-[minmax(0,1fr)] place-items-center px-4 py-8 lg:py-10">
+      <div className="grid w-full min-w-0 max-w-5xl items-stretch gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)]">
+        <aside className="relative hidden overflow-hidden rounded-[2.25rem] bg-[linear-gradient(140deg,#0b7d49_0%,#3640b0_58%,#5a3de0_100%)] p-8 text-white shadow-clay-lg lg:flex lg:flex-col">
+          <div aria-hidden="true" className="dotted-grid absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(255,255,255,0.45)_1px,transparent_1px)]" />
+          <div aria-hidden="true" className="vm-blob -right-10 -top-10 size-64 bg-white opacity-25" />
+          <Link href="/" className="relative flex items-center gap-2 font-extrabold tracking-[-0.02em]">
+            <BrandMark surface="dark" />
             <span>VyapaarMate</span>
           </Link>
-        )}
-        <Card className="bg-white/90 p-6 shadow-soft">
-          <h1 className="text-2xl font-bold text-ink">{title}</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
-          {switcher}
-          {showDemoNotice && process.env.NODE_ENV !== "production" && (
-            <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Local development. Use the test accounts created for this database; demo activity is not customer or revenue evidence.
+          <div className="relative my-6 flex flex-1 items-center justify-center">
+            <ShopIllustration className="w-[78%] max-w-[19rem] drop-shadow-[0_30px_40px_rgba(13,10,34,0.35)] motion-safe:animate-float-slow" />
+            <span className="absolute left-2 top-6">
+              <Sticker tone="mango" tilt={-8}>UPI ready</Sticker>
+            </span>
+            <span className="absolute bottom-6 right-0">
+              <Sticker tone="white" tilt={6}>WhatsApp alerts</Sticker>
+            </span>
+          </div>
+          <p className="relative text-[1.7rem] font-extrabold leading-[1.1] tracking-[-0.04em]">Take orders. Get paid. Grow.</p>
+          <p className="relative mt-2 text-sm font-semibold text-white/70">Your shop link, UPI payments and WhatsApp updates in one app.</p>
+        </aside>
+
+        <div className="flex min-w-0 flex-col justify-center">
+          {lockedToApp ? (
+            <div className="mb-5 flex items-center justify-center gap-2 font-extrabold text-ink lg:hidden" aria-label="VyapaarMate secure app sign in">
+              <BrandMark />
+              <span>VyapaarMate</span>
             </div>
+          ) : (
+            <Link href="/" className="mb-5 flex items-center justify-center gap-2 font-extrabold text-ink lg:hidden">
+              <BrandMark />
+              <span>VyapaarMate</span>
+            </Link>
           )}
-          {children}
-        </Card>
+          <Card className="rounded-[2.25rem] p-6 sm:p-8">
+            <h1 className="text-[1.75rem] font-extrabold leading-tight tracking-[-0.04em] text-ink">{title}</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+            {switcher}
+            {showDemoNotice && demoModeUiEnabled ? (
+              <Link
+                href="/demo"
+                className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-mango/30 bg-mango-soft p-3 text-sm font-extrabold text-mango-deep transition hover:-translate-y-0.5"
+              >
+                <span>Demo environment: skip the password and try a role in one tap.</span>
+                <ArrowRight className="size-4 shrink-0" />
+              </Link>
+            ) : (
+              showDemoNotice &&
+              process.env.NODE_ENV !== "production" && (
+                <div className="mt-5 rounded-2xl border border-mango/30 bg-mango-soft p-3 text-xs font-semibold leading-5 text-mango-deep">
+                  Local development. Use the test accounts created for this database; demo activity is not customer or revenue evidence.
+                </div>
+              )
+            )}
+            {children}
+          </Card>
+        </div>
       </div>
     </main>
   );
@@ -273,15 +309,15 @@ export function LoginForm() {
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />
-            <EmailInput id="email" name="email" className="pl-10" placeholder={copy.placeholder} required />
+            <Mail className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+            <EmailInput id="email" name="email" className="pl-11" placeholder={copy.placeholder} required />
           </div>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
           <PasswordInput id="password" name="password" showLockIcon required />
         </div>
-        {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
         <Button type="submit" disabled={loading} icon={<ArrowRight className="size-4" />}>
           {loading ? "Signing in" : "Sign In"}
         </Button>
@@ -550,7 +586,7 @@ export function RegisterForm() {
             </p>
           )}
           {message && <p className="rounded-lg bg-emerald/10 p-3 text-sm font-semibold text-emerald">{message}</p>}
-          {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
           <Button type="submit" disabled={loading} variant="emerald" icon={<ShieldCheck className="size-4" />}>
             {loading ? "Verifying" : "Verify and Continue"}
           </Button>
@@ -615,7 +651,7 @@ export function RegisterForm() {
             <Label htmlFor="password">Password</Label>
             <PasswordInput id="password" name="password" autoComplete="new-password" placeholder="10+ characters" minLength={10} required />
           </div>
-          {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
           <Button type="submit" disabled={loading} variant="emerald" icon={<ArrowRight className="size-4" />}>
             {loading ? "Creating" : "Create User Account"}
           </Button>
@@ -641,7 +677,7 @@ export function RegisterForm() {
         <div className="grid gap-2">
           <Label htmlFor="businessName">Business name</Label>
           <div className="relative">
-            <BusinessIcon className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />
+            <BusinessIcon className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
             <Input id="businessName" name="businessName" className="pl-10" placeholder="HSR Fresh Foods" required />
           </div>
         </div>
@@ -735,7 +771,7 @@ export function RegisterForm() {
           By creating an account, you agree to the <Link href="/terms" className="font-semibold text-ocean">Terms</Link> and acknowledge the{" "}
           <Link href="/privacy" className="font-semibold text-ocean">Privacy Policy</Link>. You will review the final discounted amount, GST, and any separate setup or provider charges before payment.
         </p>
-        {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
         <Button
           type="submit"
           disabled={loading}
@@ -801,8 +837,8 @@ export function ForgotPasswordPage() {
         <div className="grid gap-2">
           <Label htmlFor="email">Account email</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />
-            <EmailInput id="email" name="email" className="pl-10" placeholder={copy.placeholder} required />
+            <Mail className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+            <EmailInput id="email" name="email" className="pl-11" placeholder={copy.placeholder} required />
           </div>
         </div>
         {message && (
@@ -815,7 +851,7 @@ export function ForgotPasswordPage() {
             Open Local Reset Link
           </ButtonLink>
         )}
-        {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
         <Button type="submit" disabled={loading} variant="emerald" icon={<Mail className="size-4" />}>
           {loading ? "Sending" : "Send Reset Link"}
         </Button>
@@ -919,7 +955,7 @@ export function ResetPasswordPage() {
             <Label htmlFor="confirmPassword">Confirm new password</Label>
             <PasswordInput id="confirmPassword" name="confirmPassword" autoComplete="new-password" placeholder="Repeat password" minLength={10} required />
           </div>
-          {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
           <Button type="submit" disabled={loading} variant="emerald" icon={<KeyRound className="size-4" />}>
             {loading ? "Updating" : "Update Password"}
           </Button>

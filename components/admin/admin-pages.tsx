@@ -824,7 +824,7 @@ export function AdminBusinessesPage() {
       <Card className="mb-5 min-w-0 bg-white">
         <div className="grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />
+            <Search className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
             <Input
               className="pl-10"
               placeholder="Search by name, phone, city, status"

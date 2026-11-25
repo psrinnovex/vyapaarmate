@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { BrandMark } from "@/components/ui/brand-mark";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, Sparkles, X } from "lucide-react";
 import { DashboardLiveProvider } from "@/hooks/use-live-sync";
 import { DashboardBookingAlert } from "@/components/dashboard/dashboard-booking-alert";
 import { getBusinessConsoleCopy } from "@/lib/business-console-copy";
@@ -87,12 +87,15 @@ function businessAccessNotice(business: DashboardBusiness) {
 
 function ApprovalNotice({ notice }: { notice: BusinessAccessNotice }) {
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
-      <span>{notice.message}</span>
+    <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[1.4rem] border border-mango/30 bg-mango-soft p-4 text-sm font-semibold leading-6 text-mango-deep shadow-clay-sm">
+      <span className="clay-orb size-9 shrink-0 rounded-xl bg-clay-mango text-ink">
+        <Sparkles className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">{notice.message}</span>
       {notice.href && notice.actionLabel && (
         <Link
           href={notice.href}
-          className="inline-flex shrink-0 items-center font-bold text-ocean underline underline-offset-4 transition hover:text-ink"
+          className="clay-press inline-flex h-9 shrink-0 items-center rounded-xl bg-clay-ink px-3.5 text-xs font-extrabold text-white [--clay-shadow:rgba(13,10,34,0.6)]"
         >
           {notice.actionLabel}
         </Link>
@@ -135,6 +138,7 @@ export function DashboardShell({
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [mainScrolled, setMainScrolled] = useState(false);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const copy = getBusinessConsoleCopy(business.businessType);
@@ -245,45 +249,63 @@ export function DashboardShell({
   }
 
   return (
-    <div className="fixed inset-0 min-h-0 overflow-hidden bg-mist lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
-      <aside className="hidden h-full min-h-0 overflow-hidden border-r border-line bg-white lg:block">
-        <div className="flex h-full min-h-0 flex-col p-4">
-          <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
+    <div className="fixed inset-0 min-h-0 overflow-hidden lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside className="hidden h-full min-h-0 overflow-hidden p-3 pr-0 lg:block">
+        <div className="glass flex h-full min-h-0 flex-col rounded-[1.75rem] p-3">
+          <Link href="/" className="flex items-center gap-3 rounded-[1.25rem] bg-clay-ink p-3 font-extrabold tracking-[-0.02em] text-white shadow-clay-sm">
             <BrandMark surface="dark" />
             <span>VyapaarMate</span>
           </Link>
           {isSeededDemoUser && (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Demo credentials must be changed before production.
+            <div className="mt-3 rounded-2xl border border-mango/30 bg-mango-soft p-3 text-xs font-semibold leading-5 text-mango-deep">
+              Demo workspace. Change these demo credentials before going live.
             </div>
           )}
-          <nav className="mt-5 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto pr-1">
+          <nav className="scrollbar-none mt-4 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto">
             {navItems.map((item) => {
               const active = isNavItemActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition",
-                    active ? "bg-ocean text-white" : "text-slate-600 hover:bg-mist hover:text-ink"
+                    "group flex h-11 items-center gap-3 rounded-2xl px-2 text-sm font-bold transition",
+                    active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white hover:text-ink hover:shadow-clay-sm"
                   )}
                 >
-                  <item.icon className="size-4" />
-                  {item.label}
+                  <span
+                    className={cn(
+                      "grid size-8 shrink-0 place-items-center rounded-xl transition",
+                      active ? "bg-clay-emerald text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]" : "bg-white/80 text-slate-500 group-hover:text-emerald-deep"
+                    )}
+                  >
+                    <item.icon className="size-4" />
+                  </span>
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
-          <div className="mt-auto rounded-lg bg-mist p-3">
-            <p className="truncate text-sm font-bold text-ink">{business.name}</p>
-            <p className="mt-1 truncate text-xs text-slate-500">{user.name} workspace</p>
+          <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] bg-white/80 p-3 shadow-clay-sm">
+            <span className="clay-orb size-10 shrink-0 rounded-2xl bg-clay-violet text-sm font-extrabold text-white">
+              {business.name.slice(0, 1).toUpperCase()}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-extrabold text-ink">{business.name}</span>
+              <span className="mt-0.5 block truncate text-xs font-semibold text-slate-500">{user.name}</span>
+            </span>
           </div>
         </div>
       </aside>
 
       <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-        <header className="z-30 flex h-16 shrink-0 items-center justify-between border-b border-line bg-white/90 px-4 backdrop-blur-xl lg:px-6">
+        <header
+          className={cn(
+            "glass z-30 mx-3 mt-3 flex h-16 shrink-0 items-center justify-between rounded-[1.4rem] px-3 transition-shadow duration-300 lg:mx-4",
+            mainScrolled && "shadow-[0_22px_50px_-24px_rgba(31,27,58,0.45)]"
+          )}
+        >
           <div className="flex min-w-0 items-center gap-3">
             <button
               ref={mobileButtonRef}
@@ -291,18 +313,21 @@ export function DashboardShell({
               aria-label="Open navigation"
               aria-expanded={mobileNavOpen}
               aria-controls="dashboard-mobile-navigation"
-              className="grid size-10 place-items-center rounded-lg border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
+              className="grid size-10 place-items-center rounded-xl border border-white bg-white shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
               onClick={() => setMobileNavOpen((value) => !value)}
             >
               <Menu className="size-5" />
             </button>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-ink">{business.name}</p>
-              <p className="truncate text-xs text-slate-500">{planLine}</p>
+              <p className="truncate text-sm font-extrabold text-ink">{business.name}</p>
+              <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-slate-500">
+                <span className={cn("size-1.5 shrink-0 rounded-full", business.subscriptionStatus === "ACTIVE" ? "bg-emerald" : "bg-mango")} />
+                {planLine}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href={`/b/${business.slug}`} className="hidden h-10 items-center gap-2 rounded-lg border border-line bg-white px-3 text-sm font-semibold text-ink sm:flex">
+            <Link href={`/b/${business.slug}`} className="hidden h-10 items-center gap-2 rounded-xl border border-white bg-white px-3.5 text-sm font-extrabold text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald-deep sm:flex">
               <StorefrontIcon className="size-4" />
               Storefront
             </Link>
@@ -310,7 +335,7 @@ export function DashboardShell({
               type="button"
               aria-label="Log out"
               disabled={loggingOut}
-              className="grid size-10 place-items-center rounded-lg border border-line bg-white text-slate-600 transition hover:border-red-200 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="grid size-10 place-items-center rounded-xl border border-white bg-white text-slate-600 shadow-clay-sm transition hover:text-berry-deep disabled:cursor-not-allowed disabled:opacity-60"
               onClick={logout}
             >
               <LogOut className="size-4" />
@@ -328,17 +353,17 @@ export function DashboardShell({
             <div
               ref={mobilePanelRef}
               id="dashboard-mobile-navigation"
-              className="dashboard-mobile-drawer safe-bottom relative flex h-full max-h-[100svh] w-[min(88vw,22.5rem)] flex-col overflow-hidden border-r border-line bg-white p-4 shadow-[34px_0_90px_rgba(29,26,57,0.24)] motion-safe:animate-[admin-mobile-drawer-in_340ms_cubic-bezier(0.22,1,0.36,1)]"
+              className="dashboard-mobile-drawer safe-bottom relative flex h-full max-h-[100svh] w-[min(88vw,22.5rem)] flex-col overflow-hidden rounded-r-[2rem] border-r border-white bg-white/95 p-4 shadow-clay-lg backdrop-blur-xl motion-safe:animate-[admin-mobile-drawer-in_340ms_cubic-bezier(0.22,1,0.36,1)]"
             >
               <div className="flex shrink-0 items-center justify-between">
-                <Link href="/" className="flex items-center gap-3 rounded-lg bg-ink p-3 font-bold text-white">
+                <Link href="/" className="flex items-center gap-3 rounded-[1.25rem] bg-clay-ink p-3 font-extrabold text-white shadow-clay-sm">
                   <BrandMark surface="dark" />
                   <span>VyapaarMate</span>
                 </Link>
                 <button
                   type="button"
                   aria-label="Close navigation"
-                  className="grid size-10 place-items-center rounded-lg border border-line bg-white text-slate-600 transition hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
+                  className="grid size-10 place-items-center rounded-xl border border-white bg-white text-slate-600 shadow-clay-sm transition hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
                   onClick={() => setMobileNavOpen(false)}
                 >
                   <X className="size-5" />
@@ -353,12 +378,12 @@ export function DashboardShell({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex h-12 min-w-0 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
-                        active ? "bg-ocean text-white shadow-[0_18px_42px_rgba(79,91,213,0.16)]" : "text-slate-600 hover:bg-mist hover:text-ink"
+                        "flex h-12 min-w-0 items-center gap-3 rounded-2xl px-2.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
+                        active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-mist hover:text-ink"
                       )}
                       onClick={() => setMobileNavOpen(false)}
                     >
-                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", active ? "bg-white/15 text-white" : "bg-mist text-slate-500")}>
+                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-xl", active ? "bg-clay-emerald text-white" : "bg-mist text-slate-500")}>
                         <item.icon className="size-4" />
                       </span>
                       <span className="min-w-0 truncate">{item.label}</span>
@@ -366,7 +391,7 @@ export function DashboardShell({
                   );
                 })}
               </nav>
-              <div className="mt-5 shrink-0 rounded-lg bg-mist p-3">
+              <div className="mt-5 shrink-0 rounded-[1.25rem] bg-mist p-3">
                 <p className="truncate text-sm font-bold text-ink">{business.name}</p>
                 <p className="mt-1 truncate text-xs text-slate-500">{user.name} workspace</p>
               </div>
@@ -374,7 +399,13 @@ export function DashboardShell({
           </div>
         )}
         <DashboardLiveProvider initialPayload={initialLivePayload} initialPayloadIsComplete={initialLivePayloadIsComplete}>
-          <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-32 pt-6 sm:pb-6 lg:px-6">
+          <main
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-32 pt-5 sm:pb-6 lg:px-6"
+            onScroll={(event) => {
+              const next = event.currentTarget.scrollTop > 8;
+              if (next !== mainScrolled) setMainScrolled(next);
+            }}
+          >
             {approvalNotice && <ApprovalNotice notice={approvalNotice} />}
             <DashboardBookingAlert
               canReviewOrders={hasPermission(user.role, "business:orders:read")}
@@ -384,7 +415,7 @@ export function DashboardShell({
           </main>
           {mobileQuickNav.length > 0 && (
             <nav
-              className="safe-bottom fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-lg border border-line bg-white/95 p-1 shadow-[0_20px_60px_rgba(29,26,57,0.18)] backdrop-blur-xl lg:hidden"
+              className="glass safe-bottom fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 gap-1 rounded-[1.4rem] p-1.5 lg:hidden"
               aria-label="Dashboard quick navigation"
             >
               {mobileQuickNav.map((item) => {
@@ -395,8 +426,8 @@ export function DashboardShell({
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 py-2 text-[10px] font-bold leading-none transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
-                      active ? "bg-ink text-white" : "text-slate-500 hover:bg-mist hover:text-ink"
+                      "flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-extrabold leading-none transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
+                      active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-500 hover:bg-white hover:text-ink"
                     )}
                   >
                     <item.icon className="size-4" />

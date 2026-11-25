@@ -820,7 +820,7 @@ export function CustomerOrderPage({
           />
         )}
         <div className="absolute inset-0 z-0 bg-[linear-gradient(120deg,rgba(11,125,73,0.94)_0%,rgba(54,64,176,0.9)_58%,rgba(90,61,224,0.92)_100%)]" />
-        <div aria-hidden="true" className="vm-blob -right-16 -top-10 z-0 size-72 bg-mango opacity-30" />
+        <div aria-hidden="true" className="vm-blob -right-16 -top-10 z-0 size-72 bg-white opacity-25" />
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
             <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-4 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-x-5">

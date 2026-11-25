@@ -386,7 +386,8 @@ export function JuiceIllustration({ className, title }: IllustrationProps) {
       <circle cx="170" cy="76" r="26" fill={fill(p, "mango", true)} />
       <circle cx="170" cy="76" r="19" fill="#ffe7a3" />
       {[0, 60, 120, 180, 240, 300].map((a) => (
-        <path key={a} d={`M170 76 L${170 + 18 * Math.cos((a * Math.PI) / 180)} ${76 + 18 * Math.sin((a * Math.PI) / 180)}`} stroke="#ffad1f" strokeWidth="2.5" />
+        // Rounded so server and browser produce identical path strings (no hydration mismatch).
+        <path key={a} d={`M170 76 L${(170 + 18 * Math.cos((a * Math.PI) / 180)).toFixed(2)} ${(76 + 18 * Math.sin((a * Math.PI) / 180)).toFixed(2)}`} stroke="#ffad1f" strokeWidth="2.5" />
       ))}
       <ellipse cx="70" cy="70" rx="12" ry="20" fill={fill(p, "leaf")} transform="rotate(-30 70 70)" />
       <Sparkle x={42} y={140} size={8} color="#12b76a" />

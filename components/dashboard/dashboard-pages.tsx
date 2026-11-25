@@ -74,6 +74,7 @@ import { DashboardPageSkeleton } from "@/components/ui/skeleton";
 import { StatusPill } from "@/components/ui/status-pill";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Badge } from "@/components/ui/badge";
+import { ClayIllustration, illustrationNameForBusinessType } from "@/components/illustrations/clay-illustrations";
 import { PaginationControls, usePaginatedItems } from "@/components/ui/pagination";
 import { OrderStatusAnimation } from "@/components/ui/order-status-animation";
 import { PaymentStatusAnimation } from "@/components/ui/payment-status-animation";
@@ -243,25 +244,37 @@ export function DashboardOverviewPage() {
 
   return (
     <>
-      <PageHeader
-        title="Overview"
-        body={`Operating view for ${copy.transactionPlural.toLowerCase()}, revenue, pending payments, repeat ${copy.customerPlural.toLowerCase()}, and ${copy.topItemsTitle.toLowerCase()}.`}
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <LiveSyncStatus connected={connected} source={data.source} error={error} />
-            <Button
-              variant="emerald"
-              icon={<MessageCircle className="size-4" />}
-              onClick={() => {
-                downloadCsv(`daily-summary-${new Date().toISOString().slice(0, 10)}.csv`, [{ business: data.business.name, generatedAt: new Date().toISOString(), ordersToday: data.metrics.ordersToday, recordedPaymentsToday: data.metrics.revenueToday, pendingPayments: data.metrics.pendingPaymentsAmount }]);
-                setNotice({ tone: "success", message: "Daily summary downloaded. No WhatsApp message was sent." });
-              }}
-            >
-              Download Daily Summary
-            </Button>
+      <section className="relative mb-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,#0b7d49_0%,#3640b0_60%,#5a3de0_100%)] p-5 text-white shadow-clay-lg sm:p-7">
+        <div aria-hidden="true" className="dotted-grid absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(255,255,255,0.45)_1px,transparent_1px)]" />
+        <div aria-hidden="true" className="vm-blob -right-10 -top-16 size-64 bg-white opacity-25" />
+        <div className="relative grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-white/70">Welcome back</p>
+            <h1 className="mt-1 truncate text-[clamp(1.6rem,3.6vw,2.4rem)] font-extrabold leading-tight tracking-[-0.04em]">{data.business.name}</h1>
+            <p className="mt-2 max-w-md text-sm font-semibold text-white/75">
+              {data.metrics.ordersToday} {(data.metrics.ordersToday === 1 ? copy.transactionSingular : copy.transactionPlural).toLowerCase()} today · {formatINR(data.metrics.revenueToday)} collected
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="rounded-2xl bg-white/90 p-1 shadow-clay-sm">
+                <LiveSyncStatus connected={connected} source={data.source} error={error} />
+              </span>
+              <Button
+                variant="secondary"
+                icon={<MessageCircle className="size-4" />}
+                onClick={() => {
+                  downloadCsv(`daily-summary-${new Date().toISOString().slice(0, 10)}.csv`, [{ business: data.business.name, generatedAt: new Date().toISOString(), ordersToday: data.metrics.ordersToday, recordedPaymentsToday: data.metrics.revenueToday, pendingPayments: data.metrics.pendingPaymentsAmount }]);
+                  setNotice({ tone: "success", message: "Daily summary downloaded. No WhatsApp message was sent." });
+                }}
+              >
+                Download daily summary
+              </Button>
+            </div>
           </div>
-        }
-      />
+          <div aria-hidden="true" className="hidden w-44 shrink-0 md:block lg:w-52">
+            <ClayIllustration name={illustrationNameForBusinessType(data.business.businessType)} />
+          </div>
+        </div>
+      </section>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard title={`Today's ${copy.transactionPlural.toLowerCase()}`} value={String(data.metrics.ordersToday)} detail={`${data.orders.length} ${copy.transactionPlural.toLowerCase()} loaded`} icon={TransactionIcon} tone="blue" />
         <MetricCard title="Today's revenue" value={formatINR(data.metrics.revenueToday)} detail="Completed payments today" icon={IndianRupee} tone="emerald" />
@@ -291,7 +304,7 @@ export function DashboardOverviewPage() {
                   />
                   <span className="truncate">{label.toLowerCase()}</span>
                 </span>
-                <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                <div className="h-3.5 overflow-hidden rounded-full bg-mist shadow-clay-inset">
                   <div className={`${color} h-full rounded-full`} style={{ width: `${Math.min(100, count * 12)}%` }} />
                 </div>
                 <span className="text-right font-bold text-ink">{count}</span>
@@ -307,9 +320,9 @@ export function DashboardOverviewPage() {
           </div>
           <div className="mt-4 grid gap-3">
             {data.topItems.map((item, index) => (
-              <div key={item.id} className="flex items-center justify-between rounded-lg bg-mist p-3">
+              <div key={item.id} className="vm-reveal-on-scroll flex items-center justify-between rounded-2xl bg-mist/80 p-3">
                 <div className="flex items-center gap-3">
-                  <span className="grid size-8 place-items-center rounded-lg bg-white text-sm font-bold text-ocean">{index + 1}</span>
+                  <span className={`clay-orb size-9 rounded-xl text-sm font-extrabold text-white ${index === 0 ? "bg-clay-mango !text-ink" : index === 1 ? "bg-clay-violet" : "bg-clay-ocean"}`}>{index + 1}</span>
                   <div>
                     <p className="font-semibold text-ink">{item.name}</p>
                     <p className="text-xs text-slate-500">{item.category}</p>
@@ -328,7 +341,7 @@ export function DashboardOverviewPage() {
             <TransactionIcon className="size-5 text-ocean" />
             {copy.recentTransactionsTitle}
           </h2>
-          <Link href="/dashboard/orders" className="text-sm font-bold text-ocean">View all</Link>
+          <Link href="/dashboard/orders" className="rounded-xl bg-mist px-3 py-2 text-sm font-extrabold text-ocean-deep transition hover:bg-ocean-soft">View all</Link>
         </div>
         <ResponsiveOrderTable orders={data.recentOrders} transactionLabel={copy.transactionSingular} businessType={data.business.businessType} />
       </Card>
@@ -361,7 +374,7 @@ function DashboardOrderLane({
       {header}
       <div className="mt-4 grid gap-3">
         {pagination.pageItems.map((order) => (
-          <button type="button" key={order.id} onClick={() => onSelect(order)} className="min-w-0 overflow-hidden rounded-lg border border-line bg-mist p-3 text-left transition hover:border-ocean/40">
+          <button type="button" key={order.id} onClick={() => onSelect(order)} className="vm-reveal-on-scroll min-w-0 overflow-hidden rounded-[1.25rem] border border-white bg-white p-3 text-left shadow-clay-sm transition hover:-translate-y-0.5 hover:shadow-clay">
             <div className="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-start gap-3">
               <OrderStatusAnimation
                 status={order.status}

@@ -20,7 +20,7 @@ export function isDemoMode() {
 
 export const demoModeUiEnabled = truthy(process.env.NEXT_PUBLIC_DEMO_MODE);
 
-export type DemoRole = "owner" | "staff" | "admin" | "support";
+export type DemoRole = "owner" | "staff" | "admin" | "support" | "customer";
 
 /** Seeded demo accounts (see prisma/seed.ts). Demo login is limited to exactly these emails. */
 export function demoAccountEmail(role: DemoRole) {
@@ -28,13 +28,14 @@ export function demoAccountEmail(role: DemoRole) {
     owner: process.env.DEMO_OWNER_EMAIL ?? "owner@demo.com",
     staff: process.env.DEMO_STAFF_EMAIL ?? "kitchen@demo.com",
     admin: process.env.DEMO_ADMIN_EMAIL ?? "admin@pshrinnovex.com",
-    support: process.env.DEMO_SUPPORT_EMAIL ?? "support@demo.com"
+    support: process.env.DEMO_SUPPORT_EMAIL ?? "support@demo.com",
+    customer: process.env.DEMO_CUSTOMER_EMAIL ?? "customer@demo.com"
   };
   return emails[role].trim().toLowerCase();
 }
 
 export function isDemoRole(value: unknown): value is DemoRole {
-  return value === "owner" || value === "staff" || value === "admin" || value === "support";
+  return value === "owner" || value === "staff" || value === "admin" || value === "support" || value === "customer";
 }
 
 /** Public demo shop customers can order from. */

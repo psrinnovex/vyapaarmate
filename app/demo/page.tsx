@@ -8,12 +8,13 @@ import {
   ShopIllustration,
   TiffinIllustration
 } from "@/components/illustrations/clay-illustrations";
-import { DemoLoginCards, type DemoRoleCard } from "@/components/demo/demo-login-cards";
+import { DemoCustomerCard, DemoLoginCards, type DemoRoleCard } from "@/components/demo/demo-login-cards";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { PublicHeader } from "@/components/layout/public-header";
 import { ButtonLink } from "@/components/ui/button";
 import { Sticker } from "@/components/ui/sticker";
 import { demoShopSlug, isDemoMode } from "@/lib/demo-mode";
+import { prepareDemoWorkspace } from "@/services/demo-workspace";
 
 export const dynamic = "force-dynamic";
 
@@ -36,8 +37,9 @@ const journey = [
   { Icon: MessageCircle, label: "See it live as the owner" }
 ];
 
-export default function DemoPage() {
+export default async function DemoPage() {
   const demo = isDemoMode();
+  if (demo) await prepareDemoWorkspace();
 
   return (
     <main className="overflow-x-clip text-ink">
@@ -70,22 +72,26 @@ export default function DemoPage() {
         </ol>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Link
-            href={`/b/${demoShopSlug}`}
-            className="group relative flex min-h-[17rem] flex-col overflow-hidden rounded-[2rem] bg-clay-ink p-5 text-white shadow-clay-lg transition hover:-translate-y-1 sm:col-span-2 lg:col-span-1 lg:row-span-2"
-          >
-            <Sticker tone="emerald" tilt={-5} className="self-start">
-              No sign-in
-            </Sticker>
-            <div className="flex flex-1 items-center justify-center py-4">
-              <BagIllustration className="w-44 transition-transform duration-300 group-hover:scale-105 lg:w-56" />
-            </div>
-            <span className="text-2xl font-extrabold tracking-[-0.03em]">Order as a customer</span>
-            <span className="mt-1 text-sm font-semibold text-white/70">Browse the menu, pay and track the order.</span>
-            <span className="mt-4 inline-flex items-center gap-2 self-start rounded-2xl bg-clay-emerald px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">
-              Open demo shop <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </span>
-          </Link>
+          {demo ? (
+            <DemoCustomerCard art={<BagIllustration />} />
+          ) : (
+            <Link
+              href={`/b/${demoShopSlug}`}
+              className="group relative flex min-h-[17rem] flex-col overflow-hidden rounded-[2rem] bg-clay-ink p-5 text-white shadow-clay-lg transition hover:-translate-y-1 sm:col-span-2 lg:col-span-1 lg:row-span-2"
+            >
+              <Sticker tone="emerald" tilt={-5} className="self-start">
+                Live shop
+              </Sticker>
+              <div className="flex flex-1 items-center justify-center py-4">
+                <BagIllustration className="w-44 transition-transform duration-300 group-hover:scale-105 lg:w-56" />
+              </div>
+              <span className="text-2xl font-extrabold tracking-[-0.03em]">Order as a customer</span>
+              <span className="mt-1 text-sm font-semibold text-white/70">Browse the menu, pay and track the order.</span>
+              <span className="mt-4 inline-flex items-center gap-2 self-start rounded-2xl bg-clay-emerald px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">
+                Open demo shop <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          )}
 
           {demo ? (
             <DemoLoginCards cards={roleCards} />

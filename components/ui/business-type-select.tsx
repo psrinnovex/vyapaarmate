@@ -80,7 +80,7 @@ export function BusinessTypeSelect({
 
   return (
     <div className="relative">
-      <SelectedIcon className="pointer-events-none absolute left-3 top-3 size-5 text-slate-400" />
+      <SelectedIcon className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
       <select
         className={cn(selectClassName, "pl-10", className)}
         value={value}

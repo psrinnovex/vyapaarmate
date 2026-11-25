@@ -70,3 +70,47 @@ export function DemoLoginCards({ cards }: { cards: DemoRoleCard[] }) {
     </>
   );
 }
+
+/** Big "order as a customer" card: signs in the verified demo customer, then opens the demo shop. */
+export function DemoCustomerCard({ art }: { art: ReactNode }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function start() {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/demo/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: "customer" })
+      });
+      const payload = (await response.json().catch(() => ({}))) as { redirect?: string; error?: string };
+      if (!response.ok || !payload.redirect) throw new Error(payload.error ?? "Demo sign-in failed.");
+      window.location.assign(payload.redirect);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Demo sign-in failed.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={start}
+      disabled={busy}
+      className="group relative flex min-h-[17rem] flex-col overflow-hidden rounded-[2rem] bg-clay-ink p-5 text-left text-white shadow-clay-lg transition hover:-translate-y-1 disabled:cursor-wait sm:col-span-2 lg:col-span-1 lg:row-span-2"
+    >
+      <span className="sticker self-start -rotate-3 bg-clay-emerald text-white">One tap</span>
+      <span className="flex flex-1 items-center justify-center py-4 [&_svg]:w-44 [&_svg]:transition-transform [&_svg]:duration-300 group-hover:[&_svg]:scale-105 lg:[&_svg]:w-56">{art}</span>
+      <span className="text-2xl font-extrabold tracking-[-0.03em]">Order as a customer</span>
+      <span className="mt-1 text-sm font-semibold text-white/70">Browse the menu, pay with Demo UPI and track the order.</span>
+      <span className="mt-4 inline-flex items-center gap-2 self-start rounded-2xl bg-clay-emerald px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">
+        {busy ? <LoaderCircle className="size-4 animate-spin" /> : null}
+        {busy ? "Opening shop" : "Open demo shop"}
+        {!busy && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
+      </span>
+      {error && <span role="alert" className="mt-3 rounded-xl bg-berry-soft px-3 py-2 text-xs font-bold text-berry-deep">{error}</span>}
+    </button>
+  );
+}
