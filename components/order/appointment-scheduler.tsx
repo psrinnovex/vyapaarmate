@@ -208,21 +208,21 @@ export function AppointmentScheduler({
   }
 
   return (
-    <section className="mt-4 overflow-hidden rounded-xl border border-emerald/20 bg-[linear-gradient(145deg,rgba(236,253,245,0.95),rgba(239,246,255,0.92))] shadow-sm">
-      <div className="border-b border-emerald/15 p-4">
+    <section className="mt-4 overflow-hidden rounded-xl border border-brand/20 bg-[linear-gradient(145deg,rgba(239,251,236,0.95),rgba(236,247,247,0.92))] shadow-sm">
+      <div className="border-b border-brand/15 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-ink text-white shadow-sm">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-ink text-white shadow-sm theme-dark">
               <CalendarDays className="size-5" />
             </span>
             <div>
               <h3 className="text-sm font-extrabold text-ink">Choose {terminology.appointmentSingular.toLowerCase()} date & time</h3>
-              <p className="mt-1 text-xs leading-5 text-slate-600">
+              <p className="mt-1 text-xs leading-5 text-ink-600">
                 Live availability prevents overlapping bookings. Times use {timeZone.replace("_", " ")}.
               </p>
             </div>
           </div>
-          <Badge variant={autoConfirm ? "emerald" : "amber"}>{autoConfirm ? "Instant confirmation" : "Business confirmation"}</Badge>
+          <Badge variant={autoConfirm ? "success" : "warning"}>{autoConfirm ? "Instant confirmation" : "Business confirmation"}</Badge>
         </div>
       </div>
 
@@ -230,9 +230,9 @@ export function AppointmentScheduler({
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs font-extrabold text-ink">Quick dates</p>
-            <p className="mt-1 text-[10px] leading-4 text-slate-500">Choose up to {dateBounds.days} days ahead.</p>
+            <p className="mt-1 text-[10px] leading-4 text-ink-500">Choose up to {dateBounds.days} days ahead.</p>
           </div>
-          <label className="grid gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+          <label className="grid gap-1 text-[10px] font-bold uppercase tracking-wide text-ink-500">
             Calendar date
             <input
               type="date"
@@ -245,7 +245,7 @@ export function AppointmentScheduler({
                 setDate(nextDate);
                 onChange(null);
               }}
-              className="h-10 rounded-lg border border-white bg-white px-3 text-xs font-bold normal-case tracking-normal text-ink shadow-sm outline-none focus:border-emerald focus:ring-4 focus:ring-emerald/15"
+              className="h-10 rounded-lg border border-white bg-white px-3 text-xs font-bold normal-case tracking-normal text-ink shadow-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/15"
             />
           </label>
         </div>
@@ -258,10 +258,10 @@ export function AppointmentScheduler({
                 key={dateKey}
                 type="button"
                 className={cn(
-                  "min-w-[68px] rounded-xl border px-3 py-2 text-center transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
+                  "min-w-[68px] rounded-xl border px-3 py-2 text-center transition focus:outline-none focus:ring-4 focus:ring-brand/15",
                   active
-                    ? "border-emerald bg-emerald text-white shadow-md"
-                    : "border-white bg-white/90 text-slate-600 shadow-sm hover:border-emerald/30 hover:text-ink"
+                    ? "border-brand bg-brand text-ink shadow-md"
+                    : "border-white bg-white/90 text-ink-600 shadow-sm hover:border-brand/30 hover:text-ink"
                 )}
                 aria-pressed={active}
                 onClick={() => {
@@ -279,7 +279,7 @@ export function AppointmentScheduler({
 
         {providers.length > 1 && (
           <div className="mt-3">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-slate-600">
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-ink-600">
               <UsersRound className="size-3.5" /> Choose {terminology.providerSingular.toLowerCase()}
             </p>
             <div className="flex flex-wrap gap-2">
@@ -287,7 +287,7 @@ export function AppointmentScheduler({
                 type="button"
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-xs font-bold transition",
-                  activeProviderFilter === "any" ? "border-ink bg-ink text-white" : "border-white bg-white text-slate-600"
+                  activeProviderFilter === "any" ? "border-ink bg-ink text-white theme-dark" : "border-white bg-white text-ink-600"
                 )}
                 onClick={() => {
                   setProviderFilter("any");
@@ -302,7 +302,7 @@ export function AppointmentScheduler({
                   type="button"
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-xs font-bold transition",
-                    activeProviderFilter === provider.id ? "border-ink bg-ink text-white" : "border-white bg-white text-slate-600"
+                    activeProviderFilter === provider.id ? "border-ink bg-ink text-white theme-dark" : "border-white bg-white text-ink-600"
                   )}
                   onClick={() => {
                     setProviderFilter(provider.id);
@@ -317,20 +317,20 @@ export function AppointmentScheduler({
         )}
 
         {loading && (
-          <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-white/80 p-5 text-sm font-semibold text-slate-600">
-            <LoaderCircle className="size-4 animate-spin text-emerald" /> Checking live availability
+          <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-white/80 p-5 text-sm font-semibold text-ink-600">
+            <LoaderCircle className="size-4 animate-spin text-brand-text" /> Checking live availability
           </div>
         )}
 
         {!loading && error && (
-          <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>
+          <div className="mt-4 rounded-xl border border-kumkum-100 bg-kumkum-50 p-4 text-sm font-semibold text-kumkum-700">{error}</div>
         )}
 
         {!loading && !error && availability && visibleSlots.length === 0 && (
-          <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white/80 p-5 text-center">
-            <Clock3 className="mx-auto size-6 text-slate-400" />
+          <div className="mt-4 rounded-xl border border-dashed border-ink-200 bg-white/80 p-5 text-center">
+            <Clock3 className="mx-auto size-6 text-ink-500" />
             <p className="mt-2 text-sm font-bold text-ink">No open times on this date</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">Choose another date or professional to continue.</p>
+            <p className="mt-1 text-xs leading-5 text-ink-500">Choose another date or professional to continue.</p>
           </div>
         )}
 
@@ -338,9 +338,9 @@ export function AppointmentScheduler({
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="flex items-center gap-1.5 text-xs font-extrabold text-ink">
-                <BrainCircuit className="size-4 text-emerald" /> {terminology.smartPickerLabel}
+                <BrainCircuit className="size-4 text-brand-text" /> {terminology.smartPickerLabel}
               </p>
-              <Badge variant="emerald" className="gap-1"><Sparkles className="size-3" /> Explainable AI</Badge>
+              <Badge variant="success" className="gap-1"><Sparkles className="size-3" /> Explainable AI</Badge>
             </div>
             <div className="grid gap-2 sm:grid-cols-3">
               {smartSlots.map((slot) => {
@@ -350,17 +350,17 @@ export function AppointmentScheduler({
                     key={`smart-${slot.providerId}-${slot.startsAt}`}
                     type="button"
                     className={cn(
-                      "rounded-xl border p-3 text-left shadow-sm transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
-                      selected ? "border-emerald bg-emerald text-white" : "border-emerald/20 bg-white hover:-translate-y-0.5 hover:border-emerald/40"
+                      "rounded-xl border p-3 text-left shadow-sm transition focus:outline-none focus:ring-4 focus:ring-brand/15",
+                      selected ? "border-brand bg-brand text-ink" : "border-brand/20 bg-white hover:-translate-y-0.5 hover:border-brand/40"
                     )}
                     onClick={() => selectSlot(slot)}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-black">{slot.timeLabel}</span>
-                      {selected ? <Check className="size-4" /> : <Sparkles className="size-4 text-emerald" />}
+                      {selected ? <Check className="size-4" /> : <Sparkles className="size-4 text-brand-text" />}
                     </div>
                     <p className={cn("mt-1 truncate text-xs font-bold", selected ? "text-white/90" : "text-ink")}>{slot.providerName}</p>
-                    <p className={cn("mt-1 line-clamp-2 text-[10px] leading-4", selected ? "text-white/80" : "text-slate-500")}>{slot.smartReason}</p>
+                    <p className={cn("mt-1 line-clamp-2 text-[10px] leading-4", selected ? "text-white/80" : "text-ink-500")}>{slot.smartReason}</p>
                   </button>
                 );
               })}
@@ -379,10 +379,10 @@ export function AppointmentScheduler({
                     key={`${slot.providerId}-${slot.startsAt}`}
                     type="button"
                     className={cn(
-                      "rounded-xl border px-3 py-2.5 text-left transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
+                      "rounded-xl border px-3 py-2.5 text-left transition focus:outline-none focus:ring-4 focus:ring-brand/15",
                       selected
-                        ? "border-emerald bg-emerald text-white shadow-md"
-                        : "border-white bg-white/90 text-ink shadow-sm hover:border-emerald/30"
+                        ? "border-brand bg-brand text-ink shadow-md"
+                        : "border-white bg-white/90 text-ink shadow-sm hover:border-brand/30"
                     )}
                     onClick={() => selectSlot(slot)}
                   >
@@ -390,7 +390,7 @@ export function AppointmentScheduler({
                       {slot.timeLabel}
                       {selected && <Check className="size-4" />}
                     </span>
-                    <span className={cn("mt-1 flex items-center gap-1 truncate text-[10px] font-semibold", selected ? "text-white/85" : "text-slate-500")}>
+                    <span className={cn("mt-1 flex items-center gap-1 truncate text-[10px] font-semibold", selected ? "text-white/85" : "text-ink-500")}>
                       <UserRound className="size-3" /> {slot.providerName}
                     </span>
                   </button>
@@ -401,11 +401,11 @@ export function AppointmentScheduler({
         )}
 
         {value && (
-          <div className="mt-4 flex items-start gap-3 rounded-xl border border-emerald/25 bg-white p-3 shadow-sm">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-emerald text-white"><Check className="size-4" /></span>
+          <div className="mt-4 flex items-start gap-3 rounded-xl border border-brand/25 bg-white p-3 shadow-sm">
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-brand text-ink"><Check className="size-4" /></span>
             <div className="min-w-0">
               <p className="text-sm font-extrabold text-ink">{value.timeLabel} with {value.providerName}</p>
-              <p className="mt-1 text-xs leading-5 text-slate-600">{value.providerTitle} · {value.smartReason}</p>
+              <p className="mt-1 text-xs leading-5 text-ink-600">{value.providerTitle} · {value.smartReason}</p>
             </div>
           </div>
         )}

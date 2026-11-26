@@ -184,12 +184,12 @@ function localInputToUtc(value: string, timezone: string) {
 }
 
 function statusBadge(status: AppointmentStatus) {
-  if (status === "COMPLETED") return <Badge variant="emerald">Completed</Badge>;
-  if (status === "CANCELLED") return <Badge variant="red">Cancelled</Badge>;
+  if (status === "COMPLETED") return <Badge variant="success">Completed</Badge>;
+  if (status === "CANCELLED") return <Badge variant="danger">Cancelled</Badge>;
   if (status === "NO_SHOW") return <Badge variant="neutral">No-show</Badge>;
-  if (status === "IN_PROGRESS") return <Badge variant="purple">In progress</Badge>;
-  if (status === "CONFIRMED") return <Badge variant="blue">Confirmed</Badge>;
-  return <Badge variant="amber">Needs confirmation</Badge>;
+  if (status === "IN_PROGRESS") return <Badge variant="dark">In progress</Badge>;
+  if (status === "CONFIRMED") return <Badge variant="info">Confirmed</Badge>;
+  return <Badge variant="warning">Needs confirmation</Badge>;
 }
 
 function AppointmentCard({
@@ -214,7 +214,7 @@ function AppointmentCard({
   return (
     <Card className="overflow-hidden p-0">
       <div className="grid sm:grid-cols-[7.5rem_minmax(0,1fr)]">
-        <div className="flex items-center gap-3 border-b border-line bg-slate-950 px-4 py-4 text-white sm:block sm:border-b-0 sm:border-r sm:px-5 sm:py-5">
+        <div className="flex items-center gap-3 border-b border-ink-200 bg-ink-950 px-4 py-4 text-white sm:block sm:border-b-0 sm:border-r sm:px-5 sm:py-5 theme-dark">
           <p className="text-2xl font-bold tracking-tight">{formatAppointmentTime(appointment.startsAt, timezone)}</p>
           <p className="text-xs font-semibold text-white/65 sm:mt-1">{formatAppointmentDate(appointment.startsAt, timezone)}</p>
         </div>
@@ -225,37 +225,37 @@ function AppointmentCard({
                 <h3 className="truncate text-base font-bold text-ink">{appointment.customer.name}</h3>
                 {statusBadge(appointment.status)}
                 {appointment.source === "AI_ASSISTED" && (
-                  <Badge variant="purple"><Sparkles className="size-3" /> Smart pick</Badge>
+                  <Badge variant="dark"><Sparkles className="size-3" /> Smart pick</Badge>
                 )}
               </div>
-              <p className="mt-1 line-clamp-2 text-sm text-slate-600">{serviceLine}</p>
+              <p className="mt-1 line-clamp-2 text-sm text-ink-600">{serviceLine}</p>
             </div>
             <Link
               href={`/order/${appointment.order.publicToken}`}
               target="_blank"
-              className="inline-flex items-center gap-1 text-xs font-bold text-ocean hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-brand-text hover:underline"
             >
               {appointment.order.orderNumber} <ExternalLink className="size-3" />
             </Link>
           </div>
 
-          <div className="mt-4 grid gap-2 text-xs text-slate-600 sm:grid-cols-2 lg:grid-cols-4">
-            <span className="flex items-center gap-2"><UserRound className="size-4 text-slate-400" />{appointment.provider.name}</span>
-            <span className="flex items-center gap-2"><Clock3 className="size-4 text-slate-400" />Until {formatAppointmentTime(appointment.endsAt, timezone)}</span>
-            <span className="flex items-center gap-2"><MapPin className="size-4 text-slate-400" />{appointment.order.orderType === "SERVICE_AT_LOCATION" ? "Customer location" : "At business"}</span>
+          <div className="mt-4 grid gap-2 text-xs text-ink-600 sm:grid-cols-2 lg:grid-cols-4">
+            <span className="flex items-center gap-2"><UserRound className="size-4 text-ink-500" />{appointment.provider.name}</span>
+            <span className="flex items-center gap-2"><Clock3 className="size-4 text-ink-500" />Until {formatAppointmentTime(appointment.endsAt, timezone)}</span>
+            <span className="flex items-center gap-2"><MapPin className="size-4 text-ink-500" />{appointment.order.orderType === "SERVICE_AT_LOCATION" ? "Customer location" : "At business"}</span>
             <span className="font-bold text-ink">{formatINR(appointment.order.totalAmount)} · {appointment.order.paymentStatus.toLowerCase()}</span>
           </div>
 
           {appointment.smartReason && (
-            <p className="mt-3 rounded-lg bg-violet/5 px-3 py-2 text-xs leading-5 text-violet">
+            <p className="mt-3 rounded-lg bg-peacock-600/5 px-3 py-2 text-xs leading-5 text-peacock-600">
               <BrainCircuit className="mr-1 inline size-3.5" /> {appointment.smartReason}
             </p>
           )}
 
           {payload.permissions.canUpdateAppointments && !["COMPLETED", "CANCELLED", "NO_SHOW"].includes(appointment.status) && (
-            <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-ink-200 pt-4">
               {appointment.status === "REQUESTED" && (
-                <Button size="sm" variant="emerald" disabled={busy} onClick={() => onStatus(appointment, "CONFIRMED")}>
+                <Button size="sm" variant="brand" disabled={busy} onClick={() => onStatus(appointment, "CONFIRMED")}>
                   <Check className="size-4" /> Confirm
                 </Button>
               )}
@@ -265,7 +265,7 @@ function AppointmentCard({
                 </Button>
               )}
               {appointment.status === "IN_PROGRESS" && (
-                <Button size="sm" variant="emerald" disabled={busy} onClick={() => onStatus(appointment, "COMPLETED")}>
+                <Button size="sm" variant="brand" disabled={busy} onClick={() => onStatus(appointment, "COMPLETED")}>
                   <Check className="size-4" /> Complete
                 </Button>
               )}
@@ -279,7 +279,7 @@ function AppointmentCard({
                   Reschedule
                 </Button>
               )}
-              <Button size="sm" variant="ghost" className="text-berry-deep" disabled={busy} onClick={() => onStatus(appointment, "CANCELLED")}>
+              <Button size="sm" variant="ghost" className="text-kumkum-700" disabled={busy} onClick={() => onStatus(appointment, "CANCELLED")}>
                 Cancel
               </Button>
             </div>
@@ -349,9 +349,9 @@ function CreateAppointmentForm({
   }
 
   return (
-    <Card className="mb-5 border-ocean/30 p-0">
-      <div className="flex items-start justify-between gap-3 border-b border-line p-4 sm:p-5">
-        <div><Badge variant="blue">Phone or walk-in booking</Badge><h2 className="mt-2 text-lg font-extrabold text-ink">Create {payload.business.terminology.appointmentSingular.toLowerCase()}</h2><p className="mt-1 text-xs leading-5 text-slate-500">Uses the same live availability and double-booking protection as customer checkout.</p></div>
+    <Card className="mb-5 border-green-700/30 p-0">
+      <div className="flex items-start justify-between gap-3 border-b border-ink-200 p-4 sm:p-5">
+        <div><Badge variant="info">Phone or walk-in booking</Badge><h2 className="mt-2 text-lg font-extrabold text-ink">Create {payload.business.terminology.appointmentSingular.toLowerCase()}</h2><p className="mt-1 text-xs leading-5 text-ink-500">Uses the same live availability and double-booking protection as customer checkout.</p></div>
         <Button size="icon-sm" variant="ghost" onClick={onClose} aria-label="Close new appointment form"><X className="size-4" /></Button>
       </div>
       <form onSubmit={submit} className="grid gap-5 p-4 sm:p-5">
@@ -367,9 +367,9 @@ function CreateAppointmentForm({
             {payload.services.map((service) => {
               const selected = serviceIds.includes(service.id);
               return (
-                <button key={service.id} type="button" aria-pressed={selected} onClick={() => toggleService(service.id)} className={cn("flex items-start gap-3 rounded-xl border p-3 text-left transition", selected ? "border-ocean bg-ocean/5" : "border-line bg-white hover:bg-mist")}>
-                  <span className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded border", selected ? "border-ocean bg-ocean text-white" : "border-slate-300")}>{selected && <Check className="size-3.5" />}</span>
-                  <span className="min-w-0"><span className="block truncate text-sm font-bold text-ink">{service.name}</span><span className="mt-1 block text-xs text-slate-500">{service.durationMinutes} min · {formatINR(service.price)}</span></span>
+                <button key={service.id} type="button" aria-pressed={selected} onClick={() => toggleService(service.id)} className={cn("flex items-start gap-3 rounded-xl border p-3 text-left transition", selected ? "border-green-700 bg-green-700/5" : "border-ink-200 bg-white hover:bg-ivory-100")}>
+                  <span className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded border", selected ? "border-ink bg-ink text-white theme-dark" : "border-ink-300")}>{selected && <Check className="size-3.5" />}</span>
+                  <span className="min-w-0"><span className="block truncate text-sm font-bold text-ink">{service.name}</span><span className="mt-1 block text-xs text-ink-500">{service.durationMinutes} min · {formatINR(service.price)}</span></span>
                 </button>
               );
             })}
@@ -377,7 +377,7 @@ function CreateAppointmentForm({
         </div>
 
         {payload.business.fulfillmentModes.length > 1 && (
-          <div><Label>Location</Label><div className="mt-2 flex flex-wrap gap-2">{payload.business.fulfillmentModes.map((mode) => <button key={mode} type="button" onClick={() => { setOrderType(mode); setSelection(null); }} className={cn("rounded-full border px-3 py-2 text-xs font-bold", orderType === mode ? "border-ink bg-ink text-white" : "border-line bg-white text-slate-600")}>{mode === "SERVICE_AT_LOCATION" ? "Customer location" : mode === "DINE_IN" ? "At business" : "Pickup"}</button>)}</div></div>
+          <div><Label>Location</Label><div className="mt-2 flex flex-wrap gap-2">{payload.business.fulfillmentModes.map((mode) => <button key={mode} type="button" onClick={() => { setOrderType(mode); setSelection(null); }} className={cn("rounded-full border px-3 py-2 text-xs font-bold", orderType === mode ? "border-ink bg-ink text-white theme-dark" : "border-ink-200 bg-white text-ink-600")}>{mode === "SERVICE_AT_LOCATION" ? "Customer location" : mode === "DINE_IN" ? "At business" : "Pickup"}</button>)}</div></div>
         )}
 
         {orderType === "SERVICE_AT_LOCATION" && <label className="grid gap-2"><Label>Customer service address</Label><Textarea name="customerAddress" required maxLength={300} placeholder="House, street, area, landmark" /></label>}
@@ -397,10 +397,10 @@ function CreateAppointmentForm({
 
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
           <label className="grid gap-2"><Label>Internal/customer note (optional)</Label><Input name="notes" maxLength={500} placeholder="Preferences, allergies, access notes…" /></label>
-          <label className="flex h-11 items-center gap-2 rounded-lg border border-line px-3 text-xs font-semibold"><input name="whatsappOptIn" type="checkbox" /> Customer agreed to WhatsApp updates</label>
+          <label className="flex h-11 items-center gap-2 rounded-lg border border-ink-200 px-3 text-xs font-semibold"><input name="whatsappOptIn" type="checkbox" /> Customer agreed to WhatsApp updates</label>
         </div>
-        {formError && <p className="rounded-lg border border-berry/25 bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{formError}</p>}
-        {!payload.business.settings.enabled && <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">Turn on customer booking in Booking rules before creating scheduled appointments.</p>}
+        {formError && <p className="rounded-lg border border-kumkum-600/25 bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{formError}</p>}
+        {!payload.business.settings.enabled && <p className="rounded-lg border border-marigold-500/30 bg-marigold-50 p-3 text-sm text-marigold-700">Turn on customer booking in Booking rules before creating scheduled appointments.</p>}
         <div className="flex justify-end gap-2"><Button type="button" variant="secondary" onClick={onClose}>Cancel</Button><Button disabled={busy || !payload.business.settings.enabled || !selection}>{busy ? "Creating…" : `Create ${payload.business.terminology.appointmentSingular.toLowerCase()}`}</Button></div>
       </form>
     </Card>
@@ -440,9 +440,9 @@ function RescheduleAppointmentForm({
   }
 
   return (
-    <Card className="mb-5 border-violet/30 p-0">
-      <div className="flex items-start justify-between gap-3 border-b border-line p-4 sm:p-5">
-        <div><Badge variant="purple">Reschedule</Badge><h2 className="mt-2 text-lg font-extrabold text-ink">{appointment.customer.name} · {appointment.order.orderNumber}</h2><p className="mt-1 text-xs text-slate-500">Current time: {formatAppointmentDate(appointment.startsAt, payload.business.settings.timezone, true)} at {formatAppointmentTime(appointment.startsAt, payload.business.settings.timezone)}</p></div>
+    <Card className="mb-5 border-peacock-600/30 p-0">
+      <div className="flex items-start justify-between gap-3 border-b border-ink-200 p-4 sm:p-5">
+        <div><Badge variant="dark">Reschedule</Badge><h2 className="mt-2 text-lg font-extrabold text-ink">{appointment.customer.name} · {appointment.order.orderNumber}</h2><p className="mt-1 text-xs text-ink-500">Current time: {formatAppointmentDate(appointment.startsAt, payload.business.settings.timezone, true)} at {formatAppointmentTime(appointment.startsAt, payload.business.settings.timezone)}</p></div>
         <Button size="icon-sm" variant="ghost" onClick={onClose} aria-label="Close reschedule form"><X className="size-4" /></Button>
       </div>
       <form onSubmit={submit} className="p-4 sm:p-5">
@@ -460,7 +460,7 @@ function RescheduleAppointmentForm({
             initialDate={appointmentDateKey(new Date(appointment.startsAt), payload.business.settings.timezone)}
           />
         ) : (
-          <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">An original service is no longer bookable. Cancel this appointment and create a new one with current services.</p>
+          <p className="rounded-lg border border-marigold-500/30 bg-marigold-50 p-3 text-sm text-marigold-700">An original service is no longer bookable. Cancel this appointment and create a new one with current services.</p>
         )}
         <div className="mt-5 flex justify-end gap-2"><Button type="button" variant="secondary" onClick={onClose}>Keep current time</Button><Button disabled={busy || !selection || !completeServiceSet}>{busy ? "Rescheduling…" : "Confirm new time"}</Button></div>
       </form>
@@ -503,22 +503,22 @@ function AgendaPanel({
               onClick={() => setFilter(value)}
               className={cn(
                 "rounded-md px-3 py-2 text-xs font-bold capitalize transition",
-                filter === value ? "bg-ink text-white" : "text-slate-500 hover:text-ink"
+                filter === value ? "bg-ink text-white theme-dark" : "text-ink-500 hover:text-ink"
               )}
             >
               {value}
             </button>
           ))}
         </div>
-        <p className="text-xs text-slate-500">Times shown in {payload.business.settings.timezone}</p>
+        <p className="text-xs text-ink-500">Times shown in {payload.business.settings.timezone}</p>
       </div>
 
       {visible.length === 0 ? (
         <Card className="grid min-h-72 place-items-center text-center">
           <div className="max-w-sm">
-            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-ocean-soft text-ocean-deep"><CalendarDays className="size-7" /></span>
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-ivory-100 text-ink-900"><CalendarDays className="size-7" /></span>
             <h2 className="mt-4 text-lg font-extrabold text-ink">No {filter} {payload.business.terminology.appointmentPlural.toLowerCase()}</h2>
-            <p className="mt-2 leading-6 text-slate-500">New customer bookings appear here as soon as a slot is reserved.</p>
+            <p className="mt-2 leading-6 text-ink-500">New customer bookings appear here as soon as a slot is reserved.</p>
           </div>
         </Card>
       ) : (
@@ -527,8 +527,8 @@ function AgendaPanel({
             <div key={date}>
               <div className="mb-3 flex items-center gap-3">
                 <h2 className="text-sm font-bold text-ink">{formatAppointmentDate(appointments[0].startsAt, payload.business.settings.timezone, true)}</h2>
-                <span className="h-px flex-1 bg-line" />
-                <span className="text-xs font-semibold text-slate-400">{appointments.length} booked</span>
+                <span className="h-px flex-1 bg-ink-200" />
+                <span className="text-xs font-semibold text-ink-500">{appointments.length} booked</span>
               </div>
               <div className="grid gap-3">
                 {appointments.map((appointment) => (
@@ -572,7 +572,7 @@ function ProviderProfileForm({
       name: String(form.get("name") ?? ""),
       title: String(form.get("title") ?? ""),
       bio: String(form.get("bio") ?? ""),
-      color: String(form.get("color") ?? "#0F766E"),
+      color: String(form.get("color") ?? "#0B7A10"),
       isActive: form.get("isActive") === "on",
       acceptsAtBusiness: form.get("acceptsAtBusiness") === "on",
       acceptsAtCustomerLocation: form.get("acceptsAtCustomerLocation") === "on",
@@ -589,11 +589,11 @@ function ProviderProfileForm({
       </div>
       <label className="grid gap-2"><Label>Short bio</Label><Textarea name="bio" maxLength={500} defaultValue={provider?.bio ?? ""} placeholder="Specialities, experience, or customer-facing note" /></label>
       <div className="grid gap-4 sm:grid-cols-[10rem_minmax(0,1fr)]">
-        <label className="grid gap-2"><Label>Calendar colour</Label><Input name="color" type="color" className="p-1" defaultValue={provider?.color ?? "#0F766E"} /></label>
+        <label className="grid gap-2"><Label>Calendar colour</Label><Input name="color" type="color" className="p-1" defaultValue={provider?.color ?? "#0B7A10"} /></label>
         <div className="grid gap-2">
           <Label>Appointment locations</Label>
-          <label className="flex items-center gap-2 rounded-lg border border-line px-3 py-2"><input name="acceptsAtBusiness" type="checkbox" defaultChecked={provider?.acceptsAtBusiness ?? true} /> At business</label>
-          <label className="flex items-center gap-2 rounded-lg border border-line px-3 py-2"><input name="acceptsAtCustomerLocation" type="checkbox" defaultChecked={provider?.acceptsAtCustomerLocation ?? false} /> At customer location</label>
+          <label className="flex items-center gap-2 rounded-lg border border-ink-200 px-3 py-2"><input name="acceptsAtBusiness" type="checkbox" defaultChecked={provider?.acceptsAtBusiness ?? true} /> At business</label>
+          <label className="flex items-center gap-2 rounded-lg border border-ink-200 px-3 py-2"><input name="acceptsAtCustomerLocation" type="checkbox" defaultChecked={provider?.acceptsAtCustomerLocation ?? false} /> At customer location</label>
         </div>
       </div>
       <div>
@@ -601,17 +601,17 @@ function ProviderProfileForm({
         {payload.services.length ? (
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {payload.services.map((service) => (
-              <label key={service.id} className="flex items-start gap-3 rounded-lg border border-line p-3 hover:bg-mist">
+              <label key={service.id} className="flex items-start gap-3 rounded-lg border border-ink-200 p-3 hover:bg-ivory-100">
                 <input name="serviceIds" value={service.id} type="checkbox" className="mt-1" defaultChecked={provider?.serviceIds.includes(service.id) ?? true} />
-                <span><span className="block font-bold text-ink">{service.name}</span><span className="text-xs text-slate-500">{service.durationMinutes ?? "—"} min · {service.categoryName}</span></span>
+                <span><span className="block font-bold text-ink">{service.name}</span><span className="text-xs text-ink-500">{service.durationMinutes ?? "—"} min · {service.categoryName}</span></span>
               </label>
             ))}
           </div>
         ) : (
-          <p className="mt-2 rounded-lg bg-amber-50 p-3 text-sm text-mango-deep">Enable appointment booking on at least one catalog service first.</p>
+          <p className="mt-2 rounded-lg bg-marigold-50 p-3 text-sm text-marigold-700">Enable appointment booking on at least one catalog service first.</p>
         )}
       </div>
-      <label className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3"><input name="isActive" type="checkbox" defaultChecked={provider?.isActive ?? true} /><span><span className="block font-bold text-ink">Active and bookable</span><span className="text-xs text-slate-500">Inactive profiles remain in history but cannot receive new bookings.</span></span></label>
+      <label className="flex items-center gap-3 rounded-2xl bg-ivory-100/80 p-3"><input name="isActive" type="checkbox" defaultChecked={provider?.isActive ?? true} /><span><span className="block font-bold text-ink">Active and bookable</span><span className="text-xs text-ink-500">Inactive profiles remain in history but cannot receive new bookings.</span></span></label>
       <div className="flex justify-end gap-2"><Button type="button" variant="secondary" onClick={onClose}>Cancel</Button><Button disabled={busy}>{busy ? "Saving…" : provider ? "Save profile" : `Add ${payload.business.terminology.providerSingular.toLowerCase()}`}</Button></div>
     </form>
   );
@@ -646,10 +646,10 @@ function AvailabilityEditor({
   return (
     <form onSubmit={submit} className="grid gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div><h4 className="font-bold text-ink">Weekly availability</h4><p className="text-xs text-slate-500">{timezone}. With no custom days, business hours are used.</p></div>
+        <div><h4 className="font-bold text-ink">Weekly availability</h4><p className="text-xs text-ink-500">{timezone}. With no custom days, business hours are used.</p></div>
         <Button size="sm" disabled={busy}>Save hours</Button>
       </div>
-      <div className="divide-y divide-line rounded-lg border border-line">
+      <div className="divide-y divide-ink-200 rounded-lg border border-ink-200">
         {weekdays.map((day, weekday) => {
           const rule = firstRule(weekday);
           return (
@@ -696,8 +696,8 @@ function TimeOffEditor({
 
   return (
     <div className="grid gap-4">
-      <form onSubmit={submit} className="grid gap-3 rounded-2xl bg-mist/80 p-3">
-        <div><h4 className="font-bold text-ink">Block time off</h4><p className="text-xs text-slate-500">Prevents new slots during leave, breaks, or private events.</p></div>
+      <form onSubmit={submit} className="grid gap-3 rounded-2xl bg-ivory-100/80 p-3">
+        <div><h4 className="font-bold text-ink">Block time off</h4><p className="text-xs text-ink-500">Prevents new slots during leave, breaks, or private events.</p></div>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1"><span className="text-xs font-bold">Starts</span><Input name="startsAt" type="datetime-local" required /></label>
           <label className="grid gap-1"><span className="text-xs font-bold">Ends</span><Input name="endsAt" type="datetime-local" required /></label>
@@ -707,9 +707,9 @@ function TimeOffEditor({
       {provider.timeOff.length > 0 && (
         <div className="grid gap-2">
           {provider.timeOff.map((item) => (
-            <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line px-3 py-2">
-              <div className="text-xs"><p className="font-bold text-ink">{formatAppointmentRange(item.startsAt, item.endsAt, timezone)}</p><p className="text-slate-500">{item.reason || "Unavailable"}</p></div>
-              <Button type="button" size="icon-xs" variant="ghost" aria-label="Delete time off" disabled={busy} onClick={() => onSave({ action: "timeoff.delete", timeOffId: item.id })}><Trash2 className="size-4 text-berry-deep" /></Button>
+            <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ink-200 px-3 py-2">
+              <div className="text-xs"><p className="font-bold text-ink">{formatAppointmentRange(item.startsAt, item.endsAt, timezone)}</p><p className="text-ink-500">{item.reason || "Unavailable"}</p></div>
+              <Button type="button" size="icon-xs" variant="ghost" aria-label="Delete time off" disabled={busy} onClick={() => onSave({ action: "timeoff.delete", timeOffId: item.id })}><Trash2 className="size-4 text-kumkum-700" /></Button>
             </div>
           ))}
         </div>
@@ -732,38 +732,38 @@ function TeamPanel({
   const editing = payload.providers.find((provider) => provider.id === editingId);
 
   if (!payload.permissions.canManageProviders) {
-    return <Card><h2 className="font-bold text-ink">Team schedule is view-only</h2><p className="mt-2 leading-6 text-slate-500">An owner can manage provider profiles, service assignments, weekly hours, and time off.</p></Card>;
+    return <Card><h2 className="font-bold text-ink">Team schedule is view-only</h2><p className="mt-2 leading-6 text-ink-500">An owner can manage provider profiles, service assignments, weekly hours, and time off.</p></Card>;
   }
 
   return (
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h2 className="text-lg font-extrabold text-ink">{payload.business.terminology.providerPlural}</h2><p className="text-sm text-slate-500">Assign services and control exactly when each professional can be booked.</p></div>
+        <div><h2 className="text-lg font-extrabold text-ink">{payload.business.terminology.providerPlural}</h2><p className="text-sm text-ink-500">Assign services and control exactly when each professional can be booked.</p></div>
         <Button onClick={() => setEditingId("new")}><Plus className="size-4" /> Add {payload.business.terminology.providerSingular.toLowerCase()}</Button>
       </div>
 
       {editingId && (
-        <Card className="border-ocean/30">
+        <Card className="border-green-700/30">
           <div className="mb-5 flex items-center justify-between"><h3 className="text-lg font-extrabold text-ink">{editing ? `Edit ${editing.name}` : `New ${payload.business.terminology.providerSingular.toLowerCase()}`}</h3><Button size="icon-sm" variant="ghost" onClick={() => setEditingId(null)}><X className="size-4" /></Button></div>
           <ProviderProfileForm provider={editing} payload={payload} busy={busy} onSave={mutate} onClose={() => setEditingId(null)} />
         </Card>
       )}
 
       {payload.providers.length === 0 ? (
-        <Card className="grid min-h-64 place-items-center text-center"><div><UsersRound className="mx-auto size-10 text-ocean" /><h3 className="mt-3 font-bold text-ink">Add your first {payload.business.terminology.providerSingular.toLowerCase()}</h3><p className="mt-2 text-slate-500">Customers need an available professional before they can reserve a time.</p></div></Card>
+        <Card className="grid min-h-64 place-items-center text-center"><div><UsersRound className="mx-auto size-10 text-brand-text" /><h3 className="mt-3 font-bold text-ink">Add your first {payload.business.terminology.providerSingular.toLowerCase()}</h3><p className="mt-2 text-ink-500">Customers need an available professional before they can reserve a time.</p></div></Card>
       ) : payload.providers.map((provider) => {
         const expanded = expandedId === provider.id;
         return (
           <Card key={provider.id} className="p-0">
             <button type="button" className="flex w-full items-center gap-4 p-4 text-left sm:p-5" onClick={() => setExpandedId(expanded ? null : provider.id)}>
               <span className="grid size-11 shrink-0 place-items-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: provider.color }}>{provider.name.slice(0, 1).toUpperCase()}</span>
-              <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2"><span className="truncate font-bold text-ink">{provider.name}</span><Badge variant={provider.isActive ? "emerald" : "neutral"}>{provider.isActive ? "Active" : "Inactive"}</Badge></span><span className="mt-1 block text-xs text-slate-500">{provider.title} · {provider.serviceIds.length} service{provider.serviceIds.length === 1 ? "" : "s"}</span></span>
-              <ChevronRight className={cn("size-5 text-slate-400 transition", expanded && "rotate-90")} />
+              <span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2"><span className="truncate font-bold text-ink">{provider.name}</span><Badge variant={provider.isActive ? "success" : "neutral"}>{provider.isActive ? "Active" : "Inactive"}</Badge></span><span className="mt-1 block text-xs text-ink-500">{provider.title} · {provider.serviceIds.length} service{provider.serviceIds.length === 1 ? "" : "s"}</span></span>
+              <ChevronRight className={cn("size-5 text-ink-500 transition", expanded && "rotate-90")} />
             </button>
             {expanded && (
-              <div className="grid gap-6 border-t border-line p-4 sm:p-5 xl:grid-cols-2">
+              <div className="grid gap-6 border-t border-ink-200 p-4 sm:p-5 xl:grid-cols-2">
                 <div className="grid content-start gap-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-bold text-ink">Profile & services</p><p className="text-xs text-slate-500">{provider.acceptsAtBusiness ? "At business" : ""}{provider.acceptsAtBusiness && provider.acceptsAtCustomerLocation ? " + " : ""}{provider.acceptsAtCustomerLocation ? "Customer location" : ""}</p></div><Button size="sm" variant="secondary" onClick={() => setEditingId(provider.id)}>Edit profile</Button></div>
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-bold text-ink">Profile & services</p><p className="text-xs text-ink-500">{provider.acceptsAtBusiness ? "At business" : ""}{provider.acceptsAtBusiness && provider.acceptsAtCustomerLocation ? " + " : ""}{provider.acceptsAtCustomerLocation ? "Customer location" : ""}</p></div><Button size="sm" variant="secondary" onClick={() => setEditingId(provider.id)}>Edit profile</Button></div>
                   <AvailabilityEditor key={`${provider.id}-${payload.generatedAt}`} provider={provider} timezone={payload.business.settings.timezone} busy={busy} onSave={mutate} />
                 </div>
                 <TimeOffEditor provider={provider} timezone={payload.business.settings.timezone} busy={busy} onSave={mutate} />
@@ -795,30 +795,30 @@ function SettingsPanel({ payload, busy, mutate }: { payload: DashboardPayload; b
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <Card>
-        <div className="mb-5"><h2 className="text-lg font-extrabold text-ink">Online booking rules</h2><p className="mt-1 leading-6 text-slate-500">These controls define which times customers can reserve. Existing bookings are never changed when you edit a rule.</p></div>
+        <div className="mb-5"><h2 className="text-lg font-extrabold text-ink">Online booking rules</h2><p className="mt-1 leading-6 text-ink-500">These controls define which times customers can reserve. Existing bookings are never changed when you edit a rule.</p></div>
         <form onSubmit={submit} className="grid gap-5">
-          <label className="flex items-start gap-3 rounded-xl border border-line p-4"><input name="enabled" type="checkbox" className="mt-1" defaultChecked={settings.enabled} /><span><span className="block font-bold text-ink">Accept online {payload.business.terminology.appointmentPlural.toLowerCase()}</span><span className="mt-1 block text-xs leading-5 text-slate-500">Customers must select an available date, time, and {payload.business.terminology.providerSingular.toLowerCase()} during checkout.</span></span></label>
-          <label className="flex items-start gap-3 rounded-xl border border-line p-4"><input name="autoConfirm" type="checkbox" className="mt-1" defaultChecked={settings.autoConfirm} /><span><span className="block font-bold text-ink">Automatically confirm available slots</span><span className="mt-1 block text-xs leading-5 text-slate-500">Turn this off if every request needs manual approval. The slot is still held to prevent double-booking.</span></span></label>
+          <label className="flex items-start gap-3 rounded-xl border border-ink-200 p-4"><input name="enabled" type="checkbox" className="mt-1" defaultChecked={settings.enabled} /><span><span className="block font-bold text-ink">Accept online {payload.business.terminology.appointmentPlural.toLowerCase()}</span><span className="mt-1 block text-xs leading-5 text-ink-500">Customers must select an available date, time, and {payload.business.terminology.providerSingular.toLowerCase()} during checkout.</span></span></label>
+          <label className="flex items-start gap-3 rounded-xl border border-ink-200 p-4"><input name="autoConfirm" type="checkbox" className="mt-1" defaultChecked={settings.autoConfirm} /><span><span className="block font-bold text-ink">Automatically confirm available slots</span><span className="mt-1 block text-xs leading-5 text-ink-500">Turn this off if every request needs manual approval. The slot is still held to prevent double-booking.</span></span></label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2"><Label>Slot interval</Label><select name="slotIntervalMinutes" defaultValue={settings.slotIntervalMinutes} className="h-11 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm"><option value={5}>Every 5 minutes</option><option value={10}>Every 10 minutes</option><option value={15}>Every 15 minutes</option><option value={30}>Every 30 minutes</option><option value={60}>Every hour</option></select></label>
             <label className="grid gap-2"><Label>Minimum booking notice</Label><select name="leadTimeMinutes" defaultValue={settings.leadTimeMinutes} className="h-11 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm"><option value={0}>No notice</option><option value={30}>30 minutes</option><option value={60}>1 hour</option><option value={120}>2 hours</option><option value={1440}>1 day</option></select></label>
-            <label className="grid gap-2"><Label>Book up to</Label><Input name="maxAdvanceDays" type="number" min={1} max={365} defaultValue={settings.maxAdvanceDays} /><span className="text-xs text-slate-500">days in advance</span></label>
-            <label className="grid gap-2"><Label>Cancellation notice</Label><Input name="cancellationNoticeMinutes" type="number" min={0} max={43200} defaultValue={settings.cancellationNoticeMinutes} /><span className="text-xs text-slate-500">minutes before the start time</span></label>
+            <label className="grid gap-2"><Label>Book up to</Label><Input name="maxAdvanceDays" type="number" min={1} max={365} defaultValue={settings.maxAdvanceDays} /><span className="text-xs text-ink-500">days in advance</span></label>
+            <label className="grid gap-2"><Label>Cancellation notice</Label><Input name="cancellationNoticeMinutes" type="number" min={0} max={43200} defaultValue={settings.cancellationNoticeMinutes} /><span className="text-xs text-ink-500">minutes before the start time</span></label>
           </div>
-          <div className="flex items-center justify-between gap-3 rounded-2xl bg-mist/80 p-3"><p className="text-xs text-slate-500">Timezone: <strong className="text-ink">{settings.timezone}</strong></p><Button disabled={busy || !payload.permissions.canManageSettings}>{busy ? "Saving…" : "Save booking rules"}</Button></div>
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-ivory-100/80 p-3"><p className="text-xs text-ink-500">Timezone: <strong className="text-ink">{settings.timezone}</strong></p><Button disabled={busy || !payload.permissions.canManageSettings}>{busy ? "Saving…" : "Save booking rules"}</Button></div>
         </form>
       </Card>
 
       <div className="grid content-start gap-4">
-        <Card className="bg-slate-950 text-white">
-          <span className="grid size-11 place-items-center rounded-xl bg-violet text-white"><Sparkles className="size-5" /></span>
+        <Card className="bg-ink-950 text-white theme-dark">
+          <span className="grid size-11 place-items-center rounded-xl bg-peacock-600 text-white"><Sparkles className="size-5" /></span>
           <h3 className="mt-4 text-base font-bold">How Smart Picks work</h3>
           <p className="mt-2 text-sm leading-6 text-white/70">VyapaarMate ranks valid slots using earliest availability, provider workload, and customer-friendly hours. It never invents availability or overrides conflicts.</p>
         </Card>
         {payload.permissions.canManageProviders && (
           <Card>
             <h3 className="font-bold text-ink">Business closures</h3>
-            <p className="mt-1 text-xs leading-5 text-slate-500">Block every {payload.business.terminology.providerSingular.toLowerCase()} for holidays or full-business closures.</p>
+            <p className="mt-1 text-xs leading-5 text-ink-500">Block every {payload.business.terminology.providerSingular.toLowerCase()} for holidays or full-business closures.</p>
             <form
               className="mt-4 grid gap-3"
               onSubmit={async (event) => {
@@ -841,11 +841,11 @@ function SettingsPanel({ payload, busy, mutate }: { payload: DashboardPayload; b
               <Button disabled={busy}>Block all schedules</Button>
             </form>
             {payload.businessTimeOff.length > 0 && (
-              <div className="mt-4 grid gap-2 border-t border-line pt-4">
+              <div className="mt-4 grid gap-2 border-t border-ink-200 pt-4">
                 {payload.businessTimeOff.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-3 rounded-2xl bg-mist/80 p-3">
-                    <div className="min-w-0 text-xs"><p className="truncate font-bold text-ink">{item.reason || "Business unavailable"}</p><p className="mt-1 text-slate-500">{formatAppointmentRange(item.startsAt, item.endsAt, settings.timezone)}</p></div>
-                    <Button type="button" size="icon-xs" variant="ghost" disabled={busy} onClick={() => mutate({ action: "timeoff.delete", timeOffId: item.id })}><Trash2 className="size-4 text-berry-deep" /></Button>
+                  <div key={item.id} className="flex items-center justify-between gap-3 rounded-2xl bg-ivory-100/80 p-3">
+                    <div className="min-w-0 text-xs"><p className="truncate font-bold text-ink">{item.reason || "Business unavailable"}</p><p className="mt-1 text-ink-500">{formatAppointmentRange(item.startsAt, item.endsAt, settings.timezone)}</p></div>
+                    <Button type="button" size="icon-xs" variant="ghost" disabled={busy} onClick={() => mutate({ action: "timeoff.delete", timeOffId: item.id })}><Trash2 className="size-4 text-kumkum-700" /></Button>
                   </div>
                 ))}
               </div>
@@ -854,10 +854,10 @@ function SettingsPanel({ payload, busy, mutate }: { payload: DashboardPayload; b
         )}
         <Card>
           <h3 className="font-bold text-ink">Bookable services</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-500">Duration and buffer are managed in your catalog.</p>
+          <p className="mt-1 text-xs leading-5 text-ink-500">Duration and buffer are managed in your catalog.</p>
           <div className="mt-3 grid gap-2">
-            {payload.services.slice(0, 8).map((service) => <div key={service.id} className="flex items-center justify-between gap-3 rounded-2xl bg-mist/80 px-3 py-2"><span className="truncate text-xs font-bold text-ink">{service.name}</span><span className="shrink-0 text-xs text-slate-500">{service.durationMinutes} min</span></div>)}
-            {!payload.services.length && <p className="rounded-lg bg-amber-50 p-3 text-xs text-mango-deep">No services are enabled for appointment booking.</p>}
+            {payload.services.slice(0, 8).map((service) => <div key={service.id} className="flex items-center justify-between gap-3 rounded-2xl bg-ivory-100/80 px-3 py-2"><span className="truncate text-xs font-bold text-ink">{service.name}</span><span className="shrink-0 text-xs text-ink-500">{service.durationMinutes} min</span></div>)}
+            {!payload.services.length && <p className="rounded-lg bg-marigold-50 p-3 text-xs text-marigold-700">No services are enabled for appointment booking.</p>}
           </div>
           <ButtonLink href="/dashboard/menu" variant="secondary" className="mt-4 w-full">Manage services <ChevronRight className="size-4" /></ButtonLink>
         </Card>
@@ -961,11 +961,11 @@ export function AppointmentsPage() {
 
   if (loading) return <DashboardPageSkeleton variant="cards" />;
   if (!payload) {
-    return <Card className="grid min-h-80 place-items-center text-center"><div><CalendarClock className="mx-auto size-10 text-red-500" /><h1 className="mt-4 text-lg font-extrabold text-ink">Appointments could not be loaded</h1><p className="mt-2 text-slate-500">Your existing data is unchanged. Try again.</p><Button className="mt-4" onClick={() => load()}>Retry</Button></div></Card>;
+    return <Card className="grid min-h-80 place-items-center text-center"><div><CalendarClock className="mx-auto size-10 text-kumkum-500" /><h1 className="mt-4 text-lg font-extrabold text-ink">Appointments could not be loaded</h1><p className="mt-2 text-ink-500">Your existing data is unchanged. Try again.</p><Button className="mt-4" onClick={() => load()}>Retry</Button></div></Card>;
   }
 
   if (!payload.business.supported) {
-    return <Card className="grid min-h-80 place-items-center text-center"><div className="max-w-lg"><CalendarDays className="mx-auto size-12 text-ocean" /><h1 className="mt-4 text-xl font-bold text-ink">Appointments are not required for this category</h1><p className="mt-2 leading-6 text-slate-500">The scheduler is available for salons and spas, fitness or yoga studios, home services, tailoring, laundry pickups, and catering bookings.</p><ButtonLink href="/dashboard/settings" className="mt-5">Review business category</ButtonLink></div></Card>;
+    return <Card className="grid min-h-80 place-items-center text-center"><div className="max-w-lg"><CalendarDays className="mx-auto size-12 text-brand-text" /><h1 className="mt-4 text-xl font-bold text-ink">Appointments are not required for this category</h1><p className="mt-2 leading-6 text-ink-500">The scheduler is available for salons and spas, fitness or yoga studios, home services, tailoring, laundry pickups, and catering bookings.</p><ButtonLink href="/dashboard/settings" className="mt-5">Review business category</ButtonLink></div></Card>;
   }
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof CalendarDays }> = [
@@ -976,11 +976,11 @@ export function AppointmentsPage() {
 
   return (
     <div className="pb-8">
-      <div className="relative mb-5 overflow-hidden rounded-2xl bg-slate-950 px-5 py-6 text-white sm:px-7">
-        <div className="absolute -right-16 -top-24 size-64 rounded-full bg-violet/25 blur-3xl" />
+      <div className="relative mb-5 overflow-hidden rounded-2xl bg-ink-950 px-5 py-6 text-white sm:px-7 theme-dark">
+        <div className="absolute -right-16 -top-24 size-64 rounded-full bg-peacock-600/25 blur-3xl" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="flex flex-wrap items-center gap-2"><Badge variant="purple"><Sparkles className="size-3" /> Smart scheduling</Badge><Badge className="border-white/10 bg-white/10 text-white">{payload.business.settings.enabled ? "Customer booking on" : "Customer booking off"}</Badge></div>
+            <div className="flex flex-wrap items-center gap-2"><Badge variant="dark"><Sparkles className="size-3" /> Smart scheduling</Badge><Badge className="border-white/10 bg-white/10 text-white">{payload.business.settings.enabled ? "Customer booking on" : "Customer booking off"}</Badge></div>
             <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">{payload.business.terminology.appointmentPlural}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">One conflict-safe schedule for customers, {payload.business.terminology.providerPlural.toLowerCase()}, services, payments, and order updates.</p>
           </div>
@@ -990,7 +990,7 @@ export function AppointmentsPage() {
         </div>
       </div>
 
-      {message && <div role="status" className={cn("mb-4 flex items-start justify-between gap-3 rounded-lg border p-3 text-sm font-semibold", message.tone === "success" ? "border-emerald/20 bg-emerald-soft text-emerald-deep" : "border-berry/20 bg-berry-soft text-berry-deep")}><span>{message.text}</span><button type="button" onClick={() => setMessage(null)} aria-label="Dismiss"><X className="size-4" /></button></div>}
+      {message && <div role="status" className={cn("mb-4 flex items-start justify-between gap-3 rounded-lg border p-3 text-sm font-semibold", message.tone === "success" ? "border-brand/20 bg-green-50 text-green-700" : "border-kumkum-600/20 bg-kumkum-50 text-kumkum-700")}><span>{message.text}</span><button type="button" onClick={() => setMessage(null)} aria-label="Dismiss"><X className="size-4" /></button></div>}
 
       {createOpen && (
         <CreateAppointmentForm
@@ -1011,9 +1011,9 @@ export function AppointmentsPage() {
         />
       )}
 
-      <div className="mb-5 flex items-center justify-between gap-3 overflow-x-auto border-b border-line">
+      <div className="mb-5 flex items-center justify-between gap-3 overflow-x-auto border-b border-ink-200">
         <div className="flex min-w-max gap-1">
-          {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={cn("flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-bold transition", tab === item.id ? "border-ink text-ink" : "border-transparent text-slate-500 hover:text-ink")}><item.icon className="size-4" />{item.label}</button>)}
+          {tabs.map((item) => <button key={item.id} type="button" onClick={() => setTab(item.id)} className={cn("flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-bold transition", tab === item.id ? "border-ink text-ink" : "border-transparent text-ink-500 hover:text-ink")}><item.icon className="size-4" />{item.label}</button>)}
         </div>
         <div className="flex shrink-0 items-center gap-1">
           {payload.permissions.canUpdateAppointments && (

@@ -82,9 +82,9 @@ export function ActionNotice({
       className={cn(
         "action-notice fixed inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+7.5rem)] z-[70] flex items-start gap-3 rounded-lg border p-4 text-sm font-semibold shadow-soft sm:inset-x-auto sm:bottom-5 sm:right-40 sm:max-w-sm lg:right-44",
         leaving && "action-notice-leaving",
-        notice.tone === "success" && "border-emerald/20 bg-emerald text-white",
-        notice.tone === "warning" && "border-mango/30 bg-mango-soft text-mango-deep",
-        notice.tone === "error" && "border-red-200 bg-red-50 text-red-900"
+        notice.tone === "success" && "border-brand/20 bg-brand text-ink",
+        notice.tone === "warning" && "border-marigold-500/30 bg-marigold-50 text-marigold-700",
+        notice.tone === "error" && "border-kumkum-200 bg-kumkum-50 text-kumkum-900"
       )}
     >
       <span className="leading-6">{notice.message}</span>
@@ -129,19 +129,19 @@ export function ActionDialog({
         <div className="flex shrink-0 items-start justify-between gap-3 p-4 pb-0 sm:gap-4 sm:p-5 sm:pb-0">
           <div className="min-w-0">
             <h2 id={titleId} className="break-words text-lg font-bold leading-7 text-ink sm:text-xl">{title}</h2>
-            {body && <p id={descriptionId} className="mt-1 break-words text-sm leading-6 text-slate-500">{body}</p>}
+            {body && <p id={descriptionId} className="mt-1 break-words text-sm leading-6 text-ink-500">{body}</p>}
           </div>
           <button
             type="button"
             aria-label="Close dialog"
-            className="grid size-8 shrink-0 place-items-center rounded-lg bg-mist text-slate-600 transition hover:bg-slate-200 sm:size-9"
+            className="grid size-8 shrink-0 place-items-center rounded-lg bg-ivory-100 text-ink-600 transition hover:bg-ink-200 sm:size-9"
             onClick={onClose}
           >
             <X className="size-4" />
           </button>
         </div>
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 sm:mt-5 sm:px-5 sm:pb-5">{children}</div>
-        {footer && <div className="shrink-0 border-t border-line bg-white p-4 pt-3 sm:p-5 sm:pt-4">
+        {footer && <div className="shrink-0 border-t border-ink-200 bg-white p-4 pt-3 sm:p-5 sm:pt-4">
           <div className="flex flex-wrap justify-end gap-2">{footer}</div>
         </div>}
       </div>

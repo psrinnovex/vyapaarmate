@@ -4,25 +4,39 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+/* Status badges: a tinted pill with a short word. Colour never carries meaning alone. */
+const success = "border-green-700/15 bg-green-100 text-green-800"
+const warning = "border-marigold-600/25 bg-marigold-100 text-marigold-800"
+const danger = "border-kumkum-700/15 bg-kumkum-100 text-kumkum-700"
+const info = "border-peacock-700/15 bg-peacock-100 text-peacock-700"
+const dark = "border-ink bg-ink text-white shadow-none theme-dark"
+const neutral = "border-ink-200 bg-ivory-100 text-ink-700"
+
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold leading-none whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet/20 [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold leading-none whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700/30 [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
-        default: "border-ocean/15 bg-ocean-soft text-ocean-deep",
-        primary: "border-ocean/15 bg-ocean-soft text-ocean-deep",
-        blue: "border-ocean/15 bg-ocean-soft text-ocean-deep",
-        emerald: "border-emerald/20 bg-emerald-soft text-emerald-deep",
-        purple: "border-violet/20 bg-violet-soft text-violet-deep",
-        amber: "border-mango/30 bg-mango-soft text-mango-deep",
-        red: "border-berry/25 bg-berry-soft text-berry-deep",
-        danger: "border-berry/25 bg-berry-soft text-berry-deep",
-        destructive: "border-berry/25 bg-berry-soft text-berry-deep",
-        neutral: "border-slate-200 bg-slate-100 text-slate-700",
-        secondary: "border-white bg-white text-slate-700 shadow-clay-sm",
-        outline: "border-line bg-transparent text-slate-700",
-        ghost: "border-transparent bg-transparent text-slate-700 shadow-none",
-        link: "border-transparent bg-transparent p-0 text-ocean underline-offset-4 shadow-none hover:underline",
+        default: neutral,
+        primary: neutral,
+        neutral,
+        success,
+        emerald: success,
+        brand: "border-green-700/20 bg-brand text-on-brand",
+        accent: "border-marigold-600/30 bg-marigold-500 text-ink",
+        warning,
+        amber: warning,
+        danger,
+        red: danger,
+        destructive: danger,
+        info,
+        blue: info,
+        dark,
+        purple: dark,
+        secondary: "border-white bg-white text-ink-700 shadow-clay-sm",
+        outline: "border-ink-300 bg-transparent text-ink-700",
+        ghost: "border-transparent bg-transparent text-ink-700 shadow-none",
+        link: "border-transparent bg-transparent p-0 text-brand-text underline-offset-4 shadow-none hover:underline",
       },
     },
     defaultVariants: {

@@ -24,9 +24,9 @@ export function Section({
       <div className="mx-auto max-w-7xl min-w-0">
         {(eyebrow || title || body) && (
           <div className="mb-10 w-[calc(100vw-2rem)] min-w-0 max-w-3xl sm:w-auto">
-            {eyebrow && <p className="mb-4 inline-flex rounded-full bg-emerald-soft px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-emerald-deep shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">{eyebrow}</p>}
+            {eyebrow && <p className="mb-4 inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-green-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">{eyebrow}</p>}
             {title && <Heading className="break-words text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-[2.6rem] sm:leading-[1.08]">{title}</Heading>}
-            {body && <p className="mt-4 break-words text-base leading-7 text-slate-600 sm:text-lg">{body}</p>}
+            {body && <p className="mt-4 break-words text-base leading-7 text-ink-600 sm:text-lg">{body}</p>}
           </div>
         )}
         {children}
@@ -83,8 +83,8 @@ export function PageHeader({
       className={cn(
         "relative mb-6 min-w-0 overflow-hidden rounded-[2rem] p-5 sm:p-6",
         isDark
-          ? "bg-[linear-gradient(135deg,#1d1a39_0%,#2b2160_60%,#3a2a8a_100%)] text-white shadow-clay-lg"
-          : "border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(246,244,255,0.86)_55%,rgba(225,248,236,0.78)_100%)] shadow-clay",
+          ? "vm-band text-white shadow-clay-lg"
+          : "border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(250,247,240,0.86)_55%,rgba(216,246,210,0.78)_100%)] shadow-clay",
         className
       )}
     >
@@ -95,7 +95,7 @@ export function PageHeader({
             <p
               className={cn(
                 "mb-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.08em]",
-                isDark ? "bg-white/10 text-emerald-200" : "bg-emerald-soft text-emerald-deep"
+                isDark ? "bg-white/10 text-green-200" : "bg-green-50 text-green-700"
               )}
             >
               {eyebrow}
@@ -109,7 +109,7 @@ export function PageHeader({
           >
             {title}
           </h1>
-          {body && <p className={cn("mt-2 max-w-2xl text-sm font-medium leading-6", isDark ? "text-white/70" : "text-slate-500")}>{body}</p>}
+          {body && <p className={cn("mt-2 max-w-2xl text-sm font-medium leading-6", isDark ? "text-white/70" : "text-ink-500")}>{body}</p>}
           {action && <div className="mt-4 min-w-0">{action}</div>}
         </div>
         {art && (

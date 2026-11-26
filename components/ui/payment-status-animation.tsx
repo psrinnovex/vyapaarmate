@@ -58,7 +58,7 @@ export function PaymentStatusAnimation({
       src={paymentAnimationPath(status, provider, mode)}
       label={normalizedLabel}
       loop={status === "PENDING" || status === "PROCESSING" || status === "PROCESSING_PAYOUT"}
-      className={cn("payment-status-animation-visual size-8 shrink-0 rounded-lg border border-line bg-white text-ocean", className)}
+      className={cn("payment-status-animation-visual size-8 shrink-0 rounded-lg border border-ink-200 bg-white text-brand-text", className)}
       animationClassName="payment-status-animation-lottie"
       fallback={fallback}
     />

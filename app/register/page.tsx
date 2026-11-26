@@ -62,7 +62,7 @@ export default async function RegisterPage() {
         dangerouslySetInnerHTML={{ __html: jsonLd(registerStructuredData()) }}
       />
       {launchOffer.publiclyAdvertised && (
-        <section className="border-b border-emerald/20 bg-emerald/5 px-4 py-3 text-center text-sm leading-6 text-slate-700">
+        <section className="border-b border-brand/20 bg-brand/5 px-4 py-3 text-center text-sm leading-6 text-ink-700">
           <strong className="text-ink">Bengaluru launch:</strong> 80% off is applied automatically to every monthly subscription while enabled, not only the first month. GST, setup, gateway, WhatsApp, and other provider charges are separate; coupons do not stack.
         </section>
       )}

@@ -65,19 +65,19 @@ function formattedDate(value: string) {
 function DeletionResult({ deletion }: { deletion: AccountDeletionRecord }) {
   const complete = deletion.status === "COMPLETED";
   return (
-    <Card className="border-emerald/30 bg-emerald/5" role="status" aria-live="polite">
+    <Card className="border-brand/30 bg-brand/5" role="status" aria-live="polite">
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-emerald text-white">
+        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-brand text-ink">
           {complete ? <CheckCircle2 className="size-5" /> : <Clock3 className="size-5" />}
         </span>
         <div>
           <h2 className="text-xl font-bold text-ink">{complete ? "Account deletion completed" : "Business deletion scheduled"}</h2>
-          <p className="mt-2 leading-7 text-slate-600">
+          <p className="mt-2 leading-7 text-ink-600">
             {complete
               ? "The verified personal account request completed and active sign-in access was removed."
               : `Commerce, integrations, subscription access, and active sessions are disabled. Processing is scheduled for ${formattedDate(deletion.scheduledFor)}.`}
           </p>
-          <p className="mt-3 rounded-lg bg-white p-3 text-sm leading-6 text-slate-600">{deletion.retentionNotice}</p>
+          <p className="mt-3 rounded-lg bg-white p-3 text-sm leading-6 text-ink-600">{deletion.retentionNotice}</p>
         </div>
       </div>
     </Card>
@@ -153,25 +153,25 @@ function VerifiedEmailConfirmation({ token }: { token: string }) {
   if (completed) return <DeletionResult deletion={completed} />;
 
   return (
-    <Card className="border-berry/25 bg-berry-soft/40">
+    <Card className="border-kumkum-600/25 bg-kumkum-50/40">
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-red-600 text-white"><ShieldCheck className="size-5" /></span>
+        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-kumkum-600 text-white"><ShieldCheck className="size-5" /></span>
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.15em] text-berry-deep">Verified email link</p>
+          <p className="text-sm font-bold uppercase tracking-[0.15em] text-kumkum-700">Verified email link</p>
           <h2 className="mt-1 text-xl font-bold text-ink">Review and confirm deletion</h2>
         </div>
       </div>
 
-      {loading && <p className="mt-5 rounded-lg bg-white p-4 font-semibold text-slate-600" role="status">Verifying the single-use link…</p>}
-      {statusError && <p className="mt-5 rounded-lg bg-red-100 p-4 font-semibold text-red-800" role="alert">{statusError}</p>}
+      {loading && <p className="mt-5 rounded-lg bg-white p-4 font-semibold text-ink-600" role="status">Verifying the single-use link…</p>}
+      {statusError && <p className="mt-5 rounded-lg bg-kumkum-100 p-4 font-semibold text-kumkum-800" role="alert">{statusError}</p>}
       {!loading && deletion && requiredConfirmation && (
         <form className="mt-5 grid gap-4" onSubmit={confirmDeletion}>
-          <div className="rounded-lg bg-white p-4 text-sm leading-6 text-slate-600">
+          <div className="rounded-lg bg-white p-4 text-sm leading-6 text-ink-600">
             <p><span className="font-bold text-ink">Scope:</span> {deletion.scope === "BUSINESS" ? "Business account" : deletion.scope === "STAFF" ? "Staff account" : "Customer account"}</p>
             <p className="mt-2">{deletion.retentionNotice}</p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="verified-deletion-confirmation">Type <span className="font-extrabold text-berry-deep">{requiredConfirmation}</span> to confirm</Label>
+            <Label htmlFor="verified-deletion-confirmation">Type <span className="font-extrabold text-kumkum-700">{requiredConfirmation}</span> to confirm</Label>
             <Input
               id="verified-deletion-confirmation"
               value={confirmation}
@@ -182,7 +182,7 @@ function VerifiedEmailConfirmation({ token }: { token: string }) {
               onChange={(event) => setConfirmation(event.currentTarget.value)}
             />
           </div>
-          {submitError && <p className="rounded-lg bg-red-100 p-3 text-sm font-semibold text-red-800" role="alert">{submitError}</p>}
+          {submitError && <p className="rounded-lg bg-kumkum-100 p-3 text-sm font-semibold text-kumkum-800" role="alert">{submitError}</p>}
           <Button
             type="submit"
             variant="danger"
@@ -219,9 +219,9 @@ function AuthenticatedDeletion({
 
   if (!isOwner && !supportedPersonalRole) {
     return (
-      <Card className="border-mango/30 bg-mango-soft">
+      <Card className="border-marigold-500/30 bg-marigold-50">
         <h2 className="text-xl font-bold text-ink">Protected team account</h2>
-        <p className="mt-2 leading-7 text-amber-950">Administrator and support-agent identities are not mobile product accounts and cannot use this deletion workflow. Contact the authorized platform account owner through general support.</p>
+        <p className="mt-2 leading-7 text-marigold-950">Administrator and support-agent identities are not mobile product accounts and cannot use this deletion workflow. Contact the authorized platform account owner through general support.</p>
       </Card>
     );
   }
@@ -260,16 +260,16 @@ function AuthenticatedDeletion({
   if (result) return <DeletionResult deletion={result} />;
 
   return (
-    <Card className="border-berry/25 bg-berry-soft/30">
+    <Card className="border-kumkum-600/25 bg-kumkum-50/30">
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-red-600 text-white"><LockKeyhole className="size-5" /></span>
+        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-kumkum-600 text-white"><LockKeyhole className="size-5" /></span>
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.15em] text-berry-deep">Signed in</p>
+          <p className="text-sm font-bold uppercase tracking-[0.15em] text-kumkum-700">Signed in</p>
           <h2 className="mt-1 text-xl font-bold text-ink">{isOwner ? "Request business-account deletion" : "Delete this account"}</h2>
-          <p className="mt-1 text-sm text-slate-600">{session.name} · {session.email}</p>
+          <p className="mt-1 text-sm text-ink-600">{session.name} · {session.email}</p>
         </div>
       </div>
-      <p className="mt-4 leading-7 text-slate-600">
+      <p className="mt-4 leading-7 text-ink-600">
         {isOwner
           ? "The business is frozen immediately and scheduled for deletion after 30 days, subject to the disclosed retention requirements."
           : "The verified account, active sessions, and personal fields not covered by documented retention requirements are removed or anonymized."}
@@ -298,7 +298,7 @@ function AuthenticatedDeletion({
           </div>
         )}
         <div className="grid gap-2">
-          <Label htmlFor="authenticated-deletion-confirmation">Type <span className="font-extrabold text-berry-deep">{requiredConfirmation}</span> to confirm</Label>
+          <Label htmlFor="authenticated-deletion-confirmation">Type <span className="font-extrabold text-kumkum-700">{requiredConfirmation}</span> to confirm</Label>
           <Input
             id="authenticated-deletion-confirmation"
             value={confirmation}
@@ -309,7 +309,7 @@ function AuthenticatedDeletion({
             onChange={(event) => setConfirmation(event.currentTarget.value)}
           />
         </div>
-        {error && <p className="rounded-lg bg-red-100 p-3 text-sm font-semibold text-red-800" role="alert">{error}</p>}
+        {error && <p className="rounded-lg bg-kumkum-100 p-3 text-sm font-semibold text-kumkum-800" role="alert">{error}</p>}
         <Button
           type="submit"
           variant="danger"
@@ -361,10 +361,10 @@ function PublicDeletionRequest() {
   return (
     <Card>
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-ocean text-white"><Mail className="size-5" /></span>
+        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-ink text-white theme-dark"><Mail className="size-5" /></span>
         <div>
           <h2 className="text-xl font-bold text-ink">Request deletion without signing in</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Use the verified email address on the account. The response never reveals whether an account exists.</p>
+          <p className="mt-1 text-sm leading-6 text-ink-600">Use the verified email address on the account. The response never reveals whether an account exists.</p>
         </div>
       </div>
       <form className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end" onSubmit={submitRequest}>
@@ -384,9 +384,9 @@ function PublicDeletionRequest() {
           {submitting ? "Sending request" : "Email secure deletion link"}
         </Button>
       </form>
-      {message && <p className="mt-4 rounded-lg bg-emerald/10 p-3 text-sm font-semibold leading-6 text-emerald" role="status">{message}</p>}
-      {error && <p className="mt-4 rounded-lg bg-berry-soft p-3 text-sm font-semibold leading-6 text-berry-deep" role="alert">{error}</p>}
-      <p className="mt-4 text-xs leading-5 text-slate-500">The single-use link expires after 30 minutes. No account is changed unless the link is opened and the required confirmation phrase is entered.</p>
+      {message && <p className="mt-4 rounded-lg bg-brand/10 p-3 text-sm font-semibold leading-6 text-brand-text" role="status">{message}</p>}
+      {error && <p className="mt-4 rounded-lg bg-kumkum-50 p-3 text-sm font-semibold leading-6 text-kumkum-700" role="alert">{error}</p>}
+      <p className="mt-4 text-xs leading-5 text-ink-500">The single-use link expires after 30 minutes. No account is changed unless the link is opened and the required confirmation phrase is entered.</p>
     </Card>
   );
 }
@@ -424,7 +424,7 @@ export function AccountDeletionPageContent({
 
   return (
     <>
-      <LegalHeader eyebrow="Account deletion" eyebrowTone="berry" title="Delete a VyapaarMate account and associated personal data" art="shield">
+      <LegalHeader eyebrow="Account deletion" eyebrowTone="kumkum" title="Delete a VyapaarMate account and associated personal data" art="shield">
         This public resource works after uninstalling the app. Request a single-use email link, or sign in and use password confirmation. Deactivation alone is not treated as account deletion.
       </LegalHeader>
 
@@ -441,12 +441,12 @@ export function AccountDeletionPageContent({
 
         {!session && (
           <div className="clay grid items-center gap-5 rounded-[1.75rem] p-5 sm:grid-cols-[5rem_minmax(0,1fr)] sm:p-6">
-            <span aria-hidden="true" className="hidden size-20 rounded-[1.4rem] bg-mist p-2 sm:block">
+            <span aria-hidden="true" className="hidden size-20 rounded-[1.4rem] bg-ivory-100 p-2 sm:block">
               <ClayIllustration name="customers" />
             </span>
             <div className="min-w-0">
               <h2 className="text-xl font-extrabold text-ink">Prefer to sign in?</h2>
-              <p className="mt-1 leading-7 text-slate-600">Use the matching portal, then return here for password-confirmed deletion.</p>
+              <p className="mt-1 leading-7 text-ink-600">Use the matching portal, then return here for password-confirmed deletion.</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <ButtonLink href="/login?type=user&next=%2Faccount-deletion" variant="secondary">Customer sign in</ButtonLink>
                 <ButtonLink href="/login?type=business&next=%2Faccount-deletion" variant="secondary">Business or staff sign in</ButtonLink>
@@ -455,20 +455,20 @@ export function AccountDeletionPageContent({
           </div>
         )}
 
-        <div className="clay clay-tint-mango rounded-[1.75rem] p-5 sm:p-6">
+        <div className="clay clay-tint-marigold rounded-[1.75rem] p-5 sm:p-6">
           <div className="flex items-start gap-3">
-            <span className="clay-orb size-11 shrink-0 rounded-2xl bg-clay-mango text-ink">
+            <span className="clay-orb size-11 shrink-0 rounded-2xl bg-clay-marigold text-ink">
               <AlertTriangle className="size-5" />
             </span>
             <div>
               <h2 className="text-xl font-extrabold text-ink">What may be retained</h2>
-              <p className="mt-2 leading-7 text-slate-600">Orders, appointments, invoices, payments, payouts, a minimal KYC verification outcome, tax, fraud-prevention, dispute, security, and audit records may be retained only for a documented legal, accounting, dispute, or security purpose. Uploaded KYC document files and personal fields not needed for an approved retention purpose are deleted or anonymized.</p>
-              <p className="mt-3 text-sm leading-6 text-slate-600">For account recovery or general assistance, email <a className="font-semibold text-ocean hover:underline" href={`mailto:${company.supportEmail}?subject=${encodeURIComponent("VyapaarMate account deletion support")}`}>{company.supportEmail}</a>. Do not send a password, OTP, identity document, bank detail, or payment credential by email.</p>
+              <p className="mt-2 leading-7 text-ink-600">Orders, appointments, invoices, payments, payouts, a minimal KYC verification outcome, tax, fraud-prevention, dispute, security, and audit records may be retained only for a documented legal, accounting, dispute, or security purpose. Uploaded KYC document files and personal fields not needed for an approved retention purpose are deleted or anonymized.</p>
+              <p className="mt-3 text-sm leading-6 text-ink-600">For account recovery or general assistance, email <a className="font-semibold text-brand-text hover:underline" href={`mailto:${company.supportEmail}?subject=${encodeURIComponent("VyapaarMate account deletion support")}`}>{company.supportEmail}</a>. Do not send a password, OTP, identity document, bank detail, or payment credential by email.</p>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-sm text-slate-500">Read the <Link className="font-semibold text-ocean hover:underline" href="/mobile/privacy">Mobile App Privacy Notice</Link> for data categories and choices.</p>
+        <p className="text-center text-sm text-ink-500">Read the <Link className="font-semibold text-brand-text hover:underline" href="/mobile/privacy">Mobile App Privacy Notice</Link> for data categories and choices.</p>
       </div>
     </>
   );

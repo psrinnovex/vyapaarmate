@@ -72,14 +72,14 @@ export default function BusinessHomeScreen() {
 
 const styles = StyleSheet.create({
   welcomeCard: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 26, padding: 18 },
-  welcome: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
+  welcome: { fontSize: 20, fontWeight: "800", letterSpacing: -0.4 },
   welcomeCopy: { fontSize: 14, lineHeight: 20, marginTop: 4, opacity: 0.75 },
   metrics: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  section: { fontSize: 19, fontWeight: "900", letterSpacing: -0.3 },
+  section: { fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
   rowBetween: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 },
   flex: { flex: 1 },
   orderArt: { width: 50, height: 50, borderRadius: 16, alignItems: "center", justifyContent: "center" },
-  orderNumber: { fontSize: 16, fontWeight: "900" },
+  orderNumber: { fontSize: 16, fontWeight: "800" },
   meta: { fontSize: 13, lineHeight: 18, marginTop: 3 },
-  amount: { fontSize: 18, fontWeight: "900", letterSpacing: -0.4 },
+  amount: { fontSize: 18, fontWeight: "800", letterSpacing: -0.4 },
 });

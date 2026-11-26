@@ -36,7 +36,7 @@ const columns = [
 export function PublicFooter() {
   return (
     <footer className="relative overflow-hidden px-3 pb-3 pt-6 sm:px-5 sm:pb-5">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-clay-ink text-white shadow-clay-lg">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-clay-ink text-white shadow-clay-lg theme-dark">
         <div className="grid gap-10 px-6 pb-6 pt-10 sm:px-10 md:grid-cols-[1.3fr_repeat(3,minmax(0,0.7fr))]">
           <div>
             <Link href="/" className="inline-flex items-center gap-2 text-lg font-extrabold tracking-[-0.02em]">
@@ -46,11 +46,11 @@ export function PublicFooter() {
             <p className="mt-4 max-w-xs text-sm font-medium leading-6 text-white/60">Orders, UPI payments and WhatsApp updates for local businesses.</p>
             <div className="mt-5 grid gap-2 text-sm font-semibold text-white/70">
               <a href={`mailto:${company.supportEmail}`} className="inline-flex items-center gap-2 transition hover:text-white">
-                <Mail className="size-4 text-emerald-300" /> {company.supportEmail}
+                <Mail className="size-4 text-green-300" /> {company.supportEmail}
               </a>
               {company.phone && (
                 <span className="inline-flex items-center gap-2">
-                  <Phone className="size-4 text-emerald-300" /> {company.phone}
+                  <Phone className="size-4 text-green-300" /> {company.phone}
                 </span>
               )}
             </div>
@@ -82,7 +82,7 @@ export function PublicFooter() {
           </span>
           <span>
             Designed and developed by{" "}
-            <a href={developerWebsite} target="_blank" rel="noopener noreferrer" className="font-extrabold text-white transition hover:text-emerald-300">
+            <a href={developerWebsite} target="_blank" rel="noopener noreferrer" className="font-extrabold text-white transition hover:text-green-300">
               {company.name.toUpperCase()}
             </a>
           </span>

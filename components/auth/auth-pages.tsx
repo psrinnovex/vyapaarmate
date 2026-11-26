@@ -148,7 +148,7 @@ function AuthPortalSwitch({
   const gridColumns = portals.length === 3 ? "grid-cols-3" : "grid-cols-2";
 
   return (
-    <div className={`mt-5 grid ${gridColumns} rounded-2xl bg-mist p-1 text-sm font-extrabold shadow-clay-inset`}>
+    <div className={`mt-5 grid ${gridColumns} rounded-2xl bg-ivory-100 p-1 text-sm font-extrabold shadow-clay-inset`}>
       {portals.map((option) => {
         const active = portal === option;
 
@@ -158,8 +158,8 @@ function AuthPortalSwitch({
             href={authPath(page, option, nextPathForPortal(option, nextPath))}
             aria-current={active ? "page" : undefined}
             className={`flex h-10 items-center justify-center rounded-xl transition ${
-              active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white hover:text-ink"
-            }`}
+              active ? "bg-clay-ink text-white shadow-clay-sm" : "text-ink-600 hover:bg-white hover:text-ink"
+            } theme-dark`}
           >
             {portalNames[option]}
           </Link>
@@ -187,7 +187,7 @@ function AuthShell({
   return (
     <main className="grid min-h-screen min-w-0 grid-cols-[minmax(0,1fr)] place-items-center px-4 py-8 lg:py-10">
       <div className="grid w-full min-w-0 max-w-5xl items-stretch gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1fr)]">
-        <aside className="relative hidden overflow-hidden rounded-[2.25rem] bg-[linear-gradient(140deg,#0b7d49_0%,#3640b0_58%,#5a3de0_100%)] p-8 text-white shadow-clay-lg lg:flex lg:flex-col">
+        <aside className="relative hidden overflow-hidden rounded-[2.25rem] vm-band p-8 text-white shadow-clay-lg lg:flex lg:flex-col">
           <div aria-hidden="true" className="dotted-grid absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(255,255,255,0.45)_1px,transparent_1px)]" />
           <div aria-hidden="true" className="vm-blob -right-10 -top-10 size-64 bg-white opacity-25" />
           <Link href="/" className="relative flex items-center gap-2 font-extrabold tracking-[-0.02em]">
@@ -195,12 +195,12 @@ function AuthShell({
             <span>VyapaarMate</span>
           </Link>
           <div className="relative my-6 flex flex-1 items-center justify-center">
-            <ShopIllustration className="w-[78%] max-w-[19rem] drop-shadow-[0_30px_40px_rgba(13,10,34,0.35)] motion-safe:animate-float-slow" />
+            <ShopIllustration className="w-[78%] max-w-[19rem] drop-shadow-[0_30px_40px_rgba(0,0,0,0.35)] motion-safe:animate-float-slow" />
             <span className="absolute left-2 top-6">
-              <Sticker tone="mango" tilt={-8}>UPI ready</Sticker>
+              <Sticker tone="marigold" tilt={-8}>UPI ready</Sticker>
             </span>
             <span className="absolute bottom-6 right-0">
-              <Sticker tone="white" tilt={6}>WhatsApp alerts</Sticker>
+              <Sticker tone="paper" tilt={6}>WhatsApp alerts</Sticker>
             </span>
           </div>
           <p className="relative text-[1.7rem] font-extrabold leading-[1.1] tracking-[-0.04em]">Take orders. Get paid. Grow.</p>
@@ -221,12 +221,12 @@ function AuthShell({
           )}
           <Card className="rounded-[2.25rem] p-6 sm:p-8">
             <h1 className="text-[1.75rem] font-extrabold leading-tight tracking-[-0.04em] text-ink">{title}</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+            <p className="mt-2 text-sm leading-6 text-ink-600">{body}</p>
             {switcher}
             {showDemoNotice && demoModeUiEnabled ? (
               <Link
                 href="/demo"
-                className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-mango/30 bg-mango-soft p-3 text-sm font-extrabold text-mango-deep transition hover:-translate-y-0.5"
+                className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-marigold-500/30 bg-marigold-50 p-3 text-sm font-extrabold text-marigold-700 transition hover:-translate-y-0.5"
               >
                 <span>Demo environment: skip the password and try a role in one tap.</span>
                 <ArrowRight className="size-4 shrink-0" />
@@ -234,7 +234,7 @@ function AuthShell({
             ) : (
               showDemoNotice &&
               process.env.NODE_ENV !== "production" && (
-                <div className="mt-5 rounded-2xl border border-mango/30 bg-mango-soft p-3 text-xs font-semibold leading-5 text-mango-deep">
+                <div className="mt-5 rounded-2xl border border-marigold-500/30 bg-marigold-50 p-3 text-xs font-semibold leading-5 text-marigold-700">
                   Local development. Use the test accounts created for this database; demo activity is not customer or revenue evidence.
                 </div>
               )
@@ -309,7 +309,7 @@ export function LoginForm() {
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+            <Mail className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />
             <EmailInput id="email" name="email" className="pl-11" placeholder={copy.placeholder} required />
           </div>
         </div>
@@ -317,12 +317,12 @@ export function LoginForm() {
           <Label htmlFor="password">Password</Label>
           <PasswordInput id="password" name="password" showLockIcon required />
         </div>
-        {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
+        {error && <p className="rounded-2xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{error}</p>}
         <Button type="submit" disabled={loading} icon={<ArrowRight className="size-4" />}>
           {loading ? "Signing in" : "Sign In"}
         </Button>
       </form>
-      <div className="mt-5 flex items-center justify-between text-sm font-semibold text-ocean">
+      <div className="mt-5 flex items-center justify-between text-sm font-semibold text-brand-text">
         <Link href={authPath("/forgot-password", portal, nextPath)}>Forgot password?</Link>
         {!isPrivateTeamPortal && !isMobileAuthorization && (
           <Link href={authPath("/register", isUser ? "user" : "business", nextPath)}>
@@ -575,7 +575,7 @@ export function RegisterForm() {
             </div>
           )}
           {devCodes && (devCodes.email || devCodes.sms) && (
-            <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">
+            <p className="rounded-lg border border-marigold-500/30 bg-marigold-50 p-3 text-sm text-marigold-700">
               Local test code: email <strong>{devCodes.email ?? "sent by provider"}</strong>
               {phoneVerificationRequired ? (
                 <>
@@ -585,9 +585,9 @@ export function RegisterForm() {
               .
             </p>
           )}
-          {message && <p className="rounded-lg bg-emerald/10 p-3 text-sm font-semibold text-emerald">{message}</p>}
-          {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
-          <Button type="submit" disabled={loading} variant="emerald" icon={<ShieldCheck className="size-4" />}>
+          {message && <p className="rounded-lg bg-brand/10 p-3 text-sm font-semibold text-brand-text">{message}</p>}
+          {error && <p className="rounded-2xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{error}</p>}
+          <Button type="submit" disabled={loading} variant="brand" icon={<ShieldCheck className="size-4" />}>
             {loading ? "Verifying" : "Verify and Continue"}
           </Button>
           <Button
@@ -616,7 +616,7 @@ export function RegisterForm() {
         lockedToApp
       >
         <div className="mt-6">
-          <ButtonLink href={authPath("/login", portal, nextPath)} variant="emerald" className="w-full" icon={<LogIn className="size-4" />}>
+          <ButtonLink href={authPath("/login", portal, nextPath)} variant="brand" className="w-full" icon={<LogIn className="size-4" />}>
             Back to Sign In
           </ButtonLink>
         </div>
@@ -651,8 +651,8 @@ export function RegisterForm() {
             <Label htmlFor="password">Password</Label>
             <PasswordInput id="password" name="password" autoComplete="new-password" placeholder="10+ characters" minLength={10} required />
           </div>
-          {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
-          <Button type="submit" disabled={loading} variant="emerald" icon={<ArrowRight className="size-4" />}>
+          {error && <p className="rounded-2xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{error}</p>}
+          <Button type="submit" disabled={loading} variant="brand" icon={<ArrowRight className="size-4" />}>
             {loading ? "Creating" : "Create User Account"}
           </Button>
           <ButtonLink href={authPath("/login", "user", nextPath)} variant="secondary" className="w-full" icon={<LogIn className="size-4" />}>
@@ -677,7 +677,7 @@ export function RegisterForm() {
         <div className="grid gap-2">
           <Label htmlFor="businessName">Business name</Label>
           <div className="relative">
-            <BusinessIcon className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+            <BusinessIcon className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />
             <Input id="businessName" name="businessName" className="pl-10" placeholder="HSR Fresh Foods" required />
           </div>
         </div>
@@ -685,12 +685,12 @@ export function RegisterForm() {
           <Label htmlFor="city">Current launch location</Label>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="relative">
-              <MapPin className="pointer-events-none absolute left-3 top-3 size-5 text-emerald" />
+              <MapPin className="pointer-events-none absolute left-3 top-3 size-5 text-brand-text" />
               <Input id="city" name="city" defaultValue={launchSingleCityRestricted ? launchMarket.city : ""} className="pl-10" readOnly={launchSingleCityRestricted} required />
             </div>
             <Input id="state" name="state" defaultValue={launchSingleCityRestricted ? launchMarket.state : ""} readOnly={launchSingleCityRestricted} required />
           </div>
-          <p className="text-xs leading-5 text-slate-500">
+          <p className="text-xs leading-5 text-ink-500">
             {launchSingleCityRestricted
               ? "Your operating address and map pin will be verified inside the Bengaluru launch area before payment."
               : "Enter the city and state where the business operates. The map pin will be verified before payment."}
@@ -732,7 +732,7 @@ export function RegisterForm() {
                   key={plan.id}
                   type="button"
                   className={`rounded-lg border p-4 text-left transition ${
-                    selected ? "border-emerald bg-emerald/10 shadow-sm" : "border-line bg-white hover:border-ocean/30"
+                    selected ? "border-brand bg-brand/10 shadow-sm" : "border-ink-200 bg-white hover:border-green-700/30"
                   }`}
                   onClick={() => {
                     setSubscriptionPlan(plan.id);
@@ -744,38 +744,38 @@ export function RegisterForm() {
                 >
                   <span className="flex items-center justify-between gap-2">
                     <span className="font-bold text-ink">{plan.name}</span>
-                    {selected ? <CheckCircle2 className="size-5 text-emerald" /> : <CreditCard className="size-5 text-slate-400" />}
+                    {selected ? <CheckCircle2 className="size-5 text-brand-text" /> : <CreditCard className="size-5 text-ink-500" />}
                   </span>
                   <span className="mt-2 block text-2xl font-extrabold text-ink">{formatINR(plan.price)}</span>
                   {launchOffer.publiclyAdvertised && (
-                    <span className="mt-1 block text-xs font-semibold text-slate-500">
+                    <span className="mt-1 block text-xs font-semibold text-ink-500">
                       <span className="line-through">{formatINR(plan.listPrice)}</span>{" "}
-                      <span className="text-emerald">{launchOffer.discountLabel}</span>
+                      <span className="text-brand-text">{launchOffer.discountLabel}</span>
                     </span>
                   )}
-                  <span className="mt-1 block text-xs font-semibold text-slate-500">per 30 days, plus GST; setup and provider usage are separate</span>
+                  <span className="mt-1 block text-xs font-semibold text-ink-500">per 30 days, plus GST; setup and provider usage are separate</span>
                 </button>
               );
             })}
           </div>
         </div>
-        <label className="flex items-center justify-between gap-4 rounded-lg border border-line bg-mist p-3">
+        <label className="flex items-center justify-between gap-4 rounded-lg border border-ink-200 bg-ivory-100 p-3">
           <span>
             <span className="block text-sm font-bold text-ink">Enable WhatsApp customer flow</span>
-            <span className="mt-1 block text-xs leading-5 text-slate-500">Turn this off for website-only orders until you are ready for WhatsApp setup.</span>
+            <span className="mt-1 block text-xs leading-5 text-ink-500">Turn this off for website-only orders until you are ready for WhatsApp setup.</span>
           </span>
           <input name="whatsappEnabled" type="checkbox" defaultChecked className="peer sr-only" />
-          <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
+          <span className="relative h-7 w-12 shrink-0 rounded-full bg-ink-300 transition peer-checked:bg-brand after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition peer-checked:after:translate-x-5" />
         </label>
-        <p className="text-xs leading-5 text-slate-500">
-          By creating an account, you agree to the <Link href="/terms" className="font-semibold text-ocean">Terms</Link> and acknowledge the{" "}
-          <Link href="/privacy" className="font-semibold text-ocean">Privacy Policy</Link>. You will review the final discounted amount, GST, and any separate setup or provider charges before payment.
+        <p className="text-xs leading-5 text-ink-500">
+          By creating an account, you agree to the <Link href="/terms" className="font-semibold text-brand-text">Terms</Link> and acknowledge the{" "}
+          <Link href="/privacy" className="font-semibold text-brand-text">Privacy Policy</Link>. You will review the final discounted amount, GST, and any separate setup or provider charges before payment.
         </p>
-        {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
+        {error && <p className="rounded-2xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{error}</p>}
         <Button
           type="submit"
           disabled={loading}
-          variant="emerald"
+          variant="brand"
           icon={<ArrowRight className="size-4" />}
           className="h-auto min-h-10 min-w-0 whitespace-normal px-3 py-2 text-center leading-5"
         >
@@ -837,12 +837,12 @@ export function ForgotPasswordPage() {
         <div className="grid gap-2">
           <Label htmlFor="email">Account email</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+            <Mail className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />
             <EmailInput id="email" name="email" className="pl-11" placeholder={copy.placeholder} required />
           </div>
         </div>
         {message && (
-          <p className="rounded-lg bg-emerald/10 p-3 text-sm font-semibold leading-6 text-emerald">
+          <p className="rounded-lg bg-brand/10 p-3 text-sm font-semibold leading-6 text-brand-text">
             {message}
           </p>
         )}
@@ -851,8 +851,8 @@ export function ForgotPasswordPage() {
             Open Local Reset Link
           </ButtonLink>
         )}
-        {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
-        <Button type="submit" disabled={loading} variant="emerald" icon={<Mail className="size-4" />}>
+        {error && <p className="rounded-2xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{error}</p>}
+        <Button type="submit" disabled={loading} variant="brand" icon={<Mail className="size-4" />}>
           {loading ? "Sending" : "Send Reset Link"}
         </Button>
         <ButtonLink href={signInPathForPortal(portal, nextPath)} variant="secondary" className="w-full" icon={<LogIn className="size-4" />}>
@@ -917,7 +917,7 @@ export function ResetPasswordPage() {
         lockedToApp={isMobileAuthorization}
       >
         <div className="mt-6 grid gap-3">
-          <ButtonLink href={authPath("/forgot-password", portal, nextPath)} variant="emerald" className="w-full" icon={<Mail className="size-4" />}>
+          <ButtonLink href={authPath("/forgot-password", portal, nextPath)} variant="brand" className="w-full" icon={<Mail className="size-4" />}>
             Request New Link
           </ButtonLink>
           <ButtonLink href={signInHref} variant="secondary" className="w-full" icon={<LogIn className="size-4" />}>
@@ -937,11 +937,11 @@ export function ResetPasswordPage() {
     >
       {complete ? (
         <div className="mt-6 grid gap-4">
-          <p className="flex gap-3 rounded-lg bg-emerald/10 p-3 text-sm font-semibold leading-6 text-emerald">
+          <p className="flex gap-3 rounded-lg bg-brand/10 p-3 text-sm font-semibold leading-6 text-brand-text">
             <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
             <span>{message}</span>
           </p>
-          <ButtonLink href={signInHref} variant="emerald" className="w-full" icon={<LogIn className="size-4" />}>
+          <ButtonLink href={signInHref} variant="brand" className="w-full" icon={<LogIn className="size-4" />}>
             Sign In
           </ButtonLink>
         </div>
@@ -955,8 +955,8 @@ export function ResetPasswordPage() {
             <Label htmlFor="confirmPassword">Confirm new password</Label>
             <PasswordInput id="confirmPassword" name="confirmPassword" autoComplete="new-password" placeholder="Repeat password" minLength={10} required />
           </div>
-          {error && <p className="rounded-2xl bg-berry-soft p-3 text-sm font-semibold text-berry-deep">{error}</p>}
-          <Button type="submit" disabled={loading} variant="emerald" icon={<KeyRound className="size-4" />}>
+          {error && <p className="rounded-2xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{error}</p>}
+          <Button type="submit" disabled={loading} variant="brand" icon={<KeyRound className="size-4" />}>
             {loading ? "Updating" : "Update Password"}
           </Button>
           <ButtonLink href={authPath("/forgot-password", portal, nextPath)} variant="secondary" className="w-full" icon={<Mail className="size-4" />}>

@@ -48,7 +48,7 @@ export function OrderStatusAnimation({
     <LazyLottieAnimation
       src={animationPath}
       label={statusLabel}
-      className={cn("order-status-animation-visual size-9 shrink-0 rounded-lg border border-line bg-white text-ocean", className)}
+      className={cn("order-status-animation-visual size-9 shrink-0 rounded-lg border border-ink-200 bg-white text-brand-text", className)}
       animationClassName="order-status-animation-lottie"
       fallback={fallback}
     />

@@ -79,42 +79,45 @@ function buildRegistrationVerificationEmail(input: { name: string; emailCode: st
       company.name
     ].join("\n"),
     html: `
-      <div style="margin:0;padding:0;background:#f4f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif">
+      <div style="margin:0;padding:0;background:#faf7f0;color:#151815;font-family:Arial,Helvetica,sans-serif">
         <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden">
           ${escapeHtml(previewText)}
         </span>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f4f7fb;margin:0;padding:0">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#faf7f0;margin:0;padding:0">
           <tr>
             <td align="center" style="padding:32px 16px">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #e6ebf2;border-radius:14px;overflow:hidden">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #ece6d8;border-radius:14px;overflow:hidden">
                 <tr>
-                  <td style="padding:28px 32px 20px;background:#0f172a;color:#ffffff">
+                  <td style="padding:28px 32px 20px;background:#0b0d0b;color:#ffffff">
                     <div style="font-size:20px;font-weight:700;letter-spacing:.2px">${safeProduct}</div>
-                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#cbd5e1">Secure business account verification</div>
+                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#d3cab6">Secure business account verification</div>
                   </td>
+                </tr>
+                <tr>
+                  <td style="height:6px;line-height:6px;font-size:0;background:#1ec926">&nbsp;</td>
                 </tr>
                 <tr>
                   <td style="padding:32px">
-                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#172033">Hi ${safeName},</p>
-                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#334155">
+                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#151815">Hi ${safeName},</p>
+                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#3a3f39">
                       Enter the verification code below to finish creating your ${safeProduct} account.
                     </p>
-                    <div style="margin:0 0 22px;padding:22px 20px;text-align:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px">
-                      <div style="margin:0 0 8px;font-size:12px;font-weight:700;line-height:16px;letter-spacing:.12em;text-transform:uppercase;color:#64748b">Verification code</div>
-                      <div style="font-size:32px;line-height:40px;font-weight:800;letter-spacing:6px;color:#0f172a">${safeCode}</div>
+                    <div style="margin:0 0 22px;padding:22px 20px;text-align:center;background:#faf7f0;border:1px solid #e6dfcf;border-radius:12px">
+                      <div style="margin:0 0 8px;font-size:12px;font-weight:700;line-height:16px;letter-spacing:.12em;text-transform:uppercase;color:#625f57">Verification code</div>
+                      <div style="font-size:32px;line-height:40px;font-weight:800;letter-spacing:6px;color:#0b0d0b">${safeCode}</div>
                     </div>
-                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#475569">
-                      This code expires in <strong style="color:#172033">${verificationCodeLifetimeMinutes} minutes</strong>. For your security, do not share this code with anyone.
+                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#4b4a43">
+                      This code expires in <strong style="color:#151815">${verificationCodeLifetimeMinutes} minutes</strong>. For your security, do not share this code with anyone.
                     </p>
-                    <p style="margin:0;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0;font-size:14px;line-height:22px;color:#625f57">
                       If you did not request this email, you can safely ignore it or contact
-                      <a href="mailto:${safeSupportEmail}" style="color:#0f766e;text-decoration:none">${safeSupportEmail}</a>.
+                      <a href="mailto:${safeSupportEmail}" style="color:#0b7a10;text-decoration:none">${safeSupportEmail}</a>.
                     </p>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:20px 32px;background:#f8fafc;border-top:1px solid #e6ebf2">
-                    <p style="margin:0;font-size:12px;line-height:18px;color:#64748b">
+                  <td style="padding:20px 32px;background:#faf7f0;border-top:1px solid #ece6d8">
+                    <p style="margin:0;font-size:12px;line-height:18px;color:#625f57">
                       This automated message was sent by ${safeCompanyName} for ${safeProduct} account verification.
                     </p>
                   </td>

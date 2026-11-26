@@ -383,7 +383,7 @@ function supportAgentInviteNotice(name: string, invite?: SupportAgentInviteState
   return `${name} invited as a support agent.`;
 }
 
-const selectClassName = "h-11 w-full rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
+const selectClassName = "h-11 w-full rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-700/10";
 const couponFilterToolbarClassName = "mt-4 flex min-w-0 flex-wrap items-center gap-3";
 const couponSearchControlClassName = "relative min-w-0 flex-[1_1_100%] sm:min-w-[240px] sm:flex-[2_1_240px]";
 const couponFilterControlClassName = "min-w-0 flex-[1_1_100%] sm:min-w-[150px] sm:flex-[1_1_150px]";
@@ -538,20 +538,20 @@ export function AdminOverviewPage() {
         }
       />
       <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard density="compact" title="Total businesses" value={String(data.metrics.totalBusinesses)} detail="Tenant records" icon={Building2} tone="blue" />
-        <MetricCard density="compact" title="Active businesses" value={String(data.metrics.activeBusinesses)} detail="Accepting operations" icon={CheckCircle2} tone="emerald" />
-        <MetricCard density="compact" title="Active subscription revenue" value={formatINR(data.metrics.monthlyRecurringRevenue)} detail="Actual paid active subscriptions" icon={TrendingUp} tone="purple" />
-        <MetricCard density="compact" title="Orders/bookings today" value={formatCompact(data.metrics.ordersToday)} detail="Across platform" icon={ClipboardList} tone="blue" />
-        <MetricCard density="compact" title="Payment failures" value={String(data.metrics.paymentFailures)} detail="Webhook review needed" icon={ShieldAlert} tone="red" />
-        <MetricCard density="compact" title="WhatsApp messages sent" value={formatCompact(data.metrics.whatsappMessagesSent)} detail="Template and status logs" icon={MessageCircle} tone="emerald" />
-        <MetricCard density="compact" title="New signups" value={String(data.metrics.newSignups7d)} detail="Last 7 days" icon={Users} tone="amber" />
-        <MetricCard density="compact" title="Churned businesses" value={String(data.metrics.churnedBusinesses)} detail="Cancelled plans" icon={TrendingDown} tone="red" />
+        <MetricCard density="compact" title="Total businesses" value={String(data.metrics.totalBusinesses)} detail="Tenant records" icon={Building2} tone="ink" />
+        <MetricCard density="compact" title="Active businesses" value={String(data.metrics.activeBusinesses)} detail="Accepting operations" icon={CheckCircle2} tone="green" />
+        <MetricCard density="compact" title="Active subscription revenue" value={formatINR(data.metrics.monthlyRecurringRevenue)} detail="Actual paid active subscriptions" icon={TrendingUp} tone="peacock" />
+        <MetricCard density="compact" title="Orders/bookings today" value={formatCompact(data.metrics.ordersToday)} detail="Across platform" icon={ClipboardList} tone="ink" />
+        <MetricCard density="compact" title="Payment failures" value={String(data.metrics.paymentFailures)} detail="Webhook review needed" icon={ShieldAlert} tone="kumkum" />
+        <MetricCard density="compact" title="WhatsApp messages sent" value={formatCompact(data.metrics.whatsappMessagesSent)} detail="Template and status logs" icon={MessageCircle} tone="green" />
+        <MetricCard density="compact" title="New signups" value={String(data.metrics.newSignups7d)} detail="Last 7 days" icon={Users} tone="marigold" />
+        <MetricCard density="compact" title="Churned businesses" value={String(data.metrics.churnedBusinesses)} detail="Cancelled plans" icon={TrendingDown} tone="kumkum" />
       </div>
       <div className="mt-5 grid min-w-0 max-w-full gap-5 min-[1700px]:grid-cols-[minmax(0,1fr)_300px]">
         <Card className="min-w-0 overflow-hidden bg-white">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-extrabold text-ink">Registered businesses</h2>
-            <Link href="/admin/businesses" className="text-sm font-bold text-ocean">Manage</Link>
+            <Link href="/admin/businesses" className="text-sm font-bold text-brand-text">Manage</Link>
           </div>
           <BusinessTable
             businesses={data.businesses}
@@ -563,7 +563,7 @@ export function AdminOverviewPage() {
           />
         </Card>
         <GlassPanel className="min-w-0 overflow-hidden !bg-white">
-          <Server className="size-8 text-emerald" />
+          <Server className="size-8 text-brand-text" />
           <h2 className="mt-4 text-xl font-bold text-ink">System health</h2>
           <div className="mt-5 grid gap-3">
             {[
@@ -574,7 +574,7 @@ export function AdminOverviewPage() {
               ["Audit logs", "Active"]
             ].map(([name, status]) => (
               <div key={name} className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-white/75 p-3">
-                <span className="min-w-0 break-words font-semibold text-slate-700">{name}</span>
+                <span className="min-w-0 break-words font-semibold text-ink-700">{name}</span>
                 <StatusPill status={status === "Healthy" || status === "Ready" || status === "Active" ? "Active" : "Trial"} />
               </div>
             ))}
@@ -824,7 +824,7 @@ export function AdminBusinessesPage() {
       <Card className="mb-5 min-w-0 bg-white">
         <div className="grid min-w-0 gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px_180px]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+            <Search className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />
             <Input
               className="pl-10"
               placeholder="Search by name, phone, city, status"
@@ -931,10 +931,10 @@ export function AdminOrdersPage() {
         action={<LiveSyncStatus connected={connected} source={data.source} error={error} />}
       />
       <div className="grid gap-4 md:grid-cols-4">
-        <MetricCard title="Orders/bookings today" value={formatCompact(data.metrics.ordersToday)} detail="All tenants" icon={ClipboardList} tone="blue" />
-        <MetricCard title="Active businesses" value={String(data.metrics.activeBusinesses)} detail="Tenant order sources" icon={CheckCircle2} tone="emerald" />
-        <MetricCard title="Payment failures" value={String(data.metrics.paymentFailures)} detail="Needs trend review" icon={ShieldAlert} tone="red" />
-        <MetricCard title="Businesses tracked" value={String(data.businesses.length)} detail="Loaded in admin table" icon={Building2} tone="amber" />
+        <MetricCard title="Orders/bookings today" value={formatCompact(data.metrics.ordersToday)} detail="All tenants" icon={ClipboardList} tone="ink" />
+        <MetricCard title="Active businesses" value={String(data.metrics.activeBusinesses)} detail="Tenant order sources" icon={CheckCircle2} tone="green" />
+        <MetricCard title="Payment failures" value={String(data.metrics.paymentFailures)} detail="Needs trend review" icon={ShieldAlert} tone="kumkum" />
+        <MetricCard title="Businesses tracked" value={String(data.businesses.length)} detail="Loaded in admin table" icon={Building2} tone="marigold" />
       </div>
     </>
   );
@@ -1053,16 +1053,16 @@ export function AdminPaymentsPage() {
         action={<LiveSyncStatus connected={connected} source={data.source} error={error} />}
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <MetricCard title="Revenue processed" value={formatINR(data.businesses.reduce((sum, business) => sum + business.revenue, 0))} detail="Completed payments" icon={CreditCard} tone="emerald" />
-        <MetricCard title="Ready for payout" value={formatINR(data.metrics.pendingBusinessPayouts)} detail="Due to saved payout accounts" icon={Wallet} tone="blue" />
-        <MetricCard title="9 AM batch pending" value={formatINR(providerPending)} detail="Releases within 24 hours" icon={Activity} tone="purple" />
-        <MetricCard title="Processing payout" value={formatINR(processingPayouts)} detail="Cashfree transfers in flight" icon={ArrowLeftRight} tone="amber" />
-        <MetricCard title="Paid out" value={formatINR(paidOut)} detail="Confirmed business payouts" icon={CheckCircle2} tone="emerald" />
+        <MetricCard title="Revenue processed" value={formatINR(data.businesses.reduce((sum, business) => sum + business.revenue, 0))} detail="Completed payments" icon={CreditCard} tone="green" />
+        <MetricCard title="Ready for payout" value={formatINR(data.metrics.pendingBusinessPayouts)} detail="Due to saved payout accounts" icon={Wallet} tone="ink" />
+        <MetricCard title="9 AM batch pending" value={formatINR(providerPending)} detail="Releases within 24 hours" icon={Activity} tone="peacock" />
+        <MetricCard title="Processing payout" value={formatINR(processingPayouts)} detail="Cashfree transfers in flight" icon={ArrowLeftRight} tone="marigold" />
+        <MetricCard title="Paid out" value={formatINR(paidOut)} detail="Confirmed business payouts" icon={CheckCircle2} tone="green" />
       </div>
       <Card className="mt-5 overflow-hidden p-0">
-        <div className="border-b border-line p-5">
+        <div className="border-b border-ink-200 p-5">
           <h2 className="font-bold text-ink">PSHR UPI payments awaiting bank verification</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Verify the exact amount and order reference in the PSHR Innovex bank account before crediting a business wallet.</p>
+          <p className="mt-1 text-sm leading-6 text-ink-600">Verify the exact amount and order reference in the PSHR Innovex bank account before crediting a business wallet.</p>
         </div>
         {pendingUpiPaymentsLoading ? (
           <div className="grid gap-3 p-5">
@@ -1071,28 +1071,28 @@ export function AdminPaymentsPage() {
             ))}
           </div>
         ) : pendingUpiPayments.length === 0 ? (
-          <p className="p-5 text-sm text-slate-600">No direct UPI payments are waiting for verification.</p>
+          <p className="p-5 text-sm text-ink-600">No direct UPI payments are waiting for verification.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="bg-mist text-xs uppercase text-slate-500">
+              <thead className="bg-ivory-100 text-xs uppercase text-ink-500">
                 <tr>{["Order", "Business", "Customer", "Amount", "Created", "Status", "Action"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-ink-200">
                 {pendingUpiPaymentPagination.pageItems.map((payment) => (
                   <tr key={payment.id}>
-                    <td className="px-4 py-4"><a href={payment.orderUrl} target="_blank" rel="noreferrer" className="font-bold text-ocean">{payment.orderNumber}</a></td>
+                    <td className="px-4 py-4"><a href={payment.orderUrl} target="_blank" rel="noreferrer" className="font-bold text-brand-text">{payment.orderNumber}</a></td>
                     <td className="px-4 py-4 font-semibold text-ink">{payment.businessName}</td>
-                    <td className="px-4 py-4 text-slate-600"><p>{payment.customerName}</p><p className="mt-1 text-xs">{maskPhone(payment.customerPhone)}</p></td>
+                    <td className="px-4 py-4 text-ink-600"><p>{payment.customerName}</p><p className="mt-1 text-xs">{maskPhone(payment.customerPhone)}</p></td>
                     <td className="px-4 py-4 font-bold">{formatINR(payment.amount)}</td>
-                    <td className="px-4 py-4 text-slate-600">{new Date(payment.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
+                    <td className="px-4 py-4 text-ink-600">{new Date(payment.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         <PaymentStatusAnimation status={payment.status} mode="bankVerification" label={`${payment.status.toLowerCase()} payment`} />
                         <StatusPill status={payment.status} />
                       </div>
                     </td>
-                    <td className="px-4 py-4"><Button size="sm" variant="emerald" onClick={() => setUpiVerificationTarget(payment)}>Verify Bank Payment</Button></td>
+                    <td className="px-4 py-4"><Button size="sm" variant="brand" onClick={() => setUpiVerificationTarget(payment)}>Verify Bank Payment</Button></td>
                   </tr>
                 ))}
               </tbody>
@@ -1112,15 +1112,15 @@ export function AdminPaymentsPage() {
       <Card className="mt-5 overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1120px] text-left text-sm">
-            <thead className="bg-mist text-xs uppercase text-slate-500">
+            <thead className="bg-ivory-100 text-xs uppercase text-ink-500">
               <tr>{["Business", "Auto payout", "Gross", "Fees", "9 AM batch pending", "Ready", "Processing", "Paid out", "Action"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="divide-y divide-ink-200">
               {payoutPagination.pageItems.map((business) => (
                 <tr key={business.id}>
                   <td className="px-4 py-4">
                     <p className="font-bold text-ink">{business.name}</p>
-                    <p className="mt-1 text-xs text-slate-500">{business.city}, {business.state}</p>
+                    <p className="mt-1 text-xs text-ink-500">{business.city}, {business.state}</p>
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex min-w-44 items-center gap-2">
@@ -1130,20 +1130,20 @@ export function AdminPaymentsPage() {
                       />
                       <div className="min-w-0">
                         <p className="truncate text-xs font-bold text-ink">{payoutAutomationLabel(business)}</p>
-                        <p className="truncate text-xs text-slate-500">{payoutDestinationLabel(business)}</p>
+                        <p className="truncate text-xs text-ink-500">{payoutDestinationLabel(business)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-4 font-bold">{formatINR(business.walletGrossCredited)}</td>
-                  <td className="px-4 py-4 text-slate-600">{formatINR(business.walletPlatformFees)}</td>
-                  <td className="px-4 py-4 text-slate-600">{formatINR(business.walletPendingProviderSettlement)}</td>
-                  <td className="px-4 py-4 font-bold text-ocean">{formatINR(business.walletAvailableForPayout)}</td>
-                  <td className="px-4 py-4 font-bold text-amber-700">{formatINR(business.walletProcessingPayouts)}</td>
-                  <td className="px-4 py-4 text-slate-600">{formatINR(business.walletPaidOut)}</td>
+                  <td className="px-4 py-4 text-ink-600">{formatINR(business.walletPlatformFees)}</td>
+                  <td className="px-4 py-4 text-ink-600">{formatINR(business.walletPendingProviderSettlement)}</td>
+                  <td className="px-4 py-4 font-bold text-brand-text">{formatINR(business.walletAvailableForPayout)}</td>
+                  <td className="px-4 py-4 font-bold text-marigold-700">{formatINR(business.walletProcessingPayouts)}</td>
+                  <td className="px-4 py-4 text-ink-600">{formatINR(business.walletPaidOut)}</td>
                   <td className="px-4 py-4">
                     <Button
                       size="sm"
-                      variant="emerald"
+                      variant="brand"
                       disabled={business.walletAvailableForPayout <= 0}
                       onClick={() => setPayoutTarget(business)}
                     >
@@ -1168,14 +1168,14 @@ export function AdminPaymentsPage() {
       {payoutTarget && (
         <ActionDialog title="Record payout" body={`${payoutTarget.name} · ${formatINR(payoutTarget.walletAvailableForPayout)}`} onClose={() => setPayoutTarget(null)}>
           <form className="grid gap-4" onSubmit={recordPayout}>
-            <div className="rounded-xl border border-emerald/20 bg-emerald/5 p-3 text-sm leading-6 text-slate-700">
+            <div className="rounded-xl border border-brand/20 bg-brand/5 p-3 text-sm leading-6 text-ink-700">
               Cashfree automatic payouts send eligible settled balances first. Record this manually only after PSHR Innovex has sent the amount outside Cashfree.
             </div>
-            <div className="rounded-xl border border-line bg-mist p-3 text-sm leading-6 text-slate-700">
+            <div className="rounded-xl border border-ink-200 bg-ivory-100 p-3 text-sm leading-6 text-ink-700">
               <p className="font-bold text-ink">Owner payout destination</p>
               <p className="mt-1">{payoutDestinationLabel(payoutTarget)}</p>
               {payoutTarget.payoutAccountHolderName && (
-                <p className="mt-1 text-xs font-semibold text-slate-500">Account holder: {payoutTarget.payoutAccountHolderName}</p>
+                <p className="mt-1 text-xs font-semibold text-ink-500">Account holder: {payoutTarget.payoutAccountHolderName}</p>
               )}
             </div>
             <div className="grid gap-2">
@@ -1192,7 +1192,7 @@ export function AdminPaymentsPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" onClick={() => setPayoutTarget(null)} disabled={savingPayout}>Cancel</Button>
-              <Button type="submit" variant="emerald" disabled={savingPayout}>
+              <Button type="submit" variant="brand" disabled={savingPayout}>
                 {savingPayout ? "Saving" : "Record Payout"}
               </Button>
             </div>
@@ -1206,7 +1206,7 @@ export function AdminPaymentsPage() {
           onClose={() => setUpiVerificationTarget(null)}
         >
           <form className="grid gap-4" onSubmit={verifyUpiPayment}>
-            <div className="rounded-xl border border-berry/25 bg-berry-soft p-3 text-sm leading-6 text-red-800">
+            <div className="rounded-xl border border-kumkum-600/25 bg-kumkum-50 p-3 text-sm leading-6 text-kumkum-800">
               Do not approve from a screenshot. Confirm the credit in the PSHR Innovex bank account, including exact amount and order reference.
             </div>
             <div className="grid gap-2">
@@ -1215,7 +1215,7 @@ export function AdminPaymentsPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" onClick={() => setUpiVerificationTarget(null)} disabled={savingUpiVerification}>Cancel</Button>
-              <Button type="submit" variant="emerald" disabled={savingUpiVerification}>{savingUpiVerification ? "Verifying" : "Verify and Credit Wallet"}</Button>
+              <Button type="submit" variant="brand" disabled={savingUpiVerification}>{savingUpiVerification ? "Verifying" : "Verify and Credit Wallet"}</Button>
             </div>
           </form>
         </ActionDialog>
@@ -1316,37 +1316,37 @@ export function AdminSubscriptionsPage() {
         }
       />
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard title="Active subscription revenue" value={formatINR(data.metrics.monthlyRecurringRevenue)} detail="Actual paid active subscriptions" icon={CreditCard} tone="purple" />
-        <MetricCard title="Active subscriptions" value={String(activeSubscriptionCount)} detail="Paid tenants" icon={ShieldCheck} tone="emerald" />
-        <MetricCard title="Pending payments" value={String(data.metrics.pendingSubscriptionPayments ?? 0)} detail="Incomplete Cashfree/UPI checkouts" icon={FileClock} tone="amber" />
+        <MetricCard title="Active subscription revenue" value={formatINR(data.metrics.monthlyRecurringRevenue)} detail="Actual paid active subscriptions" icon={CreditCard} tone="peacock" />
+        <MetricCard title="Active subscriptions" value={String(activeSubscriptionCount)} detail="Paid tenants" icon={ShieldCheck} tone="green" />
+        <MetricCard title="Pending payments" value={String(data.metrics.pendingSubscriptionPayments ?? 0)} detail="Incomplete Cashfree/UPI checkouts" icon={FileClock} tone="marigold" />
       </div>
       <Card className="mt-5 overflow-hidden p-0">
-        <div className="border-b border-line p-5">
+        <div className="border-b border-ink-200 p-5">
           <h2 className="font-bold text-ink">Recent subscription payments</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Cashfree and PSHR Innovex UPI subscription checkout history across businesses.</p>
+          <p className="mt-1 text-sm leading-6 text-ink-600">Cashfree and PSHR Innovex UPI subscription checkout history across businesses.</p>
         </div>
         {recentSubscriptions.length === 0 ? (
-          <p className="p-5 text-sm text-slate-600">No subscription checkout records found yet.</p>
+          <p className="p-5 text-sm text-ink-600">No subscription checkout records found yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] text-left text-sm">
-              <thead className="bg-mist text-xs uppercase text-slate-500">
+              <thead className="bg-ivory-100 text-xs uppercase text-ink-500">
                 <tr>{["Reference", "Business", "Owner", "Plan", "Provider", "Amount", "Payment", "Paid", "Period"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-ink-200">
                 {recentSubscriptionPagination.pageItems.map((subscription) => (
                   <tr key={subscription.id}>
-                    <td className="px-4 py-4 font-bold text-ocean">{subscription.reference}</td>
+                    <td className="px-4 py-4 font-bold text-brand-text">{subscription.reference}</td>
                     <td className="px-4 py-4 font-semibold text-ink">{subscription.businessName}</td>
-                    <td className="px-4 py-4 text-slate-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{maskPhone(subscription.ownerPhone)}</p></td>
-                    <td className="px-4 py-4"><Badge variant={subscription.plan === "PRO" ? "purple" : "blue"}>{subscription.plan}</Badge></td>
-                    <td className="px-4 py-4 text-slate-600">{subscription.paymentProviderLabel}</td>
+                    <td className="px-4 py-4 text-ink-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{maskPhone(subscription.ownerPhone)}</p></td>
+                    <td className="px-4 py-4"><Badge variant={subscription.plan === "PRO" ? "dark" : "info"}>{subscription.plan}</Badge></td>
+                    <td className="px-4 py-4 text-ink-600">{subscription.paymentProviderLabel}</td>
                     <td className="px-4 py-4 font-bold">{formatINR(subscription.amount)}</td>
                     <td className="px-4 py-4"><StatusPill status={subscription.paymentState} /></td>
-                    <td className="px-4 py-4 text-slate-600">
+                    <td className="px-4 py-4 text-ink-600">
                       {subscription.paidAt ? new Date(subscription.paidAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "-"}
                     </td>
-                    <td className="px-4 py-4 text-slate-600">
+                    <td className="px-4 py-4 text-ink-600">
                       {new Date(subscription.periodStart).toLocaleDateString("en-IN", { dateStyle: "medium" })} - {new Date(subscription.periodEnd).toLocaleDateString("en-IN", { dateStyle: "medium" })}
                     </td>
                   </tr>
@@ -1366,9 +1366,9 @@ export function AdminSubscriptionsPage() {
         />
       </Card>
       <Card className="mt-5 overflow-hidden p-0">
-        <div className="border-b border-line p-5">
+        <div className="border-b border-ink-200 p-5">
           <h2 className="font-bold text-ink">PSHR Innovex subscription payments awaiting verification</h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">Activate a plan only after matching the exact amount and payment reference in the company bank account.</p>
+          <p className="mt-1 text-sm leading-6 text-ink-600">Activate a plan only after matching the exact amount and payment reference in the company bank account.</p>
         </div>
         {pendingUpiSubscriptionsLoading ? (
           <div className="grid gap-3 p-5">
@@ -1377,24 +1377,24 @@ export function AdminSubscriptionsPage() {
             ))}
           </div>
         ) : pendingUpiSubscriptions.length === 0 ? (
-          <p className="p-5 text-sm text-slate-600">No direct UPI subscription payments are waiting for verification.</p>
+          <p className="p-5 text-sm text-ink-600">No direct UPI subscription payments are waiting for verification.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[940px] text-left text-sm">
-              <thead className="bg-mist text-xs uppercase text-slate-500">
+              <thead className="bg-ivory-100 text-xs uppercase text-ink-500">
                 <tr>{["Reference", "Business", "Owner", "Plan", "Amount", "Created", "State", "Action"].map((head) => <th key={head} className="px-4 py-3">{head}</th>)}</tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-ink-200">
                 {pendingSubscriptionPagination.pageItems.map((subscription) => (
                   <tr key={subscription.id}>
-                    <td className="px-4 py-4 font-bold text-ocean">{subscription.reference}</td>
+                    <td className="px-4 py-4 font-bold text-brand-text">{subscription.reference}</td>
                     <td className="px-4 py-4 font-semibold text-ink">{subscription.businessName}</td>
-                    <td className="px-4 py-4 text-slate-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{maskPhone(subscription.ownerPhone)}</p></td>
-                    <td className="px-4 py-4"><Badge variant={subscription.plan === "PRO" ? "purple" : "blue"}>{subscription.plan}</Badge></td>
+                    <td className="px-4 py-4 text-ink-600"><p>{subscription.ownerName}</p><p className="mt-1 text-xs">{maskPhone(subscription.ownerPhone)}</p></td>
+                    <td className="px-4 py-4"><Badge variant={subscription.plan === "PRO" ? "dark" : "info"}>{subscription.plan}</Badge></td>
                     <td className="px-4 py-4 font-bold">{formatINR(subscription.amount)}</td>
-                    <td className="px-4 py-4 text-slate-600">{new Date(subscription.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
+                    <td className="px-4 py-4 text-ink-600">{new Date(subscription.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</td>
                     <td className="px-4 py-4"><StatusPill status={subscription.paymentState} /></td>
-                    <td className="px-4 py-4"><Button size="sm" variant="emerald" onClick={() => setVerificationTarget(subscription)}>Verify Payment</Button></td>
+                    <td className="px-4 py-4"><Button size="sm" variant="brand" onClick={() => setVerificationTarget(subscription)}>Verify Payment</Button></td>
                   </tr>
                 ))}
               </tbody>
@@ -1418,7 +1418,7 @@ export function AdminSubscriptionsPage() {
           onClose={() => setVerificationTarget(null)}
         >
           <form className="grid gap-4" onSubmit={verifySubscriptionPayment}>
-            <div className="rounded-xl border border-berry/25 bg-berry-soft p-3 text-sm leading-6 text-red-800">
+            <div className="rounded-xl border border-kumkum-600/25 bg-kumkum-50 p-3 text-sm leading-6 text-kumkum-800">
               Confirm the payment in the PSHR Innovex bank account. Do not activate a subscription from a screenshot alone.
             </div>
             <div className="grid gap-2">
@@ -1427,7 +1427,7 @@ export function AdminSubscriptionsPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" onClick={() => setVerificationTarget(null)} disabled={savingVerification}>Cancel</Button>
-              <Button type="submit" variant="emerald" disabled={savingVerification}>{savingVerification ? "Verifying" : "Verify and Activate"}</Button>
+              <Button type="submit" variant="brand" disabled={savingVerification}>{savingVerification ? "Verifying" : "Verify and Activate"}</Button>
             </div>
           </form>
         </ActionDialog>
@@ -1448,7 +1448,7 @@ export function AdminSubscriptionsPage() {
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <h3 className="break-words text-2xl font-extrabold leading-8 text-ink">{plan.name}</h3>
                   {plan.id === "PRO" && (
-                    <Badge variant="purple" className="shrink-0 px-3 py-1.5 text-sm">
+                    <Badge variant="dark" className="shrink-0 px-3 py-1.5 text-sm">
                       Recommended
                     </Badge>
                   )}
@@ -1456,12 +1456,12 @@ export function AdminSubscriptionsPage() {
                 <p className="mt-7 text-4xl font-extrabold leading-none text-ink sm:text-5xl">
                   {formatINR(plan.price)}
                 </p>
-                <p className="mt-4 text-lg text-slate-500">{planCounts[plan.id]} paid businesses</p>
-                <p className="mt-7 text-base leading-8 text-slate-600">{plan.description}</p>
+                <p className="mt-4 text-lg text-ink-500">{planCounts[plan.id]} paid businesses</p>
+                <p className="mt-7 text-base leading-8 text-ink-600">{plan.description}</p>
                 <ul className="mt-8 space-y-4">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-3 text-base leading-7 text-slate-700">
-                      <CheckCircle2 className="mt-1 size-5 shrink-0 text-emerald" />
+                    <li key={feature} className="flex gap-3 text-base leading-7 text-ink-700">
+                      <CheckCircle2 className="mt-1 size-5 shrink-0 text-brand-text" />
                       <span className="min-w-0 break-words">{feature}</span>
                     </li>
                   ))}
@@ -1792,14 +1792,14 @@ export function AdminSupportPage({
               <button
                 type="button"
                 onClick={() => setPolicyDialogOpen(true)}
-                className="rounded-md px-2 py-1 text-xs font-bold text-emerald underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-emerald/50"
+                className="rounded-md px-2 py-1 text-xs font-bold text-brand-text underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-brand/50"
               >
                 Bot security rules
               </button>
               <button
                 type="button"
                 onClick={() => setIntentDialogOpen(true)}
-                className="rounded-md px-2 py-1 text-xs font-bold text-sky-300 underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-sky-300/50"
+                className="rounded-md px-2 py-1 text-xs font-bold text-peacock-300 underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-peacock-300/50"
               >
                 Intent ownership
               </button>
@@ -1818,10 +1818,10 @@ export function AdminSupportPage({
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Open queue" value={String(metrics.open)} detail={`${metrics.total} total tracked`} icon={MessageCircle} tone="blue" />
-        <MetricCard title="Overdue" value={String(metrics.overdue)} detail="Past first-response SLA" icon={ShieldAlert} tone="red" />
-        <MetricCard title="High priority" value={String(metrics.highPriority)} detail="Payment, access, or security risk" icon={Activity} tone="amber" />
-        <MetricCard title="Bot reply cap" value={`${supportReplyWordLimit} words`} detail="Short responses enforced" icon={CheckCircle2} tone="emerald" />
+        <MetricCard title="Open queue" value={String(metrics.open)} detail={`${metrics.total} total tracked`} icon={MessageCircle} tone="ink" />
+        <MetricCard title="Overdue" value={String(metrics.overdue)} detail="Past first-response SLA" icon={ShieldAlert} tone="kumkum" />
+        <MetricCard title="High priority" value={String(metrics.highPriority)} detail="Payment, access, or security risk" icon={Activity} tone="marigold" />
+        <MetricCard title="Bot reply cap" value={`${supportReplyWordLimit} words`} detail="Short responses enforced" icon={CheckCircle2} tone="green" />
       </div>
 
       <div className="mt-5">
@@ -1829,7 +1829,7 @@ export function AdminSupportPage({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="font-bold text-ink">Agent Queue</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Customer and business requests are assigned to available agents automatically.</p>
+              <p className="mt-1 text-sm leading-6 text-ink-600">Customer and business requests are assigned to available agents automatically.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {(["ACTIVE", "OPEN", "IN_REVIEW", "WAITING_ON_CUSTOMER", "RESOLVED", "ALL"] as const).map((status) => (
@@ -1840,8 +1840,8 @@ export function AdminSupportPage({
                   className={cn(
                     "h-8 rounded-lg border px-3 text-xs font-bold transition",
                     statusFilter === status
-                      ? "border-emerald/20 bg-emerald-soft text-emerald-deep"
-                      : "border-line bg-white text-slate-600 hover:border-ocean/30"
+                      ? "border-brand/20 bg-green-50 text-green-700"
+                      : "border-ink-200 bg-white text-ink-600 hover:border-green-700/30"
                   )}
                 >
                   {status === "ACTIVE" ? "Active" : status.replaceAll("_", " ")}
@@ -1859,7 +1859,7 @@ export function AdminSupportPage({
               </div>
             )}
             {!loading && visibleTickets.length === 0 && (
-              <div className="rounded-2xl bg-mist/80 p-5 text-sm leading-6 text-slate-600">
+              <div className="rounded-2xl bg-ivory-100/80 p-5 text-sm leading-6 text-ink-600">
                 No support tickets match this filter.
               </div>
             )}
@@ -1869,22 +1869,22 @@ export function AdminSupportPage({
                 type="button"
                 onClick={() => setSelectedTicketId(ticket.id)}
                 className={cn(
-                  "grid gap-3 rounded-lg border bg-mist p-4 text-left transition hover:border-ocean/30 hover:bg-white",
-                  ticket.isOverdue ? "border-berry/25" : "border-line"
+                  "grid gap-3 rounded-lg border bg-ivory-100 p-4 text-left transition hover:border-green-700/30 hover:bg-white",
+                  ticket.isOverdue ? "border-kumkum-600/25" : "border-ink-200"
                 )}
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={supportPriorityVariant(ticket.priority)}>{supportPriorityLabel(ticket.priority)}</Badge>
                   <StatusPill status={ticket.status} label={supportStatusLabel(ticket.status)} />
-                  <span className="text-xs font-bold uppercase text-slate-500">{ticket.code}</span>
-                  <span className={cn("ml-auto text-xs font-semibold", ticket.isOverdue ? "text-berry-deep" : "text-slate-500")}>{ticket.slaLabel} SLA</span>
+                  <span className="text-xs font-bold uppercase text-ink-500">{ticket.code}</span>
+                  <span className={cn("ml-auto text-xs font-semibold", ticket.isOverdue ? "text-kumkum-700" : "text-ink-500")}>{ticket.slaLabel} SLA</span>
                 </div>
                 <div className="grid gap-1">
                   <h3 className="font-bold text-ink">{ticket.subject}</h3>
-                  <p className="text-sm text-slate-600">{ticket.businessName}</p>
+                  <p className="text-sm text-ink-600">{ticket.businessName}</p>
                 </div>
-                <p className="rounded-lg bg-white px-3 py-2 text-sm leading-6 text-slate-600">{ticket.lastMessage}</p>
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                <p className="rounded-lg bg-white px-3 py-2 text-sm leading-6 text-ink-600">{ticket.lastMessage}</p>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-ink-500">
                   <span>Intent: {ticket.intent}</span>
                   <span>Source: {supportSourceLabel(ticket.source)}</span>
                   <span>Agent: {ticket.assignedToName ?? "Unassigned"}</span>
@@ -1917,9 +1917,9 @@ export function AdminSupportPage({
           onClose={() => setPolicyDialogOpen(false)}
         >
           <div className="grid gap-5">
-            <div className="rounded-lg bg-ink p-4 text-white">
+            <div className="rounded-lg bg-ink p-4 text-white theme-dark">
               <div className="flex items-start gap-3">
-                <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-white/10 text-emerald">
+                <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-white/10 text-brand-text">
                   <ShieldCheck className="size-5" />
                 </div>
                 <div>
@@ -1930,7 +1930,7 @@ export function AdminSupportPage({
               <ul className="mt-4 grid gap-3">
                 {supportBotGuardrails.map((rule) => (
                   <li key={rule} className="flex gap-2 text-sm leading-6 text-white/75">
-                    <CheckCircle2 className="mt-1 size-4 shrink-0 text-emerald" />
+                    <CheckCircle2 className="mt-1 size-4 shrink-0 text-brand-text" />
                     <span>{rule}</span>
                   </li>
                 ))}
@@ -1941,7 +1941,7 @@ export function AdminSupportPage({
               <h3 className="font-bold text-ink">Escalation Triggers</h3>
               <div className="mt-4 grid gap-3">
                 {supportEscalationRules.map((rule) => (
-                  <div key={rule} className="rounded-2xl bg-mist/80 p-3 text-sm leading-6 text-slate-700">
+                  <div key={rule} className="rounded-2xl bg-ivory-100/80 p-3 text-sm leading-6 text-ink-700">
                     {rule}
                   </div>
                 ))}
@@ -1976,23 +1976,23 @@ export function AdminSupportPage({
           onClose={() => setIntentDialogOpen(false)}
         >
           <div className="grid gap-4">
-            <div className="flex flex-col gap-2 rounded-lg border border-ocean/15 bg-ocean/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2 rounded-lg border border-ink-200 bg-green-700/5 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="font-bold text-ink">Shared routing policy</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Each intent maps a trigger phrase family to an owner and a safe support outcome.</p>
+                <p className="mt-1 text-sm leading-6 text-ink-600">Each intent maps a trigger phrase family to an owner and a safe support outcome.</p>
               </div>
-              <Badge variant="blue">Shared policy</Badge>
+              <Badge variant="info">Shared policy</Badge>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {supportChatbotIntents.map((intent) => (
-                <div key={intent.id} className="rounded-2xl bg-mist/80 p-4">
+                <div key={intent.id} className="rounded-2xl bg-ivory-100/80 p-4">
                   <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
                     <h3 className="min-w-0 flex-1 break-words font-bold text-ink">{intent.label}</h3>
                     <Badge variant="neutral" className="shrink-0 whitespace-normal text-center leading-4">{intent.owner}</Badge>
                   </div>
-                  <p className="mt-3 text-xs font-bold uppercase text-slate-500">{intent.trigger}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{intent.outcome}</p>
+                  <p className="mt-3 text-xs font-bold uppercase text-ink-500">{intent.trigger}</p>
+                  <p className="mt-2 text-sm leading-6 text-ink-600">{intent.outcome}</p>
                 </div>
               ))}
             </div>
@@ -2011,7 +2011,7 @@ export function AdminSupportPage({
           }}
         >
           <div className="grid gap-5">
-            <form className="grid gap-3 rounded-2xl bg-mist/80 p-4" onSubmit={createSupportAgent}>
+            <form className="grid gap-3 rounded-2xl bg-ivory-100/80 p-4" onSubmit={createSupportAgent}>
               <div className="grid gap-3 md:grid-cols-[1fr_1fr_160px_auto] md:items-end">
                 <div className="grid gap-2">
                   <Label>Name</Label>
@@ -2025,7 +2025,7 @@ export function AdminSupportPage({
                   <Label>Phone</Label>
                   <Input name="phone" type="tel" disabled={agentCreateDisabled} placeholder="+91..." />
                 </div>
-                <Button type="submit" variant="emerald" disabled={agentCreateDisabled} icon={<UserPlus className="size-4" />}>
+                <Button type="submit" variant="brand" disabled={agentCreateDisabled} icon={<UserPlus className="size-4" />}>
                   {savingAgent ? "Inviting" : "Invite"}
                 </Button>
               </div>
@@ -2042,13 +2042,13 @@ export function AdminSupportPage({
                   return (
                     <form
                       key={agent.id}
-                      className="grid gap-4 rounded-lg border border-ocean/30 bg-mist p-4"
+                      className="grid gap-4 rounded-lg border border-green-700/30 bg-ivory-100 p-4"
                       onSubmit={(event) => void updateSupportAgent(event, agent)}
                     >
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
-                        <Badge variant="emerald">Support Agent</Badge>
-                        <Badge variant={agent.rating.count > 0 ? "amber" : "neutral"} className="gap-1">
-                          <Star className={cn("size-3.5", agent.rating.count > 0 ? "fill-amber-500 text-amber-700" : "text-slate-400")} />
+                        <Badge variant="success">Support Agent</Badge>
+                        <Badge variant={agent.rating.count > 0 ? "warning" : "neutral"} className="gap-1">
+                          <Star className={cn("size-3.5", agent.rating.count > 0 ? "fill-marigold-500 text-marigold-700" : "text-ink-500")} />
                           {supportAgentRatingLabel(agent.rating)}
                         </Badge>
                       </div>
@@ -2079,7 +2079,7 @@ export function AdminSupportPage({
                         <Button
                           size="sm"
                           type="submit"
-                          variant="emerald"
+                          variant="brand"
                           disabled={editBusy}
                           icon={editBusy ? <Activity className="size-4 animate-spin" /> : <Save className="size-4" />}
                         >
@@ -2091,18 +2091,18 @@ export function AdminSupportPage({
                 }
 
                 return (
-                  <div key={agent.id} className="flex flex-col gap-3 rounded-lg border border-line p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div key={agent.id} className="flex flex-col gap-3 rounded-lg border border-ink-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <p className="min-w-0 break-words font-bold text-ink">{agent.name}</p>
-                        <Badge variant={supportAgent ? "emerald" : "blue"}>{supportAgent ? "Support Agent" : "Super Admin"}</Badge>
-                        <Badge variant={agent.rating.count > 0 ? "amber" : "neutral"} className="gap-1">
-                          <Star className={cn("size-3.5", agent.rating.count > 0 ? "fill-amber-500 text-amber-700" : "text-slate-400")} />
+                        <Badge variant={supportAgent ? "success" : "info"}>{supportAgent ? "Support Agent" : "Super Admin"}</Badge>
+                        <Badge variant={agent.rating.count > 0 ? "warning" : "neutral"} className="gap-1">
+                          <Star className={cn("size-3.5", agent.rating.count > 0 ? "fill-marigold-500 text-marigold-700" : "text-ink-500")} />
                           {supportAgentRatingLabel(agent.rating)}
                         </Badge>
                       </div>
-                      <p className="mt-1 break-words text-sm leading-6 text-slate-600">{agent.email}</p>
-                      <p className="text-xs leading-5 text-slate-500">
+                      <p className="mt-1 break-words text-sm leading-6 text-ink-600">{agent.email}</p>
+                      <p className="text-xs leading-5 text-ink-500">
                         {agent.phone ?? "No phone"} · Added {new Date(agent.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })} · {supportAgentRatingDetail(agent.rating)}
                       </p>
                     </div>
@@ -2148,7 +2148,7 @@ export function AdminSupportPage({
                 );
               })}
               {agents.length === 0 && (
-                <div className="rounded-2xl bg-mist/80 p-5 text-sm leading-6 text-slate-600">
+                <div className="rounded-2xl bg-ivory-100/80 p-5 text-sm leading-6 text-ink-600">
                   No platform agents loaded.
                 </div>
               )}
@@ -2166,50 +2166,50 @@ export function AdminSupportPage({
         >
           <div className="grid gap-3 sm:gap-4">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">Priority</p>
+              <div className="rounded-2xl bg-ivory-100/80 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">Priority</p>
                 <p className="mt-1 text-sm font-semibold text-ink">{supportPriorityLabel(selectedTicket.priority)}</p>
               </div>
-              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">Agent</p>
+              <div className="rounded-2xl bg-ivory-100/80 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">Agent</p>
                 <p className="mt-1 break-words text-sm font-semibold text-ink">{selectedTicket.assignedToName ?? "Unassigned"}</p>
               </div>
-              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">Status</p>
+              <div className="rounded-2xl bg-ivory-100/80 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">Status</p>
                 <p className="mt-1 text-sm font-semibold text-ink">{supportStatusLabel(selectedTicket.status)}</p>
               </div>
-              <div className="rounded-2xl bg-mist/80 p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">SLA</p>
-                <p className={cn("mt-1 text-sm font-semibold", selectedTicket.isOverdue ? "text-berry-deep" : "text-ink")}>{selectedTicket.slaLabel}</p>
+              <div className="rounded-2xl bg-ivory-100/80 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">SLA</p>
+                <p className={cn("mt-1 text-sm font-semibold", selectedTicket.isOverdue ? "text-kumkum-700" : "text-ink")}>{selectedTicket.slaLabel}</p>
               </div>
             </div>
             {selectedTicket.feedback && (
-              <div className="rounded-lg border border-emerald/20 bg-emerald/5 p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-emerald">Agent feedback</p>
+              <div className="rounded-lg border border-brand/20 bg-brand/5 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-brand-text">Agent feedback</p>
                 <p className="mt-1 text-sm font-semibold text-ink">{selectedTicket.feedback.rating}/5 rating</p>
-                {selectedTicket.feedback.comment && <p className="mt-2 text-sm leading-6 text-slate-600">{selectedTicket.feedback.comment}</p>}
+                {selectedTicket.feedback.comment && <p className="mt-2 text-sm leading-6 text-ink-600">{selectedTicket.feedback.comment}</p>}
               </div>
             )}
             <div className="grid gap-2 sm:grid-cols-3 sm:gap-3">
-              <div className="min-w-0 rounded-lg border border-line p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">Requester</p>
+              <div className="min-w-0 rounded-lg border border-ink-200 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">Requester</p>
                 <p className="mt-1 break-words text-sm font-semibold text-ink">{selectedTicket.requesterName ?? selectedTicket.requesterBusinessName ?? "Unknown"}</p>
-                <p className="mt-1 break-words text-xs leading-5 text-slate-500">{maskEmail(selectedTicket.requesterEmail)} · {maskPhone(selectedTicket.requesterPhone)}</p>
+                <p className="mt-1 break-words text-xs leading-5 text-ink-500">{maskEmail(selectedTicket.requesterEmail)} · {maskPhone(selectedTicket.requesterPhone)}</p>
               </div>
-              <div className="min-w-0 rounded-lg border border-line p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">References</p>
-                <p className="mt-1 break-words text-sm leading-6 text-slate-600">Order: {selectedTicket.orderReference ?? "Not provided"}</p>
-                <p className="break-words text-sm leading-6 text-slate-600">Payment: {selectedTicket.paymentReference ?? "Not provided"}</p>
+              <div className="min-w-0 rounded-lg border border-ink-200 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">References</p>
+                <p className="mt-1 break-words text-sm leading-6 text-ink-600">Order: {selectedTicket.orderReference ?? "Not provided"}</p>
+                <p className="break-words text-sm leading-6 text-ink-600">Payment: {selectedTicket.paymentReference ?? "Not provided"}</p>
               </div>
-              <div className="min-w-0 rounded-lg border border-line p-2.5 sm:p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">Context</p>
-                <p className="mt-1 break-words text-sm leading-6 text-slate-600">{supportSourceLabel(selectedTicket.source)} · {selectedTicket.portal}</p>
-                <p className="break-words text-sm leading-6 text-slate-600">{selectedTicket.path ?? "No page path"}</p>
+              <div className="min-w-0 rounded-lg border border-ink-200 p-2.5 sm:p-3">
+                <p className="text-xs font-bold uppercase text-ink-500">Context</p>
+                <p className="mt-1 break-words text-sm leading-6 text-ink-600">{supportSourceLabel(selectedTicket.source)} · {selectedTicket.portal}</p>
+                <p className="break-words text-sm leading-6 text-ink-600">{selectedTicket.path ?? "No page path"}</p>
               </div>
             </div>
-            <div className="rounded-lg border border-mango/30 bg-mango-soft p-2.5 sm:p-3">
-              <p className="text-xs font-bold uppercase text-mango-deep">Secure handling</p>
-              <p className="mt-1 text-sm leading-6 text-mango-deep">{selectedTicket.safeHandlingNote}</p>
+            <div className="rounded-lg border border-marigold-500/30 bg-marigold-50 p-2.5 sm:p-3">
+              <p className="text-xs font-bold uppercase text-marigold-700">Secure handling</p>
+              <p className="mt-1 text-sm leading-6 text-marigold-700">{selectedTicket.safeHandlingNote}</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-3 sm:gap-3">
               <div className="grid gap-2">
@@ -2261,20 +2261,20 @@ export function AdminSupportPage({
                 </select>
               </div>
             </div>
-            <div className="rounded-lg border border-line">
-              <div className="border-b border-line px-3 py-2">
-                <p className="text-xs font-bold uppercase text-slate-500">Conversation</p>
+            <div className="rounded-lg border border-ink-200">
+              <div className="border-b border-ink-200 px-3 py-2">
+                <p className="text-xs font-bold uppercase text-ink-500">Conversation</p>
               </div>
               <div ref={supportConversationScrollRef} className="max-h-[30svh] min-h-32 overflow-y-auto p-2.5 sm:max-h-64 sm:p-3 xl:max-h-72">
                 <div className="grid gap-2.5 sm:gap-3">
                   {messagePagination.pageItems.map((message) => (
-                    <div key={message.id} className={cn("grid gap-1 rounded-lg p-2.5 sm:p-3", message.sender === "AGENT" ? "bg-emerald/10" : message.sender === "BOT" ? "bg-blue-50" : "bg-mist")}>
-                      <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase text-slate-500">
+                    <div key={message.id} className={cn("grid gap-1 rounded-lg p-2.5 sm:p-3", message.sender === "AGENT" ? "bg-brand/10" : message.sender === "BOT" ? "bg-peacock-50" : "bg-ivory-100")}>
+                      <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase text-ink-500">
                         <span>{message.sender}</span>
                         <span>{supportMessageAuthor(message)}</span>
                         <span>{new Date(message.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</span>
                       </div>
-                      <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">{message.body}</p>
+                      <p className="whitespace-pre-wrap text-sm leading-6 text-ink-700">{message.body}</p>
                     </div>
                   ))}
                 </div>
@@ -2290,7 +2290,7 @@ export function AdminSupportPage({
               />
             </div>
             {selectedTicket.status !== "CLOSED" && (
-              <form className="grid gap-3 rounded-lg border border-line p-2.5 sm:p-3" onSubmit={sendAgentReply}>
+              <form className="grid gap-3 rounded-lg border border-ink-200 p-2.5 sm:p-3" onSubmit={sendAgentReply}>
                 <div className="grid gap-2">
                   <Label>Agent reply</Label>
                   <Textarea ref={agentReplyTextareaRef} name="body" minLength={2} maxLength={1200} rows={3} className="min-h-20" placeholder="Write the response to the requester" required />
@@ -2312,7 +2312,7 @@ export function AdminSupportPage({
                   </div>
                   <div className="flex flex-wrap justify-end gap-2">
                     <Button className="w-full sm:w-auto" variant="secondary" type="button" onClick={() => setSelectedTicketId(null)}>Close</Button>
-                    <Button className="w-full sm:w-auto" type="submit" variant="emerald" disabled={savingTicket || sendingReply}>{sendingReply ? "Sending" : "Send Reply"}</Button>
+                    <Button className="w-full sm:w-auto" type="submit" variant="brand" disabled={savingTicket || sendingReply}>{sendingReply ? "Sending" : "Send Reply"}</Button>
                   </div>
                 </div>
               </form>
@@ -2385,10 +2385,10 @@ function supportPriorityLabel(priority: SupportTicket["priority"]) {
   }
 }
 
-function supportPriorityVariant(priority: SupportTicket["priority"]): "red" | "amber" | "blue" {
-  if (priority === "HIGH") return "red";
-  if (priority === "MEDIUM") return "amber";
-  return "blue";
+function supportPriorityVariant(priority: SupportTicket["priority"]): "danger" | "warning" | "info" {
+  if (priority === "HIGH") return "danger";
+  if (priority === "MEDIUM") return "warning";
+  return "info";
 }
 
 function supportSourceLabel(source: SupportTicket["source"]) {
@@ -2486,10 +2486,10 @@ export function AdminLogsPage() {
         }
       />
       <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Audit events" value={String(auditLogs.length)} detail="Recent admin and system actions" icon={ClipboardList} tone="blue" />
-        <MetricCard title="WhatsApp logs" value={String(whatsappLogs.length)} detail={`${formatCompact(data.metrics.whatsappMessagesSent)} sent overall`} icon={MessageCircle} tone="emerald" />
-        <MetricCard title="Payment events" value={String(paymentLogs.length)} detail={`${data.metrics.paymentFailures} failures today`} icon={CreditCard} tone="purple" />
-        <MetricCard title="Needs review" value={String(reviewCount)} detail="Failed, pending, or queued events" icon={ShieldAlert} tone={reviewCount > 0 ? "red" : "emerald"} />
+        <MetricCard title="Audit events" value={String(auditLogs.length)} detail="Recent admin and system actions" icon={ClipboardList} tone="ink" />
+        <MetricCard title="WhatsApp logs" value={String(whatsappLogs.length)} detail={`${formatCompact(data.metrics.whatsappMessagesSent)} sent overall`} icon={MessageCircle} tone="green" />
+        <MetricCard title="Payment events" value={String(paymentLogs.length)} detail={`${data.metrics.paymentFailures} failures today`} icon={CreditCard} tone="peacock" />
+        <MetricCard title="Needs review" value={String(reviewCount)} detail="Failed, pending, or queued events" icon={ShieldAlert} tone={reviewCount > 0 ? "kumkum" : "green"} />
       </div>
 
       <div className="mt-5 grid min-w-0 gap-5">
@@ -2498,32 +2498,32 @@ export function AdminLogsPage() {
             <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="font-bold text-ink">Source health</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Current log source state across audit, WhatsApp, and payment streams.</p>
+                <p className="mt-1 text-sm leading-6 text-ink-600">Current log source state across audit, WhatsApp, and payment streams.</p>
               </div>
-              <Badge variant={reviewCount > 0 ? "amber" : "emerald"}>{reviewCount > 0 ? `${reviewCount} review` : "Healthy"}</Badge>
+              <Badge variant={reviewCount > 0 ? "warning" : "success"}>{reviewCount > 0 ? `${reviewCount} review` : "Healthy"}</Badge>
             </div>
             <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-3">
               {sourceHealthItems.map((summary) => (
-                <div key={summary.source} className="min-w-0 rounded-2xl bg-mist/80/50 p-3">
+                <div key={summary.source} className="min-w-0 rounded-2xl bg-ivory-100/80/50 p-3">
                   <div className="flex min-w-0 flex-col gap-2">
                     <div className="min-w-0">
                       <p className="break-words font-bold leading-6 text-ink">{summary.label}</p>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">{summary.detail}</p>
+                      <p className="mt-1 text-xs leading-5 text-ink-500">{summary.detail}</p>
                     </div>
                     <LogStatusBadge status={summary.status} className="self-start" />
                   </div>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                     <div className="min-w-0 rounded-lg bg-white px-1.5 py-2">
                       <p className="text-lg font-extrabold text-ink">{summary.count}</p>
-                      <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-slate-400 sm:text-[10px]">Events</p>
+                      <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-ink-500 sm:text-[10px]">Events</p>
                     </div>
                     <div className="min-w-0 rounded-lg bg-white px-1.5 py-2">
-                      <p className="text-lg font-bold text-berry-deep">{summary.failedCount}</p>
-                      <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-slate-400 sm:text-[10px]">Failed</p>
+                      <p className="text-lg font-bold text-kumkum-700">{summary.failedCount}</p>
+                      <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-ink-500 sm:text-[10px]">Failed</p>
                     </div>
                     <div className="min-w-0 rounded-lg bg-white px-1.5 py-2">
-                      <p className="text-lg font-bold text-amber-700">{summary.reviewCount}</p>
-                      <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-slate-400 sm:text-[10px]">Review</p>
+                      <p className="text-lg font-bold text-marigold-700">{summary.reviewCount}</p>
+                      <p className="text-[9px] font-semibold uppercase leading-4 tracking-[0.08em] text-ink-500 sm:text-[10px]">Review</p>
                     </div>
                   </div>
                 </div>
@@ -2535,21 +2535,21 @@ export function AdminLogsPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-bold text-ink">Last sync</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{lastSyncLabel}</p>
+                <p className="mt-2 text-sm leading-6 text-ink-600">{lastSyncLabel}</p>
               </div>
               <LiveSyncStatus connected={connected} source={data.source} error={error} />
             </div>
             <div className="mt-4 grid gap-2 text-sm">
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <span className="min-w-0 break-words text-slate-500">Loaded businesses</span>
+                <span className="min-w-0 break-words text-ink-500">Loaded businesses</span>
                 <span className="shrink-0 font-bold text-ink">{data.businesses.length}</span>
               </div>
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <span className="min-w-0 break-words text-slate-500">Active subscriptions</span>
+                <span className="min-w-0 break-words text-ink-500">Active subscriptions</span>
                 <span className="shrink-0 font-bold text-ink">{data.metrics.activeSubscriptions}</span>
               </div>
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <span className="min-w-0 break-words text-slate-500">Today payment failures</span>
+                <span className="min-w-0 break-words text-ink-500">Today payment failures</span>
                 <span className="shrink-0 font-bold text-ink">{data.metrics.paymentFailures}</span>
               </div>
             </div>
@@ -2557,22 +2557,22 @@ export function AdminLogsPage() {
         </div>
 
         <Card className="min-w-0 overflow-hidden p-0">
-          <div className="border-b border-line p-4 sm:p-5">
+          <div className="border-b border-ink-200 p-4 sm:p-5">
             <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <h2 className="text-lg font-extrabold text-ink">Unified log timeline</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Most recent operational events across audit, messaging, and payments.</p>
+                <p className="mt-1 text-sm leading-6 text-ink-600">Most recent operational events across audit, messaging, and payments.</p>
               </div>
-              <Badge variant="blue">{filteredLogs.length} visible</Badge>
+              <Badge variant="info">{filteredLogs.length} visible</Badge>
             </div>
             <div className="mt-4 grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1fr)_auto_auto] xl:items-center">
               <label className="relative min-w-0">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-500" />
                 <Input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search action, business, provider, reference"
-                  className="bg-mist/60 pl-10"
+                  className="bg-ivory-100/60 pl-10"
                 />
               </label>
               <div className="flex min-w-0 flex-wrap gap-2">
@@ -2585,8 +2585,8 @@ export function AdminLogsPage() {
                     className={cn(
                       "h-10 rounded-lg border px-3 text-sm font-bold transition",
                       sourceFilter === filter.value
-                        ? "border-ocean/30 bg-ocean-soft text-ocean-deep"
-                        : "border-line bg-white text-slate-600 hover:border-ocean/20 hover:text-ink"
+                        ? "border-green-700/30 bg-ivory-100 text-ink-900"
+                        : "border-ink-200 bg-white text-ink-600 hover:border-green-700/20 hover:text-ink"
                     )}
                   >
                     {filter.label}
@@ -2594,7 +2594,7 @@ export function AdminLogsPage() {
                 ))}
               </div>
               <label className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 sm:w-max">
-                <SlidersHorizontal className="size-4 shrink-0 text-slate-400" />
+                <SlidersHorizontal className="size-4 shrink-0 text-ink-500" />
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value)}
@@ -2611,9 +2611,9 @@ export function AdminLogsPage() {
             </div>
           </div>
           {filteredLogs.length === 0 ? (
-            <div className="p-6 text-sm leading-6 text-slate-600">No matching log events found for the selected filters.</div>
+            <div className="p-6 text-sm leading-6 text-ink-600">No matching log events found for the selected filters.</div>
           ) : (
-            <div className="divide-y divide-line" aria-label="Unified log timeline events">
+            <div className="divide-y divide-ink-200" aria-label="Unified log timeline events">
               {page.pageItems.map((log) => (
                 <div key={`${log.source}-${log.id}`} className="grid min-w-0 gap-3 px-4 py-4 sm:px-5 xl:grid-cols-[minmax(0,1fr)_minmax(11rem,15rem)_minmax(8rem,10rem)] xl:items-center">
                   <div className="min-w-0">
@@ -2621,16 +2621,16 @@ export function AdminLogsPage() {
                       <Badge variant={adminLogSourceVariant(log.source)}>{adminLogSourceLabel(log.source)}</Badge>
                       <p className="min-w-0 break-words text-sm font-bold leading-6 text-ink sm:text-base">{formatAdminLogAction(log.action)}</p>
                     </div>
-                    <p className="mt-1 break-words text-sm leading-6 text-slate-600">{log.summary}</p>
-                    <div className="mt-2 flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-slate-500">
+                    <p className="mt-1 break-words text-sm leading-6 text-ink-600">{log.summary}</p>
+                    <div className="mt-2 flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-ink-500">
                       <span className="min-w-0 break-words">{log.businessName}</span>
                       {log.actorName && <span className="min-w-0 break-words">{log.actorName}</span>}
                       {log.reference && <span className="min-w-0 break-all">Ref {log.reference}</span>}
                     </div>
                   </div>
-                  <p className="min-w-0 break-words text-sm leading-6 text-slate-600 xl:text-right">{log.detail ?? log.entity}</p>
+                  <p className="min-w-0 break-words text-sm leading-6 text-ink-600 xl:text-right">{log.detail ?? log.entity}</p>
                   <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 xl:block">
-                    <p className="min-w-0 break-words text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-slate-400">{formatAdminLogDate(log.occurredAt)}</p>
+                    <p className="min-w-0 break-words text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-ink-500">{formatAdminLogDate(log.occurredAt)}</p>
                     <LogStatusBadge status={log.status} className="xl:mt-2" />
                   </div>
                 </div>
@@ -3083,27 +3083,27 @@ export function AdminCouponsPage() {
         body="Create platform subscription coupons and customer checkout coupons assigned to a business."
         tone="dark"
         action={
-          <Button type="button" variant="emerald" icon={<ActiveCouponAddIcon className="size-4" />} onClick={() => setCouponModal(couponView)}>
+          <Button type="button" variant="brand" icon={<ActiveCouponAddIcon className="size-4" />} onClick={() => setCouponModal(couponView)}>
             {activeCouponAddLabel}
           </Button>
         }
       />
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard title="Subscription coupons" value={String(subscriptionCoupons.length)} detail={`${activeSubscriptionCoupons} active for business plan payments`} icon={FileClock} tone="blue" />
-        <MetricCard title="Customer coupons" value={String(businessCoupons.length)} detail={`${activeBusinessCoupons} active on public checkout`} icon={TicketPercent} tone="emerald" />
-        <MetricCard title="Total redemptions" value={String(totalCouponRedemptions)} detail="Subscription and checkout coupon usage" icon={TrendingUp} tone="purple" />
+        <MetricCard title="Subscription coupons" value={String(subscriptionCoupons.length)} detail={`${activeSubscriptionCoupons} active for business plan payments`} icon={FileClock} tone="ink" />
+        <MetricCard title="Customer coupons" value={String(businessCoupons.length)} detail={`${activeBusinessCoupons} active on public checkout`} icon={TicketPercent} tone="green" />
+        <MetricCard title="Total redemptions" value={String(totalCouponRedemptions)} detail="Subscription and checkout coupon usage" icon={TrendingUp} tone="peacock" />
       </div>
 
       <div className="coupon-mode-switch mt-5 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-clay-sm p-2 shadow-clay-sm">
-        <div className="relative grid min-h-20 grid-cols-2 gap-1 overflow-hidden rounded-md bg-slate-950/[0.03] p-1" role="tablist" aria-label="Coupon category">
+        <div className="relative grid min-h-20 grid-cols-2 gap-1 overflow-hidden rounded-md bg-ink-950/[0.03] p-1" role="tablist" aria-label="Coupon category">
           <span
             aria-hidden="true"
             className={cn(
-              "absolute inset-y-1 left-1 w-[calc(50%_-_0.25rem)] rounded-md bg-ink shadow-clay transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              "absolute inset-y-1 left-1 w-[calc(50%_-_0.25rem)] rounded-md bg-ink shadow-clay transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] theme-dark",
               couponView === "customer" && "translate-x-[calc(100%_+_0.5rem)]"
             )}
           />
-          <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md border border-white/80 bg-white text-ocean shadow-clay-sm sm:grid">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 hidden size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-md border border-white/80 bg-white text-brand-text shadow-clay-sm sm:grid">
             <ArrowLeftRight className="size-4" />
           </span>
           {[
@@ -3143,29 +3143,29 @@ export function AdminCouponsPage() {
                   setCouponView(option.value === "subscription" ? "customer" : "subscription");
                 }}
                 className={cn(
-                  "relative z-10 grid min-h-16 min-w-0 content-center rounded-md px-3 py-2 text-left transition duration-300 focus:outline-none focus:ring-4 focus:ring-ocean/10",
-                  selected ? "text-white" : "text-slate-600 hover:bg-white/75 hover:text-ink"
+                  "relative z-10 grid min-h-16 min-w-0 content-center rounded-md px-3 py-2 text-left transition duration-300 focus:outline-none focus:ring-4 focus:ring-green-700/10",
+                  selected ? "text-white" : "text-ink-600 hover:bg-white/75 hover:text-ink"
                 )}
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span
                     className={cn(
                       "coupon-mode-icon grid size-9 shrink-0 place-items-center rounded-md border transition duration-300",
-                      selected ? "border-white/15 bg-white/15 text-white" : "border-line bg-white text-ocean shadow-clay-sm"
+                      selected ? "border-white/15 bg-white/15 text-white" : "border-ink-200 bg-white text-brand-text shadow-clay-sm"
                     )}
                   >
                     <OptionIcon className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-bold">{option.label}</span>
-                    <span className={cn("mt-0.5 block truncate text-xs leading-5", selected ? "text-white/70" : "text-slate-500")}>
+                    <span className={cn("mt-0.5 block truncate text-xs leading-5", selected ? "text-white/70" : "text-ink-500")}>
                       {option.caption}
                     </span>
                   </span>
                   <span
                     className={cn(
                       "shrink-0 rounded-md px-2 py-1 text-xs font-bold transition duration-300",
-                      selected ? "bg-white/15 text-white" : "bg-white text-slate-600 shadow-clay-sm"
+                      selected ? "bg-white/15 text-white" : "bg-white text-ink-600 shadow-clay-sm"
                     )}
                   >
                     {option.activeCount}/{option.count}
@@ -3183,16 +3183,16 @@ export function AdminCouponsPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="flex items-center gap-2 font-bold text-ink">
-                <FileClock className="size-5 text-ocean" />
+                <FileClock className="size-5 text-brand-text" />
                 Subscription coupons
               </h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">Use these for business plan payments before checkout is sent to Cashfree.</p>
+              <p className="mt-1 text-sm leading-6 text-ink-600">Use these for business plan payments before checkout is sent to Cashfree.</p>
             </div>
-            <Badge variant="blue">{activeSubscriptionCoupons} active</Badge>
+            <Badge variant="info">{activeSubscriptionCoupons} active</Badge>
           </div>
           <div className={couponFilterToolbarClassName}>
             <div className={couponSearchControlClassName}>
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-500" />
               <Input
                 className="pl-9"
                 placeholder="Search code or description"
@@ -3251,13 +3251,13 @@ export function AdminCouponsPage() {
               Reset
             </Button>
           </div>
-          <p className="mt-3 text-xs font-semibold text-slate-500">{visibleSubscriptionCoupons.length} of {subscriptionCoupons.length} shown</p>
-          <div className="mt-4 w-full max-w-full overflow-x-scroll overscroll-x-contain rounded-lg border border-line pb-2">
+          <p className="mt-3 text-xs font-semibold text-ink-500">{visibleSubscriptionCoupons.length} of {subscriptionCoupons.length} shown</p>
+          <div className="mt-4 w-full max-w-full overflow-x-scroll overscroll-x-contain rounded-lg border border-ink-200 pb-2">
             <table className="w-full min-w-[1080px] border-separate border-spacing-0 text-left text-sm">
               <thead>
                 <tr>
                   {["Code", "Status", "Plan", "Discount", "Minimum", "Usage", "Window", "Created", "Actions"].map((heading) => (
-                    <th key={heading} className="border-b border-line bg-mist px-3 py-3 text-xs font-bold uppercase text-slate-500">
+                    <th key={heading} className="border-b border-ink-200 bg-ivory-100 px-3 py-3 text-xs font-bold uppercase text-ink-500">
                       {heading}
                     </th>
                   ))}
@@ -3270,23 +3270,23 @@ export function AdminCouponsPage() {
                     const expiresAt = couponDateLabel(coupon.expiresAt);
                     return (
                       <tr key={coupon.id} className="align-top">
-                        <td className="border-b border-line px-3 py-3">
+                        <td className="border-b border-ink-200 px-3 py-3">
                           <p className="font-bold text-ink">{coupon.code}</p>
-                          {coupon.description && <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">{coupon.description}</p>}
+                          {coupon.description && <p className="mt-1 max-w-xs text-xs leading-5 text-ink-500">{coupon.description}</p>}
                         </td>
-                        <td className="border-b border-line px-3 py-3">
-                          <Badge variant={coupon.isActive ? "emerald" : "neutral"}>{coupon.isActive ? "Active" : "Inactive"}</Badge>
+                        <td className="border-b border-ink-200 px-3 py-3">
+                          <Badge variant={coupon.isActive ? "success" : "neutral"}>{coupon.isActive ? "Active" : "Inactive"}</Badge>
                         </td>
-                      <td className="border-b border-line px-3 py-3">{adminPlanLabel(coupon.plan)}</td>
-                      <td className="border-b border-line px-3 py-3 font-semibold text-ink">{adminCouponDiscountLabel(coupon)}</td>
-                      <td className="border-b border-line px-3 py-3">{coupon.minimumAmount > 0 ? formatINR(coupon.minimumAmount) : "No minimum"}</td>
-                      <td className="border-b border-line px-3 py-3">{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</td>
-                      <td className="border-b border-line px-3 py-3">
+                      <td className="border-b border-ink-200 px-3 py-3">{adminPlanLabel(coupon.plan)}</td>
+                      <td className="border-b border-ink-200 px-3 py-3 font-semibold text-ink">{adminCouponDiscountLabel(coupon)}</td>
+                      <td className="border-b border-ink-200 px-3 py-3">{coupon.minimumAmount > 0 ? formatINR(coupon.minimumAmount) : "No minimum"}</td>
+                      <td className="border-b border-ink-200 px-3 py-3">{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</td>
+                      <td className="border-b border-ink-200 px-3 py-3">
                         <p>{startsAt ? `Starts ${startsAt}` : "Starts now"}</p>
-                        <p className="mt-1 text-xs text-slate-500">{expiresAt ? `Expires ${expiresAt}` : "No expiry"}</p>
+                        <p className="mt-1 text-xs text-ink-500">{expiresAt ? `Expires ${expiresAt}` : "No expiry"}</p>
                       </td>
-                      <td className="border-b border-line px-3 py-3">{couponDateLabel(coupon.createdAt)}</td>
-                      <td className="border-b border-line px-3 py-3">
+                      <td className="border-b border-ink-200 px-3 py-3">{couponDateLabel(coupon.createdAt)}</td>
+                      <td className="border-b border-ink-200 px-3 py-3">
                         <div className="flex min-w-44 items-center justify-end gap-2">
                           <StatusSwitch
                             checked={coupon.isActive}
@@ -3305,7 +3305,7 @@ export function AdminCouponsPage() {
                 })}
                   {visibleSubscriptionCoupons.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-3 py-6 text-center text-sm text-slate-500">
+                      <td colSpan={9} className="px-3 py-6 text-center text-sm text-ink-500">
                         {subscriptionCoupons.length === 0 ? "No subscription coupons are configured yet." : "No subscription coupons match the current filters."}
                       </td>
                     </tr>
@@ -3331,16 +3331,16 @@ export function AdminCouponsPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h2 className="flex items-center gap-2 font-bold text-ink">
-                  <TicketPercent className="size-5 text-emerald" />
+                  <TicketPercent className="size-5 text-brand-text" />
                   Customer checkout coupons
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-600">Assign these to a business so customers can apply them on that business checkout.</p>
+                <p className="mt-1 text-sm leading-6 text-ink-600">Assign these to a business so customers can apply them on that business checkout.</p>
               </div>
-              <Badge variant="emerald">{activeBusinessCoupons} active</Badge>
+              <Badge variant="success">{activeBusinessCoupons} active</Badge>
             </div>
             <div className={couponFilterToolbarClassName}>
               <div className={couponSearchControlClassName}>
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-500" />
                 <Input
                   className="pl-9"
                   placeholder="Search code, business, owner, phone"
@@ -3413,13 +3413,13 @@ export function AdminCouponsPage() {
                 Reset
               </Button>
             </div>
-            <p className="mt-3 text-xs font-semibold text-slate-500">{visibleBusinessCoupons.length} of {businessCoupons.length} shown</p>
-            <div className="mt-4 w-full max-w-full overflow-x-scroll overscroll-x-contain rounded-lg border border-line pb-2">
+            <p className="mt-3 text-xs font-semibold text-ink-500">{visibleBusinessCoupons.length} of {businessCoupons.length} shown</p>
+            <div className="mt-4 w-full max-w-full overflow-x-scroll overscroll-x-contain rounded-lg border border-ink-200 pb-2">
               <table className="w-full min-w-[1180px] border-separate border-spacing-0 text-left text-sm">
                 <thead>
                   <tr>
                   {["Code", "Business", "Status", "Availability", "Discount", "Min order", "Usage", "Window", "Created", "Actions"].map((heading) => (
-                    <th key={heading} className="border-b border-line bg-mist px-3 py-3 text-xs font-bold uppercase text-slate-500">
+                    <th key={heading} className="border-b border-ink-200 bg-ivory-100 px-3 py-3 text-xs font-bold uppercase text-ink-500">
                       {heading}
                     </th>
                   ))}
@@ -3434,29 +3434,29 @@ export function AdminCouponsPage() {
                   const expiresAt = couponDateLabel(coupon.expiresAt);
                   return (
                     <tr key={coupon.id} className="align-top">
-                      <td className="border-b border-line px-3 py-3">
+                      <td className="border-b border-ink-200 px-3 py-3">
                         <p className="font-bold text-ink">{coupon.code}</p>
-                        {coupon.description && <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">{coupon.description}</p>}
+                        {coupon.description && <p className="mt-1 max-w-xs text-xs leading-5 text-ink-500">{coupon.description}</p>}
                       </td>
-                      <td className="border-b border-line px-3 py-3">
+                      <td className="border-b border-ink-200 px-3 py-3">
                         <p className="font-semibold text-ink">{coupon.business.name}</p>
-                        <p className="mt-1 text-xs text-slate-500">{coupon.business.ownerName} · {maskPhone(coupon.business.phone)}</p>
+                        <p className="mt-1 text-xs text-ink-500">{coupon.business.ownerName} · {maskPhone(coupon.business.phone)}</p>
                       </td>
-                      <td className="border-b border-line px-3 py-3">
-                        <Badge variant={coupon.isActive ? "emerald" : "neutral"}>{coupon.isActive ? "Active" : "Inactive"}</Badge>
+                      <td className="border-b border-ink-200 px-3 py-3">
+                        <Badge variant={coupon.isActive ? "success" : "neutral"}>{coupon.isActive ? "Active" : "Inactive"}</Badge>
                       </td>
-                      <td className="border-b border-line px-3 py-3">
-                        <Badge variant={liveForCustomers ? "blue" : "amber"}>{liveForCustomers ? "Public usable" : "Business not live"}</Badge>
+                      <td className="border-b border-ink-200 px-3 py-3">
+                        <Badge variant={liveForCustomers ? "info" : "warning"}>{liveForCustomers ? "Public usable" : "Business not live"}</Badge>
                       </td>
-                      <td className="border-b border-line px-3 py-3 font-semibold text-ink">{adminCouponDiscountLabel(coupon)}</td>
-                      <td className="border-b border-line px-3 py-3">{coupon.minimumOrderAmount > 0 ? formatINR(coupon.minimumOrderAmount) : "No minimum"}</td>
-                      <td className="border-b border-line px-3 py-3">{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</td>
-                      <td className="border-b border-line px-3 py-3">
+                      <td className="border-b border-ink-200 px-3 py-3 font-semibold text-ink">{adminCouponDiscountLabel(coupon)}</td>
+                      <td className="border-b border-ink-200 px-3 py-3">{coupon.minimumOrderAmount > 0 ? formatINR(coupon.minimumOrderAmount) : "No minimum"}</td>
+                      <td className="border-b border-ink-200 px-3 py-3">{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</td>
+                      <td className="border-b border-ink-200 px-3 py-3">
                         <p>{startsAt ? `Starts ${startsAt}` : "Starts now"}</p>
-                        <p className="mt-1 text-xs text-slate-500">{expiresAt ? `Expires ${expiresAt}` : "No expiry"}</p>
+                        <p className="mt-1 text-xs text-ink-500">{expiresAt ? `Expires ${expiresAt}` : "No expiry"}</p>
                       </td>
-                      <td className="border-b border-line px-3 py-3">{couponDateLabel(coupon.createdAt)}</td>
-                      <td className="border-b border-line px-3 py-3">
+                      <td className="border-b border-ink-200 px-3 py-3">{couponDateLabel(coupon.createdAt)}</td>
+                      <td className="border-b border-ink-200 px-3 py-3">
                         <div className="flex min-w-44 items-center justify-end gap-2">
                           <StatusSwitch
                             checked={coupon.isActive}
@@ -3475,7 +3475,7 @@ export function AdminCouponsPage() {
                 })}
                   {visibleBusinessCoupons.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="px-3 py-6 text-center text-sm text-slate-500">
+                      <td colSpan={10} className="px-3 py-6 text-center text-sm text-ink-500">
                         {businessCoupons.length === 0 ? "No customer checkout coupons are configured yet." : "No customer checkout coupons match the current filters."}
                       </td>
                     </tr>
@@ -3552,7 +3552,7 @@ export function AdminCouponsPage() {
             </div>
             <div className="mt-2 flex flex-wrap justify-end gap-2 md:col-span-2">
               <Button type="button" variant="secondary" onClick={() => setCouponModal(null)}>Cancel</Button>
-              <Button type="submit" variant="emerald" disabled={savingSubscriptionCoupon} icon={savingSubscriptionCoupon ? <Activity className="size-4 animate-spin" /> : <FileClock className="size-4" />}>
+              <Button type="submit" variant="brand" disabled={savingSubscriptionCoupon} icon={savingSubscriptionCoupon ? <Activity className="size-4 animate-spin" /> : <FileClock className="size-4" />}>
                 {savingSubscriptionCoupon ? "Creating" : "Create subscription coupon"}
               </Button>
             </div>
@@ -3618,7 +3618,7 @@ export function AdminCouponsPage() {
             </div>
             <div className="mt-2 flex flex-wrap justify-end gap-2 md:col-span-2">
               <Button type="button" variant="secondary" onClick={() => setCouponModal(null)}>Cancel</Button>
-              <Button type="submit" variant="emerald" disabled={savingBusinessCoupon || businesses.length === 0} icon={savingBusinessCoupon ? <Activity className="size-4 animate-spin" /> : <TicketPercent className="size-4" />}>
+              <Button type="submit" variant="brand" disabled={savingBusinessCoupon || businesses.length === 0} icon={savingBusinessCoupon ? <Activity className="size-4 animate-spin" /> : <TicketPercent className="size-4" />}>
                 {savingBusinessCoupon ? "Creating" : "Create customer coupon"}
               </Button>
             </div>
@@ -3718,9 +3718,9 @@ export function AdminSettingsPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="font-bold text-ink">PSHR Innovex payment receiver</h2>
-              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">Customer order payments use the configured platform gateway. The saved UPI receiver is only for manual fallback and direct UPI subscription requests.</p>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-ink-600">Customer order payments use the configured platform gateway. The saved UPI receiver is only for manual fallback and direct UPI subscription requests.</p>
             </div>
-            {paymentSettings && <Badge variant={paymentSettings.activeProvider === "UPI" ? "amber" : "emerald"}>{paymentSettings.activeProvider === "UPI" ? "Direct UPI selected" : "Cashfree selected"}</Badge>}
+            {paymentSettings && <Badge variant={paymentSettings.activeProvider === "UPI" ? "warning" : "success"}>{paymentSettings.activeProvider === "UPI" ? "Direct UPI selected" : "Cashfree selected"}</Badge>}
           </div>
           {paymentSettings ? (
             <form key={`${paymentSettings.updatedAt}-${paymentSettings.activeProvider}`} className="mt-5 grid gap-4" onSubmit={savePaymentSettings}>
@@ -3734,18 +3734,18 @@ export function AdminSettingsPage() {
                   <Input name="upiName" defaultValue={paymentSettings.upiName} maxLength={80} required />
                 </div>
               </div>
-              <label className="flex items-center justify-between gap-4 rounded-xl border border-line bg-mist p-4">
+              <label className="flex items-center justify-between gap-4 rounded-xl border border-ink-200 bg-ivory-100 p-4">
                 <span>
                   <span className="block text-sm font-bold text-ink">Allow direct PSHR UPI QR fallback</span>
-                  <span className="mt-1 block text-xs leading-5 text-slate-500">Customer order payments still use Cashfree with signed automatic confirmation.</span>
+                  <span className="mt-1 block text-xs leading-5 text-ink-500">Customer order payments still use Cashfree with signed automatic confirmation.</span>
                 </span>
                 <input name="directUpiEnabled" type="checkbox" defaultChecked={paymentSettings.directUpiEnabled} className="size-5" />
               </label>
-              <div className="rounded-xl border border-mango/30 bg-mango-soft p-4 text-sm leading-6 text-mango-deep">
+              <div className="rounded-xl border border-marigold-500/30 bg-marigold-50 p-4 text-sm leading-6 text-marigold-700">
                 Direct UPI QR payments do not provide this app a signed gateway webhook. Manual fallback rows are verified in Platform Payments; subscription payments are verified in Subscriptions. Nothing is credited or activated until a super admin confirms the exact bank credit and UTR.
               </div>
               <div className="flex justify-end">
-                <Button type="submit" variant="emerald" disabled={savingPaymentSettings}>{savingPaymentSettings ? "Saving" : "Save Payment Receiver"}</Button>
+                <Button type="submit" variant="brand" disabled={savingPaymentSettings}>{savingPaymentSettings ? "Saving" : "Save Payment Receiver"}</Button>
               </div>
             </form>
           ) : (
@@ -3769,14 +3769,14 @@ export function AdminSettingsPage() {
             <Input name="title" defaultValue="WhatsApp controls updated" />
             <Label>Message</Label>
             <Textarea name="message" defaultValue="New campaign controls are available. Marketing messages should only be sent to opted-in customers." />
-            <Button type="submit" variant="emerald" icon={<Megaphone className="size-4" />}>Publish Announcement</Button>
+            <Button type="submit" variant="brand" icon={<Megaphone className="size-4" />}>Publish Announcement</Button>
           </form>
           {announcements.length > 0 && (
             <div className="mt-5 grid gap-3">
               {announcementPagination.pageItems.map((announcement) => (
-                <div key={announcement.id} className="rounded-2xl bg-mist/80 p-3">
+                <div key={announcement.id} className="rounded-2xl bg-ivory-100/80 p-3">
                   <p className="font-semibold text-ink">{announcement.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">{announcement.message}</p>
+                  <p className="mt-1 text-sm leading-6 text-ink-600">{announcement.message}</p>
                 </div>
               ))}
               <PaginationControls
@@ -3803,9 +3803,9 @@ export function AdminSettingsPage() {
               "Provider secrets encrypted",
               "No hardcoded API keys"
             ].map((item) => (
-              <div key={item} className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3">
-                <ShieldCheck className="size-5 text-emerald" />
-                <span className="text-sm font-semibold text-slate-700">{item}</span>
+              <div key={item} className="flex items-center gap-3 rounded-2xl bg-ivory-100/80 p-3">
+                <ShieldCheck className="size-5 text-brand-text" />
+                <span className="text-sm font-semibold text-ink-700">{item}</span>
               </div>
             ))}
           </div>
@@ -3848,7 +3848,7 @@ function BusinessTable({
     ? ["Business", "Phone", "Plan", "Account", "WhatsApp", "Payouts", "Status", "Modes", "Revenue", "Orders", "KYC", "Actions"]
     : ["Business", "Phone", "City", "Plan", "Account", "WhatsApp", "Payouts", "Status", "Modes", "Radius", "Revenue", "Orders", "KYC", "Actions"];
   const cellClassName = "min-w-0 overflow-hidden px-3 py-4 align-middle";
-  const mutedCellClassName = cn(cellClassName, "truncate text-slate-600");
+  const mutedCellClassName = cn(cellClassName, "truncate text-ink-600");
 
   return (
     <>
@@ -3889,14 +3889,14 @@ function BusinessTable({
             </>
           )}
         </colgroup>
-        <thead className="bg-mist text-xs uppercase text-slate-500">
+        <thead className="bg-ivory-100 text-xs uppercase text-ink-500">
           <tr>
             {tableHeadings.map((head) => (
               <th key={head} className={cn("px-3 py-3 font-bold", head === "Actions" && "text-center")}>{head}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-line bg-white">
+        <tbody className="divide-y divide-ink-200 bg-white">
           {visibleBusinesses.map((business) => {
             const BusinessIcon = getBusinessConsoleIcons(business.businessType).businessIcon;
             const approved = isBusinessApproved(business);
@@ -3905,30 +3905,30 @@ function BusinessTable({
             <tr key={business.id}>
               <td className={cellClassName}>
                 <div className="flex items-center gap-3">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ocean-soft text-ocean-deep">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ivory-100 text-ink-900">
                     <BusinessIcon className="size-5" />
                   </span>
                   <div className="min-w-0">
                     <p className="truncate font-bold text-ink">{business.name}</p>
-                    <p className="truncate text-xs font-semibold text-slate-500">{business.businessType}</p>
+                    <p className="truncate text-xs font-semibold text-ink-500">{business.businessType}</p>
                   </div>
                 </div>
               </td>
               <td className={mutedCellClassName}>{maskPhone(business.phone)}</td>
               {!compact && <td className={mutedCellClassName}>{business.city}</td>}
-              <td className={cellClassName}><Badge variant={business.plan === "Pro" ? "blue" : "neutral"}>{business.plan}</Badge></td>
+              <td className={cellClassName}><Badge variant={business.plan === "Pro" ? "info" : "neutral"}>{business.plan}</Badge></td>
               <td className={cellClassName}><StatusPill status={business.status} /></td>
               <td className={cellClassName}><WhatsappStatusBadge business={business} /></td>
               <td className={cellClassName}><PayoutDestinationBadge business={business} /></td>
-              <td className={cellClassName}><Badge variant={business.isOpen ? "emerald" : "red"}>{business.isOpen ? "Open" : "Closed"}</Badge></td>
-              <td className={cn(cellClassName, "text-slate-600")}><FulfillmentModesCell business={business} compact={compact} /></td>
+              <td className={cellClassName}><Badge variant={business.isOpen ? "success" : "danger"}>{business.isOpen ? "Open" : "Closed"}</Badge></td>
+              <td className={cn(cellClassName, "text-ink-600")}><FulfillmentModesCell business={business} compact={compact} /></td>
               {!compact && <td className={mutedCellClassName}>{business.serviceRadiusKm > 0 ? `${business.serviceRadiusKm.toFixed(1)} km` : "-"}</td>}
               <td className={cn(cellClassName, "truncate font-bold")}>{formatINR(business.revenue)}</td>
               <td className={cellClassName}>{business.orders}</td>
               <td className={cellClassName}>
                 <div className="grid gap-1">
                   <StatusPill status={business.kyc} />
-                  <span className="text-xs font-semibold text-slate-500">
+                  <span className="text-xs font-semibold text-ink-500">
                     {business.kycUploadedDocumentCount}/{business.kycRequiredDocumentCount} docs
                   </span>
                 </div>
@@ -3957,7 +3957,7 @@ function BusinessTable({
           })}
           {visibleBusinesses.length === 0 && (
             <tr>
-              <td colSpan={tableHeadings.length} className="px-4 py-6 text-center text-sm text-slate-500">
+              <td colSpan={tableHeadings.length} className="px-4 py-6 text-center text-sm text-ink-500">
                 No businesses match the current filters.
               </td>
             </tr>
@@ -4022,7 +4022,7 @@ function BusinessApprovalActions({
 
   if (approved) {
     return (
-      <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald/20 bg-emerald/10 px-2.5 text-xs font-extrabold text-emerald">
+      <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-brand/20 bg-brand/10 px-2.5 text-xs font-extrabold text-brand-text">
         <CheckCircle2 className="size-4" />
         Approved
       </span>
@@ -4031,7 +4031,7 @@ function BusinessApprovalActions({
 
   if (business.kycStatus === "REJECTED") {
     return (
-      <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-berry/25 bg-berry-soft px-2.5 text-xs font-extrabold text-berry-deep">
+      <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-kumkum-600/25 bg-kumkum-50 px-2.5 text-xs font-extrabold text-kumkum-700">
         <ShieldAlert className="size-4" />
         Rejected
       </span>
@@ -4045,7 +4045,7 @@ function BusinessApprovalActions({
         title={approvalTitle ?? `Approve ${business.name}`}
         disabled={approvalDisabled}
         onClick={() => onBusinessAction?.(business, "approve")}
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-emerald/25 bg-emerald px-2.5 text-xs font-extrabold text-white shadow-[0_12px_28px_rgba(18,183,106,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald/90 disabled:translate-y-0 disabled:border-line disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-brand/25 bg-brand px-2.5 text-xs font-extrabold text-ink shadow-[0_12px_28px_rgba(30,201,38,0.18)] transition hover:-translate-y-0.5 hover:bg-brand/90 disabled:translate-y-0 disabled:border-ink-200 disabled:bg-ink-100 disabled:text-ink-500 disabled:shadow-none"
       >
         <CheckCircle2 className="size-4" />
         Approve
@@ -4055,7 +4055,7 @@ function BusinessApprovalActions({
         title={rejectTitle}
         disabled={rejectDisabled}
         onClick={() => onBusinessAction?.(business, "reject")}
-        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-berry/25 bg-white px-2.5 text-xs font-extrabold text-berry-deep shadow-[0_10px_24px_rgba(220,38,38,0.08)] transition hover:-translate-y-0.5 hover:border-red-300 hover:bg-berry-soft disabled:translate-y-0 disabled:border-line disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-kumkum-600/25 bg-white px-2.5 text-xs font-extrabold text-kumkum-700 shadow-[0_10px_24px_rgba(179,49,29,0.08)] transition hover:-translate-y-0.5 hover:border-kumkum-300 hover:bg-kumkum-50 disabled:translate-y-0 disabled:border-ink-200 disabled:bg-ink-100 disabled:text-ink-500 disabled:shadow-none"
       >
         <ShieldAlert className="size-4" />
         Reject
@@ -4262,7 +4262,7 @@ function BusinessActionsMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         title={`Manage ${business.name}`}
-        className="inline-grid size-9 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-slate-600 transition hover:border-ocean/30 hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10"
+        className="inline-grid size-9 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-ink-600 transition hover:border-green-700/30 hover:bg-ivory-100 hover:text-ink focus:outline-none focus:ring-4 focus:ring-green-700/10"
         onClick={toggleMenu}
       >
         <EllipsisVertical className="size-5" />
@@ -4273,7 +4273,7 @@ function BusinessActionsMenu({
           ref={menuRef}
           role="menu"
           aria-label={`Manage ${business.name}`}
-          className="fixed z-[1000] max-h-[calc(100vh-1.5rem)] w-[248px] overflow-x-hidden overflow-y-auto rounded-2xl border border-white/80 bg-white shadow-clay-sm py-1.5 text-left shadow-[0_20px_60px_rgba(15,23,42,0.18)]"
+          className="fixed z-[1000] max-h-[calc(100vh-1.5rem)] w-[248px] overflow-x-hidden overflow-y-auto rounded-2xl border border-white/80 bg-white shadow-clay-sm py-1.5 text-left shadow-[0_20px_60px_rgba(11,13,11,0.18)]"
           style={{ top: position.top, left: position.left }}
         >
           {items.map((item) => (
@@ -4286,15 +4286,15 @@ function BusinessActionsMenu({
               className={cn(
                 "flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45",
                 item.tone === "danger"
-                  ? "text-berry-deep hover:bg-berry-soft"
-                  : "text-ink hover:bg-mist"
+                  ? "text-kumkum-700 hover:bg-kumkum-50"
+                  : "text-ink hover:bg-ivory-100"
               )}
               onClick={() => selectItem(item)}
             >
               <span
                 className={cn(
                   "grid size-7 shrink-0 place-items-center rounded-md",
-                  item.tone === "danger" ? "bg-berry-soft text-berry-deep" : "bg-ocean-soft text-ocean-deep"
+                  item.tone === "danger" ? "bg-kumkum-50 text-kumkum-700" : "bg-ivory-100 text-ink-900"
                 )}
               >
                 {item.icon}
@@ -4331,27 +4331,27 @@ function BusinessServiceAreaDialog({
     <ActionDialog title="Service area" body={business.name} onClose={onClose}>
       <form className="grid gap-4" onSubmit={onSubmit}>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="blue" className="gap-1.5">
+          <Badge variant="info" className="gap-1.5">
             <BusinessIcon className="size-3.5" />
             {business.businessType}
           </Badge>
-          <Badge variant={business.isOpen ? "emerald" : "red"}>{business.isOpen ? "Open now" : "Closed"}</Badge>
+          <Badge variant={business.isOpen ? "success" : "danger"}>{business.isOpen ? "Open now" : "Closed"}</Badge>
         </div>
 
-        <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
+        <div className="grid gap-3 rounded-2xl bg-ivory-100/80 p-3">
           <Label>Fulfillment modes</Label>
           <div className="grid gap-3 sm:grid-cols-3">
             {fulfillmentProfile.allowedModes.map((mode: ActiveFulfillmentMode) => {
               const ModeIcon = fulfillmentModeIcons[mode];
 
               return (
-                <label key={mode} className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <label key={mode} className="flex items-center gap-2 text-sm font-semibold text-ink-700">
                   <input
                     name={fulfillmentModeFlagNames[mode]}
                     type="checkbox"
                     defaultChecked={selectedModeSet.has(mode)}
                   />
-                  <ModeIcon className="size-4 text-ocean" />
+                  <ModeIcon className="size-4 text-brand-text" />
                   {fulfillmentLabelForBusinessType(business.businessType, mode)}
                 </label>
               );
@@ -4386,7 +4386,7 @@ function BusinessServiceAreaDialog({
 
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button type="submit" variant="emerald" disabled={saving}>
+          <Button type="submit" variant="brand" disabled={saving}>
             {saving ? "Saving" : "Save Service Area"}
           </Button>
         </div>
@@ -4411,7 +4411,7 @@ function BusinessWhatsappSetupDialog({
       <form className="grid gap-4" onSubmit={onSubmit}>
         <div className="flex flex-wrap items-center gap-2">
           <WhatsappStatusBadge business={business} />
-          {business.whatsappAccessTokenConfigured && <Badge variant="blue">Token saved</Badge>}
+          {business.whatsappAccessTokenConfigured && <Badge variant="info">Token saved</Badge>}
         </div>
 
         <div className="grid gap-2">
@@ -4441,7 +4441,7 @@ function BusinessWhatsappSetupDialog({
 
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button type="submit" variant="emerald" disabled={saving}>
+          <Button type="submit" variant="brand" disabled={saving}>
             {saving ? "Saving" : "Save WhatsApp Setup"}
           </Button>
         </div>
@@ -4469,19 +4469,19 @@ function BusinessPayoutSetupDialog({
           {business.platformFeeBps > 0 && <Badge variant="neutral">{(business.platformFeeBps / 100).toFixed(2)}% platform fee</Badge>}
         </div>
 
-        <div className="rounded-xl border border-emerald/20 bg-emerald/5 p-3 text-sm leading-6 text-slate-700">
+        <div className="rounded-xl border border-brand/20 bg-brand/5 p-3 text-sm leading-6 text-ink-700">
           Customer online payments settle to the PSHR Innovex gateway account. Paid orders credit this business wallet, become payout-ready in the next 9 AM IST batch within 24 hours, then admin records the transfer to the saved payout destination.
         </div>
 
         <div className="grid gap-2">
           <Label>Platform fee in basis points</Label>
           <Input name="platformFeeBps" type="number" min="0" max="5000" step="1" defaultValue={business.platformFeeBps} />
-          <p className="text-xs text-slate-500">100 basis points = 1%. The fee is retained before the wallet amount becomes payable.</p>
+          <p className="text-xs text-ink-500">100 basis points = 1%. The fee is retained before the wallet amount becomes payable.</p>
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button type="submit" variant="emerald" disabled={saving}>
+          <Button type="submit" variant="brand" disabled={saving}>
             {saving ? "Saving" : "Save Payout Setup"}
           </Button>
         </div>
@@ -4515,30 +4515,30 @@ function BusinessKycReviewDialog({
       <div className="grid gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <StatusPill status={business.kyc} />
-          <Badge variant={business.subscriptionStatus === "ACTIVE" ? "emerald" : "amber"}>
+          <Badge variant={business.subscriptionStatus === "ACTIVE" ? "success" : "warning"}>
             Subscription {business.subscriptionStatus.replaceAll("_", " ")}
           </Badge>
-          <Badge variant="blue">{business.kycUploadedDocumentCount}/{business.kycRequiredDocumentCount} docs</Badge>
+          <Badge variant="info">{business.kycUploadedDocumentCount}/{business.kycRequiredDocumentCount} docs</Badge>
         </div>
 
         {approvalBlockedReason && (
-          <p className="rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm font-semibold leading-6 text-mango-deep">
+          <p className="rounded-lg border border-marigold-500/30 bg-marigold-50 p-3 text-sm font-semibold leading-6 text-marigold-700">
             {approvalBlockedReason}
           </p>
         )}
 
         {business.kycRejectionReason && (
-          <p className="rounded-lg border border-berry/25 bg-berry-soft p-3 text-sm font-semibold leading-6 text-red-800">
+          <p className="rounded-lg border border-kumkum-600/25 bg-kumkum-50 p-3 text-sm font-semibold leading-6 text-kumkum-800">
             {business.kycRejectionReason}
           </p>
         )}
 
         <div className="grid gap-3">
           {business.kycDocuments.map((document) => (
-            <div key={document.id} className="flex items-center justify-between gap-3 rounded-2xl bg-mist/80 p-3">
+            <div key={document.id} className="flex items-center justify-between gap-3 rounded-2xl bg-ivory-100/80 p-3">
               <div className="min-w-0">
                 <p className="truncate font-bold text-ink">{document.label}</p>
-                <p className="truncate text-xs text-slate-500">
+                <p className="truncate text-xs text-ink-500">
                   {document.fileName} · {(document.fileSize / (1024 * 1024)).toFixed(1)} MB
                 </p>
               </div>
@@ -4555,7 +4555,7 @@ function BusinessKycReviewDialog({
             </div>
           ))}
           {business.kycDocuments.length === 0 && (
-            <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-600">No KYC documents uploaded yet.</p>
+            <p className="rounded-2xl bg-ivory-100/80 p-3 text-sm text-ink-600">No KYC documents uploaded yet.</p>
           )}
         </div>
 
@@ -4570,7 +4570,7 @@ function BusinessKycReviewDialog({
             Reject KYC
           </Button>
           <Button
-            variant="emerald"
+            variant="brand"
             icon={<ShieldCheck className="size-4" />}
             disabled={!business.kycReadyForApproval}
             onClick={() => onApprove(business)}
@@ -4766,9 +4766,9 @@ function FulfillmentModesCell({ business, compact = false }: { business: LiveAdm
           <span
             key={mode}
             title={label}
-            className="inline-flex h-7 items-center gap-1.5 rounded-full bg-mist px-2 text-xs font-semibold text-slate-700"
+            className="inline-flex h-7 items-center gap-1.5 rounded-full bg-ivory-100 px-2 text-xs font-semibold text-ink-700"
           >
-            <ModeIcon className="size-3.5 text-ocean" />
+            <ModeIcon className="size-3.5 text-brand-text" />
             {!compact && label}
           </span>
         );
@@ -4778,13 +4778,13 @@ function FulfillmentModesCell({ business, compact = false }: { business: LiveAdm
 }
 
 function WhatsappStatusBadge({ business }: { business: LiveAdminBusiness }) {
-  if (business.whatsappLiveEnabled) return <Badge variant="emerald">Enabled</Badge>;
-  if (business.whatsappConnected) return <Badge variant="amber">Pending</Badge>;
+  if (business.whatsappLiveEnabled) return <Badge variant="success">Enabled</Badge>;
+  if (business.whatsappConnected) return <Badge variant="warning">Pending</Badge>;
   return <Badge variant="neutral">Not set</Badge>;
 }
 
 function PayoutSetupStatusBadge({ business }: { business: LiveAdminBusiness }) {
-  if (business.platformFeeBps > 0) return <Badge variant="emerald">Wallet fee set</Badge>;
+  if (business.platformFeeBps > 0) return <Badge variant="success">Wallet fee set</Badge>;
   return <Badge variant="neutral">Platform wallet</Badge>;
 }
 
@@ -4821,8 +4821,8 @@ function PayoutDestinationBadge({ business }: { business: LiveAdminBusiness }) {
 
   return (
     <span className="inline-flex max-w-full flex-col gap-1">
-      <Badge variant={configured ? "emerald" : "amber"}>{business.payoutMethod === "UPI" ? "UPI" : "Bank"}</Badge>
-      <span className="truncate text-xs font-semibold text-slate-500">{payoutDestinationLabel(business)}</span>
+      <Badge variant={configured ? "success" : "warning"}>{business.payoutMethod === "UPI" ? "UPI" : "Bank"}</Badge>
+      <span className="truncate text-xs font-semibold text-ink-500">{payoutDestinationLabel(business)}</span>
     </span>
   );
 }
@@ -5129,17 +5129,17 @@ function adminLogSourceLabel(source: LiveAdminLog["source"]) {
   return "Audit";
 }
 
-function adminLogSourceVariant(source: LiveAdminLog["source"]): "blue" | "emerald" | "purple" {
-  if (source === "whatsapp") return "emerald";
-  if (source === "payment") return "purple";
-  return "blue";
+function adminLogSourceVariant(source: LiveAdminLog["source"]): "info" | "success" | "dark" {
+  if (source === "whatsapp") return "success";
+  if (source === "payment") return "dark";
+  return "info";
 }
 
-function adminLogStatusVariant(status: LiveAdminLog["status"]): "neutral" | "blue" | "emerald" | "purple" | "amber" | "red" {
-  if (status === "FAILED") return "red";
-  if (status === "PENDING" || status === "QUEUED") return "amber";
-  if (status === "SENT" || status === "DELIVERED" || status === "COMPLETED" || status === "ACTIVE") return "emerald";
-  return "blue";
+function adminLogStatusVariant(status: LiveAdminLog["status"]): "neutral" | "info" | "success" | "dark" | "warning" | "danger" {
+  if (status === "FAILED") return "danger";
+  if (status === "PENDING" || status === "QUEUED") return "warning";
+  if (status === "SENT" || status === "DELIVERED" || status === "COMPLETED" || status === "ACTIVE") return "success";
+  return "info";
 }
 
 function formatAdminLogStatus(status: string) {
@@ -5189,12 +5189,12 @@ function LogStatusBadge({ status, className }: { status: LiveAdminLog["status"];
 
 function LiveSyncStatus({ connected, source, error }: { connected: boolean; source: "database" | "demo"; error: string | null }) {
   if (error) {
-    return <Badge variant="amber">Reconnecting</Badge>;
+    return <Badge variant="warning">Reconnecting</Badge>;
   }
 
   if (source === "demo") {
-    return <Badge variant="purple">Demo</Badge>;
+    return <Badge variant="dark">Demo</Badge>;
   }
 
-  return <Badge variant={connected ? "emerald" : "blue"}>{connected ? "Connected" : "Updating"}</Badge>;
+  return <Badge variant={connected ? "success" : "info"}>{connected ? "Connected" : "Updating"}</Badge>;
 }

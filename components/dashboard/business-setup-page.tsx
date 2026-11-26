@@ -214,12 +214,12 @@ export function BusinessSetupPage() {
         ? 78
         : Math.round((Math.min(activeStepIndex, setupFormStepIds.length - 1) / (setupWizardStepIds.length - 1)) * 76);
   const setupStatus = setupApproved
-    ? { label: "Completed", badge: "emerald" as const }
+    ? { label: "Completed", badge: "success" as const }
     : setupWaitingForApproval
-      ? { label: "Waiting for admin approval", badge: "purple" as const }
+      ? { label: "Waiting for admin approval", badge: "dark" as const }
       : setupSaved
-        ? { label: "Documents pending", badge: "amber" as const }
-        : { label: `Step ${activeStepIndex + 1} of ${setupWizardStepIds.length}`, badge: "blue" as const };
+        ? { label: "Documents pending", badge: "warning" as const }
+        : { label: `Step ${activeStepIndex + 1} of ${setupWizardStepIds.length}`, badge: "info" as const };
   const pageBody = setupApproved
     ? "Business setup is complete. Customer access can stay live while day-to-day edits move through Settings."
     : setupWaitingForApproval
@@ -477,18 +477,18 @@ export function BusinessSetupPage() {
       <section className="setup-progress-card mb-5 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-clay-sm p-4 shadow-clay-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-ocean">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-text">
               {setupSaved ? "Setup locked in" : wizardSteps[activeStepIndex]?.title}
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-600">{setupStatus.label}</p>
+            <p className="mt-1 text-sm font-semibold text-ink-600">{setupStatus.label}</p>
           </div>
           <div className="flex items-center gap-2 text-sm font-bold text-ink">
             <span>{setupProgressPercent}%</span>
-            <span className="text-slate-400">complete</span>
+            <span className="text-ink-500">complete</span>
           </div>
         </div>
-        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-          <span className="setup-progress-fill block h-full rounded-full bg-emerald" style={{ width: `${setupProgressPercent}%` }} />
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-ink-100">
+          <span className="setup-progress-fill block h-full rounded-full bg-brand" style={{ width: `${setupProgressPercent}%` }} />
         </div>
       </section>
 
@@ -535,7 +535,7 @@ export function BusinessSetupPage() {
       <form ref={formRef} key={business.id} noValidate className="grid gap-5" onSubmit={submitSetup}>
         <Card data-setup-step="profile" className={cn("setup-wizard-panel", activeStepId !== "profile" && "hidden")}>
           <h2 className="flex items-center gap-2 font-bold text-ink">
-            <Building2 className="size-5 text-ocean" />
+            <Building2 className="size-5 text-brand-text" />
             Owner and business
           </h2>
           <div className="mt-4 grid gap-4">
@@ -582,10 +582,10 @@ export function BusinessSetupPage() {
               <Label>WhatsApp display number</Label>
               <PhoneInput name="whatsappDisplayPhone" defaultValue={business.whatsappDisplayPhone ?? business.phone} />
             </div>
-            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-ivory-100/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Enable WhatsApp customer flow</span>
-                <span className="mt-1 block text-xs leading-5 text-slate-500">Admin approval is required before live sends.</span>
+                <span className="mt-1 block text-xs leading-5 text-ink-500">Admin approval is required before live sends.</span>
               </span>
               <input
                 name="whatsappEnabled"
@@ -593,14 +593,14 @@ export function BusinessSetupPage() {
                 defaultChecked={Boolean(business.whatsappDisplayPhone || business.whatsappConnected || business.whatsappLiveEnabled)}
                 className="peer sr-only"
               />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-ink-300 transition peer-checked:bg-brand after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
           </div>
         </Card>
 
         <Card data-setup-step="location" className={cn("setup-wizard-panel", activeStepId !== "location" && "hidden")}>
           <h2 className="flex items-center gap-2 font-bold text-ink">
-            <MapPinned className="size-5 text-emerald" />
+            <MapPinned className="size-5 text-brand-text" />
             Business location
           </h2>
           <div className="mt-4 grid gap-4">
@@ -640,7 +640,7 @@ export function BusinessSetupPage() {
               />
             </div>
             {launchSingleCityRestricted && (
-              <p className="text-xs font-semibold text-emerald">
+              <p className="text-xs font-semibold text-brand-text">
                 Pin the operating location within {launchMarket.maximumBusinessDistanceKm} km of central Bengaluru for the current launch.
               </p>
             )}
@@ -649,7 +649,7 @@ export function BusinessSetupPage() {
 
         <Card data-setup-step="service" className={cn("setup-wizard-panel", activeStepId !== "service" && "hidden")}>
           <h2 className="flex items-center gap-2 font-bold text-ink">
-            <CreditCard className="size-5 text-ocean" />
+            <CreditCard className="size-5 text-brand-text" />
             {activeCopy.transactionPlural} and service
           </h2>
           <div className="mt-4 grid gap-4">
@@ -663,11 +663,11 @@ export function BusinessSetupPage() {
                 <Input name="deliveryFee" type="number" min="0" defaultValue={business.deliveryFee} />
               </div>
             </div>
-            <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
+            <div className="grid gap-3 rounded-2xl bg-ivory-100/80 p-3">
               <Label>Fulfillment options</Label>
               <div key={activeBusinessType} className="grid gap-3 sm:grid-cols-3">
                 {activeFulfillmentProfile.allowedModes.map((mode: ActiveFulfillmentMode) => (
-                  <label key={mode} className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <label key={mode} className="flex items-center gap-2 text-sm font-semibold text-ink-700">
                     <input
                       name={fulfillmentModeFlagNames[mode]}
                       type="checkbox"
@@ -682,36 +682,36 @@ export function BusinessSetupPage() {
               <Label>Service radius in km</Label>
               <Input name="serviceRadiusKm" type="number" min="0" step="0.1" defaultValue={business.serviceRadiusKm} />
             </div>
-            <label className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3 text-sm font-semibold text-slate-700">
+            <label className="flex items-center gap-3 rounded-2xl bg-ivory-100/80 p-3 text-sm font-semibold text-ink-700">
               <input name="allowsPayLater" type="checkbox" defaultChecked={business.allowsPayLater} />
               Allow cash payment
             </label>
-            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-ivory-100/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Accept bookings after approval</span>
-                <span className="mt-1 block text-xs leading-5 text-slate-500">Customers only see it while this is on and the business hours above are open.</span>
+                <span className="mt-1 block text-xs leading-5 text-ink-500">Customers only see it while this is on and the business hours above are open.</span>
               </span>
               <input name="isOpen" type="checkbox" defaultChecked={business.isOpen} className="peer sr-only" />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-ink-300 transition peer-checked:bg-brand after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
           </div>
         </Card>
 
         <Card data-setup-step="payout" className={cn("setup-wizard-panel", activeStepId !== "payout" && "hidden")}>
           <h2 className="flex items-center gap-2 font-bold text-ink">
-            <Landmark className="size-5 text-emerald" />
+            <Landmark className="size-5 text-brand-text" />
             Wallet payout destination
           </h2>
           <div className="mt-4 grid gap-4">
-            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-mist/80 p-1">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-ivory-100/80 p-1">
               {(["UPI", "BANK_TRANSFER"] as const).map((method) => {
                 const active = payoutMethod === method;
                 return (
                   <label
                     key={method}
                     className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-bold transition ${
-                      active ? "bg-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white"
-                    }`}
+                      active ? "bg-ink text-white shadow-clay-sm" : "text-ink-600 hover:bg-white"
+                    } theme-dark`}
                   >
                     <input
                       type="radio"
@@ -760,7 +760,7 @@ export function BusinessSetupPage() {
                 </div>
               </div>
             )}
-            <div className="rounded-lg border border-emerald/20 bg-emerald/5 p-3 text-sm leading-6 text-slate-700">
+            <div className="rounded-lg border border-brand/20 bg-brand/5 p-3 text-sm leading-6 text-ink-700">
               Wallet payouts are sent to this saved destination in the daily 9 AM IST batch, within 24 hours after online payment clears.
             </div>
           </div>
@@ -776,14 +776,14 @@ export function BusinessSetupPage() {
           >
             Back
           </Button>
-          <p className="text-sm font-semibold text-slate-500">
+          <p className="text-sm font-semibold text-ink-500">
             {activeStepId === "payout"
               ? "Next: document verification"
               : `Next: ${wizardSteps[Math.min(activeStepIndex + 1, setupWizardStepIds.length - 1)]?.title}`}
           </p>
           <Button
             type={activeStepId === "payout" ? "submit" : "button"}
-            variant="emerald"
+            variant="brand"
             disabled={saving}
             icon={saving ? <LoaderCircle className="size-4 animate-spin" /> : activeStepId === "payout" ? <CheckCircle2 className="size-4" /> : <ArrowRight className="size-4" />}
             onClick={activeStepId === "payout" ? undefined : goToNextStep}
@@ -802,25 +802,25 @@ export function BusinessSetupPage() {
               src={setupApproved ? orderAnimationPaths.DELIVERED : setupWaitingForApproval ? orderAnimationPaths.bankVerificationPending : orderAnimationPaths.serviceInProgress}
               label={setupApproved ? "Business setup completed" : setupWaitingForApproval ? "Waiting for admin approval" : "Document verification pending"}
               loop={!setupApproved}
-              className="mx-auto size-28 rounded-2xl bg-mist/80 lg:mx-0"
+              className="mx-auto size-28 rounded-2xl bg-ivory-100/80 lg:mx-0"
               animationClassName="setup-completed-lottie"
               fallback={
-                <div className="grid size-20 place-items-center rounded-full border border-emerald/20 bg-emerald-soft text-emerald-deep">
+                <div className="grid size-20 place-items-center rounded-full border border-brand/20 bg-green-50 text-green-700">
                   {setupApproved ? <CheckCircle2 className="size-10" /> : <ShieldCheck className="size-10" />}
                 </div>
               }
             />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={setupApproved ? "emerald" : setupWaitingForApproval ? "purple" : "amber"}>
+                <Badge variant={setupApproved ? "success" : setupWaitingForApproval ? "dark" : "warning"}>
                   {setupApproved ? "Completed" : setupWaitingForApproval ? "Admin review" : "Documents pending"}
                 </Badge>
-                <Badge variant={subscriptionActive ? "emerald" : "amber"}>Subscription {billing.status.replaceAll("_", " ")}</Badge>
+                <Badge variant={subscriptionActive ? "success" : "warning"}>Subscription {billing.status.replaceAll("_", " ")}</Badge>
               </div>
               <h2 className="mt-3 text-2xl font-extrabold text-ink">
                 {setupApproved ? "Business setup completed" : setupWaitingForApproval ? "Waiting for admin approval" : "Setup saved. Documents are next"}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-ink-600">
                 {setupApproved
                   ? "PSHR admin approved this business. The setup wizard is finished and will not reopen."
                   : setupWaitingForApproval
@@ -832,7 +832,7 @@ export function BusinessSetupPage() {
             </div>
             <div className="flex flex-wrap gap-2 lg:justify-end">
               {!subscriptionActive && (
-                <ButtonLink href={`/dashboard/billing/checkout?plan=${billing.plan}`} variant="emerald" icon={<CreditCard className="size-4" />}>
+                <ButtonLink href={`/dashboard/billing/checkout?plan=${billing.plan}`} variant="brand" icon={<CreditCard className="size-4" />}>
                   Review billing {formatINR(currentPlan.price)}
                 </ButtonLink>
               )}
@@ -847,14 +847,14 @@ export function BusinessSetupPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={subscriptionActive ? "emerald" : "amber"}>Subscription {billing.status.replaceAll("_", " ")}</Badge>
-              <Badge variant={kyc.status === "APPROVED" ? "emerald" : kyc.status === "REJECTED" ? "red" : kyc.status === "UNDER_REVIEW" ? "purple" : "amber"}>
+              <Badge variant={subscriptionActive ? "success" : "warning"}>Subscription {billing.status.replaceAll("_", " ")}</Badge>
+              <Badge variant={kyc.status === "APPROVED" ? "success" : kyc.status === "REJECTED" ? "danger" : kyc.status === "UNDER_REVIEW" ? "dark" : "warning"}>
                 {kyc.label}
               </Badge>
-              <Badge variant="blue">{kyc.uploadedDocumentCount}/{kyc.requiredDocumentCount} documents</Badge>
+              <Badge variant="info">{kyc.uploadedDocumentCount}/{kyc.requiredDocumentCount} documents</Badge>
             </div>
             <h2 className="mt-3 text-xl font-bold text-ink">Verification documents</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-600">
               {setupSaved
                 ? subscriptionActive
                   ? setupApproved
@@ -871,7 +871,7 @@ export function BusinessSetupPage() {
           {!subscriptionActive && setupSaved && (
             <ButtonLink
               href={`/dashboard/billing/checkout?plan=${billing.plan}`}
-              variant="emerald"
+              variant="brand"
               icon={<CreditCard className="size-4" />}
             >
               Review billing {formatINR(currentPlan.price)}
@@ -895,16 +895,16 @@ export function BusinessSetupPage() {
                   : "Upload Document";
 
             return (
-              <div key={requirement.type} className="min-w-0 overflow-hidden rounded-2xl bg-mist/80 p-4">
+              <div key={requirement.type} className="min-w-0 overflow-hidden rounded-2xl bg-ivory-100/80 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="font-bold text-ink">{requirement.label}</h3>
-                    <p className="mt-1 text-xs leading-5 text-slate-500 [overflow-wrap:anywhere]">{requirement.description}</p>
+                    <p className="mt-1 text-xs leading-5 text-ink-500 [overflow-wrap:anywhere]">{requirement.description}</p>
                   </div>
-                  {document ? <FileCheck2 className="size-5 shrink-0 text-emerald" /> : <FileCheck2 className="size-5 shrink-0 text-slate-300" />}
+                  {document ? <FileCheck2 className="size-5 shrink-0 text-brand-text" /> : <FileCheck2 className="size-5 shrink-0 text-ink-300" />}
                 </div>
                 {document && (
-                  <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-lg bg-white p-3 text-xs leading-5 text-slate-600">
+                  <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-lg bg-white p-3 text-xs leading-5 text-ink-600">
                     <p className="block max-w-full truncate font-bold text-ink" title={document.fileName}>{document.fileName}</p>
                     <p>{formatFileSize(document.fileSize)} · {new Date(document.uploadedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
                   </div>
@@ -912,7 +912,7 @@ export function BusinessSetupPage() {
                 <label
                   className={`mt-4 inline-flex h-10 w-full min-w-0 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
                     disabled
-                      ? "cursor-not-allowed bg-slate-200 text-slate-500"
+                      ? "cursor-not-allowed bg-ink-200 text-ink-500"
                       : "cursor-pointer bg-black text-white hover:bg-black/90"
                   }`}
                 >
@@ -964,22 +964,22 @@ function SetupStep({
       data-active={active}
       className={cn(
         "setup-step-card flex min-w-0 items-center justify-between gap-3 rounded-lg border bg-white p-3 text-left shadow-clay-sm transition",
-        active ? "border-ocean/30 ring-4 ring-ocean/10" : "border-line",
-        done && "border-emerald/30 bg-emerald/5",
-        locked ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5 hover:border-ocean/30"
+        active ? "border-green-700/30 ring-4 ring-green-700/10" : "border-ink-200",
+        done && "border-brand/30 bg-brand/5",
+        locked ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5 hover:border-green-700/30"
       )}
       onClick={onClick}
     >
       <div className="flex min-w-0 items-center gap-2">
-        <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", done ? "bg-emerald-soft text-emerald-deep" : active ? "bg-ocean-soft text-ocean-deep" : "bg-slate-100 text-slate-400")}>
+        <span className={cn("grid size-9 shrink-0 place-items-center rounded-lg", done ? "bg-green-50 text-green-700" : active ? "bg-ivory-100 text-ink-900" : "bg-ink-100 text-ink-500")}>
           {icon}
         </span>
         <span className="min-w-0">
           <span className="block truncate text-sm font-bold text-ink">{label}</span>
-          <span className={cn("mt-0.5 block truncate text-xs font-semibold", done ? "text-emerald" : active ? "text-ocean" : "text-slate-500")}>{status}</span>
+          <span className={cn("mt-0.5 block truncate text-xs font-semibold", done ? "text-brand-text" : active ? "text-brand-text" : "text-ink-500")}>{status}</span>
         </span>
       </div>
-      {done ? <CheckCircle2 className="size-4 shrink-0 text-emerald" /> : <span className="size-2 shrink-0 rounded-full bg-amber-400" />}
+      {done ? <CheckCircle2 className="size-4 shrink-0 text-brand-text" /> : <span className="size-2 shrink-0 rounded-full bg-marigold-400" />}
     </button>
   );
 }

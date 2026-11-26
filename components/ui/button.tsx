@@ -5,40 +5,55 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
+/*
+ * Marigold Bazaar buttons: a solid face on a darker lip that squashes 3px when pressed.
+ * brand = logo green with black text; dark = logo black; accent = marigold (offers only).
+ * Legacy colour names (default/primary/emerald/blue/purple/amber/red/destructive) are aliases.
+ */
+const lipPress = "active:translate-y-[3px] motion-reduce:active:translate-y-0"
+const brand = `bg-brand text-on-brand shadow-lip-brand hover:bg-green-400 active:shadow-[0_1px_0_#0b7a10] ${lipPress}`
+const dark = `bg-ink text-white shadow-lip-ink hover:bg-ink-800 active:shadow-[0_1px_0_#000] ${lipPress} theme-dark`
+const accent = `bg-marigold-500 text-ink shadow-lip-accent hover:bg-marigold-400 active:shadow-[0_1px_0_#d08300] ${lipPress}`
+const info = `bg-peacock-600 text-white shadow-[0_4px_0_#0a5f67] hover:bg-peacock-700 active:shadow-[0_1px_0_#0a5f67] ${lipPress}`
+const danger = `bg-kumkum-700 text-white shadow-lip-danger hover:bg-kumkum-800 active:shadow-[0_1px_0_#7d2012] ${lipPress}`
+
 const buttonVariants = cva(
-  "relative inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-transparent text-sm font-bold tracking-[-0.01em] whitespace-nowrap outline-none transition-all focus-visible:ring-4 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "relative inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-transparent text-sm font-semibold tracking-[-0.01em] whitespace-nowrap outline-none transition-[transform,box-shadow,background-color,color] duration-150 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-green-700 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "clay-press bg-clay-emerald text-white [--clay-shadow:rgba(8,128,74,0.6)] focus-visible:ring-emerald/25",
-        primary: "clay-press bg-clay-emerald text-white [--clay-shadow:rgba(8,128,74,0.6)] focus-visible:ring-emerald/25",
-        emerald: "clay-press bg-clay-emerald text-white [--clay-shadow:rgba(8,128,74,0.6)] focus-visible:ring-emerald/25",
-        blue: "clay-press bg-clay-ocean text-white [--clay-shadow:rgba(48,57,168,0.6)] focus-visible:ring-ocean/25",
-        purple: "clay-press bg-clay-violet text-white [--clay-shadow:rgba(82,54,214,0.6)] focus-visible:ring-violet/25",
-        amber: "clay-press bg-clay-mango text-ink [--clay-shadow:rgba(220,128,0,0.55)] focus-visible:ring-mango/30",
-        red: "clay-press bg-clay-berry text-white [--clay-shadow:rgba(209,51,95,0.55)] focus-visible:ring-berry/25",
-        danger: "clay-press bg-clay-berry text-white [--clay-shadow:rgba(209,51,95,0.55)] focus-visible:ring-berry/25",
-        destructive: "clay-press bg-clay-berry text-white [--clay-shadow:rgba(209,51,95,0.55)] focus-visible:ring-berry/25",
-        dark: "clay-press bg-clay-ink text-white [--clay-shadow:rgba(13,10,34,0.6)] focus-visible:ring-ink/20",
-        secondary: "clay-press border-white bg-white text-ink [--clay-shadow:rgba(55,41,130,0.35)] hover:bg-mist focus-visible:ring-violet/15",
-        outline: "border-line bg-white/60 text-ink backdrop-blur hover:bg-white focus-visible:ring-violet/15",
-        ghost: "bg-transparent text-ink hover:bg-white/70 focus-visible:ring-violet/15",
-        neutral: "bg-slate-100 text-slate-700 hover:bg-slate-200 focus-visible:ring-slate-500/15",
-        link: "h-auto border-0 bg-transparent p-0 text-ocean underline-offset-4 shadow-none hover:underline focus-visible:ring-ocean/15",
+        brand,
+        default: brand,
+        primary: brand,
+        emerald: brand,
+        dark,
+        blue: dark,
+        purple: dark,
+        accent,
+        amber: accent,
+        info,
+        danger,
+        red: danger,
+        destructive: danger,
+        secondary: `border-ink-200/70 bg-white text-ink shadow-[0_4px_0_#d3cab6,0_10px_18px_-12px_rgba(84,58,18,0.3)] hover:bg-ivory-50 active:shadow-[0_1px_0_#d3cab6] ${lipPress}`,
+        outline: "border-ink-300/80 bg-white/70 text-ink backdrop-blur hover:border-ink hover:bg-white",
+        ghost: "bg-transparent text-ink hover:bg-ivory-100",
+        neutral: "bg-ivory-100 text-ink-700 hover:bg-ink-200",
+        link: "h-auto border-0 bg-transparent p-0 font-bold text-brand-text underline-offset-4 shadow-none hover:underline",
       },
       size: {
         default: "h-11 px-5",
-        xs: "h-8 rounded-xl px-2.5 text-xs",
-        sm: "h-9 rounded-xl px-3.5 text-xs",
-        lg: "h-14 rounded-[1.35rem] px-7 text-base",
+        xs: "h-8 rounded-md px-2.5 text-xs",
+        sm: "h-9 rounded-md px-3.5 text-[13px]",
+        lg: "h-14 rounded-[1.125rem] px-7 text-base",
         icon: "size-11 p-0",
-        "icon-xs": "size-7 rounded-lg p-0",
-        "icon-sm": "size-9 rounded-xl p-0",
-        "icon-lg": "size-14 rounded-[1.35rem] p-0",
+        "icon-xs": "size-7 rounded-sm p-0",
+        "icon-sm": "size-9 rounded-md p-0",
+        "icon-lg": "size-14 rounded-[1.125rem] p-0",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "brand",
       size: "default",
     },
   }
@@ -68,7 +83,7 @@ type ButtonProps = React.ComponentProps<"button"> &
 
 function Button({
   className,
-  variant = "default",
+  variant = "brand",
   size = "default",
   asChild = false,
   icon,
@@ -101,7 +116,7 @@ type ButtonLinkProps = Omit<React.ComponentProps<typeof Link>, "className"> &
 
 function ButtonLink({
   className,
-  variant = "default",
+  variant = "brand",
   size = "default",
   icon,
   iconPosition = "start",

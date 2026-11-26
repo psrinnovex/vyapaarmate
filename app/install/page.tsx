@@ -30,7 +30,7 @@ export default function InstallPage() {
     <PublicPage>
       <PageHeroBanner
         eyebrow="One account, every approved screen"
-        eyebrowTone="sky"
+        eyebrowTone="peacock"
         title="Use VyapaarMate on phone, desktop, Mac,"
         highlight="or the web"
         body={installDescription}
@@ -38,7 +38,7 @@ export default function InstallPage() {
         sideArt={["shop", "success"]}
         actions={
           <>
-            <ButtonLink href="/login?type=user&next=/user" size="lg" variant="emerald">
+            <ButtonLink href="/login?type=user&next=/user" size="lg" variant="brand">
               Open user portal
             </ButtonLink>
             <ButtonLink href="/login?next=/dashboard" size="lg" variant="secondary">
@@ -67,7 +67,7 @@ export default function InstallPage() {
             <ScrollReveal key={row.audience} delay={rowIndex * 80}>
               <div className="clay grid items-center gap-4 rounded-[2rem] p-4 sm:p-5 lg:grid-cols-[17rem_1fr]">
                 <div className="flex items-center gap-3">
-                  <span className="size-14 shrink-0 rounded-2xl bg-mist p-1.5">
+                  <span className="size-14 shrink-0 rounded-2xl bg-ivory-100 p-1.5">
                     <ClayIllustration name={row.art} />
                   </span>
                   <h2 className="text-base font-extrabold leading-6">{row.audience}</h2>
@@ -80,7 +80,7 @@ export default function InstallPage() {
                         key={platform}
                         className={cn(
                           "flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-bold",
-                          available ? "bg-emerald-soft text-emerald-deep" : "bg-slate-100 text-slate-400"
+                          available ? "bg-green-50 text-green-700" : "bg-ink-100 text-ink-500"
                         )}
                       >
                         {available ? <CheckCircle2 className="size-4 shrink-0" /> : <MinusCircle className="size-4 shrink-0" />}
@@ -96,7 +96,7 @@ export default function InstallPage() {
             </ScrollReveal>
           ))}
         </div>
-        <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-5 text-slate-500">The installable version is the same secure, responsive web application and does not cache private API responses or account data. Installation suggestions require a verified supported account; browser installation itself is not an authorization boundary. App Store and Play Store binaries require a separate native client, store-policy review, signing, and physical-device release testing.</p>
+        <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-5 text-ink-500">The installable version is the same secure, responsive web application and does not cache private API responses or account data. Installation suggestions require a verified supported account; browser installation itself is not an authorization boundary. App Store and Play Store binaries require a separate native client, store-policy review, signing, and physical-device release testing.</p>
       </section>
     </PublicPage>
   );

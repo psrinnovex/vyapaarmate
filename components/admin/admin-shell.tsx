@@ -105,14 +105,14 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
   }
 
   return (
-    <div className="fixed inset-0 min-h-0 w-full max-w-full overflow-hidden bg-[radial-gradient(70rem_40rem_at_8%_-10%,rgba(124,92,255,0.34),transparent_60%),radial-gradient(60rem_40rem_at_100%_0%,rgba(18,183,106,0.2),transparent_60%),linear-gradient(180deg,#14112b_0%,#1d1a39_100%)] text-white lg:grid lg:grid-cols-[256px_minmax(0,1fr)] xl:grid-cols-[288px_minmax(0,1fr)]">
+    <div className="fixed inset-0 min-h-0 w-full max-w-full overflow-hidden theme-dark bg-[radial-gradient(64rem_36rem_at_6%_-12%,rgba(30,201,38,0.18),transparent_60%),radial-gradient(52rem_34rem_at_100%_0%,rgba(242,162,12,0.12),transparent_60%),linear-gradient(180deg,#121512_0%,#0b0d0b_100%)] text-white lg:grid lg:grid-cols-[256px_minmax(0,1fr)] xl:grid-cols-[288px_minmax(0,1fr)]">
       <aside className="hidden h-full min-h-0 min-w-0 overflow-hidden p-3 pr-0 lg:block">
         <div className="glass-dark flex h-full min-h-0 min-w-0 flex-col rounded-[1.75rem] p-3">
           <Link href={shellHomeHref} className="flex min-w-0 shrink-0 items-center gap-3 rounded-[1.25rem] bg-white p-3 font-extrabold text-ink shadow-clay-sm">
             <BrandMark />
             <span className="min-w-0 truncate text-base">{shellTitle}</span>
           </Link>
-          <div className="mt-3 shrink-0 rounded-2xl border border-emerald/25 bg-emerald/10 p-3 text-xs font-semibold leading-5 text-emerald-100">
+          <div className="mt-3 shrink-0 rounded-2xl border border-brand/25 bg-brand/10 p-3 text-xs font-semibold leading-5 text-green-100">
             {supportOnly ? "Support queue access only. Customer and payment details stay scoped to tickets." : "Super admin access only. All business-level data remains tenant scoped."}
           </div>
           <nav className="scrollbar-none mt-4 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto">
@@ -128,7 +128,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                     active ? "bg-white text-ink shadow-clay-sm" : "text-white/70 hover:bg-white/10 hover:text-white"
                   )}
                 >
-                  <span className={cn("grid size-8 shrink-0 place-items-center rounded-xl transition", active ? "bg-clay-emerald text-white" : "bg-white/10 text-white/70 group-hover:text-white")}>
+                  <span className={cn("grid size-8 shrink-0 place-items-center rounded-xl transition", active ? "bg-clay-green text-ink" : "bg-white/10 text-white/70 group-hover:text-white")}>
                     <item.icon className="size-4 shrink-0" />
                   </span>
                   <span className="min-w-0 truncate">{item.label}</span>
@@ -152,7 +152,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
               aria-expanded={mobileNavOpen}
               aria-controls="admin-mobile-navigation"
               onClick={() => setMobileNavOpen((value) => !value)}
-              className="relative grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/10 text-white transition duration-300 hover:-translate-y-0.5 hover:text-emerald-300 focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
+              className="relative grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/10 text-white transition duration-300 hover:-translate-y-0.5 hover:text-green-300 focus:outline-none focus:ring-4 focus:ring-brand/15 lg:hidden"
             >
               <Menu
                 className={cn(
@@ -167,7 +167,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                 )}
               />
             </button>
-            <div className="clay-orb hidden size-10 shrink-0 rounded-xl bg-clay-emerald text-white sm:grid">
+            <div className="clay-orb hidden size-10 shrink-0 rounded-xl bg-clay-green text-ink sm:grid">
               <ShieldCheck className="size-5" />
             </div>
             <div className="min-w-0">
@@ -181,7 +181,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
             title="Log out"
             disabled={loggingOut}
             onClick={logout}
-            className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/10 text-white/80 transition hover:text-berry disabled:cursor-not-allowed disabled:opacity-60"
+            className="grid size-10 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/10 text-white/80 transition hover:text-kumkum-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <LogOut className="size-4" />
           </button>
@@ -191,7 +191,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
             <button
               type="button"
               aria-label="Close admin navigation"
-              className="absolute inset-0 bg-slate-950/72 backdrop-blur-md motion-safe:animate-[admin-mobile-backdrop-in_180ms_ease-out]"
+              className="absolute inset-0 bg-ink-950/72 backdrop-blur-md motion-safe:animate-[admin-mobile-backdrop-in_180ms_ease-out]"
               onClick={closeMobileNav}
             />
             <div
@@ -208,12 +208,12 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                   type="button"
                   aria-label="Close admin navigation"
                   onClick={closeMobileNav}
-                  className="grid size-11 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition hover:border-emerald/40 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
+                  className="grid size-11 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 transition hover:border-brand/40 hover:text-brand-text focus:outline-none focus:ring-4 focus:ring-brand/15"
                 >
                   <X className="size-5" />
                 </button>
               </div>
-              <div className="relative z-10 mt-4 shrink-0 rounded-lg border border-emerald/25 bg-emerald/10 p-3 text-xs leading-5 text-emerald-50 shadow-[0_18px_48px_rgba(18,183,106,0.08)]">
+              <div className="relative z-10 mt-4 shrink-0 rounded-lg border border-brand/25 bg-brand/10 p-3 text-xs leading-5 text-green-50 shadow-[0_18px_48px_rgba(30,201,38,0.08)]">
                 {supportOnly ? "Support queue access only. Customer and payment details stay scoped to tickets." : "Super admin access only. All business-level data remains tenant scoped."}
               </div>
               <nav className="relative z-10 mt-5 grid min-h-0 flex-1 auto-rows-max gap-1 overflow-y-auto pr-1">
@@ -226,14 +226,14 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                       aria-current={active ? "page" : undefined}
                       onClick={closeMobileNav}
                       className={cn(
-                        "flex h-12 min-w-0 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition duration-200 focus:outline-none focus:ring-4 focus:ring-emerald/15 motion-safe:animate-[admin-mobile-item-in_360ms_cubic-bezier(0.22,1,0.36,1)_both]",
+                        "flex h-12 min-w-0 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition duration-200 focus:outline-none focus:ring-4 focus:ring-brand/15 motion-safe:animate-[admin-mobile-item-in_360ms_cubic-bezier(0.22,1,0.36,1)_both]",
                         active
                           ? "bg-white text-ink shadow-[0_18px_42px_rgba(255,255,255,0.12)]"
                           : "text-white/72 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
                       )}
                       style={{ animationDelay: `${80 + index * 38}ms` }}
                     >
-                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", active ? "bg-emerald/15 text-emerald" : "bg-white/5 text-white/70")}>
+                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", active ? "bg-brand/15 text-brand-text" : "bg-white/5 text-white/70")}>
                         <item.icon className="size-4" />
                       </span>
                       <span className="min-w-0 truncate">{item.label}</span>
@@ -251,7 +251,7 @@ export function AdminShell({ children, role }: { children: React.ReactNode; role
                   aria-label="Log out"
                   disabled={loggingOut}
                   onClick={logout}
-                  className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-slate-950/40 px-3 text-sm font-bold text-white/80 transition hover:border-red-300/40 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-11 items-center justify-center gap-2 rounded-lg border border-white/10 bg-ink-950/40 px-3 text-sm font-bold text-white/80 transition hover:border-kumkum-300/40 hover:text-kumkum-200 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <LogOut className="size-4" />
                   <span>Log out</span>

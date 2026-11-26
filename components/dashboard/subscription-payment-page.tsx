@@ -241,28 +241,28 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
   return (
     <>
       <div className="mb-5">
-        <Link href="/dashboard/billing" className="inline-flex items-center gap-2 text-sm font-bold text-ocean">
+        <Link href="/dashboard/billing" className="inline-flex items-center gap-2 text-sm font-bold text-brand-text">
           <ArrowLeft className="size-4" /> Back to billing
         </Link>
       </div>
       <PageHeader
         title="Subscription payment"
         body={"Complete the " + (planDetails?.name ?? formatPlanName(payment.plan)) + " checkout. Subscription access changes only after successful verification."}
-        action={<Badge variant={completed ? "emerald" : failed ? "red" : "amber"}>{completed ? "Paid" : failed ? "Retry needed" : "Payment pending"}</Badge>}
+        action={<Badge variant={completed ? "success" : failed ? "danger" : "warning"}>{completed ? "Paid" : failed ? "Retry needed" : "Payment pending"}</Badge>}
       />
 
       {completed ? (
-        <Card className="payment-state-enter border border-emerald/20 bg-emerald/5 text-center">
-          <div className="mx-auto grid size-16 place-items-center rounded-full bg-emerald text-white shadow-glow">
+        <Card className="payment-state-enter border border-brand/20 bg-brand/5 text-center">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-brand text-ink shadow-glow">
             <CheckCircle2 className="size-9" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-ink">Subscription activated</h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">{payment.message}</p>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink-600">{payment.message}</p>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink-600">
             Next, upload the required verification documents. After PSHR admin approval, the business becomes eligible for public customer access.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <ButtonLink href="/dashboard/setup#verification-documents" variant="emerald" icon={<ShieldCheck className="size-4" />}>
+            <ButtonLink href="/dashboard/setup#verification-documents" variant="brand" icon={<ShieldCheck className="size-4" />}>
               Continue to verification
             </ButtonLink>
             <ButtonLink href={payment.invoiceUrl} variant="secondary" icon={<ReceiptText className="size-4" />}>
@@ -271,40 +271,40 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
           </div>
         </Card>
       ) : failed ? (
-        <Card className="payment-state-enter border border-berry/25 bg-berry-soft/70 text-center">
-          <div className="mx-auto grid size-16 place-items-center rounded-full bg-red-600 text-white shadow-clay">
+        <Card className="payment-state-enter border border-kumkum-600/25 bg-kumkum-50/70 text-center">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-kumkum-600 text-white shadow-clay">
             <XCircle className="size-9" />
           </div>
           <h2 className="mt-4 text-2xl font-bold text-ink">Payment not completed</h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">{payment.failureReason ?? payment.message}</p>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-ink-600">{payment.failureReason ?? payment.message}</p>
           <Button className="mt-5" variant="danger" icon={retrying ? <LoaderCircle className="size-4 animate-spin" /> : <QrCode className="size-4" />} onClick={createFreshCheckout} disabled={retrying}>
             {retrying ? "Creating checkout" : "Create fresh checkout"}
           </Button>
         </Card>
       ) : (
-        <Card className="payment-state-enter overflow-hidden border border-emerald/20 bg-gradient-to-br from-emerald/10 via-white to-ocean/5">
+        <Card className="payment-state-enter overflow-hidden border border-brand/20 bg-gradient-to-br from-brand/10 via-white to-green-700/5">
           <div className="grid gap-6 lg:grid-cols-[1fr_280px] lg:items-center">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="emerald">Payment pending</Badge>
-                {!isCashfree && <Badge variant="blue">{payment.paymentProviderLabel}</Badge>}
+                <Badge variant="success">Payment pending</Badge>
+                {!isCashfree && <Badge variant="info">{payment.paymentProviderLabel}</Badge>}
               </div>
               <h2 className="mt-4 text-2xl font-bold text-ink">{isCashfree ? "Pay Online Now" : "Pay " + payment.receiverName}</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{payment.message}</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-600">{payment.message}</p>
               <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-clay-sm">
-                  <span className="payment-pulse-dot size-2 rounded-full bg-emerald" /> Awaiting confirmation
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-ink-700 shadow-clay-sm">
+                  <span className="payment-pulse-dot size-2 rounded-full bg-brand" /> Awaiting confirmation
                 </span>
                 {displayedRemainingSeconds !== null && (
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-clay-sm">
-                    <Clock3 className="size-4 text-ocean" /> {displayedRemainingSeconds > 0 ? "Expires in " + checkoutCountdown(displayedRemainingSeconds) : "Checking expiry"}
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-ink-700 shadow-clay-sm">
+                    <Clock3 className="size-4 text-brand-text" /> {displayedRemainingSeconds > 0 ? "Expires in " + checkoutCountdown(displayedRemainingSeconds) : "Checking expiry"}
                   </span>
                 )}
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow-clay-sm">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-ink-700 shadow-clay-sm">
                   {planDetails?.name ?? formatPlanName(payment.plan)} - {formatINR(payment.amount)}
                 </span>
               </div>
-              <p className="mt-4 text-xs leading-5 text-slate-500">
+              <p className="mt-4 text-xs leading-5 text-ink-500">
                 {isUpi
                   ? "After payment, PSHR Innovex verifies the exact bank credit and UTR before activating this subscription."
                   : "Provider confirmation activates this subscription automatically after a successful payment."}
@@ -315,7 +315,7 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
                     href={payment.paymentUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-emerald px-4 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:bg-emerald/90"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-ink shadow-glow transition hover:-translate-y-0.5 hover:bg-brand/90"
                   >
                     <Wallet className="size-4" /> {isUpi ? "Open payment app" : isCashfree ? "Open Cashfree checkout" : "Open payment QR"} <ExternalLink className="size-4" />
                   </a>
@@ -327,7 +327,7 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
             </div>
             <div className="mx-auto lg:mx-0">
               {payment.paymentQrImageUrl ? (
-                <div className="payment-qr-frame rounded-2xl border border-emerald/20 bg-white p-3 shadow-clay">
+                <div className="payment-qr-frame rounded-2xl border border-brand/20 bg-white p-3 shadow-clay">
                   <Image
                     src={payment.paymentQrImageUrl}
                     alt={payment.receiverName + " subscription payment QR"}
@@ -339,10 +339,10 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
                   <span className="payment-qr-scanline" aria-hidden="true" />
                 </div>
               ) : (
-                <div className="grid size-64 place-items-center rounded-2xl border border-emerald/20 bg-white p-6 text-center shadow-clay">
+                <div className="grid size-64 place-items-center rounded-2xl border border-brand/20 bg-white p-6 text-center shadow-clay">
                   <div>
-                    <QrCode className="mx-auto size-12 text-ocean" />
-                    <p className="mt-3 text-sm font-semibold text-slate-600">Payment link ready</p>
+                    <QrCode className="mx-auto size-12 text-brand-text" />
+                    <p className="mt-3 text-sm font-semibold text-ink-600">Payment link ready</p>
                   </div>
                 </div>
               )}
@@ -355,44 +355,44 @@ export function SubscriptionPaymentPage({ initialData }: { initialData: Subscrip
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-bold text-ink">Checkout summary</h2>
-            <p className="mt-1 text-sm text-slate-600">{payment.invoiceNumber ?? "Subscription invoice"} is tied to this payment reference.</p>
+            <p className="mt-1 text-sm text-ink-600">{payment.invoiceNumber ?? "Subscription invoice"} is tied to this payment reference.</p>
           </div>
           <StatusPill status={payment.paymentState} />
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-mist/80 p-3">
-            <p className="text-xs font-semibold uppercase text-slate-500">Plan</p>
+          <div className="rounded-2xl bg-ivory-100/80 p-3">
+            <p className="text-xs font-semibold uppercase text-ink-500">Plan</p>
             <p className="mt-2 font-bold text-ink">{planDetails?.name ?? formatPlanName(payment.plan)}</p>
           </div>
-          <div className="rounded-2xl bg-mist/80 p-3">
-            <p className="text-xs font-semibold uppercase text-slate-500">Final payable</p>
+          <div className="rounded-2xl bg-ivory-100/80 p-3">
+            <p className="text-xs font-semibold uppercase text-ink-500">Final payable</p>
             <p className="mt-2 font-bold text-ink">{formatINR(payment.amount)}</p>
           </div>
-          <div className="rounded-2xl bg-mist/80 p-3">
-            <p className="text-xs font-semibold uppercase text-slate-500">Provider</p>
+          <div className="rounded-2xl bg-ivory-100/80 p-3">
+            <p className="text-xs font-semibold uppercase text-ink-500">Provider</p>
             <p className="mt-2 font-bold text-ink">{payment.paymentProviderLabel}</p>
           </div>
           {payment.billingGstin && (
-            <div className="rounded-2xl bg-mist/80 p-3">
-              <p className="text-xs font-semibold uppercase text-slate-500">GSTIN</p>
+            <div className="rounded-2xl bg-ivory-100/80 p-3">
+              <p className="text-xs font-semibold uppercase text-ink-500">GSTIN</p>
               <p className="mt-2 break-words font-bold text-ink">{payment.billingGstin}</p>
             </div>
           )}
         </div>
-        <div className="mt-4 ml-auto max-w-sm border-t border-line pt-3 text-sm">
-          <div className="flex justify-between py-1 text-slate-600"><span>Subscription amount</span><span>{formatINR(payment.subtotalAmount)}</span></div>
+        <div className="mt-4 ml-auto max-w-sm border-t border-ink-200 pt-3 text-sm">
+          <div className="flex justify-between py-1 text-ink-600"><span>Subscription amount</span><span>{formatINR(payment.subtotalAmount)}</span></div>
           {payment.discountAmount > 0 && (
-            <div className="flex justify-between py-1 text-emerald">
+            <div className="flex justify-between py-1 text-brand-text">
               <span>{payment.discountLabel ?? "Discount"}{payment.couponCode ? ` (${payment.couponCode})` : ""}</span>
               <span>-{formatINR(payment.discountAmount)}</span>
             </div>
           )}
           {payment.upgradeCreditAmount > 0 && (
-            <div className="flex justify-between py-1 text-emerald"><span>Current subscription credit</span><span>-{formatINR(payment.upgradeCreditAmount)}</span></div>
+            <div className="flex justify-between py-1 text-brand-text"><span>Current subscription credit</span><span>-{formatINR(payment.upgradeCreditAmount)}</span></div>
           )}
 
-          <div className="flex justify-between py-1 text-slate-600"><span>GST {(payment.gstRateBps / 100).toFixed(2)}%</span><span>{formatINR(payment.gstAmount)}</span></div>
-          <div className="mt-2 flex justify-between border-t border-line pt-3 text-base font-bold text-ink"><span>Total paid</span><span>{formatINR(payment.amount)}</span></div>
+          <div className="flex justify-between py-1 text-ink-600"><span>GST {(payment.gstRateBps / 100).toFixed(2)}%</span><span>{formatINR(payment.gstAmount)}</span></div>
+          <div className="mt-2 flex justify-between border-t border-ink-200 pt-3 text-base font-bold text-ink"><span>Total paid</span><span>{formatINR(payment.amount)}</span></div>
         </div>
       </Card>
       <ActionNotice notice={notice} onClose={() => setNotice(null)} />

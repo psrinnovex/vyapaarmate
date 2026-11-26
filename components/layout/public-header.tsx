@@ -187,7 +187,7 @@ export function PublicHeader({
         <div
           className={cn(
             "glass mx-auto grid max-w-7xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[1.4rem] px-2.5 transition-[height,box-shadow,background-color] duration-300 sm:px-3",
-            isScrolled ? "h-14 shadow-[0_22px_50px_-24px_rgba(31,27,58,0.45)]" : "h-16"
+            isScrolled ? "h-14 shadow-[0_22px_50px_-24px_rgba(60,40,10,0.45)]" : "h-16"
           )}
         >
           <Link href="/" aria-label="VyapaarMate home" className="flex min-w-0 items-center gap-2 justify-self-start rounded-xl pr-2 font-extrabold tracking-[-0.02em] text-ink">
@@ -195,7 +195,7 @@ export function PublicHeader({
             <span className="hidden sm:inline">{company.product}</span>
           </Link>
           {!isCustomer && (
-            <div className="hidden min-w-0 items-center justify-center gap-0.5 text-[13px] font-bold text-slate-600 xl:flex 2xl:text-sm">
+            <div className="hidden min-w-0 items-center justify-center gap-0.5 text-[13px] font-bold text-ink-600 xl:flex 2xl:text-sm">
               {links.map((link) => (
                 <Link
                   key={`${link.href}-${link.label}`}
@@ -212,7 +212,7 @@ export function PublicHeader({
               <Link
                 href={demoHref}
                 rel={demoRel}
-                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-emerald-soft px-3 py-2 text-emerald-deep transition hover:bg-emerald hover:text-white"
+                className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-2 text-green-700 transition hover:bg-brand hover:text-white"
                 data-marketing-event="navigation_click"
                 data-marketing-location="public_header"
                 data-marketing-label={demoLabel}
@@ -233,7 +233,7 @@ export function PublicHeader({
                 aria-controls="public-mobile-navigation"
                 aria-haspopup="dialog"
                 onClick={() => setMobileMenuOpen((value) => !value)}
-                className="relative grid size-10 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition duration-300 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 xl:hidden"
+                className="relative grid size-10 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition duration-300 hover:text-brand-text focus:outline-none focus:ring-4 focus:ring-brand/15 xl:hidden"
               >
                 <Menu
                   className={cn(
@@ -281,7 +281,7 @@ export function PublicHeader({
                     key={`${link.href}-${link.label}-mobile`}
                     href={link.href}
                     onClick={closeMobileMenu}
-                    className="flex h-12 items-center justify-between gap-3 rounded-2xl px-3.5 text-[15px] font-extrabold text-slate-700 transition hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
+                    className="flex h-12 items-center justify-between gap-3 rounded-2xl px-3.5 text-[15px] font-extrabold text-ink-700 transition hover:bg-ivory-100 hover:text-ink focus:outline-none focus:ring-4 focus:ring-green-700/10 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
                     style={{ animationDelay: `${70 + index * 45}ms` }}
                     data-marketing-event="navigation_click"
                     data-marketing-location="public_mobile_menu"
@@ -289,14 +289,14 @@ export function PublicHeader({
                     data-marketing-destination={link.href}
                   >
                     <span className="min-w-0 truncate">{link.label}</span>
-                    <ArrowUpRight className="size-4 shrink-0 text-slate-400" />
+                    <ArrowUpRight className="size-4 shrink-0 text-ink-500" />
                   </Link>
                 ))}
                 <Link
                   href={demoHref}
                   rel={demoRel}
                   onClick={closeMobileMenu}
-                  className="flex h-12 items-center justify-between gap-3 rounded-2xl bg-emerald-soft px-3.5 text-[15px] font-extrabold text-emerald-deep transition hover:bg-emerald hover:text-white focus:outline-none focus:ring-4 focus:ring-emerald/15 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
+                  className="flex h-12 items-center justify-between gap-3 rounded-2xl bg-green-50 px-3.5 text-[15px] font-extrabold text-green-700 transition hover:bg-brand hover:text-white focus:outline-none focus:ring-4 focus:ring-brand/15 motion-safe:animate-[public-mobile-item-in_320ms_cubic-bezier(0.22,1,0.36,1)_both]"
                   style={{ animationDelay: `${70 + links.length * 45}ms` }}
                   data-marketing-event="navigation_click"
                   data-marketing-location="public_mobile_menu"
@@ -308,12 +308,12 @@ export function PublicHeader({
                 </Link>
               </div>
 
-              <div className="grid gap-2 border-t border-line bg-mist/60 px-3 py-3">
+              <div className="grid gap-2 border-t border-ink-200 bg-ivory-100/60 px-3 py-3">
                 {resolvedSession ? (
                   <Link
                     href={workspaceHref}
                     onClick={closeMobileMenu}
-                    className="clay-press inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-extrabold text-white [--clay-shadow:rgba(13,10,34,0.6)]"
+                    className="clay-press inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-extrabold text-white [--clay-shadow:rgba(0,0,0,0.6)] theme-dark"
                     data-marketing-event="navigation_click"
                     data-marketing-location="public_mobile_menu"
                     data-marketing-label={workspaceLabel}
@@ -327,7 +327,7 @@ export function PublicHeader({
                     <Link
                       href="/register?plan=STARTER"
                       onClick={closeMobileMenu}
-                      className="clay-press inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-clay-emerald px-4 text-sm font-extrabold text-white [--clay-shadow:rgba(8,128,74,0.6)]"
+                      className="clay-press inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-clay-green px-4 text-sm font-extrabold text-ink [--clay-shadow:rgba(11,122,16,0.6)]"
                       data-marketing-event="cta_click"
                       data-marketing-location="public_mobile_menu"
                       data-marketing-label="join_bengaluru_launch"
@@ -339,7 +339,7 @@ export function PublicHeader({
                     <Link
                       href="/login?type=user&next=%2Fbusinesses"
                       onClick={closeMobileMenu}
-                      className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white bg-white px-4 text-sm font-extrabold text-ink shadow-clay-sm transition hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
+                      className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-white bg-white px-4 text-sm font-extrabold text-ink shadow-clay-sm transition hover:text-brand-text focus:outline-none focus:ring-4 focus:ring-brand/15"
                       data-marketing-event="cta_click"
                       data-marketing-location="public_mobile_menu"
                       data-marketing-label="view_more"

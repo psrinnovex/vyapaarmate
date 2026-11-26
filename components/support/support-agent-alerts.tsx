@@ -70,14 +70,14 @@ export function SupportAgentAlerts() {
           <div
             key={alert.key}
             className={cn(
-              "rounded-lg border bg-white p-3 shadow-[0_18px_54px_rgba(29,26,57,0.22)]",
-              latest ? "border-emerald/30 ring-4 ring-emerald/10" : "border-line"
+              "rounded-lg border bg-white p-3 shadow-[0_18px_54px_rgba(11,13,11,0.22)]",
+              latest ? "border-brand/30 ring-4 ring-brand/10" : "border-ink-200"
             )}
           >
             <div className="flex items-start gap-3">
               <span className={cn(
                 "mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg text-white",
-                alert.kind === "customer-message" ? "bg-emerald" : "bg-ocean"
+                alert.kind === "customer-message" ? "bg-brand" : "bg-ink"
               )}>
                 <CheckCircle2 className="size-5" />
               </span>
@@ -86,24 +86,24 @@ export function SupportAgentAlerts() {
                   <p className="min-w-0 break-words text-sm font-extrabold text-ink">
                     {alert.kind === "customer-message" ? "New support message" : "Support chat connected"}
                   </p>
-                  {latest && <span className="rounded-full bg-emerald/10 px-2 py-0.5 text-[10px] font-extrabold uppercase text-emerald">Newest</span>}
+                  {latest && <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-extrabold uppercase text-brand-text">Newest</span>}
                 </div>
-                <p className="mt-1 text-xs font-bold uppercase text-slate-500">{ticketLabel(alert.ticket)}</p>
-                <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-slate-700">
+                <p className="mt-1 text-xs font-bold uppercase text-ink-500">{ticketLabel(alert.ticket)}</p>
+                <p className="mt-2 line-clamp-2 break-words text-sm leading-6 text-ink-700">
                   {alert.message?.body ?? alert.ticket.lastMessage ?? "A requester is waiting for support."}
                 </p>
               </div>
             </div>
 
             {alertFeed.error && latest && (
-              <p className="mt-3 rounded-lg bg-berry-soft px-3 py-2 text-xs font-semibold leading-5 text-berry-deep">{alertFeed.error}</p>
+              <p className="mt-3 rounded-lg bg-kumkum-50 px-3 py-2 text-xs font-semibold leading-5 text-kumkum-700">{alertFeed.error}</p>
             )}
 
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => alertFeed.acceptAlert(alert.key)}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-emerald px-3 text-xs font-extrabold text-white transition hover:bg-emerald/90 focus:outline-none focus:ring-4 focus:ring-emerald/20"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-brand px-3 text-xs font-extrabold text-ink transition hover:bg-brand/90 focus:outline-none focus:ring-4 focus:ring-brand/20"
               >
                 <CheckCircle2 className="size-4" />
                 Accept
@@ -112,7 +112,7 @@ export function SupportAgentAlerts() {
                 type="button"
                 disabled={rejecting}
                 onClick={() => void alertFeed.rejectAlert(alert.key)}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-berry/25 bg-berry-soft px-3 text-xs font-extrabold text-berry-deep transition hover:bg-berry/15 focus:outline-none focus:ring-4 focus:ring-red-100 disabled:cursor-not-allowed disabled:opacity-65"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-kumkum-600/25 bg-kumkum-50 px-3 text-xs font-extrabold text-kumkum-700 transition hover:bg-kumkum-600/15 focus:outline-none focus:ring-4 focus:ring-kumkum-100 disabled:cursor-not-allowed disabled:opacity-65"
               >
                 {rejecting ? <Loader2 className="size-4 animate-spin" /> : <XCircle className="size-4" />}
                 Reject

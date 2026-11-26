@@ -25,7 +25,7 @@ export const siteConfig = {
       ? `Website orders and bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, and owner dashboards for businesses in ${launchMarket.displayName}.`
       : "Website orders and bookings, UPI QR payments, WhatsApp updates, CRM, campaigns, and owner dashboards for Indian local businesses.",
   locale: "en_IN",
-  themeColor: "#0f172a",
+  themeColor: "#0b0d0b",
   market: launchMarketRestricted ? launchMarket.displayName : launchMarket.country,
   language: "en-IN",
   alternateNames: ["Vyapaar Mate", "vyapaarmate", "vyapaar mate"] as readonly string[],

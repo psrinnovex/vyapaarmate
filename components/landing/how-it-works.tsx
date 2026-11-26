@@ -14,21 +14,21 @@ const steps = [
     title: "Share your shop link",
     body: "Post it on WhatsApp, Instagram or a QR poster.",
     Icon: Share2,
-    orb: "bg-clay-emerald text-white",
+    orb: "bg-clay-green text-ink",
     Art: PhoneChatIllustration
   },
   {
     title: "Customer pays by UPI",
     body: "Scan, pay, done. Every payment is tracked.",
     Icon: QrCode,
-    orb: "bg-clay-violet text-white",
+    orb: "bg-clay-peacock text-white",
     Art: UpiQrIllustration
   },
   {
     title: "WhatsApp confirms it",
     body: "Live updates until the order reaches them.",
     Icon: MessageCircle,
-    orb: "bg-clay-mango text-ink",
+    orb: "bg-clay-marigold text-ink",
     Art: SuccessIllustration
   }
 ];
@@ -43,7 +43,7 @@ export function HowItWorks() {
   const motionAllowed = useMotionAllowed();
   const { step, progress } = useScrollSteps(sectionRef, steps.length);
   const [paid, setPaid] = useState(false);
-  const background = useTransform(progress, [0, 0.5, 1], ["#ecfbf3", "#f2eeff", "#fff6e3"]);
+  const background = useTransform(progress, [0, 0.5, 1], ["#effbec", "#ecf7f7", "#fef8e8"]);
   const rail = useTransform(progress, [0, 1], [0.04, 1]);
 
   useMotionValueEvent(progress, "change", (value) => {
@@ -67,15 +67,15 @@ export function HowItWorks() {
 
         <div className="mx-auto grid w-full max-w-7xl items-center gap-5 px-4 pt-16 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:pt-0">
           <div className="min-w-0">
-            <p className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-emerald-deep shadow-clay-sm">
+            <p className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-green-700 shadow-clay-sm">
               How it works
             </p>
             <h2 id="how-it-works-title" className="mt-3 text-[clamp(1.9rem,4.6vw,3.4rem)] font-extrabold leading-[1.02] tracking-[-0.04em] text-ink">
-              Three steps. <span className="text-gradient-brand">First order today.</span>
+              Three steps. <span className="vm-mark">First order today.</span>
             </h2>
 
             <div className="mt-5 hidden h-1.5 w-full max-w-md overflow-hidden rounded-full bg-white/80 shadow-clay-inset lg:block">
-              <motion.div className="h-full origin-left rounded-full bg-[linear-gradient(90deg,#12b76a,#7c5cff,#ffad1f)]" style={{ scaleX: rail }} />
+              <motion.div className="h-full origin-left rounded-full bg-brand" style={{ scaleX: rail }} />
             </div>
 
             <ol className="mt-4 grid grid-cols-3 gap-2 lg:mt-6 lg:max-w-md lg:grid-cols-1 lg:gap-3">
@@ -99,17 +99,17 @@ export function HowItWorks() {
                       </span>
                       <span className="min-w-0">
                         <span className="block text-[11px] font-extrabold leading-tight text-ink sm:text-xs lg:text-lg">
-                          <span className="hidden text-slate-400 lg:inline">0{index + 1} · </span>
+                          <span className="hidden text-ink-500 lg:inline">0{index + 1} · </span>
                           {title}
                         </span>
-                        <span className={cn("mt-1 hidden text-sm leading-6 text-slate-500 lg:block", !active && "lg:hidden")}>{body}</span>
+                        <span className={cn("mt-1 hidden text-sm leading-6 text-ink-500 lg:block", !active && "lg:hidden")}>{body}</span>
                       </span>
                     </button>
                   </li>
                 );
               })}
             </ol>
-            <p className="mt-3 text-center text-sm font-semibold text-slate-600 lg:hidden">{steps[step].body}</p>
+            <p className="mt-3 text-center text-sm font-semibold text-ink-600 lg:hidden">{steps[step].body}</p>
           </div>
 
           <div className="relative flex justify-center">

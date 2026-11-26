@@ -450,12 +450,12 @@ export function SiteChatbot() {
         <section
           aria-label="VyapaarBot support chat"
           className={cn(
-            "fixed inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] top-[calc(env(safe-area-inset-top)+0.5rem)] flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_24px_90px_rgba(29,26,57,0.25)] sm:inset-x-auto sm:top-auto sm:bottom-5 sm:right-5 sm:h-[min(680px,calc(100dvh-2.5rem))] sm:w-[380px]"
+            "fixed inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] top-[calc(env(safe-area-inset-top)+0.5rem)] flex min-h-0 flex-col overflow-hidden rounded-lg border border-ink-200 bg-white shadow-[0_24px_90px_rgba(11,13,11,0.25)] sm:inset-x-auto sm:top-auto sm:bottom-5 sm:right-5 sm:h-[min(680px,calc(100dvh-2.5rem))] sm:w-[380px]"
           )}
         >
-          <header className="flex shrink-0 items-center justify-between gap-3 border-b border-line bg-ink px-4 py-3 text-white">
+          <header className="flex shrink-0 items-center justify-between gap-3 border-b border-ink-200 bg-ink px-4 py-3 text-white theme-dark">
             <div className="flex min-w-0 items-center gap-3">
-              <div className={cn("grid size-14 shrink-0 place-items-center overflow-visible rounded-lg", activeTicket?.assignedToName ? "bg-emerald text-white" : "bg-transparent")}>
+              <div className={cn("grid size-14 shrink-0 place-items-center overflow-visible rounded-lg", activeTicket?.assignedToName ? "bg-brand text-ink" : "bg-transparent")}>
                 {activeTicket?.assignedToName ? (
                   <span className="text-sm font-extrabold">{activeTicket.assignedToInitials ?? initials(activeTicket.assignedToName)}</span>
                 ) : animationData ? (
@@ -466,7 +466,7 @@ export function SiteChatbot() {
                     className="size-20 [&_svg]:!overflow-visible [&_svg]:!bg-transparent"
                   />
                 ) : (
-                  <Bot className="size-7 text-emerald" />
+                  <Bot className="size-7 text-brand-text" />
                 )}
               </div>
               <div className="min-w-0">
@@ -488,25 +488,25 @@ export function SiteChatbot() {
             </button>
           </header>
 
-          <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-mist/70 p-4">
+          <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-ivory-100/70 p-4">
             {displayMessages.map((message) => (
               <div key={message.id} className={cn("flex flex-col gap-2", message.role === "user" ? "items-end" : message.role === "system" ? "items-center" : "items-start")}>
                 {message.role !== "system" && (
                   <div className={cn("flex max-w-[92%] items-center gap-2 sm:max-w-[86%]", message.role === "user" && "flex-row-reverse")}>
-                    <span className={cn("grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-extrabold", message.role === "user" ? "bg-ink text-white" : "bg-emerald text-white")}>
+                    <span className={cn("grid size-6 shrink-0 place-items-center rounded-full text-[10px] font-extrabold", message.role === "user" ? "bg-ink text-white theme-dark" : "bg-brand text-ink")}>
                       {message.role === "user" ? "You" : message.authorInitials ?? "VM"}
                     </span>
-                    <span className="truncate text-[11px] font-bold text-slate-500">{message.role === "user" ? "You" : message.authorName ?? "Support"}</span>
+                    <span className="truncate text-[11px] font-bold text-ink-500">{message.role === "user" ? "You" : message.authorName ?? "Support"}</span>
                   </div>
                 )}
                 <p
                   className={cn(
                     "w-fit max-w-[92%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm leading-6 sm:max-w-[86%]",
                     message.role === "user"
-                      ? "bg-ink text-white"
+                      ? "bg-ink text-white theme-dark"
                       : message.role === "system"
-                        ? "bg-transparent px-2 py-1 text-center text-xs font-bold text-slate-500"
-                        : "border border-line bg-white text-slate-700"
+                        ? "bg-transparent px-2 py-1 text-center text-xs font-bold text-ink-500"
+                        : "border border-ink-200 bg-white text-ink-700"
                   )}
                 >
                   {message.role === "user" ? message.text : renderChatMessageText(message.text, chatHighlightTerms, message.authorName)}
@@ -520,10 +520,10 @@ export function SiteChatbot() {
                         className={cn(
                           "inline-flex h-8 items-center rounded-lg border px-3 text-xs font-bold transition",
                           action.tone === "urgent"
-                            ? "border-berry/20 bg-berry-soft text-berry-deep hover:bg-berry/15"
+                            ? "border-kumkum-600/20 bg-kumkum-50 text-kumkum-700 hover:bg-kumkum-600/15"
                             : action.tone === "primary"
-                              ? "border-emerald/20 bg-emerald-soft text-emerald-deep hover:bg-emerald/15"
-                              : "border-line bg-white text-ink hover:border-ocean/30"
+                              ? "border-brand/20 bg-green-50 text-green-700 hover:bg-brand/15"
+                              : "border-ink-200 bg-white text-ink hover:border-green-700/30"
                         )}
                       >
                         {action.label}
@@ -534,18 +534,18 @@ export function SiteChatbot() {
               </div>
             ))}
             {isSending && (
-              <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-2 text-sm font-semibold text-slate-600">
-                <Loader2 className="size-4 animate-spin text-emerald" />
+              <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-2 text-sm font-semibold text-ink-600">
+                <Loader2 className="size-4 animate-spin text-brand-text" />
                 {activeTicket ? "Sending" : "Replying"}
               </div>
             )}
           </div>
 
-          <div className="shrink-0 border-t border-line bg-white p-3">
+          <div className="shrink-0 border-t border-ink-200 bg-white p-3">
             {ticketClosed ? (
               <div className="grid gap-3">
                 {activeTicket?.feedback ? (
-                  <div className="rounded-lg border border-emerald/20 bg-emerald/5 p-3 text-sm font-semibold text-emerald">
+                  <div className="rounded-lg border border-brand/20 bg-brand/5 p-3 text-sm font-semibold text-brand-text">
                     Feedback saved. Rating: {activeTicket.feedback.rating}/5.
                   </div>
                 ) : (
@@ -557,7 +557,7 @@ export function SiteChatbot() {
                       rows={2}
                       onChange={(event) => setFeedbackComment(event.target.value)}
                       placeholder="Optional feedback"
-                      className="min-h-12 resize-none rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-2 text-sm leading-5 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10"
+                      className="min-h-12 resize-none rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-2 text-sm leading-5 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-700/10"
                     />
                     <div className="grid grid-cols-5 gap-2">
                       {[1, 2, 3, 4, 5].map((rating) => (
@@ -566,7 +566,7 @@ export function SiteChatbot() {
                           type="button"
                           disabled={feedbackSending}
                           onClick={() => void submitFeedback(rating)}
-                          className="grid h-10 place-items-center rounded-2xl bg-mist/80 text-amber-500 transition hover:border-amber-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="grid h-10 place-items-center rounded-2xl bg-ivory-100/80 text-marigold-500 transition hover:border-marigold-300 hover:bg-marigold-50 disabled:cursor-not-allowed disabled:opacity-60"
                           aria-label={`Rate ${rating} out of 5`}
                           title={`${rating}/5`}
                         >
@@ -587,7 +587,7 @@ export function SiteChatbot() {
                   type="button"
                   disabled={isSending}
                   onClick={() => void submitMessage(undefined, prompt)}
-                  className="h-9 rounded-2xl bg-mist/80 px-3 text-xs font-bold text-slate-700 transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="h-9 rounded-2xl bg-ivory-100/80 px-3 text-xs font-bold text-ink-700 transition hover:border-green-700/30 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {prompt}
                 </button>
@@ -603,14 +603,14 @@ export function SiteChatbot() {
                     onKeyDown={handleKeyDown}
                     onChange={(event) => setDraft(event.target.value)}
                     placeholder={activeTicket ? (activeTicket.assignedToName ? "Message your agent" : "Add details for the agent") : "Ask a short question"}
-                    className="h-14 min-h-14 max-h-28 flex-1 resize-none overflow-y-auto rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-3 text-sm leading-5 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10"
+                    className="h-14 min-h-14 max-h-28 flex-1 resize-none overflow-y-auto rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 py-3 text-sm leading-5 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-700/10"
                   />
                   <button
                     type="submit"
                     aria-label="Send support message"
                     title="Send"
                     disabled={isSending || !draft.trim()}
-                    className="grid size-12 shrink-0 place-items-center rounded-lg bg-emerald text-white shadow-glow transition hover:bg-emerald/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="grid size-12 shrink-0 place-items-center rounded-lg bg-brand text-ink shadow-glow transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSending ? <Loader2 className="size-5 animate-spin" /> : <Send className="size-5" />}
                   </button>
@@ -632,12 +632,12 @@ export function SiteChatbot() {
               setIsOpen(true);
             }}
             className={cn(
-              "group relative grid place-items-center overflow-visible rounded-full border border-transparent !bg-transparent p-0 shadow-none drop-shadow-[0_18px_34px_rgba(29,26,57,0.24)] transition hover:-translate-y-0.5 hover:!bg-transparent hover:drop-shadow-[0_24px_46px_rgba(29,26,57,0.28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald/60",
+              "group relative grid place-items-center overflow-visible rounded-full border border-transparent !bg-transparent p-0 shadow-none drop-shadow-[0_18px_34px_rgba(11,13,11,0.24)] transition hover:-translate-y-0.5 hover:!bg-transparent hover:drop-shadow-[0_24px_46px_rgba(11,13,11,0.28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand/60",
               launcherButtonClassName
             )}
           >
             {unreadAgentMessages > 0 && (
-              <span className="absolute right-2 top-2 z-10 grid min-w-6 place-items-center rounded-full bg-red-600 px-1.5 py-0.5 text-xs font-extrabold leading-5 text-white shadow-clay ring-2 ring-white">
+              <span className="absolute right-2 top-2 z-10 grid min-w-6 place-items-center rounded-full bg-kumkum-600 px-1.5 py-0.5 text-xs font-extrabold leading-5 text-white shadow-clay ring-2 ring-white">
                 {unreadAgentMessages > 9 ? "9+" : unreadAgentMessages}
               </span>
             )}

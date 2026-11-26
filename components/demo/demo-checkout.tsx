@@ -57,31 +57,31 @@ export function DemoCheckout({
     <div className="relative w-full max-w-sm">
       <div className="clay relative overflow-hidden rounded-[2.25rem] p-6 text-center">
         <div className="absolute right-4 top-4">
-          <Sticker tone="mango" tilt={6} icon={<FlaskConical className="size-3" />}>
+          <Sticker tone="marigold" tilt={6} icon={<FlaskConical className="size-3" />}>
             Demo
           </Sticker>
         </div>
-        <p className="text-left text-sm font-extrabold text-slate-500">Demo Pay · UPI</p>
+        <p className="text-left text-sm font-extrabold text-ink-500">Demo Pay · UPI</p>
 
         {done === "success" ? (
           <div className="py-6" role="status">
             <SuccessIllustration className="mx-auto w-40 motion-safe:animate-pop" />
             <p className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-ink">Paid {amountLabel}</p>
-            <p className="mt-1 text-sm font-semibold text-slate-500">Taking you back…</p>
+            <p className="mt-1 text-sm font-semibold text-ink-500">Taking you back…</p>
           </div>
         ) : (
           <>
-            <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Paying {merchant}</p>
+            <p className="mt-6 text-xs font-bold uppercase tracking-[0.14em] text-ink-500">Paying {merchant}</p>
             <p className="mt-1 text-5xl font-extrabold tracking-[-0.05em] text-ink">{amountLabel}</p>
-            <p className="mt-1 text-xs font-bold text-slate-400">{reference}</p>
+            <p className="mt-1 text-xs font-bold text-ink-500">{reference}</p>
 
             <div className="relative mx-auto mt-6 w-fit rounded-[1.5rem] bg-white p-3.5 shadow-clay">
               <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: 49 }).map((_, index) => (
-                  <span key={index} className={cn("size-5 rounded-[5px]", qrCells.includes(index) ? "bg-ink" : "bg-mist")} />
+                  <span key={index} className={cn("size-5 rounded-[5px]", qrCells.includes(index) ? "bg-ink" : "bg-ivory-100")} />
                 ))}
               </div>
-              <span className="absolute left-1/2 top-1/2 grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl bg-clay-violet text-xs font-extrabold text-white shadow-clay-sm">
+              <span className="absolute left-1/2 top-1/2 grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl bg-clay-peacock text-xs font-extrabold text-white shadow-clay-sm">
                 UPI
               </span>
             </div>
@@ -100,18 +100,18 @@ export function DemoCheckout({
         )}
 
         {error && (
-          <p role="alert" className="mt-4 rounded-2xl bg-berry-soft px-3 py-2 text-sm font-bold text-berry-deep">
+          <p role="alert" className="mt-4 rounded-2xl bg-kumkum-50 px-3 py-2 text-sm font-bold text-kumkum-700">
             {error}
           </p>
         )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 px-2 text-xs font-bold text-slate-500">
+      <div className="mt-4 flex items-center justify-between gap-3 px-2 text-xs font-bold text-ink-500">
         <a href={backUrl} className="inline-flex items-center gap-1.5 transition hover:text-ink">
           <ArrowLeft className="size-3.5" /> Back
         </a>
         <span className="inline-flex items-center gap-1.5">
-          <ShieldCheck className="size-3.5 text-emerald" /> Simulated. No real money moves.
+          <ShieldCheck className="size-3.5 text-brand-text" /> Simulated. No real money moves.
         </span>
       </div>
     </div>

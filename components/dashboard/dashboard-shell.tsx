@@ -87,15 +87,15 @@ function businessAccessNotice(business: DashboardBusiness) {
 
 function ApprovalNotice({ notice }: { notice: BusinessAccessNotice }) {
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[1.4rem] border border-mango/30 bg-mango-soft p-4 text-sm font-semibold leading-6 text-mango-deep shadow-clay-sm">
-      <span className="clay-orb size-9 shrink-0 rounded-xl bg-clay-mango text-ink">
+    <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[1.4rem] border border-marigold-500/30 bg-marigold-50 p-4 text-sm font-semibold leading-6 text-marigold-700 shadow-clay-sm">
+      <span className="clay-orb size-9 shrink-0 rounded-xl bg-clay-marigold text-ink">
         <Sparkles className="size-4" />
       </span>
       <span className="min-w-0 flex-1">{notice.message}</span>
       {notice.href && notice.actionLabel && (
         <Link
           href={notice.href}
-          className="clay-press inline-flex h-9 shrink-0 items-center rounded-xl bg-clay-ink px-3.5 text-xs font-extrabold text-white [--clay-shadow:rgba(13,10,34,0.6)]"
+          className="clay-press inline-flex h-9 shrink-0 items-center rounded-xl bg-clay-ink px-3.5 text-xs font-extrabold text-white [--clay-shadow:rgba(0,0,0,0.6)] theme-dark"
         >
           {notice.actionLabel}
         </Link>
@@ -252,12 +252,12 @@ export function DashboardShell({
     <div className="fixed inset-0 min-h-0 overflow-hidden lg:grid lg:grid-cols-[280px_minmax(0,1fr)]">
       <aside className="hidden h-full min-h-0 overflow-hidden p-3 pr-0 lg:block">
         <div className="glass flex h-full min-h-0 flex-col rounded-[1.75rem] p-3">
-          <Link href="/" className="flex items-center gap-3 rounded-[1.25rem] bg-clay-ink p-3 font-extrabold tracking-[-0.02em] text-white shadow-clay-sm">
+          <Link href="/" className="flex items-center gap-3 rounded-[1.25rem] bg-clay-ink p-3 font-extrabold tracking-[-0.02em] text-white shadow-clay-sm theme-dark">
             <BrandMark surface="dark" />
             <span>VyapaarMate</span>
           </Link>
           {isSeededDemoUser && (
-            <div className="mt-3 rounded-2xl border border-mango/30 bg-mango-soft p-3 text-xs font-semibold leading-5 text-mango-deep">
+            <div className="mt-3 rounded-2xl border border-marigold-500/30 bg-marigold-50 p-3 text-xs font-semibold leading-5 text-marigold-700">
               Demo workspace. Change these demo credentials before going live.
             </div>
           )}
@@ -271,13 +271,13 @@ export function DashboardShell({
                   aria-current={active ? "page" : undefined}
                   className={cn(
                     "group flex h-11 items-center gap-3 rounded-2xl px-2 text-sm font-bold transition",
-                    active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white hover:text-ink hover:shadow-clay-sm"
+                    active ? "bg-clay-ink text-white shadow-clay-sm theme-dark" : "text-ink-600 hover:bg-white hover:text-ink hover:shadow-clay-sm"
                   )}
                 >
                   <span
                     className={cn(
                       "grid size-8 shrink-0 place-items-center rounded-xl transition",
-                      active ? "bg-clay-emerald text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]" : "bg-white/80 text-slate-500 group-hover:text-emerald-deep"
+                      active ? "bg-clay-green text-ink shadow-[inset_0_-2px_0_rgba(0,0,0,0.15)]" : "bg-white/80 text-ink-500 group-hover:text-green-700"
                     )}
                   >
                     <item.icon className="size-4" />
@@ -288,12 +288,12 @@ export function DashboardShell({
             })}
           </nav>
           <div className="mt-3 flex items-center gap-3 rounded-[1.25rem] bg-white/80 p-3 shadow-clay-sm">
-            <span className="clay-orb size-10 shrink-0 rounded-2xl bg-clay-violet text-sm font-extrabold text-white">
+            <span className="clay-orb size-10 shrink-0 rounded-2xl bg-clay-peacock text-sm font-extrabold text-white">
               {business.name.slice(0, 1).toUpperCase()}
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-extrabold text-ink">{business.name}</span>
-              <span className="mt-0.5 block truncate text-xs font-semibold text-slate-500">{user.name}</span>
+              <span className="mt-0.5 block truncate text-xs font-semibold text-ink-500">{user.name}</span>
             </span>
           </div>
         </div>
@@ -303,7 +303,7 @@ export function DashboardShell({
         <header
           className={cn(
             "glass z-30 mx-3 mt-3 flex h-16 shrink-0 items-center justify-between rounded-[1.4rem] px-3 transition-shadow duration-300 lg:mx-4",
-            mainScrolled && "shadow-[0_22px_50px_-24px_rgba(31,27,58,0.45)]"
+            mainScrolled && "shadow-[0_22px_50px_-24px_rgba(60,40,10,0.45)]"
           )}
         >
           <div className="flex min-w-0 items-center gap-3">
@@ -313,21 +313,21 @@ export function DashboardShell({
               aria-label="Open navigation"
               aria-expanded={mobileNavOpen}
               aria-controls="dashboard-mobile-navigation"
-              className="grid size-10 place-items-center rounded-xl border border-white bg-white shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15 lg:hidden"
+              className="grid size-10 place-items-center rounded-xl border border-white bg-white shadow-clay-sm transition hover:-translate-y-0.5 hover:text-brand-text focus:outline-none focus:ring-4 focus:ring-brand/15 lg:hidden"
               onClick={() => setMobileNavOpen((value) => !value)}
             >
               <Menu className="size-5" />
             </button>
             <div className="min-w-0">
               <p className="truncate text-sm font-extrabold text-ink">{business.name}</p>
-              <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-slate-500">
-                <span className={cn("size-1.5 shrink-0 rounded-full", business.subscriptionStatus === "ACTIVE" ? "bg-emerald" : "bg-mango")} />
+              <p className="flex items-center gap-1.5 truncate text-xs font-semibold text-ink-500">
+                <span className={cn("size-1.5 shrink-0 rounded-full", business.subscriptionStatus === "ACTIVE" ? "bg-brand" : "bg-marigold-500")} />
                 {planLine}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href={`/b/${business.slug}`} className="hidden h-10 items-center gap-2 rounded-xl border border-white bg-white px-3.5 text-sm font-extrabold text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald-deep sm:flex">
+            <Link href={`/b/${business.slug}`} className="hidden h-10 items-center gap-2 rounded-xl border border-white bg-white px-3.5 text-sm font-extrabold text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-green-700 sm:flex">
               <StorefrontIcon className="size-4" />
               Storefront
             </Link>
@@ -335,7 +335,7 @@ export function DashboardShell({
               type="button"
               aria-label="Log out"
               disabled={loggingOut}
-              className="grid size-10 place-items-center rounded-xl border border-white bg-white text-slate-600 shadow-clay-sm transition hover:text-berry-deep disabled:cursor-not-allowed disabled:opacity-60"
+              className="grid size-10 place-items-center rounded-xl border border-white bg-white text-ink-600 shadow-clay-sm transition hover:text-kumkum-700 disabled:cursor-not-allowed disabled:opacity-60"
               onClick={logout}
             >
               <LogOut className="size-4" />
@@ -356,14 +356,14 @@ export function DashboardShell({
               className="dashboard-mobile-drawer safe-bottom relative flex h-full max-h-[100svh] w-[min(88vw,22.5rem)] flex-col overflow-hidden rounded-r-[2rem] border-r border-white bg-white/95 p-4 shadow-clay-lg backdrop-blur-xl motion-safe:animate-[admin-mobile-drawer-in_340ms_cubic-bezier(0.22,1,0.36,1)]"
             >
               <div className="flex shrink-0 items-center justify-between">
-                <Link href="/" className="flex items-center gap-3 rounded-[1.25rem] bg-clay-ink p-3 font-extrabold text-white shadow-clay-sm">
+                <Link href="/" className="flex items-center gap-3 rounded-[1.25rem] bg-clay-ink p-3 font-extrabold text-white shadow-clay-sm theme-dark">
                   <BrandMark surface="dark" />
                   <span>VyapaarMate</span>
                 </Link>
                 <button
                   type="button"
                   aria-label="Close navigation"
-                  className="grid size-10 place-items-center rounded-xl border border-white bg-white text-slate-600 shadow-clay-sm transition hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15"
+                  className="grid size-10 place-items-center rounded-xl border border-white bg-white text-ink-600 shadow-clay-sm transition hover:text-brand-text focus:outline-none focus:ring-4 focus:ring-brand/15"
                   onClick={() => setMobileNavOpen(false)}
                 >
                   <X className="size-5" />
@@ -378,12 +378,12 @@ export function DashboardShell({
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex h-12 min-w-0 items-center gap-3 rounded-2xl px-2.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
-                        active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-mist hover:text-ink"
+                        "flex h-12 min-w-0 items-center gap-3 rounded-2xl px-2.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-brand/15",
+                        active ? "bg-clay-ink text-white shadow-clay-sm theme-dark" : "text-ink-600 hover:bg-ivory-100 hover:text-ink"
                       )}
                       onClick={() => setMobileNavOpen(false)}
                     >
-                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-xl", active ? "bg-clay-emerald text-white" : "bg-mist text-slate-500")}>
+                      <span className={cn("grid size-8 shrink-0 place-items-center rounded-xl", active ? "bg-clay-green text-ink" : "bg-ivory-100 text-ink-500")}>
                         <item.icon className="size-4" />
                       </span>
                       <span className="min-w-0 truncate">{item.label}</span>
@@ -391,9 +391,9 @@ export function DashboardShell({
                   );
                 })}
               </nav>
-              <div className="mt-5 shrink-0 rounded-[1.25rem] bg-mist p-3">
+              <div className="mt-5 shrink-0 rounded-[1.25rem] bg-ivory-100 p-3">
                 <p className="truncate text-sm font-bold text-ink">{business.name}</p>
-                <p className="mt-1 truncate text-xs text-slate-500">{user.name} workspace</p>
+                <p className="mt-1 truncate text-xs text-ink-500">{user.name} workspace</p>
               </div>
             </div>
           </div>
@@ -426,8 +426,8 @@ export function DashboardShell({
                     href={item.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-extrabold leading-none transition focus:outline-none focus:ring-4 focus:ring-emerald/15",
-                      active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-500 hover:bg-white hover:text-ink"
+                      "flex min-w-0 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-extrabold leading-none transition focus:outline-none focus:ring-4 focus:ring-brand/15",
+                      active ? "bg-clay-ink text-white shadow-clay-sm theme-dark" : "text-ink-500 hover:bg-white hover:text-ink"
                     )}
                   >
                     <item.icon className="size-4" />

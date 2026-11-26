@@ -13,13 +13,28 @@ import { launchSingleCityRestricted } from "@/lib/launch-policy";
 import { company, getSiteOrigin, siteConfig } from "@/lib/site";
 import "./globals.css";
 
-// DM Sans (SIL OFL) bundled locally: one variable file covers every weight we use and
-// works offline, so pages never wait on a font CDN.
-const dmSans = localFont({
-  src: "./fonts/dm-sans-latin-var.woff",
-  variable: "--font-dm-sans",
-  weight: "100 1000",
-  display: "swap"
+// VyapaarMate type system (both SIL OFL, bundled locally so pages never wait on a font CDN):
+// Inter for everything you read, Poppins by the Indian Type Foundry for headlines and prices.
+const inter = localFont({
+  src: [
+    { path: "./fonts/Inter-Regular.woff", weight: "400", style: "normal" },
+    { path: "./fonts/Inter-Medium.woff", weight: "500", style: "normal" },
+    { path: "./fonts/Inter-SemiBold.woff", weight: "600", style: "normal" },
+    { path: "./fonts/Inter-Bold.woff", weight: "700", style: "normal" }
+  ],
+  variable: "--font-inter-local",
+  display: "swap",
+  adjustFontFallback: "Arial"
+});
+
+const poppins = localFont({
+  src: [
+    { path: "./fonts/Poppins-Medium.woff", weight: "500", style: "normal" },
+    { path: "./fonts/Poppins-Bold.woff", weight: "700", style: "normal" }
+  ],
+  variable: "--font-poppins-local",
+  display: "swap",
+  adjustFontFallback: "Arial"
 });
 
 export const metadata: Metadata = {
@@ -68,7 +83,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={siteConfig.language} className={`${dmSans.variable} scroll-smooth font-sans`} data-scroll-behavior="smooth">
+    <html lang={siteConfig.language} className={`${inter.variable} ${poppins.variable} scroll-smooth font-sans`} data-scroll-behavior="smooth">
       <body>
         <TooltipProvider>
           <MarketingTags />

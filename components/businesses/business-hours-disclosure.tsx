@@ -36,7 +36,7 @@ export function BusinessHoursDisclosure({
   const panelId = `business-days-${businessId}`;
   const currentDayIndex = getBusinessTime(now).dayIndex;
   const isHero = variant === "hero";
-  const icon = leadingIcon ?? <Shop className="mt-0.5 size-5 shrink-0 text-ocean" variant="Bulk" />;
+  const icon = leadingIcon ?? <Shop className="mt-0.5 size-5 shrink-0 text-brand-text" variant="Bulk" />;
 
   const toggleButton = schedule && showSchedule ? (
     <button
@@ -47,8 +47,8 @@ export function BusinessHoursDisclosure({
       className={cn(
         "inline-flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-bold transition focus:outline-none focus:ring-2",
         isHero
-          ? "border-white/20 bg-white/10 text-white/80 backdrop-blur hover:border-emerald/30 hover:bg-emerald/20 hover:text-white focus:ring-emerald/30"
-          : "border-line bg-white text-slate-600 hover:border-ocean/30 hover:text-ocean focus:ring-ocean/20"
+          ? "border-white/20 bg-white/10 text-white/80 backdrop-blur hover:border-brand/30 hover:bg-brand/20 hover:text-white focus:ring-brand/30"
+          : "border-ink-200 bg-white text-ink-600 hover:border-green-700/30 hover:text-brand-text focus:ring-green-700/20"
       )}
     >
       <span>{expanded ? "Hide business days" : "Show business days"}</span>
@@ -66,14 +66,14 @@ export function BusinessHoursDisclosure({
       )}
     >
       <div className="min-h-0 overflow-hidden">
-        <div className={cn("overflow-hidden rounded-lg border", isHero ? "border-white/15 bg-white/10 backdrop-blur" : "border-line bg-mist/60")}>
+        <div className={cn("overflow-hidden rounded-lg border", isHero ? "border-white/15 bg-white/10 backdrop-blur" : "border-ink-200 bg-ivory-100/60")}>
           {schedule.map((row, rowIndex) => (
             <div
               key={row.key}
               className={cn(
                 "grid grid-cols-[4rem_1fr] gap-3 border-b px-3 py-2 text-xs font-semibold last:border-b-0",
-                isHero ? "border-white/10 text-white/75" : "border-line/70 text-slate-600",
-                rowIndex === currentDayIndex && (isHero ? "bg-emerald/15 text-white" : "bg-emerald/10 text-ink")
+                isHero ? "border-white/10 text-white/75" : "border-ink-200/70 text-ink-600",
+                rowIndex === currentDayIndex && (isHero ? "bg-brand/15 text-white" : "bg-brand/10 text-ink")
               )}
             >
               <span className={rowIndex === currentDayIndex ? "font-extrabold" : "font-bold"}>{row.label}</span>
@@ -91,7 +91,7 @@ export function BusinessHoursDisclosure({
         <div className="flex items-start gap-2">
           {icon}
           <div className="min-w-0 flex-1">
-            {toggleButton ?? <p className={cn("text-sm font-semibold leading-6", isHero ? "text-white/70" : "text-slate-600")}>{primary}</p>}
+            {toggleButton ?? <p className={cn("text-sm font-semibold leading-6", isHero ? "text-white/70" : "text-ink-600")}>{primary}</p>}
           </div>
         </div>
         {schedulePanel && <div className="max-w-xl pl-6">{schedulePanel}</div>}
@@ -104,8 +104,8 @@ export function BusinessHoursDisclosure({
       <div className="flex items-start gap-2">
         {icon}
         <div className="min-w-0 flex-1">
-          <p className={cn("text-sm font-semibold leading-5", isHero ? "text-emerald-100" : "text-emerald-700")}>{primary}</p>
-          {secondary && <p className={cn("mt-0.5 text-xs font-semibold leading-5", isHero ? "text-emerald-200/85" : "text-emerald-600")}>{secondary}</p>}
+          <p className={cn("text-sm font-semibold leading-5", isHero ? "text-green-100" : "text-green-700")}>{primary}</p>
+          {secondary && <p className={cn("mt-0.5 text-xs font-semibold leading-5", isHero ? "text-green-200/85" : "text-green-600")}>{secondary}</p>}
         </div>
       </div>
 

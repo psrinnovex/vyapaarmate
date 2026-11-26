@@ -396,7 +396,7 @@ export function BusinessLocationMapPicker({
       <input type="hidden" name="longitude" value={location ? formatMapCoordinate(location.longitude) : ""} />
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-500" />
           <Input
             value={searchQuery}
             onChange={(event) => {
@@ -430,49 +430,49 @@ export function BusinessLocationMapPicker({
         </Button>
       </div>
       {launchMarketRestricted && (
-        <p className="text-xs font-semibold text-slate-500">
+        <p className="text-xs font-semibold text-ink-500">
           {launchSingleCityRestricted
             ? `Current launch area: within ${launchMarket.maximumBusinessDistanceKm} km of central Bengaluru.`
             : `Pilot locations: ${launchMarket.displayName}. The operating address and pin require verification before approval.`}
         </p>
       )}
       {searchResults.length > 0 && (
-        <div className="grid max-h-56 gap-1 overflow-y-auto rounded-lg border border-line bg-white p-2 shadow-sm">
+        <div className="grid max-h-56 gap-1 overflow-y-auto rounded-lg border border-ink-200 bg-white p-2 shadow-sm">
           {searchResults.map((result) => (
             <button
               key={`${result.place_id}-${result.lat}-${result.lon}`}
               type="button"
-              className="flex items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-mist focus:outline-none focus:ring-4 focus:ring-ocean/10"
+              className="flex items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-ink-700 transition hover:bg-ivory-100 focus:outline-none focus:ring-4 focus:ring-green-700/10"
               onClick={() => chooseSearchResult(result)}
             >
-              <MapPin className="mt-0.5 size-4 shrink-0 text-ocean" />
+              <MapPin className="mt-0.5 size-4 shrink-0 text-brand-text" />
               <span>{result.display_name}</span>
             </button>
           ))}
-          <p className="px-3 py-1 text-xs font-semibold text-slate-500" translate="no">
+          <p className="px-3 py-1 text-xs font-semibold text-ink-500" translate="no">
             Results from Google Maps
           </p>
         </div>
       )}
-      {searchError && <p className="text-xs font-semibold text-red-700">{searchError}</p>}
-      {locationError && <p className="text-xs font-semibold text-red-700">{locationError}</p>}
+      {searchError && <p className="text-xs font-semibold text-kumkum-700">{searchError}</p>}
+      {locationError && <p className="text-xs font-semibold text-kumkum-700">{locationError}</p>}
       <div
         role="application"
         aria-label="Google business location map"
         data-testid="business-location-map"
         className={cn(
-          "relative h-80 overflow-hidden rounded-lg border border-line bg-slate-100 shadow-inner",
+          "relative h-80 overflow-hidden rounded-lg border border-ink-200 bg-ink-100 shadow-inner",
           mapClassName
         )}
       >
         <div ref={mapElementRef} className="absolute inset-0" />
         {mapStatus !== "ready" && (
-          <div className="absolute inset-0 z-10 grid place-items-center bg-slate-100/95 p-5 text-center">
+          <div className="absolute inset-0 z-10 grid place-items-center bg-ink-100/95 p-5 text-center">
             <div>
               {mapStatus === "loading" ? (
-                <Loader2 className="mx-auto size-8 animate-spin text-ocean" />
+                <Loader2 className="mx-auto size-8 animate-spin text-brand-text" />
               ) : (
-                <MapPin className="mx-auto size-8 text-ocean" />
+                <MapPin className="mx-auto size-8 text-brand-text" />
               )}
               <p className="mt-3 text-sm font-semibold text-ink">
                 {mapStatus === "loading" ? "Loading Google Maps" : mapError ?? "Google Maps is not ready."}
@@ -486,7 +486,7 @@ export function BusinessLocationMapPicker({
             aria-label="Use current location"
             title="Use current location"
             disabled={locationStatus === "loading"}
-            className="grid size-9 place-items-center rounded-lg border border-line bg-white text-ink shadow-sm transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="grid size-9 place-items-center rounded-lg border border-ink-200 bg-white text-ink shadow-sm transition hover:border-green-700/30 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={useBrowserLocation}
           >
             {locationStatus === "loading" ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
@@ -496,7 +496,7 @@ export function BusinessLocationMapPicker({
             aria-label="Center on selected pin"
             title="Center pin"
             disabled={!location || mapStatus !== "ready"}
-            className="grid size-9 place-items-center rounded-lg border border-line bg-white text-ink shadow-sm transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="grid size-9 place-items-center rounded-lg border border-ink-200 bg-white text-ink shadow-sm transition hover:border-green-700/30 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               if (location) focusMapOnLocation(location);
             }}
@@ -506,12 +506,12 @@ export function BusinessLocationMapPicker({
         </div>
       </div>
       <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-stretch">
-        <div className="rounded-lg border border-line bg-mist p-3">
-          <p className="text-xs font-semibold uppercase text-slate-500">Latitude</p>
+        <div className="rounded-lg border border-ink-200 bg-ivory-100 p-3">
+          <p className="text-xs font-semibold uppercase text-ink-500">Latitude</p>
           <p className="mt-1 font-mono text-sm font-semibold text-ink">{hasLocation ? formatMapCoordinate(location.latitude) : "Not set"}</p>
         </div>
-        <div className="rounded-lg border border-line bg-mist p-3">
-          <p className="text-xs font-semibold uppercase text-slate-500">Longitude</p>
+        <div className="rounded-lg border border-ink-200 bg-ivory-100 p-3">
+          <p className="text-xs font-semibold uppercase text-ink-500">Longitude</p>
           <p className="mt-1 font-mono text-sm font-semibold text-ink">{hasLocation ? formatMapCoordinate(location.longitude) : "Not set"}</p>
         </div>
         <Button

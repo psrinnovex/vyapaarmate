@@ -108,53 +108,56 @@ function buildPasswordResetEmail(input: { name: string; resetUrl: string; portal
       company.name
     ].join("\n"),
     html: `
-      <div style="margin:0;padding:0;background:#f4f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif">
+      <div style="margin:0;padding:0;background:#faf7f0;color:#151815;font-family:Arial,Helvetica,sans-serif">
         <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden">
           ${escapeHtml(previewText)}
         </span>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f4f7fb;margin:0;padding:0">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#faf7f0;margin:0;padding:0">
           <tr>
             <td align="center" style="padding:32px 16px">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #e6ebf2;border-radius:14px;overflow:hidden">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #ece6d8;border-radius:14px;overflow:hidden">
                 <tr>
-                  <td style="padding:28px 32px 20px;background:#0f172a;color:#ffffff">
+                  <td style="padding:28px 32px 20px;background:#0b0d0b;color:#ffffff">
                     <div style="font-size:20px;font-weight:700;letter-spacing:.2px">${safeProduct}</div>
-                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#cbd5e1">Secure password recovery</div>
+                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#d3cab6">Secure password recovery</div>
                   </td>
                 </tr>
                 <tr>
+                  <td style="height:6px;line-height:6px;font-size:0;background:#1ec926">&nbsp;</td>
+                </tr>
+                <tr>
                   <td style="padding:32px">
-                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#172033">Hi ${safeName},</p>
-                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#334155">
+                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#151815">Hi ${safeName},</p>
+                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#3a3f39">
                       We received a request to reset the password for your ${safeProduct} ${safePortalLabel} account. Use the secure button below to choose a new password.
                     </p>
                     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 24px">
                       <tr>
-                        <td style="border-radius:10px;background:#0f766e">
-                          <a href="${safeResetUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;line-height:20px;color:#ffffff;text-decoration:none;border-radius:10px">
+                        <td style="border-radius:12px;background:#1ec926;border-bottom:4px solid #0b7a10">
+                          <a href="${safeResetUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;line-height:20px;color:#0b0d0b;text-decoration:none;border-radius:12px">
                             Reset password
                           </a>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#475569">
-                      This link expires in <strong style="color:#172033">${passwordResetLifetimeMinutes} minutes</strong> and can be used only once.
+                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#4b4a43">
+                      This link expires in <strong style="color:#151815">${passwordResetLifetimeMinutes} minutes</strong> and can be used only once.
                     </p>
-                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#625f57">
                       If the button does not work, copy and paste this link into your browser:
                     </p>
-                    <p style="margin:0 0 22px;word-break:break-all;font-size:13px;line-height:20px;color:#0f766e">
-                      <a href="${safeResetUrl}" style="color:#0f766e;text-decoration:none">${safeResetUrl}</a>
+                    <p style="margin:0 0 22px;word-break:break-all;font-size:13px;line-height:20px;color:#0b7a10">
+                      <a href="${safeResetUrl}" style="color:#0b7a10;text-decoration:none">${safeResetUrl}</a>
                     </p>
-                    <p style="margin:0;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0;font-size:14px;line-height:22px;color:#625f57">
                       If you did not request this reset, no changes were made. You can safely ignore this email or contact
-                      <a href="mailto:${safeSupportEmail}" style="color:#0f766e;text-decoration:none">${safeSupportEmail}</a>.
+                      <a href="mailto:${safeSupportEmail}" style="color:#0b7a10;text-decoration:none">${safeSupportEmail}</a>.
                     </p>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:20px 32px;background:#f8fafc;border-top:1px solid #e6ebf2">
-                    <p style="margin:0;font-size:12px;line-height:18px;color:#64748b">
+                  <td style="padding:20px 32px;background:#faf7f0;border-top:1px solid #ece6d8">
+                    <p style="margin:0;font-size:12px;line-height:18px;color:#625f57">
                       This automated message was sent by ${safeCompanyName} for ${safeProduct} account security.
                     </p>
                   </td>
@@ -212,64 +215,67 @@ function buildStaffInviteEmail(input: { name: string; businessName: string; role
       company.name
     ].join("\n"),
     html: `
-      <div style="margin:0;padding:0;background:#f4f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif">
+      <div style="margin:0;padding:0;background:#faf7f0;color:#151815;font-family:Arial,Helvetica,sans-serif">
         <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden">
           ${escapeHtml(previewText)}
         </span>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f4f7fb;margin:0;padding:0">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#faf7f0;margin:0;padding:0">
           <tr>
             <td align="center" style="padding:32px 16px">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #e6ebf2;border-radius:14px;overflow:hidden">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #ece6d8;border-radius:14px;overflow:hidden">
                 <tr>
-                  <td style="padding:28px 32px 20px;background:#0f172a;color:#ffffff">
+                  <td style="padding:28px 32px 20px;background:#0b0d0b;color:#ffffff">
                     <div style="font-size:20px;font-weight:700;letter-spacing:.2px">${safeProduct}</div>
-                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#cbd5e1">Business staff access invitation</div>
+                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#d3cab6">Business staff access invitation</div>
                   </td>
                 </tr>
                 <tr>
+                  <td style="height:6px;line-height:6px;font-size:0;background:#1ec926">&nbsp;</td>
+                </tr>
+                <tr>
                   <td style="padding:32px">
-                    <div style="display:inline-block;margin:0 0 18px;padding:6px 10px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:12px;font-weight:700;line-height:16px;text-transform:uppercase;letter-spacing:.4px">
+                    <div style="display:inline-block;margin:0 0 18px;padding:6px 10px;border-radius:999px;background:#effbec;color:#0b7a10;font-size:12px;font-weight:700;line-height:16px;text-transform:uppercase;letter-spacing:.4px">
                       ${safeRoleLabel} Access
                     </div>
-                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#172033">Hi ${safeName},</p>
-                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#334155">
-                      <strong style="color:#172033">${safeBusinessName}</strong> has invited you to join their ${safeProduct} business dashboard as <strong style="color:#172033">${safeRoleLabel}</strong>. Once your password is set, you can access the tools assigned to your role.
+                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#151815">Hi ${safeName},</p>
+                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#3a3f39">
+                      <strong style="color:#151815">${safeBusinessName}</strong> has invited you to join their ${safeProduct} business dashboard as <strong style="color:#151815">${safeRoleLabel}</strong>. Once your password is set, you can access the tools assigned to your role.
                     </p>
                     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 24px">
                       <tr>
-                        <td style="border-radius:10px;background:#0f766e">
-                          <a href="${safeInviteUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;line-height:20px;color:#ffffff;text-decoration:none;border-radius:10px">
+                        <td style="border-radius:12px;background:#1ec926;border-bottom:4px solid #0b7a10">
+                          <a href="${safeInviteUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;line-height:20px;color:#0b0d0b;text-decoration:none;border-radius:12px">
                             Accept invitation
                           </a>
                         </td>
                       </tr>
                     </table>
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 22px;background:#f8fafc;border:1px solid #e6ebf2;border-radius:12px">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 22px;background:#faf7f0;border:1px solid #ece6d8;border-radius:12px">
                       <tr>
                         <td style="padding:16px 18px">
-                          <p style="margin:0 0 8px;font-size:14px;font-weight:700;line-height:20px;color:#172033">Security note</p>
-                          <p style="margin:0;font-size:14px;line-height:22px;color:#475569">
-                            This invitation link expires in <strong style="color:#172033">${passwordResetLifetimeMinutes} minutes</strong>, can be used only once, and should not be forwarded or shared.
+                          <p style="margin:0 0 8px;font-size:14px;font-weight:700;line-height:20px;color:#151815">Security note</p>
+                          <p style="margin:0;font-size:14px;line-height:22px;color:#4b4a43">
+                            This invitation link expires in <strong style="color:#151815">${passwordResetLifetimeMinutes} minutes</strong>, can be used only once, and should not be forwarded or shared.
                           </p>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#625f57">
                       If the button does not work, copy and paste this link into your browser:
                     </p>
-                    <p style="margin:0 0 22px;word-break:break-all;font-size:13px;line-height:20px;color:#0f766e">
-                      <a href="${safeInviteUrl}" style="color:#0f766e;text-decoration:none">${safeInviteUrl}</a>
+                    <p style="margin:0 0 22px;word-break:break-all;font-size:13px;line-height:20px;color:#0b7a10">
+                      <a href="${safeInviteUrl}" style="color:#0b7a10;text-decoration:none">${safeInviteUrl}</a>
                     </p>
-                    <p style="margin:0;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0;font-size:14px;line-height:22px;color:#625f57">
                       If you were not expecting this invitation, do not use the link. Contact ${safeBusinessName} or
-                      <a href="mailto:${safeSupportEmail}" style="color:#0f766e;text-decoration:none">${safeSupportEmail}</a>
+                      <a href="mailto:${safeSupportEmail}" style="color:#0b7a10;text-decoration:none">${safeSupportEmail}</a>
                       so the request can be reviewed.
                     </p>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:20px 32px;background:#f8fafc;border-top:1px solid #e6ebf2">
-                    <p style="margin:0;font-size:12px;line-height:18px;color:#64748b">
+                  <td style="padding:20px 32px;background:#faf7f0;border-top:1px solid #ece6d8">
+                    <p style="margin:0;font-size:12px;line-height:18px;color:#625f57">
                       This automated message was sent by ${safeCompanyName} for ${safeProduct} business access.
                     </p>
                   </td>
@@ -330,64 +336,67 @@ function buildSupportAgentInviteEmail(input: { name: string; inviteUrl: string }
       supportPortalName
     ].join("\n"),
     html: `
-      <div style="margin:0;padding:0;background:#f4f7fb;color:#172033;font-family:Arial,Helvetica,sans-serif">
+      <div style="margin:0;padding:0;background:#faf7f0;color:#151815;font-family:Arial,Helvetica,sans-serif">
         <span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden">
           ${escapeHtml(previewText)}
         </span>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f4f7fb;margin:0;padding:0">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#faf7f0;margin:0;padding:0">
           <tr>
             <td align="center" style="padding:32px 16px">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #e6ebf2;border-radius:14px;overflow:hidden">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;max-width:600px;background:#ffffff;border:1px solid #ece6d8;border-radius:14px;overflow:hidden">
                 <tr>
-                  <td style="padding:28px 32px 20px;background:#0f172a;color:#ffffff">
+                  <td style="padding:28px 32px 20px;background:#0b0d0b;color:#ffffff">
                     <div style="font-size:20px;font-weight:700;letter-spacing:.2px">${safeSupportPortalName}</div>
-                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#cbd5e1">Secure support operations</div>
+                    <div style="margin-top:8px;font-size:13px;line-height:20px;color:#d3cab6">Secure support operations</div>
                   </td>
                 </tr>
                 <tr>
+                  <td style="height:6px;line-height:6px;font-size:0;background:#1ec926">&nbsp;</td>
+                </tr>
+                <tr>
                   <td style="padding:32px">
-                    <div style="display:inline-block;margin:0 0 18px;padding:6px 10px;border-radius:999px;background:#ecfdf5;color:#047857;font-size:12px;font-weight:700;line-height:16px;text-transform:uppercase;letter-spacing:.4px">
+                    <div style="display:inline-block;margin:0 0 18px;padding:6px 10px;border-radius:999px;background:#effbec;color:#0b7a10;font-size:12px;font-weight:700;line-height:16px;text-transform:uppercase;letter-spacing:.4px">
                       Support Agent Access
                     </div>
-                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#172033">Hi ${safeName},</p>
-                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#334155">
+                    <p style="margin:0 0 16px;font-size:16px;line-height:24px;color:#151815">Hi ${safeName},</p>
+                    <p style="margin:0 0 22px;font-size:16px;line-height:24px;color:#3a3f39">
                       You have been invited to join ${safeSupportPortalName} as a support agent. Once your password is set, you can manage escalations, review customer and business requests, and respond from the secure support portal.
                     </p>
                     <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 24px">
                       <tr>
-                        <td style="border-radius:10px;background:#0f766e">
-                          <a href="${safeInviteUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;line-height:20px;color:#ffffff;text-decoration:none;border-radius:10px">
+                        <td style="border-radius:12px;background:#1ec926;border-bottom:4px solid #0b7a10">
+                          <a href="${safeInviteUrl}" style="display:inline-block;padding:14px 22px;font-size:15px;font-weight:700;line-height:20px;color:#0b0d0b;text-decoration:none;border-radius:12px">
                             Accept invitation
                           </a>
                         </td>
                       </tr>
                     </table>
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 22px;background:#f8fafc;border:1px solid #e6ebf2;border-radius:12px">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 0 22px;background:#faf7f0;border:1px solid #ece6d8;border-radius:12px">
                       <tr>
                         <td style="padding:16px 18px">
-                          <p style="margin:0 0 8px;font-size:14px;font-weight:700;line-height:20px;color:#172033">Security note</p>
-                          <p style="margin:0;font-size:14px;line-height:22px;color:#475569">
-                            This invitation link expires in <strong style="color:#172033">${passwordResetLifetimeMinutes} minutes</strong>, can be used only once, and should not be forwarded or shared.
+                          <p style="margin:0 0 8px;font-size:14px;font-weight:700;line-height:20px;color:#151815">Security note</p>
+                          <p style="margin:0;font-size:14px;line-height:22px;color:#4b4a43">
+                            This invitation link expires in <strong style="color:#151815">${passwordResetLifetimeMinutes} minutes</strong>, can be used only once, and should not be forwarded or shared.
                           </p>
                         </td>
                       </tr>
                     </table>
-                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0 0 18px;font-size:14px;line-height:22px;color:#625f57">
                       If the button does not work, copy and paste this link into your browser:
                     </p>
-                    <p style="margin:0 0 22px;word-break:break-all;font-size:13px;line-height:20px;color:#0f766e">
-                      <a href="${safeInviteUrl}" style="color:#0f766e;text-decoration:none">${safeInviteUrl}</a>
+                    <p style="margin:0 0 22px;word-break:break-all;font-size:13px;line-height:20px;color:#0b7a10">
+                      <a href="${safeInviteUrl}" style="color:#0b7a10;text-decoration:none">${safeInviteUrl}</a>
                     </p>
-                    <p style="margin:0;font-size:14px;line-height:22px;color:#64748b">
+                    <p style="margin:0;font-size:14px;line-height:22px;color:#625f57">
                       If you were not expecting this invitation, do not use the link. Contact
-                      <a href="mailto:${safeSupportEmail}" style="color:#0f766e;text-decoration:none">${safeSupportEmail}</a>
+                      <a href="mailto:${safeSupportEmail}" style="color:#0b7a10;text-decoration:none">${safeSupportEmail}</a>
                       so we can review the request.
                     </p>
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding:20px 32px;background:#f8fafc;border-top:1px solid #e6ebf2">
-                    <p style="margin:0;font-size:12px;line-height:18px;color:#64748b">
+                  <td style="padding:20px 32px;background:#faf7f0;border-top:1px solid #ece6d8">
+                    <p style="margin:0;font-size:12px;line-height:18px;color:#625f57">
                       This automated message was sent for ${safeSupportPortalName} access.
                     </p>
                   </td>

@@ -102,12 +102,12 @@ export function PasswordChangeCard({
     <>
       {showHeader && (
         <div className="flex items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-ink text-white">
+          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-ink text-white theme-dark">
             <ShieldCheck className="size-5" />
           </span>
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-ink">{title}</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500">{body}</p>
+            <p className="mt-1 text-sm leading-6 text-ink-500">{body}</p>
           </div>
         </div>
       )}
@@ -149,15 +149,15 @@ export function PasswordChangeCard({
         </div>
 
         {message && (
-          <p className="flex gap-3 rounded-lg bg-emerald/10 p-3 text-sm font-semibold leading-6 text-emerald">
+          <p className="flex gap-3 rounded-lg bg-brand/10 p-3 text-sm font-semibold leading-6 text-brand-text">
             <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
             <span>{message}</span>
           </p>
         )}
-        {error && <p className="rounded-lg bg-red-50 p-3 text-sm leading-6 text-red-700">{error}</p>}
+        {error && <p className="rounded-lg bg-kumkum-50 p-3 text-sm leading-6 text-kumkum-700">{error}</p>}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <Button className="w-full" type="submit" disabled={loading} variant="emerald" icon={<KeyRound className="size-4" />}>
+          <Button className="w-full" type="submit" disabled={loading} variant="brand" icon={<KeyRound className="size-4" />}>
             {loading ? "Updating" : "Update Password"}
           </Button>
           <ButtonLink className="w-full" href={authPath("/forgot-password", portal)} variant="secondary" icon={<Mail className="size-4" />}>

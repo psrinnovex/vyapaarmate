@@ -82,7 +82,7 @@ import { PaymentStatusAnimation } from "@/components/ui/payment-status-animation
 import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollReveal } from "@/components/landing/scroll-reveal";
 
-const selectClassName = "h-11 w-full rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
+const selectClassName = "h-11 w-full rounded-2xl border border-white/80 bg-white shadow-clay-sm px-3 text-sm outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-700/10";
 type ManagedMenuCategory = {
   id: string;
   name: string;
@@ -246,7 +246,7 @@ export function DashboardOverviewPage() {
 
   return (
     <>
-      <section className="relative mb-5 overflow-hidden rounded-[2rem] bg-[linear-gradient(120deg,#0b7d49_0%,#3640b0_60%,#5a3de0_100%)] p-5 text-white shadow-clay-lg sm:p-7">
+      <section className="relative mb-5 overflow-hidden rounded-[2rem] vm-band p-5 text-white shadow-clay-lg sm:p-7">
         <div aria-hidden="true" className="dotted-grid absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(255,255,255,0.45)_1px,transparent_1px)]" />
         <div aria-hidden="true" className="vm-blob -right-10 -top-16 size-64 bg-white opacity-25" />
         <div className="relative grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_auto]">
@@ -278,25 +278,25 @@ export function DashboardOverviewPage() {
         </div>
       </section>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title={`Today's ${copy.transactionPlural.toLowerCase()}`} value={String(data.metrics.ordersToday)} detail={`${data.orders.length} ${copy.transactionPlural.toLowerCase()} loaded`} icon={TransactionIcon} tone="blue" />
-        <MetricCard title="Today's revenue" value={formatINR(data.metrics.revenueToday)} detail="Completed payments today" icon={IndianRupee} tone="emerald" />
-        <MetricCard title="Pending payments" value={formatINR(data.metrics.pendingPaymentsAmount)} detail={`${data.metrics.pendingPaymentsCount} reminders due`} icon={CreditCard} tone="amber" />
-        <MetricCard title={`Repeat ${copy.customerPlural.toLowerCase()}`} value={`${data.metrics.repeatRate}%`} detail={`${data.metrics.repeatCustomers} of ${data.metrics.totalCustomers} ${copy.customerPlural.toLowerCase()}`} icon={CustomerIcon} tone="purple" />
+        <MetricCard title={`Today's ${copy.transactionPlural.toLowerCase()}`} value={String(data.metrics.ordersToday)} detail={`${data.orders.length} ${copy.transactionPlural.toLowerCase()} loaded`} icon={TransactionIcon} tone="ink" />
+        <MetricCard title="Today's revenue" value={formatINR(data.metrics.revenueToday)} detail="Completed payments today" icon={IndianRupee} tone="green" />
+        <MetricCard title="Pending payments" value={formatINR(data.metrics.pendingPaymentsAmount)} detail={`${data.metrics.pendingPaymentsCount} reminders due`} icon={CreditCard} tone="marigold" />
+        <MetricCard title={`Repeat ${copy.customerPlural.toLowerCase()}`} value={`${data.metrics.repeatRate}%`} detail={`${data.metrics.repeatCustomers} of ${data.metrics.totalCustomers} ${copy.customerPlural.toLowerCase()}`} icon={CustomerIcon} tone="peacock" />
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <Card>
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-lg font-extrabold text-ink">
-              <TransactionIcon className="size-5 text-ocean" />
+              <TransactionIcon className="size-5 text-brand-text" />
               {copy.transactionSingular} status chart
             </h2>
-            <Badge variant="blue">Today</Badge>
+            <Badge variant="info">Today</Badge>
           </div>
           <div className="mt-6 grid gap-4">
             {statusRows.map(({ status, label, count, color }) => (
               <div key={status} className="grid grid-cols-[136px_1fr_34px] items-center gap-3 text-sm">
-                <span className="flex min-w-0 items-center gap-2 font-semibold text-slate-600">
+                <span className="flex min-w-0 items-center gap-2 font-semibold text-ink-600">
                   <OrderStatusAnimation
                     status={status}
                     businessType={data.business.businessType}
@@ -306,7 +306,7 @@ export function DashboardOverviewPage() {
                   />
                   <span className="truncate">{label.toLowerCase()}</span>
                 </span>
-                <div className="h-3.5 overflow-hidden rounded-full bg-mist shadow-clay-inset">
+                <div className="h-3.5 overflow-hidden rounded-full bg-ivory-100 shadow-clay-inset">
                   <div className={`${color} h-full rounded-full`} style={{ width: `${Math.min(100, count * 12)}%` }} />
                 </div>
                 <span className="text-right font-bold text-ink">{count}</span>
@@ -317,20 +317,20 @@ export function DashboardOverviewPage() {
 
         <Card>
           <div className="flex items-center gap-2">
-            <ItemIcon className="size-5 text-ocean" />
+            <ItemIcon className="size-5 text-brand-text" />
             <h2 className="text-lg font-extrabold text-ink">{copy.topItemsTitle}</h2>
           </div>
           <div className="mt-4 grid gap-3">
             {data.topItems.map((item, index) => (
-              <div key={item.id} className="vm-reveal-on-scroll flex items-center justify-between rounded-2xl bg-mist/80 p-3">
+              <div key={item.id} className="vm-reveal-on-scroll flex items-center justify-between rounded-2xl bg-ivory-100/80 p-3">
                 <div className="flex items-center gap-3">
-                  <span className={`clay-orb size-9 rounded-xl text-sm font-extrabold text-white ${index === 0 ? "bg-clay-mango !text-ink" : index === 1 ? "bg-clay-violet" : "bg-clay-ocean"}`}>{index + 1}</span>
+                  <span className={`clay-orb size-9 rounded-xl text-sm font-extrabold text-white ${index === 0 ? "bg-clay-marigold !text-ink" : index === 1 ? "bg-clay-peacock" : "bg-clay-ink"} theme-dark`}>{index + 1}</span>
                   <div>
                     <p className="font-semibold text-ink">{item.name}</p>
-                    <p className="text-xs text-slate-500">{item.category}</p>
+                    <p className="text-xs text-ink-500">{item.category}</p>
                   </div>
                 </div>
-                <p className="font-bold text-emerald">{formatINR(item.price)}</p>
+                <p className="font-bold text-brand-text">{formatINR(item.price)}</p>
               </div>
             ))}
           </div>
@@ -340,10 +340,10 @@ export function DashboardOverviewPage() {
       <Card className="mt-5">
         <div className="flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-extrabold text-ink">
-            <TransactionIcon className="size-5 text-ocean" />
+            <TransactionIcon className="size-5 text-brand-text" />
             {copy.recentTransactionsTitle}
           </h2>
-          <Link href="/dashboard/orders" className="rounded-xl bg-mist px-3 py-2 text-sm font-extrabold text-ocean-deep transition hover:bg-ocean-soft">View all</Link>
+          <Link href="/dashboard/orders" className="rounded-xl bg-ivory-100 px-3 py-2 text-sm font-extrabold text-ink-900 transition hover:bg-ivory-100">View all</Link>
         </div>
         <ResponsiveOrderTable orders={data.recentOrders} transactionLabel={copy.transactionSingular} businessType={data.business.businessType} />
       </Card>
@@ -390,8 +390,8 @@ function DashboardOrderLane({
                 <StatusPill status={order.status} label={statusPillLabel(order.status, order.orderType)} className="mt-2 w-fit whitespace-normal text-left leading-5" />
               </div>
             </div>
-            <p className="mt-2 break-words text-sm text-slate-600">{order.customer}</p>
-            <p className="break-words text-sm text-slate-500">{order.items}</p>
+            <p className="mt-2 break-words text-sm text-ink-600">{order.customer}</p>
+            <p className="break-words text-sm text-ink-500">{order.items}</p>
             <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-2 text-sm font-bold">
               <span className="shrink-0">{formatINR(order.amount)}</span>
               <span className="flex min-w-0 items-center gap-2">
@@ -402,7 +402,7 @@ function DashboardOrderLane({
           </button>
         ))}
         {orders.length === 0 && (
-          <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-500">No {transactionPlural.toLowerCase()} in this lane.</p>
+          <p className="rounded-2xl bg-ivory-100/80 p-3 text-sm text-ink-500">No {transactionPlural.toLowerCase()} in this lane.</p>
         )}
       </div>
       <PaginationControls
@@ -422,8 +422,8 @@ function DashboardOrderLane({
 function OrderDetailItem({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
     <div className={cn("min-w-0 rounded-lg bg-white p-3", className)}>
-      <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">{label}</p>
-      <div className="mt-1 break-words text-sm font-semibold text-slate-700 [overflow-wrap:anywhere]">{children}</div>
+      <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink-500">{label}</p>
+      <div className="mt-1 break-words text-sm font-semibold text-ink-700 [overflow-wrap:anywhere]">{children}</div>
     </div>
   );
 }
@@ -597,7 +597,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
             <LiveSyncStatus connected={connected} source={data.source} error={error} />
             {view === "operations" && (
               <Button
-                variant="emerald"
+                variant="brand"
                 icon={<MessageCircle className="size-4" />}
                 onClick={sendActiveOrderUpdates}
               >
@@ -619,12 +619,12 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                 header={
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <span className={cn("clay-orb size-9 rounded-xl text-white", ["bg-clay-ocean", "bg-clay-mango !text-ink", "bg-clay-emerald"][columnIndex % 3])}>
+                      <span className={cn("clay-orb size-9 rounded-xl text-white", ["bg-clay-ink", "bg-clay-marigold !text-ink", "bg-clay-green"][columnIndex % 3])}>
                         <TransactionIcon className="size-4" />
                       </span>
                       <h2 className="font-extrabold text-ink">{column.title}</h2>
                     </div>
-                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-slate-600 shadow-clay-sm">
+                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-ink-600 shadow-clay-sm">
                       {data.orders.filter((order) => column.statuses.includes(order.status)).length}
                     </span>
                   </div>
@@ -643,7 +643,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-extrabold text-ink">{historyTitle}</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
+              <p className="mt-1 text-sm leading-6 text-ink-600">
                 All {copy.transactionPlural.toLowerCase()} for this business, including active, completed, cancelled, and payment states.
               </p>
             </div>
@@ -652,7 +652,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
           {data.orders.length > 0 ? (
             <ResponsiveOrderTable orders={data.orders} transactionLabel={copy.transactionSingular} businessType={data.business.businessType} />
           ) : (
-            <p className="mt-4 rounded-2xl bg-mist/80 p-4 text-sm text-slate-500">No {copy.transactionPlural.toLowerCase()} have been created yet.</p>
+            <p className="mt-4 rounded-2xl bg-ivory-100/80 p-4 text-sm text-ink-500">No {copy.transactionPlural.toLowerCase()} have been created yet.</p>
           )}
         </Card>
       )}
@@ -671,21 +671,21 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                 />
                 <div className="min-w-0">
                   <h2 className="truncate text-xl font-bold text-ink">{selected.orderNumber}</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-ink-500">
                     <span className="font-bold text-ink">{selected.customer}</span> - {selected.time}
                   </p>
                 </div>
               </div>
-              <button type="button" className="rounded-xl bg-mist px-3 py-2 text-sm font-extrabold text-slate-600 transition hover:bg-white hover:shadow-clay-sm" onClick={closeSelectedOrder}>Close</button>
+              <button type="button" className="rounded-xl bg-ivory-100 px-3 py-2 text-sm font-extrabold text-ink-600 transition hover:bg-white hover:shadow-clay-sm" onClick={closeSelectedOrder}>Close</button>
             </div>
             <div className="mt-5 grid gap-3">
-              <section className="rounded-2xl bg-mist/70 p-4" aria-labelledby="selected-order-details-title">
+              <section className="rounded-2xl bg-ivory-100/70 p-4" aria-labelledby="selected-order-details-title">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p id="selected-order-details-title" className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                    <p id="selected-order-details-title" className="text-xs font-bold uppercase tracking-[0.16em] text-ink-500">
                       {copy.transactionSingular} details
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-600">
+                    <p className="mt-1 text-sm font-semibold text-ink-600">
                       Complete {copy.transactionSingular.toLowerCase()} summary for this {copy.customerSingular.toLowerCase()}.
                     </p>
                   </div>
@@ -720,7 +720,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                   )}
                   {selected.noShowAt && (
                     <OrderDetailItem label="Outcome">
-                      <Badge variant="red">Customer no-show</Badge>
+                      <Badge variant="danger">Customer no-show</Badge>
                     </OrderDetailItem>
                   )}
                   {selected.cancellationReason && (
@@ -771,7 +771,7 @@ export function OrdersPage({ view = "operations" }: { view?: OrdersPageView } = 
                 })}
               </div>
               <Button
-                variant="emerald"
+                variant="brand"
                 icon={<MessageCircle className="size-4" />}
                 onClick={() => sendOrderUpdate(selected)}
               >
@@ -1051,7 +1051,7 @@ export function MenuManagementPage() {
         title={copy.catalogTitle}
         body={copy.catalogBody}
         action={
-          <Button variant="emerald" icon={<CategoryIcon className="size-4" />} onClick={() => setCategoryDialogOpen(true)}>
+          <Button variant="brand" icon={<CategoryIcon className="size-4" />} onClick={() => setCategoryDialogOpen(true)}>
             {addCategoryLabel}
           </Button>
         }
@@ -1060,7 +1060,7 @@ export function MenuManagementPage() {
         {categories.length === 0 && (
           <Card>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm leading-6 text-slate-500">Add a {copy.categorySingular.toLowerCase()} first, then place related {copy.itemPlural.toLowerCase()} under it.</p>
+              <p className="text-sm leading-6 text-ink-500">Add a {copy.categorySingular.toLowerCase()} first, then place related {copy.itemPlural.toLowerCase()} under it.</p>
               <Button size="sm" variant="secondary" icon={<Plus className="size-4" />} onClick={() => setCategoryDialogOpen(true)}>
                 Add {copy.categorySingular}
               </Button>
@@ -1072,12 +1072,12 @@ export function MenuManagementPage() {
           <section key={section.id} className="rounded-[2rem] border border-white/70 bg-white/55 p-4 shadow-clay-sm backdrop-blur-xl sm:p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
-                <span className="clay-orb size-11 shrink-0 rounded-2xl bg-clay-violet text-white">
+                <span className="clay-orb size-11 shrink-0 rounded-2xl bg-clay-peacock text-white">
                   <CategoryIcon className="size-5" />
                 </span>
                 <div className="min-w-0">
                   <h2 className="break-words text-xl font-extrabold text-ink [overflow-wrap:anywhere]">{section.name}</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                  <p className="mt-1 text-sm leading-6 text-ink-500">
                     {section.items.length} {section.items.length === 1 ? copy.itemSingular.toLowerCase() : copy.itemPlural.toLowerCase()}
                     {section.sortOrder !== null ? ` - Sort ${section.sortOrder}` : ""}
                   </p>
@@ -1097,7 +1097,7 @@ export function MenuManagementPage() {
                     type="button"
                     aria-label={`Delete ${section.name}`}
                     title={`Delete ${section.name}`}
-                    className="grid size-9 shrink-0 place-items-center rounded-lg bg-berry-soft text-berry-deep transition hover:bg-berry/15"
+                    className="grid size-9 shrink-0 place-items-center rounded-lg bg-kumkum-50 text-kumkum-700 transition hover:bg-kumkum-600/15"
                     onClick={() => setDeleteTarget({ type: "menu-category", category: section.category })}
                   >
                     <Trash2 className="size-4" />
@@ -1110,16 +1110,16 @@ export function MenuManagementPage() {
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6">
                 {section.items.map((item) => (
                   <Card key={item.id} className="vm-reveal-on-scroll rounded-[1.6rem] p-3 transition hover:-translate-y-1 hover:shadow-clay-lg">
-                    <div className="relative aspect-[5/4] overflow-hidden rounded-[1.2rem] bg-mist/80">
+                    <div className="relative aspect-[5/4] overflow-hidden rounded-[1.2rem] bg-ivory-100/80">
                       {item.imageUrl ? (
                         <Image src={item.imageUrl} alt={item.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 220px" className="object-cover" />
                       ) : (
-                        <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f3f0ff_45%,#e3f7ec_100%)]">
+                        <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f3eee2_45%,#d8f6d2_100%)]">
                           <ClayIllustration name={illustrationNameForBusinessType(data.business.businessType)} className="w-[58%]" />
                         </div>
                       )}
                       {item.isBestSeller && (
-                        <Badge variant="amber" className="absolute left-2 top-2 bg-amber-100/95">
+                        <Badge variant="warning" className="absolute left-2 top-2 bg-marigold-100/95">
                           Popular
                         </Badge>
                       )}
@@ -1128,7 +1128,7 @@ export function MenuManagementPage() {
                           type="button"
                           aria-label={`Edit ${item.name}`}
                           title={`Edit ${item.name}`}
-                          className="grid size-8 place-items-center rounded-lg bg-white/95 text-ink shadow-clay-sm ring-1 ring-line transition hover:bg-slate-50"
+                          className="grid size-8 place-items-center rounded-lg bg-white/95 text-ink shadow-clay-sm ring-1 ring-ink-200 transition hover:bg-ink-50"
                           onClick={() => openMenuDialog({ mode: "edit", item })}
                         >
                           <Edit3 className="size-4" />
@@ -1137,7 +1137,7 @@ export function MenuManagementPage() {
                           type="button"
                           aria-label={`Delete ${item.name}`}
                           title={`Delete ${item.name}`}
-                          className="grid size-8 place-items-center rounded-lg bg-berry-soft/95 text-berry-deep shadow-clay-sm ring-1 ring-red-100 transition hover:bg-berry/15"
+                          className="grid size-8 place-items-center rounded-lg bg-kumkum-50/95 text-kumkum-700 shadow-clay-sm ring-1 ring-kumkum-100 transition hover:bg-kumkum-600/15"
                           onClick={() => setDeleteTarget({ type: "menu-item", item })}
                         >
                           <Trash2 className="size-4" />
@@ -1146,20 +1146,20 @@ export function MenuManagementPage() {
                     </div>
                     <div className="mt-3 min-w-0">
                       <h3 className="line-clamp-2 min-h-10 break-words text-sm font-bold leading-5 text-ink [overflow-wrap:anywhere]">{item.name}</h3>
-                      <p className="mt-1 text-sm font-extrabold text-ocean">{formatINR(item.price)}</p>
+                      <p className="mt-1 text-sm font-extrabold text-brand-text">{formatINR(item.price)}</p>
                       {item.appointmentEnabled && item.durationMinutes && (
-                        <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-emerald">
+                        <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-brand-text">
                           <Clock3 className="size-3.5" /> {item.durationMinutes} min
                           {(item.bufferMinutes ?? 0) > 0 ? ` + ${item.bufferMinutes} min buffer` : ""}
                         </p>
                       )}
-                      <p className="mt-2 line-clamp-2 min-h-10 break-words text-xs leading-5 text-slate-600 [overflow-wrap:anywhere]">{item.description}</p>
+                      <p className="mt-2 line-clamp-2 min-h-10 break-words text-xs leading-5 text-ink-600 [overflow-wrap:anywhere]">{item.description}</p>
                     </div>
                   </Card>
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-lg border border-dashed border-line bg-white/70 p-4 text-sm text-slate-500">
+              <div className="mt-4 rounded-lg border border-dashed border-ink-200 bg-white/70 p-4 text-sm text-ink-500">
                 No {copy.itemPlural.toLowerCase()} in this {copy.categorySingular.toLowerCase()} yet.
               </div>
             )}
@@ -1176,7 +1176,7 @@ export function MenuManagementPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" onClick={() => setCategoryDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" variant="emerald">Save {copy.categorySingular}</Button>
+              <Button type="submit" variant="brand">Save {copy.categorySingular}</Button>
             </div>
           </form>
         </ActionDialog>
@@ -1210,7 +1210,7 @@ export function MenuManagementPage() {
             </div>
             <div className="grid gap-2">
               <Label>{copy.itemSingular} photo</Label>
-              <div className="grid gap-3 rounded-2xl bg-mist/70 p-3 sm:grid-cols-[160px_1fr] sm:items-center">
+              <div className="grid gap-3 rounded-2xl bg-ivory-100/70 p-3 sm:grid-cols-[160px_1fr] sm:items-center">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-white">
                   {menuImagePreview ? (
                     <Image
@@ -1222,13 +1222,13 @@ export function MenuManagementPage() {
                       unoptimized={menuImagePreview.startsWith("data:")}
                     />
                   ) : (
-                    <div className="grid h-full place-items-center text-slate-400">
+                    <div className="grid h-full place-items-center text-ink-500">
                       <ImagePlus className="size-8" />
                     </div>
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-ocean shadow-clay-sm ring-1 ring-line transition hover:bg-slate-50">
+                  <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-white px-4 text-sm font-bold text-brand-text shadow-clay-sm ring-1 ring-ink-200 transition hover:bg-ink-50">
                     {isProcessingMenuImage ? <LoaderCircle className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
                     {isProcessingMenuImage ? "Optimizing..." : menuImagePreview ? "Replace photo" : "Add photo"}
                     <input
@@ -1242,7 +1242,7 @@ export function MenuManagementPage() {
                   {menuImagePreview && (
                     <button
                       type="button"
-                      className="h-10 rounded-lg px-4 text-sm font-bold text-berry-deep transition hover:bg-berry-soft"
+                      className="h-10 rounded-lg px-4 text-sm font-bold text-kumkum-700 transition hover:bg-kumkum-50"
                       disabled={isProcessingMenuImage || isSavingMenuItem}
                       onClick={() => {
                         setMenuImagePreview(null);
@@ -1252,7 +1252,7 @@ export function MenuManagementPage() {
                       Remove photo
                     </button>
                   )}
-                  <p className="text-xs leading-5 text-slate-500">JPG, PNG, or WebP up to 10 MB. Stored as an optimized WebP up to 1280 px and 500 KB.</p>
+                  <p className="text-xs leading-5 text-ink-500">JPG, PNG, or WebP up to 10 MB. Stored as an optimized WebP up to 1280 px and 500 KB.</p>
                 </div>
               </div>
             </div>
@@ -1271,28 +1271,28 @@ export function MenuManagementPage() {
                 <input name="foodType" type="hidden" value="NOT_APPLICABLE" />
               )}
               <div className="grid content-end gap-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
                   <input name="isAvailable" type="checkbox" defaultChecked={menuDialog.mode !== "edit" || menuDialog.item.isAvailable} />
                   Available
                 </label>
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <label className="flex items-center gap-2 text-sm font-semibold text-ink-700">
                   <input name="isBestSeller" type="checkbox" defaultChecked={menuDialog.mode === "edit" && Boolean(menuDialog.item.isBestSeller)} />
                   Best seller
                 </label>
               </div>
             </div>
             {supportsAppointments && (
-              <div className="grid gap-4 rounded-lg border border-emerald/20 bg-emerald/5 p-4 sm:grid-cols-2">
+              <div className="grid gap-4 rounded-lg border border-brand/20 bg-brand/5 p-4 sm:grid-cols-2">
                 <label className="flex items-start gap-3 sm:col-span-2">
                   <input
                     name="appointmentEnabled"
                     type="checkbox"
-                    className="mt-1 size-4 accent-emerald"
+                    className="mt-1 size-4 accent-brand"
                     defaultChecked={menuDialog.mode !== "edit" || Boolean(menuDialog.item.appointmentEnabled)}
                   />
                   <span>
                     <span className="block text-sm font-bold text-ink">Requires a date and time</span>
-                    <span className="mt-1 block text-xs leading-5 text-slate-600">
+                    <span className="mt-1 block text-xs leading-5 text-ink-600">
                       Customers choose a professional and an available slot before checkout.
                     </span>
                   </span>
@@ -1323,7 +1323,7 @@ export function MenuManagementPage() {
             )}
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" disabled={isSavingMenuItem} onClick={closeMenuDialog}>Cancel</Button>
-              <Button type="submit" variant="emerald" disabled={isProcessingMenuImage || isSavingMenuItem}>
+              <Button type="submit" variant="brand" disabled={isProcessingMenuImage || isSavingMenuItem}>
                 {isSavingMenuItem ? "Saving..." : menuDialog.mode === "edit" ? `Save ${copy.itemSingular}` : copy.addItemLabel}
               </Button>
             </div>
@@ -1443,7 +1443,7 @@ export function CustomersPage() {
                 <span
                   className={cn(
                     "clay-orb size-12 shrink-0 rounded-2xl text-base font-extrabold text-white",
-                    ["bg-clay-violet", "bg-clay-emerald", "bg-clay-ocean", "bg-clay-berry", "bg-clay-mango !text-ink"][index % 5]
+                    ["bg-clay-peacock", "bg-clay-green", "bg-clay-ink", "bg-clay-kumkum", "bg-clay-marigold !text-ink"][index % 5]
                   )}
                 >
                   {customer.name
@@ -1455,35 +1455,35 @@ export function CustomersPage() {
                 </span>
                 <div className="min-w-0">
                   <p className="truncate font-extrabold text-ink">{customer.name}</p>
-                  <p className="truncate text-sm font-semibold text-slate-500">{customer.phone}</p>
+                  <p className="truncate text-sm font-semibold text-ink-500">{customer.phone}</p>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="rounded-2xl bg-mist/80 p-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-slate-400">{copy.transactionPlural}</p>
+                <div className="rounded-2xl bg-ivory-100/80 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-ink-500">{copy.transactionPlural}</p>
                   <p className="mt-0.5 text-lg font-extrabold text-ink">{customer.totalOrders}</p>
                 </div>
-                <div className="rounded-2xl bg-mist/80 p-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-slate-400">Spent</p>
+                <div className="rounded-2xl bg-ivory-100/80 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.06em] text-ink-500">Spent</p>
                   <p className="mt-0.5 truncate text-lg font-extrabold text-ink">{formatINR(customer.totalSpent)}</p>
                 </div>
               </div>
-              <p className="mt-3 text-xs font-semibold text-slate-500">
+              <p className="mt-3 text-xs font-semibold text-ink-500">
                 Last {copy.transactionSingular.toLowerCase()}: <span className="text-ink">{customer.lastOrdered}</span>
               </p>
-              {customer.favouriteItems && <p className="mt-1 truncate text-xs font-semibold text-slate-500">Favourite: {customer.favouriteItems}</p>}
+              {customer.favouriteItems && <p className="mt-1 truncate text-xs font-semibold text-ink-500">Favourite: {customer.favouriteItems}</p>}
               <div className="mt-3 flex min-h-6 flex-wrap gap-1">
-                {customer.whatsappOptIn && <Badge variant="emerald">Updates</Badge>}
-                {customer.marketingOptIn && <Badge variant="purple">Offers</Badge>}
+                {customer.whatsappOptIn && <Badge variant="success">Updates</Badge>}
+                {customer.marketingOptIn && <Badge variant="dark">Offers</Badge>}
               </div>
-              <div className="mt-4 flex flex-wrap gap-2 border-t border-line/70 pt-4">
+              <div className="mt-4 flex flex-wrap gap-2 border-t border-ink-200/70 pt-4">
                 <Button size="sm" variant="secondary" icon={<Bell className="size-4" />} onClick={() => router.push("/dashboard/campaigns")}>
                   Prepare message
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="text-berry-deep hover:bg-berry-soft"
+                  className="text-kumkum-700 hover:bg-kumkum-50"
                   icon={<Trash2 className="size-4" />}
                   disabled={data.source === "database"}
                   title="Use the account-data request process through support."
@@ -1568,11 +1568,11 @@ export function PaymentsPage() {
         action={<LiveSyncStatus connected={connected} source={data.source} error={error} />}
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <MetricCard title={`Paid ${copy.transactionPlural.toLowerCase()}`} value={String(paidOrders)} detail="Payment rows" icon={TransactionIcon} tone="emerald" />
-        <MetricCard title="Wallet available" value={formatINR(wallet.availableForPayout)} detail="Ready for PSHR payout" icon={Wallet} tone="blue" />
-        <MetricCard title="Payout processing" value={formatINR(wallet.processingPayouts)} detail="Sent to bank or UPI" icon={ArrowLeftRight} tone="amber" />
-        <MetricCard title="9 AM payout batch" value={formatINR(wallet.pendingProviderSettlement)} detail="Paid online, releases within 24 hours" icon={ReceiptText} tone="purple" />
-        <MetricCard title="Pending payments" value={formatINR(data.metrics.pendingPaymentsAmount)} detail={`${data.metrics.pendingPaymentsCount} reminders due`} icon={CreditCard} tone="amber" />
+        <MetricCard title={`Paid ${copy.transactionPlural.toLowerCase()}`} value={String(paidOrders)} detail="Payment rows" icon={TransactionIcon} tone="green" />
+        <MetricCard title="Wallet available" value={formatINR(wallet.availableForPayout)} detail="Ready for PSHR payout" icon={Wallet} tone="ink" />
+        <MetricCard title="Payout processing" value={formatINR(wallet.processingPayouts)} detail="Sent to bank or UPI" icon={ArrowLeftRight} tone="marigold" />
+        <MetricCard title="9 AM payout batch" value={formatINR(wallet.pendingProviderSettlement)} detail="Paid online, releases within 24 hours" icon={ReceiptText} tone="peacock" />
+        <MetricCard title="Pending payments" value={formatINR(data.metrics.pendingPaymentsAmount)} detail={`${data.metrics.pendingPaymentsCount} reminders due`} icon={CreditCard} tone="marigold" />
       </div>
       <Card className="mt-5 overflow-hidden p-0">
         <div className="flex items-center justify-between gap-3 px-5 pt-5">
@@ -1594,11 +1594,11 @@ export function PaymentsPage() {
                     {payment.orderNumber}
                     <StatusPill status={payment.status} className="px-2 py-0.5 text-[11px]" />
                   </p>
-                  <p className="mt-0.5 truncate text-sm font-semibold text-slate-500">
+                  <p className="mt-0.5 truncate text-sm font-semibold text-ink-500">
                     {payment.customer} · {payment.provider}
                     {payment.paymentId ? ` · ${payment.paymentId}` : ""}
                   </p>
-                  <p className="mt-0.5 text-xs font-semibold text-slate-400">
+                  <p className="mt-0.5 text-xs font-semibold text-ink-500">
                     Wallet: {payment.walletStatus}
                     {payment.walletAmount > 0 ? ` ${formatINR(payment.walletAmount)}` : ""}
                     {payment.platformFee > 0 ? ` · Fee ${formatINR(payment.platformFee)}` : ""}
@@ -1606,15 +1606,15 @@ export function PaymentsPage() {
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
                   <span className="text-lg font-extrabold tracking-[-0.02em] text-ink">{formatINR(payment.amount)}</span>
-                  <a href={payment.invoiceUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-mist px-3 py-2 text-xs font-extrabold text-ocean-deep transition hover:bg-ocean-soft">
+                  <a href={payment.invoiceUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-ivory-100 px-3 py-2 text-xs font-extrabold text-ink-900 transition hover:bg-ivory-100">
                     Invoice
                   </a>
                   {payment.canMarkPaid ? (
-                    <Button size="sm" variant="emerald" disabled={collectingPaymentId === payment.id} onClick={() => markPaymentCollected(payment.id, payment.orderNumber)}>
+                    <Button size="sm" variant="brand" disabled={collectingPaymentId === payment.id} onClick={() => markPaymentCollected(payment.id, payment.orderNumber)}>
                       {collectingPaymentId === payment.id ? "Saving" : "Mark paid"}
                     </Button>
                   ) : (
-                    payment.refundStatus && <span className="text-xs font-bold text-slate-500">{payment.refundStatus}</span>
+                    payment.refundStatus && <span className="text-xs font-bold text-ink-500">{payment.refundStatus}</span>
                   )}
                 </div>
               </li>
@@ -1787,16 +1787,16 @@ export function InvoicesPage() {
       <Card className="invoice-source-panel mt-5 overflow-hidden p-0">
         <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,32rem)] lg:items-center">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-wider text-ocean">{modeCopy.eyebrow}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-brand-text">{modeCopy.eyebrow}</p>
             <h2 className="mt-2 text-xl font-bold text-ink">{modeCopy.title}</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">{modeCopy.description}</p>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-600">{modeCopy.description}</p>
           </div>
-          <div className="invoice-mode-switch relative grid min-h-[4.5rem] grid-cols-2 rounded-2xl border border-white/80 bg-mist/80 p-1 shadow-clay-inset">
+          <div className="invoice-mode-switch relative grid min-h-[4.5rem] grid-cols-2 rounded-2xl border border-white/80 bg-ivory-100/80 p-1 shadow-clay-inset">
             <span
               aria-hidden="true"
               className={cn(
                 "invoice-mode-indicator absolute bottom-1 left-1 top-1 w-[calc(50%-0.25rem)] rounded-md transition duration-500 ease-out",
-                invoiceMode === "business" ? "translate-x-[calc(100%+0.25rem)] bg-ink" : "translate-x-0 bg-ocean"
+                invoiceMode === "business" ? "translate-x-[calc(100%+0.25rem)] bg-ink theme-dark" : "translate-x-0 bg-ink theme-dark"
               )}
             />
             {invoiceModeOptions.map((option) => {
@@ -1810,16 +1810,16 @@ export function InvoicesPage() {
                   data-active={active}
                   className={cn(
                     "relative z-10 flex min-w-0 items-center gap-3 rounded-md px-3 py-2 text-left transition duration-300",
-                    active ? "text-white" : "text-slate-600 hover:text-ink"
+                    active ? "text-white" : "text-ink-600 hover:text-ink"
                   )}
                   onClick={() => setInvoiceMode(option.mode)}
                 >
-                  <span className={cn("invoice-mode-icon grid size-9 shrink-0 place-items-center rounded-lg", active ? "bg-white/15 text-white" : "bg-mist text-ocean")}>
+                  <span className={cn("invoice-mode-icon grid size-9 shrink-0 place-items-center rounded-lg", active ? "bg-white/15 text-white" : "bg-ivory-100 text-brand-text")}>
                     <Icon className="size-4" />
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold">{option.label}</span>
-                    <span className={cn("mt-0.5 block text-xs font-semibold", active ? "text-white/75" : "text-slate-500")}>{option.detail}</span>
+                    <span className={cn("mt-0.5 block text-xs font-semibold", active ? "text-white/75" : "text-ink-500")}>{option.detail}</span>
                   </span>
                 </button>
               );
@@ -1829,62 +1829,62 @@ export function InvoicesPage() {
       </Card>
       <div key={invoiceMode} className="invoice-view-panel mt-5">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <MetricCard title="Total invoices" value={String(invoiceRows.length)} detail={modeCopy.totalDetail} icon={ReceiptText} tone="blue" />
-          <MetricCard title="Total invoiced" value={formatINR(totalInvoiced)} detail="All visible invoice rows" icon={IndianRupee} tone="purple" />
-          <MetricCard title="Paid invoices" value={formatINR(paidAmount)} detail={modeCopy.paidDetail} icon={CheckCircle2} tone="emerald" />
-          <MetricCard title="Attention needed" value={String(pendingInvoiceRows.length + failedInvoiceRows.length)} detail={modeCopy.attentionDetail} icon={FileCheck2} tone="amber" />
+          <MetricCard title="Total invoices" value={String(invoiceRows.length)} detail={modeCopy.totalDetail} icon={ReceiptText} tone="ink" />
+          <MetricCard title="Total invoiced" value={formatINR(totalInvoiced)} detail="All visible invoice rows" icon={IndianRupee} tone="peacock" />
+          <MetricCard title="Paid invoices" value={formatINR(paidAmount)} detail={modeCopy.paidDetail} icon={CheckCircle2} tone="green" />
+          <MetricCard title="Attention needed" value={String(pendingInvoiceRows.length + failedInvoiceRows.length)} detail={modeCopy.attentionDetail} icon={FileCheck2} tone="marigold" />
         </div>
         {invoiceRows.length > 0 ? (
           <div className="mt-5 grid gap-x-5 gap-y-6 md:grid-cols-2 2xl:grid-cols-3">
             {invoicePagination.pageItems.map((invoice, index) => (
               <div
                 key={invoice.id}
-                className="invoice-table-row drop-shadow-[0_18px_22px_rgba(55,41,130,0.14)]"
+                className="invoice-table-row drop-shadow-[0_18px_22px_rgba(84,58,18,0.14)]"
                 style={{ animationDelay: `${Math.min(index, 8) * 34}ms` }}
               >
                 <article className="relative rounded-t-[1.6rem] bg-white px-5 pb-9 pt-5" style={{ WebkitMask: receiptEdgeMask, mask: receiptEdgeMask }}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className={cn("clay-orb size-11 shrink-0 rounded-2xl text-white", invoice.kind === "customer" ? "bg-clay-ocean" : "bg-clay-ink")}>
+                      <span className={cn("clay-orb size-11 shrink-0 rounded-2xl text-white", invoice.kind === "customer" ? "bg-clay-ink" : "bg-clay-ink")}>
                         <ReceiptText className="size-5" />
                       </span>
                       <div className="min-w-0">
                         <p className="truncate font-extrabold text-ink">{invoice.reference}</p>
-                        <p className="truncate text-xs font-semibold text-slate-500">{invoice.subReference}</p>
+                        <p className="truncate text-xs font-semibold text-ink-500">{invoice.subReference}</p>
                       </div>
                     </div>
                     {invoice.kind === "customer" ? (
                       <PaymentStatusAnimation status={invoice.status as LivePaymentStatus} label={`${invoice.statusLabel.toLowerCase()} payment`} className="size-9 shrink-0" />
                     ) : null}
                   </div>
-                  <div className="mt-4 rounded-2xl bg-mist/70 px-3 py-2.5">
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate-400">{modeCopy.ownerHeading}</p>
-                    <p className="truncate text-sm font-bold text-slate-700">{invoice.party}</p>
-                    <p className="truncate text-xs text-slate-500">{invoice.partyDetail}</p>
+                  <div className="mt-4 rounded-2xl bg-ivory-100/70 px-3 py-2.5">
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-ink-500">{modeCopy.ownerHeading}</p>
+                    <p className="truncate text-sm font-bold text-ink-700">{invoice.party}</p>
+                    <p className="truncate text-xs text-ink-500">{invoice.partyDetail}</p>
                   </div>
-                  <div className="mt-4 flex items-end justify-between gap-3 border-t-2 border-dashed border-line pt-4">
+                  <div className="mt-4 flex items-end justify-between gap-3 border-t-2 border-dashed border-ink-200 pt-4">
                     <p className="text-3xl font-extrabold tracking-[-0.04em] text-ink">{formatINR(invoice.amount)}</p>
                     <StatusPill status={invoice.status} label={invoice.statusLabel} />
                   </div>
                   <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
                     <div>
-                      <dt className="font-bold text-slate-400">Issued</dt>
-                      <dd className="mt-0.5 font-bold text-slate-700">{formatDateLabel(invoice.issuedAt)}</dd>
+                      <dt className="font-bold text-ink-500">Issued</dt>
+                      <dd className="mt-0.5 font-bold text-ink-700">{formatDateLabel(invoice.issuedAt)}</dd>
                     </div>
                     <div>
-                      <dt className="font-bold text-slate-400">Provider</dt>
-                      <dd className="mt-0.5 truncate font-bold text-slate-700">{invoice.provider}</dd>
+                      <dt className="font-bold text-ink-500">Provider</dt>
+                      <dd className="mt-0.5 truncate font-bold text-ink-700">{invoice.provider}</dd>
                     </div>
                     <div>
-                      <dt className="font-bold text-slate-400">{modeCopy.paymentHeading}</dt>
-                      <dd className="mt-0.5 truncate font-bold text-slate-700">{invoice.paymentLabel}</dd>
+                      <dt className="font-bold text-ink-500">{modeCopy.paymentHeading}</dt>
+                      <dd className="mt-0.5 truncate font-bold text-ink-700">{invoice.paymentLabel}</dd>
                     </div>
                   </dl>
                   <a
                     href={invoice.invoiceUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink text-sm font-bold text-white shadow-clay-sm transition hover:-translate-y-0.5"
+                    className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink text-sm font-bold text-white shadow-clay-sm transition hover:-translate-y-0.5 theme-dark"
                   >
                     Open invoice
                     <ArrowUpRight className="size-4" />
@@ -1916,10 +1916,10 @@ export { CampaignDraftsPage as CampaignsPage } from "@/components/dashboard/camp
 
 function staffBadgeTone(role: string) {
   const value = role.toUpperCase();
-  if (value.includes("OWNER")) return { band: "bg-clay-ink", orb: "bg-clay-violet", chip: "bg-violet/10 text-violet-deep" };
-  if (value.includes("MANAGER")) return { band: "bg-clay-ocean", orb: "bg-clay-ocean", chip: "bg-ocean/10 text-ocean" };
-  if (value.includes("DELIVERY") || value.includes("SERVICE")) return { band: "bg-clay-mango", orb: "bg-clay-mango", chip: "bg-mango-soft text-mango-deep" };
-  return { band: "bg-clay-emerald", orb: "bg-clay-emerald", chip: "bg-emerald-soft text-emerald-deep" };
+  if (value.includes("OWNER")) return { band: "bg-clay-ink", orb: "bg-clay-peacock", chip: "bg-peacock-600/10 text-peacock-700" };
+  if (value.includes("MANAGER")) return { band: "bg-clay-ink", orb: "bg-clay-ink", chip: "bg-green-700/10 text-brand-text" };
+  if (value.includes("DELIVERY") || value.includes("SERVICE")) return { band: "bg-clay-marigold", orb: "bg-clay-marigold", chip: "bg-marigold-50 text-marigold-700" };
+  return { band: "bg-clay-green", orb: "bg-clay-green", chip: "bg-green-50 text-green-700" };
 }
 
 export function StaffPage() {
@@ -2060,7 +2060,7 @@ export function StaffPage() {
         title="Staff"
         body="Invite staff users and apply business access by role."
         action={
-          <Button variant="emerald" icon={<StaffIcon className="size-4" />} onClick={() => setDialogOpen(true)}>
+          <Button variant="brand" icon={<StaffIcon className="size-4" />} onClick={() => setDialogOpen(true)}>
             Add Staff
           </Button>
         }
@@ -2073,7 +2073,7 @@ export function StaffPage() {
           return (
             <ScrollReveal key={member.id} delay={Math.min(index, 7) * 50} className="h-full">
               <article className="relative flex h-full flex-col">
-                <span aria-hidden="true" className="absolute -top-4 left-1/2 z-10 h-7 w-12 -translate-x-1/2 rounded-b-xl rounded-t-md bg-clay-ink shadow-clay-sm" />
+                <span aria-hidden="true" className="absolute -top-4 left-1/2 z-10 h-7 w-12 -translate-x-1/2 rounded-b-xl rounded-t-md bg-clay-ink shadow-clay-sm theme-dark" />
                 <div className="clay relative flex h-full flex-col overflow-hidden rounded-[2rem] pt-3 text-center">
                   <div className={cn("mx-3 h-16 rounded-[1.4rem]", tone.band)}>
                     <span aria-hidden="true" className="mx-auto mt-2 block h-2 w-10 rounded-full bg-white/60 shadow-clay-inset" />
@@ -2086,8 +2086,8 @@ export function StaffPage() {
                     <div className="mt-1 flex justify-center">
                       <span className={cn("rounded-full px-3 py-1 text-xs font-extrabold", tone.chip)}>{roleLabel(member.roleValue ?? member.role, data.business.businessType)}</span>
                     </div>
-                    {member.email && <p className="mt-2 break-all text-xs font-semibold text-slate-500">{member.email}</p>}
-                    <p className="mt-3 flex-1 rounded-2xl bg-mist/70 px-3 py-2.5 text-left text-xs font-semibold leading-5 text-slate-600">{member.permissions}</p>
+                    {member.email && <p className="mt-2 break-all text-xs font-semibold text-ink-500">{member.email}</p>}
+                    <p className="mt-3 flex-1 rounded-2xl bg-ivory-100/70 px-3 py-2.5 text-left text-xs font-semibold leading-5 text-ink-600">{member.permissions}</p>
                     <div className="mt-3 flex items-center justify-between gap-2">
                       <StatusPill status={member.status} />
                       {editable && (
@@ -2097,7 +2097,7 @@ export function StaffPage() {
                             aria-label={`Resend invite to ${member.name}`}
                             title="Resend invite"
                             disabled={resendingInviteId === member.id}
-                            className="grid size-9 place-items-center rounded-xl bg-ocean/10 text-ocean transition hover:bg-ocean/15 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="grid size-9 place-items-center rounded-xl bg-green-700/10 text-brand-text transition hover:bg-green-700/15 disabled:cursor-not-allowed disabled:opacity-60"
                             onClick={() => resendStaffInvite(member)}
                           >
                             {resendingInviteId === member.id ? <LoaderCircle className="size-4 animate-spin" /> : <Mail className="size-4" />}
@@ -2106,7 +2106,7 @@ export function StaffPage() {
                             type="button"
                             aria-label={`Change role for ${member.name}`}
                             title="Change role"
-                            className="grid size-9 place-items-center rounded-xl bg-mist text-slate-700 transition hover:bg-white hover:shadow-clay-sm"
+                            className="grid size-9 place-items-center rounded-xl bg-ivory-100 text-ink-700 transition hover:bg-white hover:shadow-clay-sm"
                             onClick={() => setRoleTarget(member)}
                           >
                             <Edit3 className="size-4" />
@@ -2115,7 +2115,7 @@ export function StaffPage() {
                             type="button"
                             aria-label={`Delete ${member.name}`}
                             title="Delete staff"
-                            className="grid size-9 place-items-center rounded-xl bg-berry-soft text-berry-deep transition hover:bg-berry/15"
+                            className="grid size-9 place-items-center rounded-xl bg-kumkum-50 text-kumkum-700 transition hover:bg-kumkum-600/15"
                             onClick={() => setDeleteTarget({ type: "staff", member })}
                           >
                             <Trash2 className="size-4" />
@@ -2132,19 +2132,19 @@ export function StaffPage() {
         <button
           type="button"
           onClick={() => setDialogOpen(true)}
-          className="group grid min-h-[17rem] place-items-center rounded-[2rem] border-2 border-dashed border-violet/25 bg-white/40 p-6 text-center transition hover:border-emerald/50 hover:bg-white/70"
+          className="group grid min-h-[17rem] place-items-center rounded-[2rem] border-2 border-dashed border-peacock-600/25 bg-white/40 p-6 text-center transition hover:border-brand/50 hover:bg-white/70"
         >
           <span>
-            <span className="clay-orb mx-auto size-14 rounded-2xl bg-clay-emerald text-white transition group-hover:scale-105">
+            <span className="clay-orb mx-auto size-14 rounded-2xl bg-clay-green text-ink transition group-hover:scale-105">
               <Plus className="size-6" />
             </span>
             <span className="mt-3 block text-base font-extrabold text-ink">Add staff</span>
-            <span className="mt-1 block text-xs font-semibold text-slate-500">Invite by email and pick a role</span>
+            <span className="mt-1 block text-xs font-semibold text-ink-500">Invite by email and pick a role</span>
           </span>
         </button>
       </div>
       {staff.length === 0 && (
-        <p className="mt-4 rounded-2xl bg-white/70 p-4 text-sm font-semibold text-slate-500">No staff users loaded.</p>
+        <p className="mt-4 rounded-2xl bg-white/70 p-4 text-sm font-semibold text-ink-500">No staff users loaded.</p>
       )}
       <PaginationControls
         className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
@@ -2181,7 +2181,7 @@ export function StaffPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" variant="emerald">Invite Staff</Button>
+              <Button type="submit" variant="brand">Invite Staff</Button>
             </div>
           </form>
         </ActionDialog>
@@ -2199,7 +2199,7 @@ export function StaffPage() {
             </div>
             <div className="flex flex-wrap justify-end gap-2">
               <Button variant="secondary" onClick={() => setRoleTarget(null)}>Cancel</Button>
-              <Button type="submit" variant="emerald" icon={<RefreshCw className="size-4" />}>Update Role</Button>
+              <Button type="submit" variant="brand" icon={<RefreshCw className="size-4" />}>Update Role</Button>
             </div>
           </form>
         </ActionDialog>
@@ -2263,50 +2263,50 @@ export function ReportsPage() {
         }
       />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <MetricCard title="Daily sales" value={formatINR(reports.dailySales)} detail={`${reports.dailyOrders} ${copy.transactionPlural.toLowerCase()} today`} icon={BarChart3} tone="blue" />
-        <MetricCard title="Weekly sales" value={formatINR(reports.weeklySales)} detail={`${formatSignedPercent(reports.weeklyChangePercent)} week over week`} icon={TrendingUp} tone="emerald" />
-        <MetricCard title={`Repeat ${copy.transactionSingular.toLowerCase()} rate`} value={`${reports.repeatOrderRate}%`} detail={`${reports.repeatCustomers} of ${reports.totalCustomers} ${copy.customerPlural.toLowerCase()}`} icon={CustomerIcon} tone="purple" />
-        <MetricCard title={`Average ${copy.transactionSingular.toLowerCase()} value`} value={formatINR(reports.averageOrderValue)} detail={`${reports.completedPayments} paid ${copy.transactionPlural.toLowerCase()} this month`} icon={TransactionIcon} tone="amber" />
+        <MetricCard title="Daily sales" value={formatINR(reports.dailySales)} detail={`${reports.dailyOrders} ${copy.transactionPlural.toLowerCase()} today`} icon={BarChart3} tone="ink" />
+        <MetricCard title="Weekly sales" value={formatINR(reports.weeklySales)} detail={`${formatSignedPercent(reports.weeklyChangePercent)} week over week`} icon={TrendingUp} tone="green" />
+        <MetricCard title={`Repeat ${copy.transactionSingular.toLowerCase()} rate`} value={`${reports.repeatOrderRate}%`} detail={`${reports.repeatCustomers} of ${reports.totalCustomers} ${copy.customerPlural.toLowerCase()}`} icon={CustomerIcon} tone="peacock" />
+        <MetricCard title={`Average ${copy.transactionSingular.toLowerCase()} value`} value={formatINR(reports.averageOrderValue)} detail={`${reports.completedPayments} paid ${copy.transactionPlural.toLowerCase()} this month`} icon={TransactionIcon} tone="marigold" />
       </div>
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
         <Card className="p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-bold text-ink sm:text-lg">Monthly sales</h2>
-            <Badge variant="blue" className="shrink-0">{formatINR(reports.monthlySales)}</Badge>
+            <Badge variant="info" className="shrink-0">{formatINR(reports.monthlySales)}</Badge>
           </div>
-          <div className="mt-5 grid h-64 grid-cols-12 items-end gap-2 rounded-[1.4rem] bg-[repeating-linear-gradient(180deg,transparent_0,transparent_51px,rgba(29,26,57,0.06)_51px,rgba(29,26,57,0.06)_52px)] px-1 sm:mt-6 sm:gap-3">
+          <div className="mt-5 grid h-64 grid-cols-12 items-end gap-2 rounded-[1.4rem] bg-[repeating-linear-gradient(180deg,transparent_0,transparent_51px,rgba(11,13,11,0.06)_51px,rgba(11,13,11,0.06)_52px)] px-1 sm:mt-6 sm:gap-3">
             {reports.monthlyTrend.map((point) => (
               <div key={point.label} className="flex min-w-0 flex-col items-center gap-2">
                 <div
-                  className="vm-grow-on-scroll w-full rounded-t-[0.8rem] bg-[linear-gradient(180deg,#7c5cff_0%,#4f5bd5_45%,#12b76a_100%)] shadow-[inset_0_2px_0_rgba(255,255,255,0.45)] transition hover:brightness-110"
+                  className="vm-grow-on-scroll w-full rounded-t-[0.8rem] bg-brand shadow-[inset_0_2px_0_rgba(255,255,255,0.45)] transition hover:bg-green-600"
                   title={`${point.label}: ${formatINR(point.revenue)} from ${point.orders} orders`}
                   style={{ height: `${trendBarHeight(point.revenue, maxRevenue)}px` }}
                 />
-                <span className="max-w-full truncate text-[11px] font-semibold leading-4 text-slate-500 sm:text-xs">{point.label}</span>
+                <span className="max-w-full truncate text-[11px] font-semibold leading-4 text-ink-500 sm:text-xs">{point.label}</span>
               </div>
             ))}
           </div>
         </Card>
         <Card>
           <h2 className="flex items-center gap-2 text-lg font-extrabold text-ink">
-            <ItemIcon className="size-5 text-ocean" />
+            <ItemIcon className="size-5 text-brand-text" />
             {copy.topItemsTitle} revenue
           </h2>
           <div className="mt-4 grid gap-3">
             {data.topItems.map((item, index) => (
-              <div key={item.id} className="vm-reveal-on-scroll flex items-center justify-between gap-3 rounded-2xl bg-mist/80 p-3">
+              <div key={item.id} className="vm-reveal-on-scroll flex items-center justify-between gap-3 rounded-2xl bg-ivory-100/80 p-3">
                 <div className="flex items-center gap-3">
-                  <span className={cn("clay-orb size-9 rounded-xl text-sm font-extrabold text-white", index === 0 ? "bg-clay-mango !text-ink" : index === 1 ? "bg-clay-violet" : "bg-clay-ocean")}>{index + 1}</span>
+                  <span className={cn("clay-orb size-9 rounded-xl text-sm font-extrabold text-white", index === 0 ? "bg-clay-marigold !text-ink" : index === 1 ? "bg-clay-peacock" : "bg-clay-ink")}>{index + 1}</span>
                   <div>
                     <p className="font-semibold text-ink">{item.name}</p>
-                    <p className="text-xs text-slate-500">{item.quantitySold} {copy.transactionPlural.toLowerCase()}</p>
+                    <p className="text-xs text-ink-500">{item.quantitySold} {copy.transactionPlural.toLowerCase()}</p>
                   </div>
                 </div>
-                <p className="font-bold text-emerald">{formatINR(item.revenue)}</p>
+                <p className="font-bold text-brand-text">{formatINR(item.revenue)}</p>
               </div>
             ))}
             {data.topItems.length === 0 && (
-              <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-500">No paid {copy.itemSingular.toLowerCase()} data yet.</p>
+              <p className="rounded-2xl bg-ivory-100/80 p-3 text-sm text-ink-500">No paid {copy.itemSingular.toLowerCase()} data yet.</p>
             )}
           </div>
         </Card>
@@ -2440,33 +2440,33 @@ export function BillingPage() {
         action={<LiveSyncStatus connected={connected} source={data.source} error={error} />}
       />
       {paymentRequired && (
-        <div className="clay clay-tint-mango mb-5 grid items-center gap-4 rounded-[2rem] p-5 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:p-6">
+        <div className="clay clay-tint-marigold mb-5 grid items-center gap-4 rounded-[2rem] p-5 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:p-6">
           <span aria-hidden="true" className="hidden size-20 sm:block">
             <ClayIllustration name="bell" />
           </span>
           <div className="min-w-0">
-            <Badge variant="amber">Payment required</Badge>
+            <Badge variant="warning">Payment required</Badge>
             <h2 className="mt-3 text-xl font-extrabold text-ink">Pay {formatPlanName(billing.plan)} to continue KYC</h2>
-            <p className="mt-1 text-sm leading-6 text-mango-deep">
+            <p className="mt-1 text-sm leading-6 text-marigold-700">
               Your business stays hidden from customers until subscription payment, KYC document upload, and PSHR admin approval are complete.
             </p>
           </div>
-          <Button variant="emerald" icon={<ReceiptText className="size-4" />} onClick={() => goToSubscriptionCheckout(billing.plan)}>
+          <Button variant="brand" icon={<ReceiptText className="size-4" />} onClick={() => goToSubscriptionCheckout(billing.plan)}>
             Review billing
           </Button>
         </div>
       )}
       <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="relative min-h-[15rem] overflow-hidden rounded-[2rem] bg-[linear-gradient(150deg,#1d1a39_0%,#2b2160_50%,#4f3bb8_100%)] p-6 text-white shadow-clay-lg sm:p-7">
-          <div aria-hidden="true" className="vm-blob -right-14 -top-20 size-64 bg-emerald opacity-30" />
+        <div className="relative min-h-[15rem] overflow-hidden rounded-[2rem] vm-band p-6 text-white shadow-clay-lg sm:p-7">
+          <div aria-hidden="true" className="vm-blob -right-14 -top-20 size-64 bg-brand opacity-30" />
           <div aria-hidden="true" className="absolute inset-0 opacity-15 [background-image:radial-gradient(rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:16px_16px]" />
           <div className="relative flex items-start justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-extrabold uppercase tracking-[0.1em]">{formatPlanName(billing.plan)} plan</span>
               <StatusPill status={billing.status} />
             </div>
-            <span aria-hidden="true" className="grid h-9 w-12 grid-cols-3 gap-0.5 rounded-lg bg-[linear-gradient(135deg,#ffe7a3,#ffad1f)] p-1.5 shadow-clay-sm">
-              {Array.from({ length: 6 }, (_, cell) => <span key={cell} className="rounded-[2px] bg-mango-deep/35" />)}
+            <span aria-hidden="true" className="grid h-9 w-12 grid-cols-3 gap-0.5 rounded-lg bg-[linear-gradient(135deg,#fdebc4,#f2a20c)] p-1.5 shadow-clay-sm">
+              {Array.from({ length: 6 }, (_, cell) => <span key={cell} className="rounded-[2px] bg-marigold-600/35" />)}
             </span>
           </div>
           <p className="relative mt-6 text-4xl font-extrabold tracking-[-0.05em]">
@@ -2478,7 +2478,7 @@ export function BillingPage() {
           </p>
           <div className="relative mt-6 flex flex-wrap items-center gap-3">
             <Button
-              variant="emerald"
+              variant="brand"
               icon={<ReceiptText className="size-4" />}
               onClick={() => goToSubscriptionCheckout(primaryCheckoutPlan)}
               disabled={billing.status === "ACTIVE" && isPro}
@@ -2503,15 +2503,15 @@ export function BillingPage() {
         <div className="clay rounded-[2rem] p-6 sm:p-7">
           <h2 className="text-lg font-extrabold text-ink">Subscription cycle</h2>
           <div className="mt-6">
-            <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400">
+            <div className="flex items-center justify-between text-xs font-extrabold uppercase tracking-[0.08em] text-ink-500">
               <span>Period start</span>
               <span>Period end</span>
             </div>
-            <div className="relative mt-2 h-3 rounded-full bg-mist shadow-clay-inset">
-              <div className="h-full rounded-full bg-[linear-gradient(90deg,#12b76a,#7c5cff)]" style={{ width: `${Math.max(3, periodProgress * 100)}%` }} />
+            <div className="relative mt-2 h-3 rounded-full bg-ivory-100 shadow-clay-inset">
+              <div className="h-full rounded-full bg-brand" style={{ width: `${Math.max(3, periodProgress * 100)}%` }} />
               <span
                 aria-hidden="true"
-                className="absolute top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-violet shadow-clay-sm"
+                className="absolute top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-peacock-600 shadow-clay-sm"
                 style={{ left: `${Math.max(3, periodProgress * 100)}%` }}
               />
             </div>
@@ -2521,16 +2521,16 @@ export function BillingPage() {
             </div>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl bg-mist/80 p-4">
-              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400">Next renewal</p>
+            <div className="rounded-2xl bg-ivory-100/80 p-4">
+              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-ink-500">Next renewal</p>
               <p className="mt-1.5 text-lg font-extrabold text-ink">{formatDateLabel(billing.nextRenewalDate)}</p>
             </div>
-            <div className="rounded-2xl bg-mist/80 p-4">
-              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-slate-400">Setup fee</p>
+            <div className="rounded-2xl bg-ivory-100/80 p-4">
+              <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-ink-500">Setup fee</p>
               <p className="mt-1.5 text-lg font-extrabold text-ink">{billing.setupFeeAmount === null ? "Not set" : formatINR(billing.setupFeeAmount)}</p>
             </div>
           </div>
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="mt-4 text-sm text-ink-600">
             Current billing period ends on <span className="font-bold text-ink">{formatDateLabel(billing.currentPeriodEnd)}</span>.
           </p>
         </div>
@@ -2542,25 +2542,25 @@ export function BillingPage() {
             role="img"
             aria-label={`${kyc.uploadedDocumentCount} of ${kyc.requiredDocumentCount} documents uploaded`}
             className="relative grid size-24 shrink-0 place-items-center rounded-full"
-            style={{ background: `conic-gradient(#12b76a ${kycProgress * 360}deg, #ece6ff 0deg)` }}
+            style={{ background: `conic-gradient(#1ec926 ${kycProgress * 360}deg, #e6dfcf 0deg)` }}
           >
             <span className="grid size-[4.6rem] place-items-center rounded-full bg-white shadow-clay-inset">
               <span className="text-xl font-extrabold text-ink">
                 {kyc.uploadedDocumentCount}
-                <span className="text-sm text-slate-400">/{kyc.requiredDocumentCount}</span>
+                <span className="text-sm text-ink-500">/{kyc.requiredDocumentCount}</span>
               </span>
             </span>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={kyc.status === "APPROVED" ? "emerald" : kyc.status === "REJECTED" ? "red" : kyc.status === "UNDER_REVIEW" ? "purple" : "amber"}>
+              <Badge variant={kyc.status === "APPROVED" ? "success" : kyc.status === "REJECTED" ? "danger" : kyc.status === "UNDER_REVIEW" ? "dark" : "warning"}>
                 {kyc.label}
               </Badge>
-              <Badge variant="blue">{kyc.uploadedDocumentCount}/{kyc.requiredDocumentCount} documents</Badge>
-              {kyc.status === "UNDER_REVIEW" && <Badge variant="purple">Admin review</Badge>}
+              <Badge variant="info">{kyc.uploadedDocumentCount}/{kyc.requiredDocumentCount} documents</Badge>
+              {kyc.status === "UNDER_REVIEW" && <Badge variant="dark">Admin review</Badge>}
             </div>
             <h2 className="mt-2 text-xl font-extrabold text-ink">Business KYC documents</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-600">
               {billing.status !== "ACTIVE"
                 ? "Complete subscription payment to unlock document upload."
                 : kyc.readyForReview
@@ -2582,20 +2582,20 @@ export function BillingPage() {
                 key={requirement.type}
                 className={cn(
                   "min-w-0 overflow-hidden rounded-[1.5rem] border-2 p-4 transition",
-                  document ? "border-emerald/30 bg-emerald-soft/40" : "border-dashed border-violet/25 bg-mist/60"
+                  document ? "border-brand/30 bg-green-50/40" : "border-dashed border-peacock-600/25 bg-ivory-100/60"
                 )}
               >
                 <div className="flex items-start gap-3">
-                  <span className={cn("clay-orb size-11 shrink-0 rounded-2xl", document ? "bg-clay-emerald text-white" : "bg-white text-slate-300")}>
+                  <span className={cn("clay-orb size-11 shrink-0 rounded-2xl", document ? "bg-clay-green text-ink" : "bg-white text-ink-300")}>
                     {document ? <CheckCircle2 className="size-5" /> : <FileCheck2 className="size-5" />}
                   </span>
                   <div className="min-w-0">
                     <h3 className="font-extrabold text-ink">{requirement.label}</h3>
-                    <p className="mt-0.5 text-xs leading-5 text-slate-500 [overflow-wrap:anywhere]">{requirement.description}</p>
+                    <p className="mt-0.5 text-xs leading-5 text-ink-500 [overflow-wrap:anywhere]">{requirement.description}</p>
                   </div>
                 </div>
                 {document && (
-                  <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-xl bg-white p-3 text-xs leading-5 text-slate-600 shadow-clay-sm">
+                  <div className="mt-3 min-w-0 max-w-full overflow-hidden rounded-xl bg-white p-3 text-xs leading-5 text-ink-600 shadow-clay-sm">
                     <p className="block max-w-full truncate font-bold text-ink" title={document.fileName}>{document.fileName}</p>
                     <p>{formatFileSize(document.fileSize)} · {new Date(document.uploadedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
                   </div>
@@ -2603,7 +2603,7 @@ export function BillingPage() {
                 <label
                   className={cn(
                     "mt-4 inline-flex h-11 w-full min-w-0 items-center justify-center gap-2 rounded-2xl px-3 text-sm font-bold transition",
-                    disabled ? "cursor-not-allowed bg-slate-200 text-slate-500" : "cursor-pointer bg-clay-ink text-white shadow-clay-sm hover:-translate-y-0.5"
+                    disabled ? "cursor-not-allowed bg-ink-200 text-ink-500" : "cursor-pointer bg-clay-ink text-white shadow-clay-sm hover:-translate-y-0.5 theme-dark"
                   )}
                 >
                   {uploading ? <LoaderCircle className="size-4 shrink-0 animate-spin" /> : <UploadCloud className="size-4 shrink-0" />}
@@ -2625,9 +2625,9 @@ export function BillingPage() {
       <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-ink">Choose a subscription plan</h2>
-          <p className="mt-1 text-sm font-medium text-slate-500">Start a plan here, then review billing details and apply coupons on the next page.</p>
+          <p className="mt-1 text-sm font-medium text-ink-500">Start a plan here, then review billing details and apply coupons on the next page.</p>
         </div>
-        <Badge variant="blue">Next: billing details</Badge>
+        <Badge variant="info">Next: billing details</Badge>
       </div>
       <div className="mt-4 grid gap-5 md:grid-cols-2">
         {pricingPlans.map((plan) => {
@@ -2642,31 +2642,31 @@ export function BillingPage() {
               key={plan.name}
               className={cn(
                 "relative flex h-full flex-col rounded-[2rem] p-6",
-                pro ? "bg-clay-ink text-white shadow-clay-lg" : "clay text-ink",
-                active && "ring-4 ring-emerald/40",
+                pro ? "bg-clay-ink text-white shadow-clay-lg theme-dark" : "clay text-ink",
+                active && "ring-4 ring-brand/40",
                 blockStarter && "opacity-75 grayscale"
               )}
             >
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-lg font-extrabold">{plan.name}</h3>
-                {active && <Badge variant="emerald">Active</Badge>}
+                {active && <Badge variant="success">Active</Badge>}
               </div>
-              <p className={cn("mt-2 min-h-12 text-sm leading-6", pro ? "text-white/65" : "text-slate-600")}>{plan.description}</p>
+              <p className={cn("mt-2 min-h-12 text-sm leading-6", pro ? "text-white/65" : "text-ink-600")}>{plan.description}</p>
               <p className="mt-4 text-4xl font-extrabold tracking-[-0.05em]">
                 {formatINR(plan.price)}
-                <span className={cn("text-sm font-bold", pro ? "text-white/60" : "text-slate-500")}>/month</span>
+                <span className={cn("text-sm font-bold", pro ? "text-white/60" : "text-ink-500")}>/month</span>
               </p>
               <ul className="mt-4 flex-1 space-y-2">
                 {plan.features.slice(0, 4).map((feature) => (
-                  <li key={feature} className={cn("flex gap-2 text-sm font-semibold", pro ? "text-white/85" : "text-slate-700")}>
-                    <CheckCircle2 className={cn("mt-0.5 size-4 shrink-0", pro ? "text-emerald-300" : "text-emerald")} />
+                  <li key={feature} className={cn("flex gap-2 text-sm font-semibold", pro ? "text-white/85" : "text-ink-700")}>
+                    <CheckCircle2 className={cn("mt-0.5 size-4 shrink-0", pro ? "text-green-300" : "text-brand-text")} />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
               <Button
                 className="mt-5 w-full"
-                variant={pro ? "emerald" : "dark"}
+                variant={pro ? "brand" : "dark"}
                 onClick={() => goToSubscriptionCheckout(planKey)}
                 disabled={blockStarter || active}
               >
@@ -2685,18 +2685,18 @@ export function BillingPage() {
         <ol className="relative mt-5 grid gap-3 pl-7">
           {billingHistoryPagination.pageItems.map((invoice) => (
             <li key={invoice.id} className="relative">
-              <span aria-hidden="true" className="absolute -left-7 top-0 h-full w-0.5 translate-x-[0.4rem] bg-line" />
-              <span aria-hidden="true" className="absolute -left-7 top-5 size-3.5 rounded-full border-[3px] border-white bg-violet shadow-clay-sm" />
-              <div className="grid gap-3 rounded-2xl bg-mist/70 p-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
+              <span aria-hidden="true" className="absolute -left-7 top-0 h-full w-0.5 translate-x-[0.4rem] bg-ink-200" />
+              <span aria-hidden="true" className="absolute -left-7 top-5 size-3.5 rounded-full border-[3px] border-white bg-peacock-600 shadow-clay-sm" />
+              <div className="grid gap-3 rounded-2xl bg-ivory-100/70 p-4 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
                 <div className="min-w-0">
                   <p className="font-bold text-ink">{invoice.label}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-ink-500">
                     {invoice.reference} · {formatDateLabel(invoice.periodStart)} to {formatDateLabel(invoice.periodEnd)}
                   </p>
                 </div>
                 <p className="text-lg font-extrabold text-ink">{formatINR(invoice.amount)}</p>
                 <StatusPill status={invoice.status} />
-                <a href={invoice.invoiceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-ocean">
+                <a href={invoice.invoiceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-brand-text">
                   Invoice
                   <ArrowUpRight className="size-3.5" />
                 </a>
@@ -2705,7 +2705,7 @@ export function BillingPage() {
           ))}
         </ol>
         {billing.history.length === 0 && (
-          <p className="rounded-2xl bg-mist/80 p-3 text-sm text-slate-500">No subscription invoice rows are available yet.</p>
+          <p className="rounded-2xl bg-ivory-100/80 p-3 text-sm text-ink-500">No subscription invoice rows are available yet.</p>
         )}
         <PaginationControls
           className="mt-4 rounded-2xl border border-white/80 bg-white shadow-clay-sm"
@@ -2739,7 +2739,7 @@ export function BillingPage() {
 }
 
 type SettingsSectionId = "business-profile" | "whatsapp-api" | "wallet-payout" | "payment-rules";
-type SettingsSectionAccent = "ocean" | "emerald" | "violet";
+type SettingsSectionAccent = "ink" | "green" | "peacock";
 
 const settingsSectionAccentClasses: Record<
   SettingsSectionAccent,
@@ -2752,29 +2752,29 @@ const settingsSectionAccentClasses: Record<
     line: string;
   }
 > = {
-  ocean: {
-    arrowOpen: "border-black/10 bg-black text-white shadow-[0_10px_28px_rgba(0,0,0,0.18)]",
-    arrowHover: "group-hover:border-black/10 group-hover:bg-black group-hover:text-white",
-    icon: "text-ocean",
-    iconShell: "border-ocean/15 bg-ocean/10",
-    signal: "bg-ocean",
-    line: "from-ocean/70 via-violet/60 to-transparent"
+  ink: {
+    arrowOpen: "border-black/10 bg-ink text-white shadow-[0_10px_28px_rgba(0,0,0,0.18)]",
+    arrowHover: "group-hover:border-black/10 group-hover:bg-ink group-hover:text-white",
+    icon: "text-ink",
+    iconShell: "border-ink-200 bg-ivory-100",
+    signal: "bg-ink",
+    line: "from-ink/60 via-ink-300/60 to-transparent"
   },
-  emerald: {
-    arrowOpen: "border-emerald/25 bg-emerald text-white shadow-[0_10px_28px_rgba(18,183,106,0.26)]",
-    arrowHover: "group-hover:border-emerald/25 group-hover:bg-emerald group-hover:text-white",
-    icon: "text-emerald",
-    iconShell: "border-emerald/15 bg-emerald/10",
-    signal: "bg-emerald",
-    line: "from-emerald/70 via-ocean/55 to-transparent"
+  green: {
+    arrowOpen: "border-brand/25 bg-brand text-ink shadow-[0_10px_28px_rgba(30,201,38,0.26)]",
+    arrowHover: "group-hover:border-brand/25 group-hover:bg-brand group-hover:text-ink",
+    icon: "text-brand-text",
+    iconShell: "border-brand/15 bg-brand/10",
+    signal: "bg-brand",
+    line: "from-brand/70 via-green-700/55 to-transparent"
   },
-  violet: {
-    arrowOpen: "border-violet/25 bg-violet text-white shadow-[0_10px_28px_rgba(124,92,255,0.24)]",
-    arrowHover: "group-hover:border-violet/25 group-hover:bg-violet group-hover:text-white",
-    icon: "text-violet",
-    iconShell: "border-violet/15 bg-violet/10",
-    signal: "bg-violet",
-    line: "from-violet/70 via-ocean/55 to-transparent"
+  peacock: {
+    arrowOpen: "border-peacock-600/25 bg-peacock-600 text-white shadow-[0_10px_28px_rgba(17,154,165,0.24)]",
+    arrowHover: "group-hover:border-peacock-600/25 group-hover:bg-peacock-600 group-hover:text-white",
+    icon: "text-peacock-600",
+    iconShell: "border-peacock-600/15 bg-peacock-600/10",
+    signal: "bg-peacock-600",
+    line: "from-peacock-600/70 via-green-700/55 to-transparent"
   }
 };
 
@@ -2784,7 +2784,7 @@ function SettingsAccordionSection({
   description,
   icon,
   badge,
-  accent = "ocean",
+  accent = "ink",
   open,
   onToggle,
   saveLabel,
@@ -2816,7 +2816,7 @@ function SettingsAccordionSection({
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        className="relative z-10 flex w-full items-center justify-between gap-4 px-5 py-4 text-left outline-none transition focus-visible:ring-4 focus-visible:ring-ocean/10"
+        className="relative z-10 flex w-full items-center justify-between gap-4 px-5 py-4 text-left outline-none transition focus-visible:ring-4 focus-visible:ring-green-700/10"
         onClick={() => onToggle(sectionId)}
       >
         <span className="flex min-w-0 flex-1 items-center gap-3">
@@ -2829,7 +2829,7 @@ function SettingsAccordionSection({
               <span className="text-base font-extrabold leading-6 text-ink">{title}</span>
               {badge}
             </span>
-            <span className="mt-1 block text-sm leading-5 text-slate-500">{description}</span>
+            <span className="mt-1 block text-sm leading-5 text-ink-500">{description}</span>
           </span>
         </span>
         <span className="flex shrink-0 items-center gap-3">
@@ -2837,7 +2837,7 @@ function SettingsAccordionSection({
           <span
             aria-hidden="true"
             className={cn(
-              "grid size-10 shrink-0 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-slate-600 shadow-clay-sm transition duration-300",
+              "grid size-10 shrink-0 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-ink-600 shadow-clay-sm transition duration-300",
               accentClasses.arrowHover,
               open && accentClasses.arrowOpen
             )}
@@ -2858,15 +2858,15 @@ function SettingsAccordionSection({
         <div className="min-h-0 overflow-hidden">
           <div
             className={cn(
-              "grid gap-4 border-t border-line/70 px-5 pb-5 pt-4",
+              "grid gap-4 border-t border-ink-200/70 px-5 pb-5 pt-4",
               open && "motion-safe:animate-[settings-section-rise_420ms_cubic-bezier(0.22,1,0.36,1)_both]"
             )}
           >
             {children}
-            <div className="flex justify-end border-t border-line/70 pt-4">
+            <div className="flex justify-end border-t border-ink-200/70 pt-4">
               <Button
                 type="submit"
-                variant="emerald"
+                variant="brand"
                 disabled={saving}
                 className="w-full sm:w-auto"
                 icon={saving ? <LoaderCircle className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
@@ -3023,7 +3023,7 @@ export function SettingsPage() {
           title="Business profile"
           description="Identity, owner details, contact channels, address, map pin, and hours."
           icon={<BusinessIcon className="size-5" />}
-          accent="ocean"
+          accent="ink"
           open={isSettingsSectionOpen("business-profile")}
           onToggle={toggleSettingsSection}
           saveLabel="Save Business Profile"
@@ -3097,7 +3097,7 @@ export function SettingsPage() {
                 onAddressSelect={setBusinessAddressDraft}
               />
               {launchSingleCityRestricted && (
-                <p className="mt-2 text-xs font-semibold text-emerald">
+                <p className="mt-2 text-xs font-semibold text-brand-text">
                   Business locations must remain inside the {launchMarket.displayName} launch area.
                 </p>
               )}
@@ -3110,13 +3110,13 @@ export function SettingsPage() {
               <Label>WhatsApp number</Label>
               <PhoneInput name="phone" defaultValue={business.phone} />
             </div>
-            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-ivory-100/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Accept bookings</span>
-                <span className="mt-1 block text-xs leading-5 text-slate-500">Customers only see it while this is on and the business hours above are open.</span>
+                <span className="mt-1 block text-xs leading-5 text-ink-500">Customers only see it while this is on and the business hours above are open.</span>
               </span>
               <input name="isOpen" type="checkbox" defaultChecked={business.isOpen} className="peer sr-only" />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-ink-300 transition peer-checked:bg-brand after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
         </SettingsAccordionSection>
         <SettingsAccordionSection
@@ -3124,21 +3124,21 @@ export function SettingsPage() {
           title="Wallet payout destination"
           description="Settlement method, account holder, UPI, and bank transfer details."
           icon={<Landmark className="size-5" />}
-          accent="violet"
+          accent="peacock"
           open={isSettingsSectionOpen("wallet-payout")}
           onToggle={toggleSettingsSection}
           saveLabel="Save Payout Details"
           saving={saving}
         >
-            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-mist/80 p-1">
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-ivory-100/80 p-1">
               {(["UPI", "BANK_TRANSFER"] as const).map((method) => {
                 const active = payoutMethod === method;
                 return (
                   <label
                     key={method}
                     className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md text-sm font-bold transition ${
-                      active ? "bg-ink text-white shadow-clay-sm" : "text-slate-600 hover:bg-white"
-                    }`}
+                      active ? "bg-ink text-white shadow-clay-sm" : "text-ink-600 hover:bg-white"
+                    } theme-dark`}
                   >
                     <input
                       type="radio"
@@ -3187,7 +3187,7 @@ export function SettingsPage() {
                 </div>
               </div>
             )}
-            <div className="rounded-lg border border-emerald/20 bg-emerald/5 p-3 text-sm leading-6 text-slate-700">
+            <div className="rounded-lg border border-brand/20 bg-brand/5 p-3 text-sm leading-6 text-ink-700">
               Eligible wallet balance is sent automatically to this saved destination after provider settlement. Cashfree payout status appears on the payments page.
             </div>
         </SettingsAccordionSection>
@@ -3197,20 +3197,20 @@ export function SettingsPage() {
           description="Customer chat flow, approval state, and display number."
           icon={<MessageCircle className="size-5" />}
           badge={
-            <Badge variant={business.whatsappLiveEnabled ? "emerald" : business.whatsappConnected ? "amber" : "neutral"}>
+            <Badge variant={business.whatsappLiveEnabled ? "success" : business.whatsappConnected ? "warning" : "neutral"}>
               {business.whatsappLiveEnabled ? "Enabled" : business.whatsappConnected ? "Pending PSHR approval" : "Not configured"}
             </Badge>
           }
-          accent="emerald"
+          accent="green"
           open={isSettingsSectionOpen("whatsapp-api")}
           onToggle={toggleSettingsSection}
           saveLabel="Save WhatsApp Settings"
           saving={saving}
         >
-            <label className="flex items-center justify-between gap-4 rounded-2xl bg-mist/80 p-3">
+            <label className="flex items-center justify-between gap-4 rounded-2xl bg-ivory-100/80 p-3">
               <span>
                 <span className="block text-sm font-bold text-ink">Enable WhatsApp customer flow</span>
-                <span className="mt-1 block text-xs leading-5 text-slate-500">When off, public ordering stays website-only and WhatsApp buttons are hidden.</span>
+                <span className="mt-1 block text-xs leading-5 text-ink-500">When off, public ordering stays website-only and WhatsApp buttons are hidden.</span>
               </span>
               <input
                 name="whatsappEnabled"
@@ -3218,7 +3218,7 @@ export function SettingsPage() {
                 defaultChecked={Boolean(business.whatsappDisplayPhone || business.whatsappConnected || business.whatsappLiveEnabled)}
                 className="peer sr-only"
               />
-              <span className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-emerald after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
+              <span className="relative h-7 w-12 shrink-0 rounded-full bg-ink-300 transition peer-checked:bg-brand after:absolute after:left-1 after:top-1 after:size-5 after:rounded-full after:bg-white after:shadow-clay-sm after:transition peer-checked:after:translate-x-5" />
             </label>
             <div className="grid gap-2">
               <Label>WhatsApp display number</Label>
@@ -3230,7 +3230,7 @@ export function SettingsPage() {
           title="Billing and payment settings"
           description="Minimum value, fulfillment choices, service radius, and cash payments."
           icon={<TransactionIcon className="size-5" />}
-          accent="ocean"
+          accent="ink"
           open={isSettingsSectionOpen("payment-rules")}
           onToggle={toggleSettingsSection}
           saveLabel="Save Billing Settings"
@@ -3246,35 +3246,35 @@ export function SettingsPage() {
                 <Input name="deliveryFee" type="number" min="0" defaultValue={business.deliveryFee} />
               </div>
             </div>
-            <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
+            <div className="grid gap-3 rounded-2xl bg-ivory-100/80 p-3">
               <Label>Fulfillment options</Label>
               <div key={activeBusinessType} className="grid gap-3 sm:grid-cols-3">
                 {activeFulfillmentProfile.allowedModes.map((mode: ActiveFulfillmentMode) => {
                   const ModeIcon = fulfillmentModeIcons[mode];
 
                   return (
-                    <label key={mode} className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <label key={mode} className="flex items-center gap-2 text-sm font-semibold text-ink-700">
                       <input
                         name={fulfillmentModeFlagNames[mode]}
                         type="checkbox"
                         defaultChecked={selectedFulfillmentModeSet.has(mode)}
                       />
-                      <ModeIcon className="size-4 text-ocean" />
+                      <ModeIcon className="size-4 text-brand-text" />
                       {fulfillmentLabelForBusinessType(activeBusinessType, mode)}
                     </label>
                   );
                 })}
               </div>
             </div>
-            <div className="grid gap-3 rounded-2xl bg-mist/80 p-3">
+            <div className="grid gap-3 rounded-2xl bg-ivory-100/80 p-3">
               <div>
                 <p className="text-sm font-bold text-ink">Platform online payments</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
+                <p className="mt-1 text-xs leading-5 text-ink-500">
                   Customer online payments are collected through the PSHR Innovex gateway account. Paid orders credit your business wallet and are paid to your saved payout destination in the daily 9 AM IST batch within 24 hours.
                 </p>
               </div>
             </div>
-            <label className="flex items-center gap-3 rounded-2xl bg-mist/80 p-3 text-sm font-semibold text-slate-700">
+            <label className="flex items-center gap-3 rounded-2xl bg-ivory-100/80 p-3 text-sm font-semibold text-ink-700">
               <input name="allowsPayLater" type="checkbox" defaultChecked={business.allowsPayLater} />
               Allow cash payment
             </label>
@@ -3397,7 +3397,7 @@ export function CustomerCouponsPage() {
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button
               type="button"
-              variant="emerald"
+              variant="brand"
               icon={<Plus className="size-4" />}
               onClick={() => {
                 setNotice(null);
@@ -3411,16 +3411,16 @@ export function CustomerCouponsPage() {
         }
       />
       <div className="grid gap-4 md:grid-cols-3">
-        <MetricCard title="Total coupons" value={String(data.coupons.length)} detail="Configured checkout offers" icon={ReceiptText} tone="blue" />
-        <MetricCard title="Active coupons" value={String(activeCouponCount)} detail="Available on public checkout" icon={CheckCircle2} tone="emerald" />
-        <MetricCard title="Total redemptions" value={String(totalRedemptions)} detail="Claims across all coupons" icon={TrendingUp} tone="purple" />
+        <MetricCard title="Total coupons" value={String(data.coupons.length)} detail="Configured checkout offers" icon={ReceiptText} tone="ink" />
+        <MetricCard title="Active coupons" value={String(activeCouponCount)} detail="Available on public checkout" icon={CheckCircle2} tone="green" />
+        <MetricCard title="Total redemptions" value={String(totalRedemptions)} detail="Claims across all coupons" icon={TrendingUp} tone="peacock" />
       </div>
       <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-extrabold tracking-[-0.03em] text-ink">Coupon list</h2>
-          <p className="mt-1 text-sm font-medium text-slate-500">Use the status switch to activate or pause coupons, or remove unused entries.</p>
+          <p className="mt-1 text-sm font-medium text-ink-500">Use the status switch to activate or pause coupons, or remove unused entries.</p>
         </div>
-        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-slate-600 shadow-clay-sm">{data.coupons.length} coupons</span>
+        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-ink-600 shadow-clay-sm">{data.coupons.length} coupons</span>
       </div>
       {data.coupons.length > 0 ? (
         <div className="mt-4 grid gap-5 lg:grid-cols-2">
@@ -3434,7 +3434,7 @@ export function CustomerCouponsPage() {
             return (
               <ScrollReveal key={coupon.id} delay={Math.min(index, 7) * 50}>
                 <article className={cn("relative grid min-h-[11rem] grid-cols-[7.5rem_minmax(0,1fr)] overflow-hidden rounded-[1.75rem] bg-white shadow-clay transition sm:grid-cols-[9rem_minmax(0,1fr)]", !coupon.isActive && "saturate-[0.35]")}>
-                  <div className={cn("relative grid place-items-center px-3 text-center text-white", percent ? "bg-clay-violet" : "bg-clay-emerald")}>
+                  <div className={cn("relative grid place-items-center px-3 text-center text-white", percent ? "bg-clay-peacock" : "bg-clay-green")}>
                     <div aria-hidden="true" className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgba(255,255,255,0.7)_1px,transparent_1px)] [background-size:12px_12px]" />
                     <p className="relative">
                       <span className="block text-[2rem] font-extrabold leading-none tracking-[-0.05em] sm:text-[2.4rem]">{percent ? `${coupon.discountValue}%` : formatINR(coupon.discountValue).replace(/\.00$/, "")}</span>
@@ -3442,11 +3442,11 @@ export function CustomerCouponsPage() {
                     </p>
                   </div>
                   <span aria-hidden="true" className="absolute left-[7.5rem] top-0 h-full -translate-x-1/2 border-l-2 border-dashed border-white/80 sm:left-[9rem]" />
-                  <span aria-hidden="true" className="absolute -top-3 left-[7.5rem] size-6 -translate-x-1/2 rounded-full bg-mist shadow-clay-inset sm:left-[9rem]" />
-                  <span aria-hidden="true" className="absolute -bottom-3 left-[7.5rem] size-6 -translate-x-1/2 rounded-full bg-mist shadow-clay-inset sm:left-[9rem]" />
+                  <span aria-hidden="true" className="absolute -top-3 left-[7.5rem] size-6 -translate-x-1/2 rounded-full bg-ivory-100 shadow-clay-inset sm:left-[9rem]" />
+                  <span aria-hidden="true" className="absolute -bottom-3 left-[7.5rem] size-6 -translate-x-1/2 rounded-full bg-ivory-100 shadow-clay-inset sm:left-[9rem]" />
                   <div className="flex min-w-0 flex-col p-4 sm:p-5">
                     <div className="flex items-start justify-between gap-3">
-                      <span className="rounded-xl border-2 border-dashed border-violet/30 bg-violet/5 px-3 py-1 font-mono text-base font-extrabold tracking-[0.08em] text-ink">{coupon.code}</span>
+                      <span className="rounded-xl border-2 border-dashed border-peacock-600/30 bg-peacock-600/5 px-3 py-1 font-mono text-base font-extrabold tracking-[0.08em] text-ink">{coupon.code}</span>
                       <StatusSwitch
                         checked={coupon.isActive}
                         loading={busy}
@@ -3454,18 +3454,18 @@ export function CustomerCouponsPage() {
                         onCheckedChange={(isActive) => updateBusinessCoupon(coupon.id, { isActive }, isActive ? `Coupon ${coupon.code} activated.` : `Coupon ${coupon.code} paused.`)}
                       />
                     </div>
-                    <p className="mt-2 text-sm font-semibold text-slate-600">
+                    <p className="mt-2 text-sm font-semibold text-ink-600">
                       {discountLabel} off{coupon.minimumOrderAmount > 0 ? ` above ${formatINR(coupon.minimumOrderAmount)}` : ""}{coupon.expiresAt ? ` · expires ${formatDateLabel(coupon.expiresAt)}` : ""}
                     </p>
-                    {coupon.description && <p className="mt-1 truncate text-xs text-slate-500">{coupon.description}</p>}
+                    {coupon.description && <p className="mt-1 truncate text-xs text-ink-500">{coupon.description}</p>}
                     <div className="mt-auto pt-3">
-                      <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-500">
-                        <span className={coupon.isActive ? "text-emerald-deep" : "text-slate-400"}>{coupon.isActive ? "Active" : "Inactive"}</span>
+                      <div className="flex items-center justify-between gap-2 text-xs font-bold text-ink-500">
+                        <span className={coupon.isActive ? "text-green-700" : "text-ink-500"}>{coupon.isActive ? "Active" : "Inactive"}</span>
                         <span>{coupon.redeemedCount}{coupon.redemptionLimit ? `/${coupon.redemptionLimit}` : ""} used</span>
                       </div>
-                      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-mist">
+                      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ivory-100">
                         <div
-                          className={cn("h-full rounded-full", percent ? "bg-[linear-gradient(90deg,#7c5cff,#4f5bd5)]" : "bg-[linear-gradient(90deg,#12b76a,#0b8a50)]")}
+                          className={cn("h-full rounded-full", percent ? "bg-peacock-500" : "bg-brand")}
                           style={{ width: `${usage === null ? (coupon.redeemedCount > 0 ? 100 : 4) : Math.max(4, usage * 100)}%`, opacity: usage === null ? 0.35 : 1 }}
                         />
                       </div>
@@ -3474,7 +3474,7 @@ export function CustomerCouponsPage() {
                           type="button"
                           size="sm"
                           variant="ghost"
-                          className="text-berry-deep hover:bg-berry-soft"
+                          className="text-kumkum-700 hover:bg-kumkum-50"
                           icon={busy ? <LoaderCircle className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                           disabled={busy}
                           onClick={() => deleteBusinessCoupon(coupon.id, coupon.code)}
@@ -3495,7 +3495,7 @@ export function CustomerCouponsPage() {
           illustration="success"
           title="No customer coupons are configured yet."
           action={
-            <Button type="button" variant="emerald" icon={<Plus className="size-4" />} onClick={() => setCreateCouponOpen(true)}>
+            <Button type="button" variant="brand" icon={<Plus className="size-4" />} onClick={() => setCreateCouponOpen(true)}>
               Create coupon
             </Button>
           }
@@ -3559,7 +3559,7 @@ export function CustomerCouponsPage() {
               </Button>
               <Button
                 type="submit"
-                variant="emerald"
+                variant="brand"
                 disabled={savingCoupon}
                 icon={savingCoupon ? <LoaderCircle className="size-4 animate-spin" /> : <Plus className="size-4" />}
               >
@@ -3605,14 +3605,14 @@ function ResponsiveOrderTable({
             <div className="flex min-w-0 items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-bold text-ink">{order.orderNumber}</p>
-                <p className="mt-1 truncate text-sm text-slate-600">{order.customer}</p>
+                <p className="mt-1 truncate text-sm text-ink-600">{order.customer}</p>
               </div>
               <p className="shrink-0 font-bold text-ink">{formatINR(order.amount)}</p>
             </div>
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{order.items}</p>
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-ink-600">{order.items}</p>
             <div className="mt-3 grid gap-2">
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <span className="text-xs font-semibold uppercase text-slate-400">Status</span>
+                <span className="text-xs font-semibold uppercase text-ink-500">Status</span>
                 <div className="flex min-w-0 items-center gap-2">
                   <OrderStatusAnimation
                     status={order.status}
@@ -3625,28 +3625,28 @@ function ResponsiveOrderTable({
                 </div>
               </div>
               <div className="flex min-w-0 items-center justify-between gap-3">
-                <span className="text-xs font-semibold uppercase text-slate-400">Payment</span>
+                <span className="text-xs font-semibold uppercase text-ink-500">Payment</span>
                 <div className="flex min-w-0 items-center gap-2">
                   <PaymentStatusAnimation status={order.paymentStatus} label={`${order.paymentStatus.toLowerCase()} payment`} className="size-7" />
                   <StatusPill status={order.paymentStatus} className="px-2 py-0.5 text-[11px]" />
                 </div>
               </div>
-              <p className="text-xs font-semibold text-slate-500">{order.time}</p>
+              <p className="text-xs font-semibold text-ink-500">{order.time}</p>
             </div>
           </div>
         ))}
       </div>
       <div className="mt-4 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="text-xs uppercase text-slate-500">
+          <thead className="text-xs uppercase text-ink-500">
             <tr>{[transactionLabel, "Customer", "Items", "Amount", "Status", "Payment", "Time"].map((head) => <th key={head} className="px-3 py-3">{head}</th>)}</tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-ink-200">
             {orderPagination.pageItems.map((order) => (
               <tr key={order.id}>
                 <td className="px-3 py-4 font-bold text-ink">{order.orderNumber}</td>
-                <td className="px-3 py-4 text-slate-600">{order.customer}</td>
-                <td className="px-3 py-4 text-slate-600">{order.items}</td>
+                <td className="px-3 py-4 text-ink-600">{order.customer}</td>
+                <td className="px-3 py-4 text-ink-600">{order.items}</td>
                 <td className="px-3 py-4 font-bold">{formatINR(order.amount)}</td>
                 <td className="px-3 py-4">
                   <div className="flex items-center gap-2">
@@ -3666,7 +3666,7 @@ function ResponsiveOrderTable({
                     <StatusPill status={order.paymentStatus} />
                   </div>
                 </td>
-                <td className="px-3 py-4 text-slate-500">{order.time}</td>
+                <td className="px-3 py-4 text-ink-500">{order.time}</td>
               </tr>
             ))}
           </tbody>
@@ -3688,12 +3688,12 @@ function ResponsiveOrderTable({
 
 function statusBarColor(status: LiveOrderStatus) {
   const colors: Record<LiveOrderStatus, string> = {
-    NEW: "bg-ocean",
-    ACCEPTED: "bg-violet",
-    PREPARING: "bg-amber-500",
-    READY: "bg-emerald",
-    DELIVERED: "bg-slate-500",
-    CANCELLED: "bg-berry-soft0"
+    NEW: "bg-ink",
+    ACCEPTED: "bg-peacock-600",
+    PREPARING: "bg-marigold-500",
+    READY: "bg-brand",
+    DELIVERED: "bg-ink-500",
+    CANCELLED: "bg-kumkum-50"
   };
   return colors[status];
 }
@@ -3780,11 +3780,11 @@ function formatDateLabel(value: string | null) {
   return new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function billingStatusVariant(status: string): "neutral" | "blue" | "emerald" | "purple" | "amber" | "red" {
-  if (status === "ACTIVE") return "emerald";
-  if (status === "TRIAL") return "purple";
-  if (status === "PAST_DUE") return "amber";
-  if (status === "CANCELLED") return "red";
+function billingStatusVariant(status: string): "neutral" | "info" | "success" | "dark" | "warning" | "danger" {
+  if (status === "ACTIVE") return "success";
+  if (status === "TRIAL") return "info";
+  if (status === "PAST_DUE") return "warning";
+  if (status === "CANCELLED") return "danger";
   return "neutral";
 }
 
@@ -3794,12 +3794,12 @@ function dateStamp() {
 
 function LiveSyncStatus({ connected, source, error }: { connected: boolean; source: "database" | "demo"; error: string | null }) {
   if (error) {
-    return <Badge variant="amber">Reconnecting</Badge>;
+    return <Badge variant="warning">Reconnecting</Badge>;
   }
 
   if (source === "demo") {
-    return <Badge variant="purple">Demo</Badge>;
+    return <Badge variant="dark">Demo</Badge>;
   }
 
-  return <Badge variant={connected ? "emerald" : "blue"}>{connected ? "Connected" : "Updating"}</Badge>;
+  return <Badge variant={connected ? "success" : "info"}>{connected ? "Connected" : "Updating"}</Badge>;
 }

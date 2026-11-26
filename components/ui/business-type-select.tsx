@@ -11,7 +11,7 @@ import { getBusinessConsoleIcons } from "@/lib/business-console-icons";
 import { cn } from "@/lib/utils";
 
 const selectClassName =
-  "h-11 w-full rounded-lg border border-line bg-white px-3 text-sm outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10";
+  "h-11 w-full rounded-lg border border-ink-200 bg-white px-3 text-sm outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-700/10";
 
 type BusinessServiceTypesResponse = {
   serviceTypes?: BusinessServiceTypeOption[];
@@ -80,7 +80,7 @@ export function BusinessTypeSelect({
 
   return (
     <div className="relative">
-      <SelectedIcon className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+      <SelectedIcon className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />
       <select
         className={cn(selectClassName, "pl-10", className)}
         value={value}

@@ -26,13 +26,13 @@ export function EmptyState({
           <ClayIllustration name={illustration} className="mx-auto w-28 sm:w-32" />
         ) : (
           Icon && (
-            <div className="clay-orb mx-auto size-14 bg-clay-emerald text-white">
+            <div className="clay-orb mx-auto size-14 bg-clay-green text-ink">
               <Icon className="size-6" />
             </div>
           )
         )}
         <h2 className="mt-3 text-lg font-extrabold text-ink">{title}</h2>
-        {body && <p className="mt-1.5 text-sm leading-6 text-slate-500">{body}</p>}
+        {body && <p className="mt-1.5 text-sm leading-6 text-ink-500">{body}</p>}
         {action && <div className="mt-5 flex justify-center">{action}</div>}
       </div>
     </div>

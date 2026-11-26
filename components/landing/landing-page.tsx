@@ -11,6 +11,7 @@ import { VelocityMarquee } from "@/components/motion/velocity-marquee";
 import { PublicFooter } from "@/components/layout/public-footer";
 import { PublicHeader } from "@/components/layout/public-header";
 import { ButtonLink } from "@/components/ui/button";
+import { Sticker } from "@/components/ui/sticker";
 import { businessServiceTypeOptions } from "@/lib/business-service-types";
 import { pricingPlans } from "@/lib/constants";
 import { launchMarket, launchMarketRestricted, launchOffer } from "@/lib/launch-policy";
@@ -34,21 +35,21 @@ const navLinks = [
 ];
 
 const marqueeItems = [
-  { label: "Own order page", Icon: Globe, tone: "bg-clay-emerald text-white" },
-  { label: "UPI QR", Icon: QrCode, tone: "bg-clay-violet text-white" },
-  { label: "WhatsApp updates", Icon: MessageCircle, tone: "bg-clay-emerald text-white" },
-  { label: "Bookings", Icon: CalendarDays, tone: "bg-clay-mango text-ink" },
-  { label: "Customer reminders", Icon: Users, tone: "bg-clay-berry text-white" },
-  { label: "GST invoices", Icon: ReceiptText, tone: "bg-clay-ocean text-white" },
-  { label: "Staff roles", Icon: ShieldCheck, tone: "bg-clay-ink text-white" },
-  { label: "Daily reports", Icon: TrendingUp, tone: "bg-clay-violet text-white" }
+  { label: "Own order page", Icon: Globe, tone: "bg-clay-green text-ink" },
+  { label: "UPI QR", Icon: QrCode, tone: "bg-clay-peacock text-white" },
+  { label: "WhatsApp updates", Icon: MessageCircle, tone: "bg-clay-green text-ink" },
+  { label: "Bookings", Icon: CalendarDays, tone: "bg-clay-marigold text-ink" },
+  { label: "Customer reminders", Icon: Users, tone: "bg-clay-kumkum text-white" },
+  { label: "GST invoices", Icon: ReceiptText, tone: "bg-clay-ink text-white theme-dark" },
+  { label: "Staff roles", Icon: ShieldCheck, tone: "bg-clay-ink text-white theme-dark" },
+  { label: "Daily reports", Icon: TrendingUp, tone: "bg-clay-peacock text-white" }
 ];
 
 const heroFaces = [
-  { Art: TiffinIllustration, tint: "bg-mango-soft" },
-  { Art: SalonIllustration, tint: "bg-ocean-soft" },
-  { Art: GroceryIllustration, tint: "bg-emerald-soft" },
-  { Art: CakeIllustration, tint: "bg-berry-soft" }
+  { Art: TiffinIllustration, tint: "bg-marigold-50" },
+  { Art: SalonIllustration, tint: "bg-ivory-100" },
+  { Art: GroceryIllustration, tint: "bg-green-50" },
+  { Art: CakeIllustration, tint: "bg-kumkum-50" }
 ];
 
 export const faqItems = [
@@ -93,24 +94,31 @@ export function LandingPage() {
       <section className="relative isolate">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-14 pt-6 sm:px-6 lg:min-h-[min(760px,calc(100svh-5rem))] lg:grid-cols-[1.02fr_0.98fr] lg:gap-4 lg:px-8 lg:pb-20 lg:pt-4">
           <ScrollReveal className="min-w-0" direction="right">
-            <p className="glass inline-flex max-w-full items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-extrabold text-ink">
-              <span className="relative flex size-2 shrink-0">
-                <span className="absolute inline-flex size-full rounded-full bg-emerald opacity-60 motion-safe:animate-ping" />
-                <span className="relative inline-flex size-2 rounded-full bg-emerald" />
-              </span>
+            <Sticker
+              tone="marigold"
+              tilt={-2}
+              className="max-w-[calc(100%-0.75rem)]"
+              icon={
+                <span className="relative flex size-2 shrink-0">
+                  <span className="absolute inline-flex size-full rounded-full bg-ink opacity-50 motion-safe:animate-ping theme-dark" />
+                  <span className="relative inline-flex size-2 rounded-full bg-ink theme-dark" />
+                </span>
+              }
+            >
               <span className="truncate">Now onboarding · {launchMarket.displayName}</span>
-            </p>
+            </Sticker>
             <h1 className="mt-5">
-              <span className="block text-lg font-extrabold tracking-[-0.02em] text-emerald-deep sm:text-xl">
-                VyapaarMate<span className="sr-only"> (Vyapaar Mate)</span>
+              <span className="block font-display text-lg font-bold tracking-[-0.02em] text-ink sm:text-xl">
+                Vyapaar<span className="text-green-700">Mate</span>
+                <span className="sr-only"> (Vyapaar Mate)</span>
               </span>
-              <span className="mt-2 block text-[clamp(2.7rem,7.4vw,5rem)] font-extrabold leading-[0.95] tracking-[-0.05em] text-ink">
+              <span className="mt-2 block text-[clamp(2.7rem,7.4vw,5rem)] font-bold leading-[0.98] tracking-[-0.045em] text-ink">
                 Take orders.
                 <br />
-                Get paid. <span className="text-gradient-brand">Grow.</span>
+                Get paid. <span className="vm-mark">Grow.</span>
               </span>
             </h1>
-            <p className="mt-5 max-w-[28rem] text-base font-medium leading-7 text-slate-600 sm:text-lg">
+            <p className="mt-5 max-w-[28rem] text-base font-medium leading-7 text-ink-600 sm:text-lg">
               Your own shop link, UPI payments and WhatsApp updates in one simple app.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -146,7 +154,7 @@ export function LandingPage() {
                   </span>
                 ))}
               </div>
-              <p className="text-sm font-bold leading-5 text-slate-500">
+              <p className="text-sm font-bold leading-5 text-ink-500">
                 Tiffins, salons, kirana
                 <br />
                 and {Math.max(0, businessServiceTypeOptions.length - 3)} more business types
@@ -158,7 +166,7 @@ export function LandingPage() {
       </section>
 
       {/* ---------- Sticker strip (speeds up with scroll velocity) ---------- */}
-      <div className="relative -rotate-[1.5deg] border-y-4 border-white bg-ink py-3 shadow-clay">
+      <div className="relative -rotate-[1.5deg] border-y-4 border-white bg-ink py-3 shadow-clay theme-dark">
         <VelocityMarquee>
           {marqueeItems.map(({ label, Icon, tone }) => (
             <span key={label} className="mx-2 inline-flex items-center gap-2.5 whitespace-nowrap px-2 text-sm font-extrabold text-white sm:text-base">
@@ -166,7 +174,7 @@ export function LandingPage() {
                 <Icon className="size-4" />
               </span>
               {label}
-              <Sparkles className="ml-3 size-4 text-mango" />
+              <Sparkles className="ml-3 size-4 text-marigold-400" />
             </span>
           ))}
         </VelocityMarquee>
@@ -183,23 +191,23 @@ export function LandingPage() {
             {
               value: <CountUp to={businessServiceTypeOptions.length} />,
               label: "business types supported",
-              tone: "clay-tint-emerald"
+              tone: "clay-tint-green"
             },
             {
               value: <CountUp to={Math.round(starter.price)} prefix="₹" />,
               label: launchOffer.publiclyAdvertised ? `a month to start, ${launchOffer.discountPercent}% off` : "a month to start, plus GST",
-              tone: "clay-tint-violet"
+              tone: "clay-tint-peacock"
             },
             {
               value: <span>0</span>,
               label: "apps your customers need to install",
-              tone: "clay-tint-mango"
+              tone: "clay-tint-marigold"
             }
           ].map(({ value, label, tone }, index) => (
             <ScrollReveal key={label} delay={index * 80}>
               <div className={`clay ${tone} flex items-center gap-4 rounded-[1.75rem] px-6 py-5`}>
                 <span className="text-[2.6rem] font-extrabold leading-none tracking-[-0.05em] text-ink">{value}</span>
-                <span className="text-sm font-bold leading-5 text-slate-500">{label}</span>
+                <span className="text-sm font-bold leading-5 text-ink-500">{label}</span>
               </div>
             </ScrollReveal>
           ))}

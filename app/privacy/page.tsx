@@ -118,7 +118,7 @@ export default function PrivacyPage() {
       <PublicPage>
         <PageHeroBanner
           eyebrow="Privacy"
-          eyebrowTone="emerald"
+          eyebrowTone="green"
           title="VyapaarMate"
           highlight="Privacy Policy"
           body="How business and customer data is kept separate, used and protected."

@@ -9,7 +9,7 @@ export function DemoRibbon() {
   return (
     <Link
       href="/demo"
-      className="group fixed bottom-3 left-3 z-[65] inline-flex items-center gap-1.5 rounded-full border-[3px] border-white bg-clay-mango px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-ink shadow-[0_5px_0_-1px_rgba(29,26,57,0.14),0_12px_20px_-10px_rgba(29,26,57,0.4)] transition hover:-translate-y-0.5 print:hidden"
+      className="group fixed bottom-3 left-3 z-[65] inline-flex items-center gap-1.5 rounded-full border-[3px] border-white bg-clay-marigold px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-[0.06em] text-ink shadow-[0_5px_0_-1px_rgba(11,13,11,0.14),0_12px_20px_-10px_rgba(11,13,11,0.4)] transition hover:-translate-y-0.5 print:hidden"
       title="Demo environment: payments and WhatsApp messages are simulated"
     >
       <FlaskConical className="size-3.5" />

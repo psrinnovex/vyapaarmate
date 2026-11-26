@@ -61,29 +61,29 @@ function buildInvoiceHtml(order: NonNullable<Awaited<ReturnType<typeof getPublic
   <title>${escapeHtml(order.invoiceNumber)}</title>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; background: #f8fbff; color: #0d1321; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    main { max-width: 860px; margin: 32px auto; padding: 32px; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; }
+    body { margin: 0; background: #fbf9f4; color: #0b0d0b; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 860px; margin: 32px auto; padding: 32px; background: #fff; border: 1px solid #e6dfcf; border-top: 6px solid #1ec926; border-radius: 18px; }
     header, .grid, .total-row { display: flex; justify-content: space-between; gap: 24px; }
-    header { align-items: flex-start; border-bottom: 1px solid #e2e8f0; padding-bottom: 24px; }
+    header { align-items: flex-start; border-bottom: 1px solid #e6dfcf; padding-bottom: 24px; }
     h1, h2, p { margin: 0; }
     h1 { margin-top: 8px; font-size: 30px; }
-    .eyebrow { color: ${paid ? "#059669" : "#1246a0"}; font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-    .muted { color: #64748b; }
+    .eyebrow { color: ${paid ? "#0b7a10" : "#0a5f67"}; font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .muted { color: #625f57; }
     .right { text-align: right; }
-    .pill { display: inline-block; border-radius: 8px; padding: 8px 12px; background: ${paid ? "#ecfdf5" : "#f8fafc"}; color: ${paid ? "#059669" : "#475569"}; border: 1px solid ${paid ? "#bbf7d0" : "#e2e8f0"}; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    .grid { border-bottom: 1px solid #e2e8f0; padding: 24px 0; }
+    .pill { display: inline-block; border-radius: 8px; padding: 8px 12px; background: ${paid ? "#effbec" : "#faf7f0"}; color: ${paid ? "#0b7a10" : "#4b4a43"}; border: 1px solid ${paid ? "#b2eca8" : "#e6dfcf"}; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .grid { border-bottom: 1px solid #e6dfcf; padding: 24px 0; }
     .block { flex: 1; min-width: 0; }
-    .label { color: #64748b; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+    .label { color: #625f57; font-size: 12px; font-weight: 800; text-transform: uppercase; }
     .value { margin-top: 10px; font-weight: 800; }
     table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
-    th { color: #64748b; font-size: 12px; text-align: left; text-transform: uppercase; padding-bottom: 12px; }
-    td { border-top: 1px solid #e2e8f0; padding: 14px 0; }
+    th { color: #625f57; font-size: 12px; text-align: left; text-transform: uppercase; padding-bottom: 12px; }
+    td { border-top: 1px solid #e6dfcf; padding: 14px 0; }
     .num { text-align: right; }
-    .totals { margin-left: auto; width: min(360px, 100%); border-top: 1px solid #e2e8f0; padding-top: 12px; }
+    .totals { margin-left: auto; width: min(360px, 100%); border-top: 1px solid #e6dfcf; padding-top: 12px; }
     .total-row { padding: 8px 0; }
-    .grand { margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 14px; font-size: 20px; font-weight: 900; }
-    .notes { margin-top: 24px; border-radius: 12px; background: #f1f5f9; padding: 14px; color: #475569; }
-    footer { margin-top: 30px; color: #64748b; font-size: 12px; line-height: 1.6; }
+    .grand { margin-top: 8px; border-top: 1px solid #e6dfcf; padding-top: 14px; font-size: 20px; font-weight: 900; }
+    .notes { margin-top: 24px; border-radius: 12px; background: #f3eee2; padding: 14px; color: #4b4a43; }
+    footer { margin-top: 30px; color: #625f57; font-size: 12px; line-height: 1.6; }
     @media print {
       body { background: #fff; }
       main { margin: 0; max-width: none; border: 0; border-radius: 0; }

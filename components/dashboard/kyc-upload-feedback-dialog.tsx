@@ -47,18 +47,18 @@ export function KycUploadFeedbackDialog({
       aria-modal={completed ? true : undefined}
       className="payment-celebration fixed inset-0 z-[90] grid place-items-center overflow-hidden bg-ink/45 px-4 backdrop-blur-sm print:hidden"
     >
-      <div key={feedback.status} className="payment-celebration-card relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white p-6 text-center shadow-[0_32px_100px_rgba(29,26,57,0.32)]">
+      <div key={feedback.status} className="payment-celebration-card relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/80 bg-white p-6 text-center shadow-[0_32px_100px_rgba(11,13,11,0.32)]">
         <LazyLottieAnimation
           src={uploading ? orderAnimationPaths.serviceInProgress : orderAnimationPaths.serviceReady}
           label={title}
           loop={uploading}
-          className="mx-auto size-32 rounded-2xl bg-mist"
+          className="mx-auto size-32 rounded-2xl bg-ivory-100"
           animationClassName="kyc-upload-lottie"
           fallback={
             <div
               className={cn(
                 "grid size-24 place-items-center rounded-full border bg-white",
-                uploading ? "border-ocean/20 text-ocean" : "border-emerald/20 text-emerald"
+                uploading ? "border-green-700/20 text-brand-text" : "border-brand/20 text-brand-text"
               )}
             >
               {uploading ? (
@@ -69,26 +69,26 @@ export function KycUploadFeedbackDialog({
             </div>
           }
         />
-        <p className={cn("mt-5 text-xs font-extrabold uppercase tracking-[0.2em]", uploading ? "text-ocean" : "text-emerald")}>
+        <p className={cn("mt-5 text-xs font-extrabold uppercase tracking-[0.2em]", uploading ? "text-brand-text" : "text-brand-text")}>
           {uploading ? "Secure upload" : "Upload complete"}
         </p>
         <h2 className="mt-2 text-2xl font-extrabold text-ink">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
-        <div className="mt-5 rounded-2xl bg-mist/80 p-3 text-left">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{feedback.label}</p>
+        <p className="mt-2 text-sm leading-6 text-ink-600">{body}</p>
+        <div className="mt-5 rounded-2xl bg-ivory-100/80 p-3 text-left">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-ink-500">{feedback.label}</p>
           <p className="mt-1 truncate text-sm font-bold text-ink">{feedback.fileName}</p>
         </div>
         {uploading ? (
-          <div className="mt-5 flex items-center justify-center gap-2 text-sm font-semibold text-slate-600">
+          <div className="mt-5 flex items-center justify-center gap-2 text-sm font-semibold text-ink-600">
             <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
             <span>Uploading and validating file</span>
           </div>
         ) : (
           <>
-            <div className="mx-auto mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-slate-100">
-              <span className="payment-celebration-progress block h-full rounded-full bg-emerald" />
+            <div className="mx-auto mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-ink-100">
+              <span className="payment-celebration-progress block h-full rounded-full bg-brand" />
             </div>
-            <Button className="mt-5 w-full" variant="emerald" icon={<CheckCircle2 className="size-4" />} onClick={onClose}>
+            <Button className="mt-5 w-full" variant="brand" icon={<CheckCircle2 className="size-4" />} onClick={onClose}>
               Done
             </Button>
           </>

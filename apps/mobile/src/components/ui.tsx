@@ -47,30 +47,36 @@ export function Screen({ children, scroll = true }: PropsWithChildren<{ scroll?:
   );
 }
 
-type StickerTone = "mango" | "emerald" | "violet" | "berry" | "white";
+type StickerTone = "marigold" | "green" | "ink" | "peacock" | "kumkum" | "paper";
 
 function stickerColors(tone: StickerTone, colors: AppColors) {
   switch (tone) {
-    case "emerald":
+    case "green":
       return { background: colors.primary, text: colors.onPrimary };
-    case "violet":
+    case "ink":
+      return { background: colors.contrast, text: colors.onContrast };
+    case "peacock":
       return { background: colors.accent, text: "#FFFFFF" };
-    case "berry":
-      return { background: colors.berry, text: "#FFFFFF" };
-    case "white":
+    case "kumkum":
+      return { background: colors.kumkum, text: "#FFFFFF" };
+    case "paper":
       return { background: colors.surface, text: colors.text };
     default:
-      return { background: colors.mango, text: "#1D1A39" };
+      return { background: colors.marigold, text: colors.onMarigold };
   }
 }
 
-/** Die-cut label with a thick white edge and a slight tilt. */
-export function Sticker({ label, tone = "mango", tilt = -3 }: { label: string; tone?: StickerTone; tilt?: number }) {
+/** Price-tag sticker: a notched tag with a punched hole, bold caps and a slight tilt. */
+export function Sticker({ label, tone = "marigold", tilt = -3 }: { label: string; tone?: StickerTone; tilt?: number }) {
   const { colors } = useAppTheme();
   const palette = stickerColors(tone, colors);
   return (
-    <View style={[styles.sticker, { backgroundColor: palette.background, transform: [{ rotate: `${tilt}deg` }], boxShadow: colors.clayShadowSmall }]}>
-      <Text style={[styles.stickerText, { color: palette.text }]}>{label}</Text>
+    <View style={[styles.sticker, { transform: [{ rotate: `${tilt}deg` }] }]}>
+      <View style={[styles.stickerPoint, { backgroundColor: palette.background }]} />
+      <View style={[styles.stickerBody, { backgroundColor: palette.background, boxShadow: colors.clayShadowSmall }]}>
+        <Text style={[styles.stickerText, { color: palette.text }]}>{label}</Text>
+      </View>
+      <View style={[styles.stickerHole, { backgroundColor: colors.background }]} />
     </View>
   );
 }
@@ -109,7 +115,7 @@ export function PageHeader({ eyebrow, title, subtitle, action, illustration }: {
   return (
     <View style={[styles.heroShell, { backgroundColor: colors.surface, boxShadow: colors.clayShadow }]}>
       <View style={styles.hero}>
-        <View style={[styles.heroGlow, { backgroundColor: colors.accentSurface }]} />
+        <View style={[styles.heroGlow, { backgroundColor: colors.blobA }]} />
         <View style={styles.heroRow}>
           {copy}
           <Illustration name={illustration} size={96} />
@@ -346,12 +352,15 @@ const styles = StyleSheet.create({
   heroGlow: { position: "absolute", width: 220, height: 220, borderRadius: 110, right: -70, top: -60, opacity: 0.9 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   heroAction: { alignItems: "flex-start" },
-  sticker: { alignSelf: "flex-start", borderRadius: 999, borderWidth: 3, borderColor: "#FFFFFF", paddingHorizontal: 11, paddingVertical: 4 },
-  stickerText: { fontSize: 11, fontWeight: "900", letterSpacing: 0.8, textTransform: "uppercase" },
-  title: { fontSize: 30, lineHeight: 34, fontWeight: "900", letterSpacing: -1 },
+  sticker: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", marginLeft: 11 },
+  stickerPoint: { position: "absolute", left: -10, width: 21, height: 21, borderRadius: 3, transform: [{ rotate: "45deg" }] },
+  stickerBody: { height: 30, justifyContent: "center", paddingLeft: 12, paddingRight: 13, borderTopRightRadius: 8, borderBottomRightRadius: 8 },
+  stickerHole: { position: "absolute", left: -4, width: 7, height: 7, borderRadius: 4 },
+  stickerText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.9, textTransform: "uppercase" },
+  title: { fontSize: 30, lineHeight: 34, fontWeight: "800", letterSpacing: -1 },
   subtitle: { fontSize: 15, lineHeight: 22 },
   sectionTitleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 10, marginTop: 6 },
-  sectionTitle: { fontSize: 22, lineHeight: 27, fontWeight: "900", letterSpacing: -0.5 },
+  sectionTitle: { fontSize: 22, lineHeight: 27, fontWeight: "800", letterSpacing: -0.5 },
   countChip: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
   card: { borderRadius: 26, borderWidth: 1, padding: 18, gap: 12 },
   button: { minHeight: 52, borderRadius: 18, alignItems: "center", justifyContent: "center", paddingHorizontal: 18, marginBottom: 4 },
@@ -368,14 +377,14 @@ const styles = StyleSheet.create({
   choiceText: { fontSize: 14, fontWeight: "800" },
   state: { flex: 1, minHeight: 280, alignItems: "center", justifyContent: "center", gap: 12, padding: 24 },
   stateArt: { width: 136, height: 136, borderRadius: 68, alignItems: "center", justifyContent: "center", marginBottom: 6 },
-  stateTitle: { fontSize: 21, textAlign: "center", fontWeight: "900", letterSpacing: -0.4 },
+  stateTitle: { fontSize: 21, textAlign: "center", fontWeight: "800", letterSpacing: -0.4 },
   stateMessage: { fontSize: 15, lineHeight: 22, textAlign: "center" },
   stateAction: { alignSelf: "stretch", marginTop: 4 },
   loaderOrb: { width: 88, height: 88, borderRadius: 44, alignItems: "center", justifyContent: "center" },
   body: { fontSize: 15, lineHeight: 22 },
   metric: { flex: 1, minWidth: 140, gap: 6 },
   metricArt: { width: 52, height: 52, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 4 },
-  metricValue: { fontSize: 24, lineHeight: 29, fontWeight: "900", letterSpacing: -0.6 },
+  metricValue: { fontSize: 24, lineHeight: 29, fontWeight: "800", letterSpacing: -0.6 },
   small: { fontSize: 12, lineHeight: 17 },
   bold: { fontWeight: "700" },
 });

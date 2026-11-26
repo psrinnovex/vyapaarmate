@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   flex: { flex: 1, gap: 6, alignItems: "flex-start" },
   art: { width: 62, height: 62, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-  name: { fontSize: 18, fontWeight: "900", letterSpacing: -0.3, alignSelf: "stretch" },
+  name: { fontSize: 18, fontWeight: "800", letterSpacing: -0.3, alignSelf: "stretch" },
   numberChip: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 },
   number: { fontSize: 11, fontWeight: "800" },
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
@@ -79,5 +79,5 @@ const styles = StyleSheet.create({
   meta: { fontSize: 12, lineHeight: 18 },
   bold: { fontWeight: "800" },
   amountBand: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, borderTopWidth: 2, borderStyle: "dashed", paddingTop: 12 },
-  amount: { fontSize: 22, fontWeight: "900", letterSpacing: -0.5 },
+  amount: { fontSize: 22, fontWeight: "800", letterSpacing: -0.5 },
 });

@@ -1,22 +1,23 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export type StickerTone = "emerald" | "mango" | "berry" | "violet" | "ocean" | "sky" | "ink" | "white";
+export type StickerTone = "marigold" | "green" | "ink" | "paper" | "peacock" | "kumkum";
 
 const toneClass: Record<StickerTone, string> = {
-  emerald: "bg-clay-emerald text-white",
-  mango: "bg-clay-mango text-ink",
-  berry: "bg-clay-berry text-white",
-  violet: "bg-clay-violet text-white",
-  ocean: "bg-clay-ocean text-white",
-  sky: "bg-[linear-gradient(180deg,#9be0ff_0%,#33b5f5_100%)] text-ink",
-  ink: "bg-clay-ink text-white",
-  white: "bg-white text-ink"
+  marigold: "bg-marigold-500 text-ink",
+  green: "bg-brand text-on-brand",
+  ink: "bg-ink text-white theme-dark",
+  paper: "bg-white text-ink",
+  peacock: "bg-peacock-600 text-white",
+  kumkum: "bg-kumkum-700 text-white"
 };
 
-/** Die-cut "sticker" label: thick white edge, bold caps, optional tilt in degrees. */
+/**
+ * Price-tag sticker: a notched tag with a punched hole, bold caps and an optional tilt in
+ * degrees. Marigold is for offers and eyebrows; use at most two per screen.
+ */
 export function Sticker({
-  tone = "mango",
+  tone = "marigold",
   tilt = 0,
   icon,
   className,

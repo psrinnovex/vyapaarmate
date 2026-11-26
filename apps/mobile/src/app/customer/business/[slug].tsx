@@ -254,7 +254,7 @@ export default function CustomerBusinessScreen() {
 
 const styles = StyleSheet.create({
   heroImage: { width: "100%", height: 190, borderRadius: 26 },
-  sectionTitle: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
+  sectionTitle: { fontSize: 20, fontWeight: "800", letterSpacing: -0.4 },
   menuRow: { flexDirection: "row", gap: 12, alignItems: "center", padding: 12, borderRadius: 20 },
   itemArt: { width: 54, height: 54, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   flex: { flex: 1 },
@@ -269,5 +269,5 @@ const styles = StyleSheet.create({
   choices: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   totalBand: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14 },
   totalLabel: { fontSize: 15, fontWeight: "800" },
-  total: { fontSize: 26, fontWeight: "900", letterSpacing: -0.6 },
+  total: { fontSize: 26, fontWeight: "800", letterSpacing: -0.6 },
 });

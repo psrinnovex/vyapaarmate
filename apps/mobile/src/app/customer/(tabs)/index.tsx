@@ -21,7 +21,7 @@ const quickSearches: { label: string; term: string; art: IllustrationName }[] = 
 ];
 
 /** Stripe colours for each card's storefront awning. */
-const awningColors = ["#12B76A", "#7C5CFF", "#FF5C8A", "#FFAD1F", "#33B5F5", "#4F5BD5"];
+const awningColors = ["#1EC926", "#F2A20C", "#0E7C86", "#0B0D0B", "#D8432E", "#12A51A"];
 
 function distanceKm(from: Coordinates, item: BusinessListing) {
   if (item.latitude === null || item.longitude === null) return Number.POSITIVE_INFINITY;
@@ -84,7 +84,7 @@ export default function CustomerHomeScreen() {
             <Text style={[styles.meta, { color: colors.accent }]}>{item.businessType} · {item.city}</Text>
             <Text numberOfLines={1} style={[styles.meta, { color: colors.textMuted }]}>{item.featuredItems.join(" · ") || `${item.itemCount} available items`}</Text>
             {Number.isFinite(distance) ? (
-              <View style={[styles.distanceChip, { backgroundColor: colors.mangoSurface }]}>
+              <View style={[styles.distanceChip, { backgroundColor: colors.marigoldSurface }]}>
                 <Text style={[styles.distance, { color: colors.warning }]}>{Number(distance).toFixed(1)} km away</Text>
               </View>
             ) : null}
@@ -160,10 +160,10 @@ const styles = StyleSheet.create({
   storeFront: { height: 96, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", paddingHorizontal: 16, paddingBottom: 6 },
   logo: { width: 62, height: 62, borderRadius: 20, alignItems: "center", justifyContent: "center", overflow: "hidden", marginBottom: -22, borderWidth: 3, borderColor: "#FFFFFF" },
   logoImage: { width: 56, height: 56 },
-  logoText: { fontSize: 21, fontWeight: "900" },
+  logoText: { fontSize: 21, fontWeight: "800" },
   businessCopy: { gap: 5, padding: 16, paddingTop: 28 },
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
-  businessName: { flex: 1, fontSize: 18, fontWeight: "900", letterSpacing: -0.3 },
+  businessName: { flex: 1, fontSize: 18, fontWeight: "800", letterSpacing: -0.3 },
   meta: { fontSize: 13, lineHeight: 18, fontWeight: "600" },
   distanceChip: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, marginTop: 2 },
   distance: { fontSize: 12, fontWeight: "800" },

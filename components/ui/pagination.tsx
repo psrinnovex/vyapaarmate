@@ -70,8 +70,8 @@ export function PaginationControls({
   if (pageCount <= 1) return null;
 
   return (
-    <div className={cn("flex flex-col gap-3 border-t border-line/70 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between", className)}>
-      <p className="font-semibold text-slate-500">
+    <div className={cn("flex flex-col gap-3 border-t border-ink-200/70 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between", className)}>
+      <p className="font-semibold text-ink-500">
         Showing {startItem}-{endItem} of {totalItems} {itemLabel}
       </p>
       <div className="flex items-center gap-2">
@@ -80,12 +80,12 @@ export function PaginationControls({
           aria-label="Previous page"
           title="Previous page"
           disabled={page <= 1}
-          className="grid size-9 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-50"
+          className="grid size-9 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => onPageChange(page - 1)}
         >
           <ChevronLeft className="size-4" />
         </button>
-        <span className="min-w-24 text-center text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+        <span className="min-w-24 text-center text-xs font-bold uppercase tracking-[0.12em] text-ink-500">
           Page {page} of {pageCount}
         </span>
         <button
@@ -93,7 +93,7 @@ export function PaginationControls({
           aria-label="Next page"
           title="Next page"
           disabled={page >= pageCount}
-          className="grid size-9 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald-deep disabled:cursor-not-allowed disabled:opacity-50"
+          className="grid size-9 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => onPageChange(page + 1)}
         >
           <ChevronRight className="size-4" />

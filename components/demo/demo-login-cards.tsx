@@ -54,8 +54,8 @@ export function DemoLoginCards({ cards }: { cards: DemoRoleCard[] }) {
             {art}
           </div>
           <span className="text-lg font-extrabold tracking-[-0.02em] text-ink">{title}</span>
-          <span className="mt-1 text-sm font-semibold text-slate-500">{line}</span>
-          <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-emerald-deep">
+          <span className="mt-1 text-sm font-semibold text-ink-500">{line}</span>
+          <span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-green-700">
             {busy === role ? <LoaderCircle className="size-4 animate-spin" /> : null}
             {busy === role ? "Signing in" : "Open"}
             {busy !== role && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
@@ -63,7 +63,7 @@ export function DemoLoginCards({ cards }: { cards: DemoRoleCard[] }) {
         </button>
       ))}
       {error && (
-        <p role="alert" className="col-span-full rounded-2xl bg-berry-soft px-4 py-3 text-sm font-bold text-berry-deep">
+        <p role="alert" className="col-span-full rounded-2xl bg-kumkum-50 px-4 py-3 text-sm font-bold text-kumkum-700">
           {error}
         </p>
       )}
@@ -99,18 +99,18 @@ export function DemoCustomerCard({ art }: { art: ReactNode }) {
       type="button"
       onClick={start}
       disabled={busy}
-      className="group relative flex min-h-[17rem] flex-col overflow-hidden rounded-[2rem] bg-clay-ink p-5 text-left text-white shadow-clay-lg transition hover:-translate-y-1 disabled:cursor-wait sm:col-span-2 lg:col-span-1 lg:row-span-2"
+      className="group relative flex min-h-[17rem] flex-col overflow-hidden rounded-[2rem] bg-clay-ink p-5 text-left text-white shadow-clay-lg transition hover:-translate-y-1 disabled:cursor-wait sm:col-span-2 lg:col-span-1 lg:row-span-2 theme-dark"
     >
-      <span className="sticker self-start -rotate-3 bg-clay-emerald text-white">One tap</span>
+      <span className="sticker self-start -rotate-3 bg-clay-green text-ink">One tap</span>
       <span className="flex flex-1 items-center justify-center py-4 [&_svg]:w-44 [&_svg]:transition-transform [&_svg]:duration-300 group-hover:[&_svg]:scale-105 lg:[&_svg]:w-56">{art}</span>
       <span className="text-2xl font-extrabold tracking-[-0.03em]">Order as a customer</span>
       <span className="mt-1 text-sm font-semibold text-white/70">Browse the menu, pay with Demo UPI and track the order.</span>
-      <span className="mt-4 inline-flex items-center gap-2 self-start rounded-2xl bg-clay-emerald px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">
+      <span className="mt-4 inline-flex items-center gap-2 self-start rounded-2xl bg-clay-green px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">
         {busy ? <LoaderCircle className="size-4 animate-spin" /> : null}
         {busy ? "Opening shop" : "Open demo shop"}
         {!busy && <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />}
       </span>
-      {error && <span role="alert" className="mt-3 rounded-xl bg-berry-soft px-3 py-2 text-xs font-bold text-berry-deep">{error}</span>}
+      {error && <span role="alert" className="mt-3 rounded-xl bg-kumkum-50 px-3 py-2 text-xs font-bold text-kumkum-700">{error}</span>}
     </button>
   );
 }

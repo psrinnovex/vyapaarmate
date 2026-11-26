@@ -16,7 +16,7 @@ export default function MobileTermsPage() {
   return (
     <MobileLegalShell activePath="/mobile/terms">
       <LegalHeader eyebrow="Mobile terms" title="VyapaarMate Mobile App Terms" updated="17 August 2026" art="calendar">
-        These terms apply to the VyapaarMate iOS and Android apps provided by {company.name}. Using the app means agreeing to these terms and the <Link className="font-semibold text-ocean hover:underline" href="/mobile/privacy">Mobile App Privacy Notice</Link>.
+        These terms apply to the VyapaarMate iOS and Android apps provided by {company.name}. Using the app means agreeing to these terms and the <Link className="font-semibold text-brand-text hover:underline" href="/mobile/privacy">Mobile App Privacy Notice</Link>.
       </LegalHeader>
 
       <div className="grid gap-5">
@@ -45,7 +45,7 @@ export default function MobileTermsPage() {
 
         <LegalSection title="Suspension, cancellation, and deletion">
           <p>Access may be restricted or suspended for non-payment, fraud, security risk, unlawful conduct, policy violations, or misuse. Customer and staff accounts can use the available deletion process. A business owner can request business-account deletion, which disables active commerce and integrations and schedules the account for processing subject to disclosed retention obligations.</p>
-          <p><Link className="font-semibold text-ocean hover:underline" href="/account-deletion">Use the account deletion resource</Link> for the current verified process.</p>
+          <p><Link className="font-semibold text-brand-text hover:underline" href="/account-deletion">Use the account deletion resource</Link> for the current verified process.</p>
         </LegalSection>
 
         <LegalSection title="Service availability and changes">
@@ -53,7 +53,7 @@ export default function MobileTermsPage() {
         </LegalSection>
 
         <LegalSection title="Contact">
-          <p>Questions about these mobile terms can be sent to <a className="font-semibold text-ocean hover:underline" href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>.</p>
+          <p>Questions about these mobile terms can be sent to <a className="font-semibold text-brand-text hover:underline" href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>.</p>
         </LegalSection>
       </div>
     </MobileLegalShell>

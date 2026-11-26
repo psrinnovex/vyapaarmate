@@ -37,10 +37,10 @@ function checkoutHtml(input: {
   <title>Opening Cashfree Checkout</title>
   <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
   <style>
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #0f172a; }
-    main { width: min(92vw, 440px); border: 1px solid #e2e8f0; border-radius: 24px; background: #fff; padding: 28px; box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08); text-align: center; }
-    .spinner { width: 44px; height: 44px; margin: 0 auto 18px; border-radius: 999px; border: 4px solid #e2e8f0; border-top-color: #059669; animation: spin 0.8s linear infinite; }
-    a { color: #059669; font-weight: 700; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #faf7f0; color: #0b0d0b; }
+    main { width: min(92vw, 440px); border: 1px solid #e6dfcf; border-radius: 24px; background: #fff; padding: 28px; box-shadow: 0 20px 60px rgba(11, 13, 11, 0.08); text-align: center; }
+    .spinner { width: 44px; height: 44px; margin: 0 auto 18px; border-radius: 999px; border: 4px solid #e6dfcf; border-top-color: #0b7a10; animation: spin 0.8s linear infinite; }
+    a { color: #0b7a10; font-weight: 700; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>

@@ -147,22 +147,22 @@ export function BusinessHoursEditor({ name, defaultValue, required }: BusinessHo
   return (
     <div className="grid gap-2">
       <input name={name} type="hidden" value={serializedHours} required={required} />
-      <div className="overflow-hidden rounded-lg border border-line bg-white">
+      <div className="overflow-hidden rounded-lg border border-ink-200 bg-white">
         {schedule.map((row, index) => {
           const day = weekDays.find((candidate) => candidate.key === row.day) ?? weekDays[index];
           return (
             <div
               key={row.day}
-              className="grid gap-3 border-b border-line p-3 last:border-b-0 sm:grid-cols-[8rem_1fr] sm:items-center"
+              className="grid gap-3 border-b border-ink-200 p-3 last:border-b-0 sm:grid-cols-[8rem_1fr] sm:items-center"
             >
               <div className="flex min-w-0 items-center justify-between gap-3 sm:justify-start">
                 <span className="w-10 text-sm font-bold text-ink">{day.label}</span>
-                <label className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <label className="flex items-center gap-2 text-xs font-semibold text-ink-600">
                   <input
                     type="checkbox"
                     checked={row.open}
                     onChange={(event) => updateRow(row.day, { open: event.currentTarget.checked })}
-                    className="size-4 rounded border-line text-ocean focus:ring-ocean"
+                    className="size-4 rounded border-ink-200 text-brand-text focus:ring-green-700"
                   />
                   Open
                 </label>
@@ -174,16 +174,16 @@ export function BusinessHoursEditor({ name, defaultValue, required }: BusinessHo
                   disabled={!row.open}
                   onChange={(event) => updateRow(row.day, { opensAt: event.currentTarget.value || defaultOpensAt })}
                   aria-label={`${day.fullLabel} open time`}
-                  className="h-10 disabled:bg-mist disabled:text-slate-400"
+                  className="h-10 disabled:bg-ivory-100 disabled:text-ink-500"
                 />
-                <span className="text-xs font-semibold text-slate-400">to</span>
+                <span className="text-xs font-semibold text-ink-500">to</span>
                 <Input
                   type="time"
                   value={row.closesAt}
                   disabled={!row.open}
                   onChange={(event) => updateRow(row.day, { closesAt: event.currentTarget.value || defaultClosesAt })}
                   aria-label={`${day.fullLabel} close time`}
-                  className="h-10 disabled:bg-mist disabled:text-slate-400"
+                  className="h-10 disabled:bg-ivory-100 disabled:text-ink-500"
                 />
               </div>
             </div>

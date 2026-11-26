@@ -20,11 +20,11 @@ import { PhoneMockup, ShopScreen } from "./phone-mockup";
 export function HeroStage() {
   return (
     <TiltStage className="relative mx-auto aspect-square w-full max-w-[25rem] sm:max-w-[32rem] lg:max-w-[36rem]">
-      <div aria-hidden="true" className="vm-blob left-[4%] top-[10%] size-[58%] bg-violet motion-safe:animate-blob-drift" />
-      <div aria-hidden="true" className="vm-blob bottom-[6%] right-[2%] size-[52%] bg-emerald motion-safe:animate-blob-drift [animation-delay:-6s]" />
+      <div aria-hidden="true" className="vm-blob left-[4%] top-[10%] size-[58%] bg-marigold-400 motion-safe:animate-blob-drift" />
+      <div aria-hidden="true" className="vm-blob bottom-[6%] right-[2%] size-[52%] bg-brand motion-safe:animate-blob-drift [animation-delay:-6s]" />
       <div
         aria-hidden="true"
-        className="absolute left-1/2 top-1/2 size-[84%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_28%,#ffffff_0%,#f3f0ff_48%,#e6e0fb_100%)] shadow-[0_50px_90px_-40px_rgba(55,41,130,0.45),inset_0_-18px_40px_rgba(124,92,255,0.12),inset_0_10px_24px_rgba(255,255,255,0.95)]"
+        className="absolute left-1/2 top-1/2 size-[84%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_35%_28%,#ffffff_0%,#f3eee2_48%,#e6dfcf_100%)] shadow-[0_50px_90px_-40px_rgba(84,58,18,0.45),inset_0_-18px_40px_rgba(17,154,165,0.12),inset_0_10px_24px_rgba(255,255,255,0.95)]"
       />
       <div aria-hidden="true" className="dotted-grid absolute inset-[10%] rounded-full opacity-60 [mask-image:radial-gradient(circle,black_30%,transparent_70%)]" />
 
@@ -63,11 +63,11 @@ export function HeroStage() {
 
       <Parallax anchor="top" speed={-0.4} className="absolute left-[-6%] top-[47%] z-30 hidden min-[420px]:block">
         <div className="glass flex items-center gap-2.5 rounded-2xl py-2 pl-2 pr-3.5 motion-safe:animate-float [animation-delay:-1s]">
-          <span className="clay-orb size-9 rounded-xl bg-clay-emerald text-white">
+          <span className="clay-orb size-9 rounded-xl bg-clay-green text-ink">
             <Check className="size-4" strokeWidth={3} />
           </span>
           <span className="leading-tight">
-            <span className="block text-[11px] font-bold text-slate-500">UPI received</span>
+            <span className="block text-[11px] font-bold text-ink-500">UPI received</span>
             <span className="block text-sm font-extrabold text-ink">₹120.00</span>
           </span>
         </div>
@@ -75,18 +75,18 @@ export function HeroStage() {
 
       <Parallax anchor="top" speed={-0.26} className="absolute bottom-[13%] right-[-2%] z-30 hidden min-[420px]:block">
         <div className="glass flex items-center gap-2.5 rounded-2xl py-2 pl-2 pr-3.5 motion-safe:animate-float-slow [animation-delay:-3s]">
-          <span className="clay-orb size-9 rounded-xl bg-clay-mango text-ink">
+          <span className="clay-orb size-9 rounded-xl bg-clay-marigold text-ink">
             <Bell className="size-4" />
           </span>
           <span className="leading-tight">
-            <span className="block text-[11px] font-bold text-slate-500">New order</span>
+            <span className="block text-[11px] font-bold text-ink-500">New order</span>
             <span className="block text-sm font-extrabold text-ink">#VM-2051</span>
           </span>
         </div>
       </Parallax>
 
       <div className="absolute left-[16%] top-[30%] z-30">
-        <Sticker tone="berry" tilt={-10}>Live</Sticker>
+        <Sticker tone="kumkum" tilt={-10}>Live</Sticker>
       </div>
     </TiltStage>
   );

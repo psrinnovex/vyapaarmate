@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1, gap: 4 },
   portalRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   portalArt: { width: 76, height: 76, borderRadius: 24, alignItems: "center", justifyContent: "center" },
-  cardTitle: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
+  cardTitle: { fontSize: 20, fontWeight: "800", letterSpacing: -0.4 },
   copy: { fontSize: 14, lineHeight: 20 },
   links: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   linkChip: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10 },

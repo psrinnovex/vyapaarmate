@@ -55,7 +55,7 @@ export function PasswordInput({
 
   return (
     <div className="relative">
-      {showLockIcon && <LockKeyhole className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />}
+      {showLockIcon && <LockKeyhole className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />}
       <Input
         {...props}
         type={visible ? "text" : "password"}
@@ -66,7 +66,7 @@ export function PasswordInput({
         type="button"
         aria-label={visible ? "Hide password" : "Show password"}
         aria-pressed={visible}
-        className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-xl text-slate-500 transition hover:bg-mist hover:text-ink focus:outline-none focus:ring-4 focus:ring-ocean/10"
+        className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-xl text-ink-500 transition hover:bg-ivory-100 hover:text-ink focus:outline-none focus:ring-4 focus:ring-green-700/10"
         onClick={() => setVisible((current) => !current)}
       >
         <Icon className="size-4" />
@@ -128,7 +128,7 @@ export function PhoneInput({
       <div className={cn("flex w-full min-w-0", containerClassName)}>
         <select
           aria-label="Phone country"
-          className="h-11 w-[4.25rem] shrink-0 rounded-l-lg border border-line bg-white px-2 text-sm font-semibold text-slate-700 outline-none transition focus:border-ocean focus:ring-4 focus:ring-ocean/10 disabled:cursor-not-allowed disabled:bg-slate-50"
+          className="h-11 w-[4.25rem] shrink-0 rounded-l-lg border border-ink-200 bg-white px-2 text-sm font-semibold text-ink-700 outline-none transition focus:border-green-700 focus:ring-4 focus:ring-green-700/10 disabled:cursor-not-allowed disabled:bg-ink-50"
           disabled={disabled}
           value={countryCode}
           onChange={(event) => {

@@ -88,11 +88,11 @@ const styles = StyleSheet.create({
   amountBand: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10 },
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   flex: { flex: 1 },
-  number: { fontSize: 18, fontWeight: "900", letterSpacing: -0.3 },
+  number: { fontSize: 18, fontWeight: "800", letterSpacing: -0.3 },
   meta: { fontSize: 12, lineHeight: 18 },
   items: { fontSize: 14, lineHeight: 20 },
   notes: { fontSize: 13, lineHeight: 19 },
-  amount: { fontSize: 20, fontWeight: "900", letterSpacing: -0.4 },
+  amount: { fontSize: 20, fontWeight: "800", letterSpacing: -0.4 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   action: { minWidth: 120, flexGrow: 1 },
 });

@@ -21,7 +21,7 @@ export default function MobilePrivacyPage() {
 
       <div className="grid gap-5">
         <LegalSection title="Who provides VyapaarMate">
-          <p>{company.product} is provided by {company.name}. General privacy and account-support questions can be sent to <a className="font-semibold text-ocean hover:underline" href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>.</p>
+          <p>{company.product} is provided by {company.name}. General privacy and account-support questions can be sent to <a className="font-semibold text-brand-text hover:underline" href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>.</p>
         </LegalSection>
 
         <LegalSection title="Information handled by the mobile app">
@@ -53,7 +53,7 @@ export default function MobilePrivacyPage() {
         <LegalSection title="Retention and account deletion">
           <p>Account and operational data is kept only for the service, security, accounting, dispute, fraud-prevention, and legal purposes that apply to it. Retention is not represented as unlimited, and deleting an account does not mean that records which must lawfully be retained are erased.</p>
           <p>When an account deletion is completed, sign-in access is removed and personal fields that are not required for a documented retention purpose are deleted or anonymized. Business deletion requests disable the storefront, commerce, messaging integrations, subscription access, and active app sessions while the scheduled deletion is processed.</p>
-          <p><Link className="font-semibold text-ocean hover:underline" href="/account-deletion">Open the account deletion resource</Link> to initiate or continue a verified request.</p>
+          <p><Link className="font-semibold text-brand-text hover:underline" href="/account-deletion">Open the account deletion resource</Link> to initiate or continue a verified request.</p>
         </LegalSection>
 
         <LegalSection title="Your choices">

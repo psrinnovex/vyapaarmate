@@ -69,7 +69,7 @@ export default function ContactPage() {
       <PublicPage>
         <PageHeroBanner
           eyebrow="Contact"
-          eyebrowTone="violet"
+          eyebrowTone="peacock"
           title="Book a VyapaarMate"
           highlight="demo"
           body={

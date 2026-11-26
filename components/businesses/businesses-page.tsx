@@ -52,7 +52,7 @@ const quickFilters: { label: string; term: string; art: ClayIllustrationName }[]
 const awningMask =
   "linear-gradient(#000 0 0) top / 100% calc(100% - 0.4rem) no-repeat, radial-gradient(circle 0.4rem at 50% 50%, #000 96%, transparent 100%) bottom / 0.8rem 0.8rem repeat-x";
 /** Stripe colours for the storefront awning on each card. */
-const awningColors = ["#12b76a", "#7c5cff", "#ff5c8a", "#ffad1f", "#33b5f5", "#4f5bd5"];
+const awningColors = ["#1ec926", "#f2a20c", "#0e7c86", "#0b0d0b", "#d8432e", "#12a51a"];
 
 function fulfillmentLabel(businessType: string, mode: string) {
   return fulfillmentLabelForBusinessType(businessType, mode as ActiveFulfillmentMode) ?? mode;
@@ -217,16 +217,16 @@ export function BusinessesPage({
   return (
     <main className="min-h-screen overflow-x-clip text-ink">
       <section className="px-4 pb-4 pt-4 sm:px-6 lg:px-8">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95)_0%,rgba(244,240,255,0.9)_52%,rgba(225,248,236,0.85)_100%)] p-5 shadow-clay sm:p-8 lg:p-10">
-          <div aria-hidden="true" className="vm-blob -right-10 -top-16 size-72 bg-violet opacity-40" />
-          <div aria-hidden="true" className="vm-blob -bottom-20 left-1/3 size-72 bg-emerald opacity-30" />
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95)_0%,rgba(243,238,226,0.9)_52%,rgba(216,246,210,0.85)_100%)] p-5 shadow-clay sm:p-8 lg:p-10">
+          <div aria-hidden="true" className="vm-blob -right-10 -top-16 size-72 bg-marigold-400 opacity-40" />
+          <div aria-hidden="true" className="vm-blob -bottom-20 left-1/3 size-72 bg-brand opacity-30" />
           <div className="relative grid items-center gap-6 lg:grid-cols-[1.25fr_0.75fr]">
             <div className="min-w-0">
-              <Sticker tone="sky" tilt={-3}>Near you</Sticker>
+              <Sticker tone="peacock" tilt={-3}>Near you</Sticker>
               <h1 className="mt-4 text-[clamp(1.9rem,4.6vw,3.3rem)] font-extrabold leading-[1.03] tracking-[-0.045em]">
-                Restaurants, hotels, and local businesses <span className="text-gradient-brand">around you</span>
+                Restaurants, hotels, and local businesses <span className="vm-mark">around you</span>
               </h1>
-              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-600 sm:text-base">
+              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-ink-600 sm:text-base">
                 Browse active VyapaarMate businesses, check who is open now, then view menus, services, products, or classes based on each business type.
               </p>
 
@@ -238,12 +238,12 @@ export function BusinessesPage({
                   void refreshBusinesses({ query });
                 }}
               >
-                <SearchNormal1 className="ml-2 size-6 shrink-0 text-slate-400" variant="Bulk" />
+                <SearchNormal1 className="ml-2 size-6 shrink-0 text-ink-500" variant="Bulk" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.currentTarget.value)}
                   aria-label="Search businesses"
-                  className="h-12 min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-slate-400 sm:text-base"
+                  className="h-12 min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-ink-500 sm:text-base"
                   placeholder="Search by business, city, menu item, service, product, or class"
                 />
                 <Button type="submit" variant="dark" disabled={loading} className="shrink-0">
@@ -263,10 +263,10 @@ export function BusinessesPage({
                       disabled={loading}
                       className={cn(
                         "flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 text-sm font-bold transition",
-                        selected ? "bg-clay-ink text-white shadow-clay-sm" : "bg-white/80 text-slate-600 shadow-clay-sm hover:bg-white"
+                        selected ? "bg-clay-ink text-white shadow-clay-sm theme-dark" : "bg-white/80 text-ink-600 shadow-clay-sm hover:bg-white"
                       )}
                     >
-                      <span className="size-7 rounded-full bg-mist p-0.5">
+                      <span className="size-7 rounded-full bg-ivory-100 p-0.5">
                         <ClayIllustration name={filter.art} />
                       </span>
                       {filter.label}
@@ -277,15 +277,15 @@ export function BusinessesPage({
             </div>
 
             <div className="relative mx-auto hidden aspect-square w-full max-w-[19rem] lg:block">
-              <div aria-hidden="true" className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_35%_28%,#ffffff_0%,#f3f0ff_55%,#e6e0fb_100%)] shadow-clay-inset" />
+              <div aria-hidden="true" className="absolute inset-[8%] rounded-full bg-[radial-gradient(circle_at_35%_28%,#ffffff_0%,#f3eee2_55%,#e6dfcf_100%)] shadow-clay-inset" />
               <div className="absolute inset-[16%] motion-safe:animate-float-slow">
                 <ClayIllustration name="shop" />
               </div>
               <div className="absolute left-0 top-[12%]">
-                <Sticker tone="emerald" tilt={-6}>{openCount} open now</Sticker>
+                <Sticker tone="green" tilt={-6}>{openCount} open now</Sticker>
               </div>
               <div className="absolute bottom-[10%] right-0">
-                <Sticker tone="white" tilt={5}>{whatsappCount} on WhatsApp</Sticker>
+                <Sticker tone="paper" tilt={5}>{whatsappCount} on WhatsApp</Sticker>
               </div>
             </div>
           </div>
@@ -296,7 +296,7 @@ export function BusinessesPage({
             role="status"
             className={cn(
               "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold",
-              location.status === "error" ? "bg-berry-soft text-berry-deep" : location.status === "ready" ? "bg-emerald-soft text-emerald-deep" : "bg-white/80 text-slate-600"
+              location.status === "error" ? "bg-kumkum-50 text-kumkum-700" : location.status === "ready" ? "bg-green-50 text-green-700" : "bg-white/80 text-ink-600"
             )}
           >
             <Location className="size-5 shrink-0" variant="Bulk" />
@@ -306,7 +306,7 @@ export function BusinessesPage({
             <span className="rounded-full bg-white/80 px-3 py-2 text-xs font-extrabold text-ink shadow-clay-sm lg:hidden">
               {openCount} open · {whatsappCount} WhatsApp
             </span>
-            <Button variant="emerald" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation} disabled={location.status === "loading" || loading}>
+            <Button variant="brand" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation} disabled={location.status === "loading" || loading}>
               {location.status === "loading" ? "Locating" : "Use My Location"}
             </Button>
           </div>
@@ -318,16 +318,16 @@ export function BusinessesPage({
           {!hasLocation && !loading ? (
             <div className="clay col-span-full mx-auto w-full max-w-2xl rounded-[2.25rem] p-8 text-center">
               <div className="relative mx-auto grid size-28 place-items-center">
-                <span aria-hidden="true" className="absolute inset-0 rounded-full bg-emerald/15 motion-safe:animate-ping [animation-duration:2.4s]" />
-                <span aria-hidden="true" className="absolute inset-4 rounded-full bg-emerald/20" />
-                <span className="clay-orb relative size-16 rounded-full bg-clay-emerald text-white">
+                <span aria-hidden="true" className="absolute inset-0 rounded-full bg-brand/15 motion-safe:animate-ping [animation-duration:2.4s]" />
+                <span aria-hidden="true" className="absolute inset-4 rounded-full bg-brand/20" />
+                <span className="clay-orb relative size-16 rounded-full bg-clay-green text-ink">
                   <Gps className="size-8" variant="Bulk" />
                 </span>
               </div>
               <h2 className="mt-5 text-2xl font-extrabold tracking-[-0.03em]">Location required</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-600">{location.label}</p>
+              <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-ink-600">{location.label}</p>
               {showLocationRequiredAction && (
-                <Button className="mt-6" size="lg" variant="emerald" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation}>
+                <Button className="mt-6" size="lg" variant="brand" icon={<Gps className="size-5" variant="Bulk" />} onClick={useCurrentLocation}>
                   Use My Location
                 </Button>
               )}
@@ -359,7 +359,7 @@ export function BusinessesPage({
             return (
               <ScrollReveal key={business.id} className="h-full" delay={index * 45}>
                 <article className="clay group flex h-full flex-col overflow-hidden rounded-[2rem] transition hover:-translate-y-1 hover:shadow-clay-lg">
-                  <div className="relative h-32 bg-[linear-gradient(180deg,#faf8ff,#efeafd)]">
+                  <div className="relative h-32 bg-[linear-gradient(180deg,#fffdf8,#f3eee2)]">
                     <div
                       aria-hidden="true"
                       className="absolute inset-x-0 top-0 h-7"
@@ -380,7 +380,7 @@ export function BusinessesPage({
                           unoptimized={business.logoUrl.toLowerCase().split("?")[0].endsWith(".svg")}
                         />
                       ) : (
-                        <span className="grid size-full place-items-center text-lg font-extrabold text-white" style={{ background: `linear-gradient(160deg, ${awning}, #1d1a39)` }}>
+                        <span className="grid size-full place-items-center text-lg font-extrabold text-white" style={{ background: `linear-gradient(160deg, ${awning}, #0b0d0b)` }}>
                           {initials(business.name)}
                         </span>
                       )}
@@ -391,7 +391,7 @@ export function BusinessesPage({
                     <span
                       className={cn(
                         "absolute left-5 top-9 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold shadow-clay-sm",
-                        business.open ? "bg-emerald text-white" : "bg-berry text-white"
+                        business.open ? "bg-brand text-ink" : "bg-kumkum-700 text-white"
                       )}
                     >
                       <span className={cn("size-1.5 rounded-full bg-white", business.open && "motion-safe:animate-pulse")} />
@@ -401,42 +401,42 @@ export function BusinessesPage({
 
                   <div className="flex flex-1 flex-col p-5 pt-8">
                     <h2 className="truncate text-xl font-extrabold tracking-[-0.02em]">{business.name}</h2>
-                    <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-violet-deep">
+                    <p className="mt-1 flex items-center gap-1.5 text-sm font-bold text-peacock-700">
                       <BusinessIcon className="size-4" />
                       {business.businessType}
                     </p>
 
-                    <p className="mt-3 flex items-start gap-2 text-sm leading-6 text-slate-600">
-                      <Location className="mt-0.5 size-5 shrink-0 text-ocean" variant="Bulk" />
+                    <p className="mt-3 flex items-start gap-2 text-sm leading-6 text-ink-600">
+                      <Location className="mt-0.5 size-5 shrink-0 text-brand-text" variant="Bulk" />
                       <span className="min-w-0 flex-1">{business.address || `${copy.catalogNavLabel} available from ${business.name}.`}</span>
                     </p>
 
                     <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-bold">
-                      <span className="rounded-2xl bg-mist/80 px-3 py-2.5 text-slate-600">
+                      <span className="rounded-2xl bg-ivory-100/80 px-3 py-2.5 text-ink-600">
                         <span className="block text-lg font-extrabold leading-6 text-ink">{business.itemCount}</span>
                         {business.itemCount === 1 ? copy.itemSingular.toLowerCase() : copy.itemPlural.toLowerCase()}
                       </span>
-                      <span className="rounded-2xl bg-mist/80 px-3 py-2.5 text-slate-600">
+                      <span className="rounded-2xl bg-ivory-100/80 px-3 py-2.5 text-ink-600">
                         <span className="block text-lg font-extrabold leading-6 text-ink">{formatINR(business.minimumOrder)}</span>
                         {copy.minimumValueLabel.toLowerCase()}
                       </span>
                     </div>
-                    <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-500">
-                      <WalletMoney className="size-4 text-ocean" variant="Bulk" />
+                    <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-bold text-ink-500">
+                      <WalletMoney className="size-4 text-brand-text" variant="Bulk" />
                       {business.allowsPayOnDelivery ? "Cash available" : "Online payment"}
                       <span aria-hidden="true">·</span>
                       {business.fulfillmentModes.map((mode) => fulfillmentLabel(business.businessType, mode)).join(" / ")}
                     </p>
 
-                    <div className="mt-3 text-sm text-slate-600">
+                    <div className="mt-3 text-sm text-ink-600">
                       <BusinessHoursDisclosure businessId={business.id} hours={business.hours} open={business.open} now={now} showSchedule={showBusinessDays} />
                     </div>
 
                     {visibleFeaturedItems.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-2">
                         {visibleFeaturedItems.map((item) => (
-                          <span key={item} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-600 shadow-clay-sm">
-                            <CatalogIcon className="size-4 text-emerald-deep" />
+                          <span key={item} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-ink-600 shadow-clay-sm">
+                            <CatalogIcon className="size-4 text-green-700" />
                             {item}
                           </span>
                         ))}

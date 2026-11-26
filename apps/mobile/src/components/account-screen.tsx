@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
   rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   flex: { flex: 1 },
   avatar: { width: 54, height: 54, borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  avatarText: { fontSize: 19, fontWeight: "900" },
-  name: { fontSize: 19, fontWeight: "900", letterSpacing: -0.3 },
+  avatarText: { fontSize: 19, fontWeight: "800" },
+  name: { fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
   meta: { fontSize: 13, marginTop: 4 },
-  sectionTitle: { fontSize: 19, fontWeight: "900", letterSpacing: -0.3 },
+  sectionTitle: { fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
 });

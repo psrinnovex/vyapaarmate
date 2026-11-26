@@ -4,18 +4,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * VyapaarMate "Marigold Bazaar" foundations.
+ * Built on the logo: black #0B0D0B, green #1EC926 and white, warmed by an ivory canvas and
+ * marigold price tags. Values mirror the design system's tokens.json.
+ */
 :root {
-  /* DM Sans (bundled with next/font/local) with system fallbacks. */
-  --font-sans: var(--font-dm-sans, "DM Sans"), ui-rounded, "SF Pro Rounded", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* Inter for reading, Poppins (Indian Type Foundry) for headlines and prices. */
+  --font-sans: var(--font-inter-local, "Inter"), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-poppins-local, "Poppins"), var(--font-sans);
   --font-inter: var(--font-sans);
-  --vm-canvas: #f7f5ff;
-  --vm-ink: #1d1a39;
-  --vm-emerald: #12b76a;
-  --vm-violet: #7c5cff;
-  --vm-mango: #ffad1f;
-  --vm-berry: #ff5c8a;
-  --vm-ocean: #4f5bd5;
+  --vm-canvas: #faf7f0;
+  --vm-ink: #0b0d0b;
+  --vm-paper: #ffffff;
+  --vm-green: #1ec926;
+  --vm-marigold: #f2a20c;
+  --vm-sand: #e6dfcf;
+  /* Semantic brand roles as RGB channels so Tailwind opacity modifiers work. */
+  --vm-brand: 30 201 38;
+  --vm-brand-text: 11 122 16;
+  --vm-on-brand: 11 13 11;
+  --vm-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   color-scheme: light;
+}
+
+/* Dark surfaces (bands, dark cards, dark shells): lift the brand green for contrast. */
+.theme-dark {
+  --vm-brand: 63 214 69;
+  --vm-brand-text: 63 214 69;
+  --vm-on-brand: 11 13 11;
+}
+
+/* Light cards inside a dark band go back to the daylight values. */
+.theme-dark :where(.bg-white, .clay, .vm-card, .bg-paper) {
+  --vm-brand: 30 201 38;
+  --vm-brand-text: 11 122 16;
 }
 
 * {
@@ -45,13 +68,13 @@ body {
   background: var(--vm-canvas);
   color: var(--vm-ink);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11";
+  font-feature-settings: "cv11", "ss03";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Soft lavender, mint and mango light across the whole app; fixed so it never repaints on scroll. */
+/* Ivory bazaar paper: a faint grain plus green (top-left) and marigold (top-right) light. */
 body::before {
   content: "";
   position: fixed;
@@ -59,17 +82,29 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(60rem 36rem at 8% -8%, rgba(124, 92, 255, 0.13), transparent 62%),
-    radial-gradient(48rem 30rem at 100% 4%, rgba(18, 183, 106, 0.11), transparent 60%),
-    radial-gradient(52rem 34rem at 55% 108%, rgba(255, 173, 31, 0.1), transparent 62%),
+    radial-gradient(56rem 34rem at 4% -10%, rgba(30, 201, 38, 0.1), transparent 62%),
+    radial-gradient(46rem 30rem at 100% -2%, rgba(242, 162, 12, 0.12), transparent 60%),
+    var(--vm-grain),
     var(--vm-canvas);
 }
 
+/* Headlines and big numbers speak in Poppins; everything you read is Inter. */
 h1,
 h2,
 h3,
+:where(.font-display) {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+
 h4 {
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+}
+
+/* Poppins is drawn heavy: cap headline weight at bold so extrabold/black utilities stay crisp. */
+:where(h1, h2, h3).font-extrabold,
+:where(h1, h2, h3).font-black {
+  font-weight: 700;
 }
 
 a {
@@ -85,9 +120,14 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid rgba(18, 183, 106, 0.65);
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #0b7a10;
   outline-offset: 2px;
+}
+
+.theme-dark :is(button, a, input, textarea, select, summary):focus-visible {
+  outline-color: #3fd645;
 }
 
 button,
@@ -98,95 +138,228 @@ select {
 }
 
 ::selection {
-  background: rgba(18, 183, 106, 0.22);
+  background: #fdebc4;
+  color: #0b0d0b;
 }
 
-/* ---------- Clay & Glass surfaces ---------- */
+:where(.font-display) {
+  font-variant-numeric: tabular-nums;
+}
 
-/* :where() keeps these surfaces at zero specificity so bg/border/shadow utilities can override them. */
+/* ---------- Clay & glass surfaces ---------- */
+
+/* :where() keeps these at zero specificity so bg/border/shadow utilities can override them. */
 :where(.glass) {
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.58));
-  box-shadow: 0 18px 50px -24px rgba(31, 27, 58, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 18px 50px -24px rgba(60, 40, 10, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
 }
 
 :where(.glass-dark) {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(180deg, rgba(41, 37, 78, 0.82), rgba(29, 26, 57, 0.72));
+  --vm-brand: 63 214 69;
+  --vm-brand-text: 63 214 69;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(11, 13, 11, 0.82);
   color: #fff;
-  box-shadow: 0 20px 50px -24px rgba(13, 10, 34, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 20px 50px -24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
 }
 
-/* Puffy clay card: white body, soft drop shadow, inner highlight on top and shade at the bottom. */
+/* Warm clay card: white paper, soft brown drop shadow, an inner highlight on top. */
 :where(.clay) {
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfaff 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   box-shadow:
-    0 22px 44px -22px rgba(55, 41, 130, 0.38),
-    0 8px 18px -12px rgba(55, 41, 130, 0.18),
-    inset 0 -6px 14px rgba(84, 64, 168, 0.07),
-    inset 0 3px 6px rgba(255, 255, 255, 0.95);
+    0 22px 40px -22px rgba(84, 58, 18, 0.4),
+    0 8px 16px -12px rgba(84, 58, 18, 0.18),
+    inset 0 -6px 14px rgba(140, 100, 40, 0.07),
+    inset 0 3px 6px rgba(255, 255, 255, 0.9);
 }
 
-.clay-tint-emerald { background: linear-gradient(180deg, #f1fcf6 0%, #e1f8ec 100%); }
-.clay-tint-violet { background: linear-gradient(180deg, #f7f4ff 0%, #ece6ff 100%); }
-.clay-tint-mango { background: linear-gradient(180deg, #fffaf0 0%, #fff0cf 100%); }
-.clay-tint-berry { background: linear-gradient(180deg, #fff6f9 0%, #ffe5ed 100%); }
-.clay-tint-ocean { background: linear-gradient(180deg, #f6f7ff 0%, #e7eaff 100%); }
-.clay-tint-sky { background: linear-gradient(180deg, #f3fbff 0%, #dff3fd 100%); }
+/* Tinted clay only where the colour means something: money, offers, info, alerts. */
+.clay-tint-green { background: linear-gradient(180deg, #f5fdf3 0%, #d8f6d2 100%); }
+.clay-tint-marigold { background: linear-gradient(180deg, #fef8e8 0%, #fdebc4 100%); }
+.clay-tint-peacock { background: linear-gradient(180deg, #f3fafa 0%, #d4eeef 100%); }
+.clay-tint-kumkum { background: linear-gradient(180deg, #fff7f5 0%, #fbe1db 100%); }
+.clay-tint-ivory { background: linear-gradient(180deg, #fffdf8 0%, #f3eee2 100%); }
+.clay-tint-ink {
+  --vm-brand: 63 214 69;
+  --vm-brand-text: 63 214 69;
+  background: linear-gradient(180deg, #1f241f 0%, #0b0d0b 100%);
+  color: #fff;
+}
 
-/* Round icon "blob" that sits on clay cards. */
-.clay-orb {
+/* Icon orb: a soft square well on clay cards (black icon on green, green icon on black). */
+:where(.clay-orb) {
   display: grid;
   place-items: center;
-  border-radius: 1.15rem;
+  border-radius: 1rem;
   box-shadow:
-    0 10px 18px -10px rgba(29, 26, 57, 0.45),
-    inset 0 -4px 8px rgba(0, 0, 0, 0.12),
-    inset 0 3px 5px rgba(255, 255, 255, 0.55);
+    0 10px 18px -10px rgba(84, 58, 18, 0.45),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.12),
+    inset 0 2px 4px rgba(255, 255, 255, 0.45);
 }
 
-/* Pressable clay button surface (used by the Button component). */
-.clay-press {
+/* Pressable surface: sits on a darker lip and squashes 3px when pressed. */
+:where(.clay-press) {
   box-shadow:
-    0 12px 22px -12px var(--clay-shadow, rgba(29, 26, 57, 0.55)),
-    inset 0 -4px 0 rgba(0, 0, 0, 0.14),
-    inset 0 2px 0 rgba(255, 255, 255, 0.35);
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+    0 4px 0 var(--clay-shadow, #0b7a10),
+    0 12px 20px -14px rgba(84, 58, 18, 0.45);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
 }
 
-.clay-press:hover {
-  transform: translateY(-1px);
-  filter: saturate(1.08) brightness(1.03);
+:where(.clay-press):hover {
+  filter: brightness(1.04);
 }
 
-.clay-press:active {
-  transform: translateY(1px);
-  box-shadow:
-    0 6px 12px -10px var(--clay-shadow, rgba(29, 26, 57, 0.55)),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.12),
-    inset 0 2px 3px rgba(0, 0, 0, 0.08);
+:where(.clay-press):active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--clay-shadow, #0b7a10);
 }
 
-/* Die-cut sticker: thick white edge, bold label, slight tilt set inline. */
-.sticker {
+/*
+ * Price-tag sticker: a notched tag with a punched hole. Colour comes from bg-/text- utilities
+ * (marigold by default via the Sticker component). Max two per screen.
+ */
+:where(.sticker) {
+  position: relative;
+  z-index: 0;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  border: 3px solid #fff;
-  border-radius: 999px;
-  padding: 0.35rem 0.8rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  gap: 0.375rem;
+  height: 1.875rem;
+  margin-inline-start: 0.7rem;
+  padding: 0 0.875rem 0 0.95rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1;
   white-space: nowrap;
-  box-shadow: 0 5px 0 -1px rgba(29, 26, 57, 0.14), 0 12px 20px -10px rgba(29, 26, 57, 0.4);
+  filter: drop-shadow(0 6px 7px rgba(84, 58, 18, 0.24));
+}
+
+/* The pointed end of the tag, drawn as a rotated square in the tag's own colour. */
+:where(.sticker)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 0;
+  width: 1.33rem;
+  height: 1.33rem;
+  border-radius: 0.2rem;
+  background: inherit;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* The punched hole. */
+:where(.sticker)::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -0.2rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: -0.225rem;
+  border-radius: 999px;
+  background: var(--vm-canvas);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.28);
+}
+
+/* Marker highlight: a marigold stroke behind 2–4 key words. Never gradient text. */
+.vm-mark {
+  background: linear-gradient(transparent 56%, #fdebc4 56%, #fdebc4 92%, transparent 92%);
+  /* Bleed the stroke past the words so wrapped lines stay aligned with the rest. */
+  margin: 0 -0.1em;
+  padding: 0 0.1em;
+  color: inherit;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.vm-mark-green {
+  background: linear-gradient(transparent 56%, #d8f6d2 56%, #d8f6d2 92%, transparent 92%);
+}
+
+.theme-dark .vm-mark,
+.theme-dark .vm-mark-green {
+  background: linear-gradient(transparent 56%, rgba(245, 176, 49, 0.38) 56%, rgba(245, 176, 49, 0.38) 92%, transparent 92%);
+}
+
+/*
+ * Bazaar awning: green-and-white stripes, each ending in a scallop. Tune with
+ * --awning-size (stripe width), --awning-a and --awning-b (stripe colours).
+ */
+:where(.vm-awning) {
+  --awning-size: 1.125rem;
+  --awning-a: #1ec926;
+  --awning-b: #ffffff;
+  height: calc(var(--awning-size) * 1.25);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--awning-a) 0 var(--awning-size),
+    var(--awning-b) var(--awning-size) calc(var(--awning-size) * 2)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--awning-size) / 2) no-repeat,
+    radial-gradient(circle calc(var(--awning-size) / 2) at 50% 50%, #000 96%, transparent) bottom / var(--awning-size) var(--awning-size) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--awning-size) / 2) no-repeat,
+    radial-gradient(circle calc(var(--awning-size) / 2) at 50% 50%, #000 96%, transparent) bottom / var(--awning-size) var(--awning-size) repeat-x;
+}
+
+/* Ticket perforation: dashed rule with punched notches on both ends. */
+:where(.vm-perforation) {
+  position: relative;
+  border-top: 2px dashed #d3cab6;
+}
+
+:where(.vm-perforation)::before,
+:where(.vm-perforation)::after {
+  content: "";
+  position: absolute;
+  top: -0.7rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 999px;
+  background: var(--vm-canvas);
+}
+
+:where(.vm-perforation)::before {
+  left: -1.95rem;
+}
+
+:where(.vm-perforation)::after {
+  right: -1.95rem;
+}
+
+/* The one dark band per page: logo black with faint green and marigold light. */
+:where(.vm-band) {
+  --vm-brand: 63 214 69;
+  --vm-brand-text: 63 214 69;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(40rem 22rem at 0% 0%, rgba(30, 201, 38, 0.2), transparent 60%),
+    radial-gradient(36rem 22rem at 100% 100%, rgba(242, 162, 12, 0.16), transparent 62%),
+    #0b0d0b;
+  color: #fff;
+}
+
+:where(.vm-band)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: var(--vm-grain);
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /* Phone mock screens (website illustrations) are designed ~250px wide and zoom down to fit. */
@@ -304,25 +477,19 @@ select {
   }
 }
 
-/* Soft colour blobs used behind hero illustrations. */
+/* Soft colour light behind hero illustrations. */
 .vm-blob {
   position: absolute;
   border-radius: 999px;
-  filter: blur(40px);
-  opacity: 0.55;
+  filter: blur(42px);
+  opacity: 0.5;
   pointer-events: none;
 }
 
+/* Paper dot grid, warm ink at low opacity. */
 .dotted-grid {
-  background-image: radial-gradient(rgba(29, 26, 57, 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(84, 58, 18, 0.16) 1px, transparent 1px);
   background-size: 18px 18px;
-}
-
-.text-gradient-brand {
-  background: linear-gradient(100deg, #12b76a 0%, #4f5bd5 55%, #7c5cff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -350,8 +517,8 @@ select {
   position: relative;
   isolation: isolate;
   background:
-    linear-gradient(180deg, #f7f5ff 0%, #f6f4ff 42%, #edf7f2 100%),
-    linear-gradient(120deg, rgba(79, 91, 213, 0.08), transparent 38%, rgba(18, 183, 106, 0.08));
+    linear-gradient(180deg, #faf7f0 0%, #faf7f0 42%, #f3eee2 100%),
+    linear-gradient(120deg, rgba(11, 122, 16, 0.08), transparent 38%, rgba(30, 201, 38, 0.08));
 }
 
 .public-order-shell::before {
@@ -360,7 +527,7 @@ select {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(rgba(29, 26, 57, 0.09) 1px, transparent 1px);
+  background: radial-gradient(rgba(11, 13, 11, 0.09) 1px, transparent 1px);
   background-size: 20px 20px;
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 74%, transparent);
   mask-image: linear-gradient(180deg, transparent, #000 16%, #000 74%, transparent);
@@ -393,13 +560,18 @@ select {
 }
 
 .public-order-hero {
+  --vm-brand: 63 214 69;
+  --vm-brand-text: 63 214 69;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   margin-inline: 0.75rem;
   border-radius: 2rem;
-  box-shadow: 0 30px 60px -30px rgba(54, 64, 176, 0.55);
-  background: linear-gradient(120deg, #0b7d49 0%, #3640b0 58%, #5a3de0 100%);
+  box-shadow: 0 40px 70px -34px rgba(84, 58, 18, 0.48), 0 14px 26px -18px rgba(84, 58, 18, 0.22);
+  background:
+    radial-gradient(38rem 20rem at 0% 0%, rgba(30, 201, 38, 0.24), transparent 62%),
+    radial-gradient(30rem 20rem at 100% 100%, rgba(242, 162, 12, 0.16), transparent 62%),
+    #0b0d0b;
 }
 
 @media (min-width: 640px) {
@@ -413,9 +585,8 @@ select {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1px);
-  background-size: 18px 18px;
-  opacity: 0.35;
+  background-image: var(--vm-grain);
+  opacity: 0.55;
 }
 
 .public-order-panel {
@@ -423,8 +594,8 @@ select {
   border-radius: 1.75rem;
   background: rgba(255, 255, 255, 0.92);
   box-shadow:
-    0 22px 44px -22px rgba(55, 41, 130, 0.38),
-    0 8px 18px -12px rgba(55, 41, 130, 0.18),
+    0 22px 44px -22px rgba(84, 58, 18, 0.38),
+    0 8px 18px -12px rgba(84, 58, 18, 0.18),
     inset 0 3px 6px rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(18px);
 }
@@ -439,15 +610,15 @@ select {
 .public-service-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 30px 54px -24px rgba(55, 41, 130, 0.45),
-    0 10px 20px -12px rgba(55, 41, 130, 0.2),
+    0 30px 54px -24px rgba(84, 58, 18, 0.45),
+    0 10px 20px -12px rgba(84, 58, 18, 0.2),
     inset 0 3px 6px rgba(255, 255, 255, 0.95);
 }
 
 .skeleton-shimmer {
   position: relative;
   overflow: hidden;
-  background: #e7eef7;
+  background: #ece6d8;
 }
 
 .skeleton-shimmer::after {
@@ -461,9 +632,9 @@ select {
 
 .settings-accordion-card {
   background-image:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 251, 0.9)),
-    linear-gradient(90deg, rgba(79, 91, 213, 0.08) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(18, 183, 106, 0.07) 1px, transparent 1px);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 247, 240, 0.9)),
+    linear-gradient(90deg, rgba(11, 122, 16, 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(30, 201, 38, 0.07) 1px, transparent 1px);
   background-size: auto, 42px 42px, 42px 42px;
 }
 
@@ -474,7 +645,7 @@ select {
   pointer-events: none;
   opacity: 0;
   transform: translateX(-115%);
-  background: linear-gradient(105deg, transparent 18%, rgba(79, 91, 213, 0.12) 44%, rgba(18, 183, 106, 0.14) 50%, transparent 72%);
+  background: linear-gradient(105deg, transparent 18%, rgba(11, 122, 16, 0.12) 44%, rgba(30, 201, 38, 0.14) 50%, transparent 72%);
 }
 
 .settings-accordion-card::after {
@@ -536,9 +707,9 @@ select {
   position: relative;
   isolation: isolate;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 251, 0.92)),
-    linear-gradient(90deg, rgba(79, 91, 213, 0.07) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(18, 183, 106, 0.06) 1px, transparent 1px);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 247, 240, 0.92)),
+    linear-gradient(90deg, rgba(11, 122, 16, 0.07) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(30, 201, 38, 0.06) 1px, transparent 1px);
   background-size: auto, 34px 34px, 34px 34px;
 }
 
@@ -547,7 +718,7 @@ select {
   position: absolute;
   inset: -1px;
   z-index: -1;
-  background: linear-gradient(115deg, rgba(79, 91, 213, 0.14), rgba(18, 183, 106, 0.1), rgba(124, 92, 255, 0.12));
+  background: linear-gradient(115deg, rgba(11, 122, 16, 0.14), rgba(30, 201, 38, 0.1), rgba(17, 154, 165, 0.12));
   opacity: 0.28;
 }
 
@@ -569,7 +740,7 @@ select {
 }
 
 .invoice-mode-indicator {
-  box-shadow: 0 18px 44px rgba(29, 26, 57, 0.2);
+  box-shadow: 0 18px 44px rgba(11, 13, 11, 0.2);
 }
 
 .invoice-mode-switch button[data-active="true"] .invoice-mode-icon {
@@ -589,7 +760,7 @@ select {
 .admin-mobile-drawer {
   isolation: isolate;
   background:
-    linear-gradient(150deg, rgba(7, 14, 28, 0.98) 0%, rgba(14, 24, 44, 0.98) 46%, rgba(7, 42, 34, 0.96) 100%),
+    linear-gradient(150deg, rgba(11, 13, 11, 0.98) 0%, rgba(11, 13, 11, 0.98) 46%, rgba(3, 42, 6, 0.96) 100%),
     linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: auto, 38px 38px, 38px 38px;
@@ -601,7 +772,7 @@ select {
   inset: -1px;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(110deg, transparent 18%, rgba(18, 183, 106, 0.18) 38%, rgba(124, 92, 255, 0.12) 49%, transparent 68%);
+  background: linear-gradient(110deg, transparent 18%, rgba(30, 201, 38, 0.18) 38%, rgba(17, 154, 165, 0.12) 49%, transparent 68%);
   opacity: 0;
   transform: translateX(-120%);
   animation: admin-mobile-drawer-scan 1.15s cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
@@ -610,9 +781,9 @@ select {
 .dashboard-mobile-drawer {
   isolation: isolate;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 248, 251, 0.98)),
-    linear-gradient(90deg, rgba(79, 91, 213, 0.05) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(18, 183, 106, 0.045) 1px, transparent 1px);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 247, 240, 0.98)),
+    linear-gradient(90deg, rgba(11, 122, 16, 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(30, 201, 38, 0.045) 1px, transparent 1px);
   background-size: auto, 38px 38px, 38px 38px;
 }
 
@@ -622,7 +793,7 @@ select {
   inset: -1px;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(110deg, transparent 18%, rgba(79, 91, 213, 0.08) 38%, rgba(18, 183, 106, 0.1) 49%, transparent 68%);
+  background: linear-gradient(110deg, transparent 18%, rgba(11, 122, 16, 0.08) 38%, rgba(30, 201, 38, 0.1) 49%, transparent 68%);
   opacity: 0;
   transform: translateX(-120%);
   animation: admin-mobile-drawer-scan 1.15s cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
@@ -908,10 +1079,10 @@ select {
 @keyframes payment-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(18, 183, 106, 0.32);
+    box-shadow: 0 0 0 0 rgba(30, 201, 38, 0.32);
   }
   50% {
-    box-shadow: 0 0 0 9px rgba(18, 183, 106, 0);
+    box-shadow: 0 0 0 9px rgba(30, 201, 38, 0);
   }
 }
 
@@ -977,10 +1148,10 @@ select {
 @keyframes order-stage-active {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(79, 91, 213, 0.08);
+    box-shadow: 0 0 0 0 rgba(11, 122, 16, 0.08);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(79, 91, 213, 0);
+    box-shadow: 0 0 0 8px rgba(11, 122, 16, 0);
   }
 }
 
@@ -1135,10 +1306,10 @@ select {
 @keyframes setup-step-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(79, 91, 213, 0.12);
+    box-shadow: 0 0 0 0 rgba(11, 122, 16, 0.12);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(79, 91, 213, 0);
+    box-shadow: 0 0 0 8px rgba(11, 122, 16, 0);
   }
 }
 
@@ -1156,8 +1327,8 @@ select {
   inset: 8px 12px auto;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, #12b76a 18%, #12b76a 82%, transparent);
-  box-shadow: 0 0 16px rgba(18, 183, 106, 0.8);
+  background: linear-gradient(90deg, transparent, #1ec926 18%, #1ec926 82%, transparent);
+  box-shadow: 0 0 16px rgba(30, 201, 38, 0.8);
   animation: payment-qr-scan 3.2s ease-in-out infinite;
 }
 
@@ -1187,7 +1358,7 @@ select {
 
 .order-status-animation-visual,
 .payment-status-animation-visual {
-  box-shadow: 0 8px 22px rgba(79, 91, 213, 0.08);
+  box-shadow: 0 8px 22px rgba(11, 122, 16, 0.08);
 }
 
 .business-order-alert {
@@ -1197,13 +1368,13 @@ select {
 .business-order-alert-sweep {
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 0%, rgba(245, 158, 11, 0.18) 42%, transparent 72%);
+  background: linear-gradient(110deg, transparent 0%, rgba(242, 162, 12, 0.18) 42%, transparent 72%);
   animation: business-order-alert-sweep 4.2s ease-in-out infinite;
   pointer-events: none;
 }
 
 .business-order-alert-visual {
-  box-shadow: 0 18px 42px rgba(245, 158, 11, 0.22);
+  box-shadow: 0 18px 42px rgba(242, 162, 12, 0.22);
 }
 
 .business-order-alert-ping {
@@ -1212,7 +1383,7 @@ select {
   top: 50%;
   width: 84px;
   height: 84px;
-  border: 2px solid rgba(245, 158, 11, 0.62);
+  border: 2px solid rgba(242, 162, 12, 0.62);
   border-radius: 999px;
   animation: business-order-alert-ping 1.5s ease-out infinite;
 }
@@ -1255,7 +1426,7 @@ select {
   right: -65px;
   width: 250px;
   height: 250px;
-  background: radial-gradient(circle, rgba(124, 92, 255, 0.42), rgba(124, 92, 255, 0));
+  background: radial-gradient(circle, rgba(242, 162, 12, 0.32), rgba(242, 162, 12, 0));
 }
 
 .order-hero-orb-two {
@@ -1263,7 +1434,7 @@ select {
   left: 28%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(18, 183, 106, 0.32), rgba(18, 183, 106, 0));
+  background: radial-gradient(circle, rgba(30, 201, 38, 0.32), rgba(30, 201, 38, 0));
   animation-delay: -3.5s;
 }
 
@@ -1299,24 +1470,24 @@ select {
   width: 9px;
   height: 18px;
   border-radius: 3px;
-  background: #12b76a;
+  background: #1ec926;
   animation: payment-confetti-fall 2.4s ease-in both;
 }
 
-.payment-celebration > .payment-confetti:nth-of-type(1) { left: 7%; --confetti-drift: 42px; background: #12b76a; animation-delay: 40ms; }
-.payment-celebration > .payment-confetti:nth-of-type(2) { left: 14%; --confetti-drift: -32px; background: #7c5cff; animation-delay: 220ms; }
-.payment-celebration > .payment-confetti:nth-of-type(3) { left: 22%; --confetti-drift: 24px; background: #f59e0b; animation-delay: 100ms; }
-.payment-celebration > .payment-confetti:nth-of-type(4) { left: 30%; --confetti-drift: -42px; background: #38bdf8; animation-delay: 360ms; }
-.payment-celebration > .payment-confetti:nth-of-type(5) { left: 38%; --confetti-drift: 36px; background: #fb7185; animation-delay: 160ms; }
-.payment-celebration > .payment-confetti:nth-of-type(6) { left: 46%; --confetti-drift: -18px; background: #12b76a; animation-delay: 480ms; }
-.payment-celebration > .payment-confetti:nth-of-type(7) { left: 54%; --confetti-drift: 20px; background: #facc15; animation-delay: 60ms; }
-.payment-celebration > .payment-confetti:nth-of-type(8) { left: 62%; --confetti-drift: -36px; background: #7c5cff; animation-delay: 300ms; }
-.payment-celebration > .payment-confetti:nth-of-type(9) { left: 70%; --confetti-drift: 44px; background: #38bdf8; animation-delay: 140ms; }
-.payment-celebration > .payment-confetti:nth-of-type(10) { left: 77%; --confetti-drift: -24px; background: #fb7185; animation-delay: 430ms; }
-.payment-celebration > .payment-confetti:nth-of-type(11) { left: 83%; --confetti-drift: 38px; background: #12b76a; animation-delay: 250ms; }
-.payment-celebration > .payment-confetti:nth-of-type(12) { left: 89%; --confetti-drift: -38px; background: #f59e0b; animation-delay: 80ms; }
-.payment-celebration > .payment-confetti:nth-of-type(13) { left: 94%; --confetti-drift: 18px; background: #7c5cff; animation-delay: 390ms; }
-.payment-celebration > .payment-confetti:nth-of-type(14) { left: 3%; --confetti-drift: -18px; background: #38bdf8; animation-delay: 520ms; }
+.payment-celebration > .payment-confetti:nth-of-type(1) { left: 7%; --confetti-drift: 42px; background: #1ec926; animation-delay: 40ms; }
+.payment-celebration > .payment-confetti:nth-of-type(2) { left: 14%; --confetti-drift: -32px; background: #119aa5; animation-delay: 220ms; }
+.payment-celebration > .payment-confetti:nth-of-type(3) { left: 22%; --confetti-drift: 24px; background: #f2a20c; animation-delay: 100ms; }
+.payment-celebration > .payment-confetti:nth-of-type(4) { left: 30%; --confetti-drift: -42px; background: #119aa5; animation-delay: 360ms; }
+.payment-celebration > .payment-confetti:nth-of-type(5) { left: 38%; --confetti-drift: 36px; background: #e76c57; animation-delay: 160ms; }
+.payment-celebration > .payment-confetti:nth-of-type(6) { left: 46%; --confetti-drift: -18px; background: #1ec926; animation-delay: 480ms; }
+.payment-celebration > .payment-confetti:nth-of-type(7) { left: 54%; --confetti-drift: 20px; background: #f5b031; animation-delay: 60ms; }
+.payment-celebration > .payment-confetti:nth-of-type(8) { left: 62%; --confetti-drift: -36px; background: #119aa5; animation-delay: 300ms; }
+.payment-celebration > .payment-confetti:nth-of-type(9) { left: 70%; --confetti-drift: 44px; background: #119aa5; animation-delay: 140ms; }
+.payment-celebration > .payment-confetti:nth-of-type(10) { left: 77%; --confetti-drift: -24px; background: #e76c57; animation-delay: 430ms; }
+.payment-celebration > .payment-confetti:nth-of-type(11) { left: 83%; --confetti-drift: 38px; background: #1ec926; animation-delay: 250ms; }
+.payment-celebration > .payment-confetti:nth-of-type(12) { left: 89%; --confetti-drift: -38px; background: #f2a20c; animation-delay: 80ms; }
+.payment-celebration > .payment-confetti:nth-of-type(13) { left: 94%; --confetti-drift: 18px; background: #119aa5; animation-delay: 390ms; }
+.payment-celebration > .payment-confetti:nth-of-type(14) { left: 3%; --confetti-drift: -18px; background: #119aa5; animation-delay: 520ms; }
 
 .setup-progress-card,
 .setup-review-card,
@@ -1384,80 +1555,80 @@ select {
 
 @layer base {
   .theme {
-    --font-heading: var(--font-sans);
+    --font-heading: var(--font-display);
     --font-sans: var(--font-sans);
   }
   :root {
-    --background: #f7f5ff;
-    --foreground: #1d1a39;
+    --background: #faf7f0;
+    --foreground: #0b0d0b;
     --card: #ffffff;
-    --card-foreground: #1d1a39;
+    --card-foreground: #0b0d0b;
     --popover: #ffffff;
-    --popover-foreground: #1d1a39;
-    --primary: #12b76a;
-    --primary-foreground: #ffffff;
-    --secondary: #f6f4ff;
-    --secondary-foreground: #1d1a39;
-    --muted: #f6f4ff;
-    --muted-foreground: #77729a;
-    --accent: #e1f8ec;
-    --accent-foreground: #1d1a39;
-    --destructive: #e5484d;
+    --popover-foreground: #0b0d0b;
+    --primary: #1ec926;
+    --primary-foreground: #0b0d0b;
+    --secondary: #f3eee2;
+    --secondary-foreground: #0b0d0b;
+    --muted: #f3eee2;
+    --muted-foreground: #625f57;
+    --accent: #f3eee2;
+    --accent-foreground: #0b0d0b;
+    --destructive: #b3311d;
     --destructive-foreground: #ffffff;
-    --border: #e8e4f5;
-    --input: #e8e4f5;
-    --ring: #12b76a;
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
+    --border: #e6dfcf;
+    --input: #d3cab6;
+    --ring: #0b7a10;
+    --chart-1: #1ec926;
+    --chart-2: #0e7c86;
+    --chart-3: #f2a20c;
+    --chart-4: #0b0d0b;
+    --chart-5: #d8432e;
     --radius: 1rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar: #ffffff;
+    --sidebar-foreground: #0b0d0b;
+    --sidebar-primary: #0b0d0b;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f3eee2;
+    --sidebar-accent-foreground: #0b0d0b;
+    --sidebar-border: #e6dfcf;
+    --sidebar-ring: #0b7a10;
   }
   .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --background: #0b0d0b;
+    --foreground: #f4f1ea;
+    --card: #161a16;
+    --card-foreground: #f4f1ea;
+    --popover: #161a16;
+    --popover-foreground: #f4f1ea;
+    --primary: #3fd645;
+    --primary-foreground: #0b0d0b;
+    --secondary: #1f241f;
+    --secondary-foreground: #f4f1ea;
+    --muted: #1f241f;
+    --muted-foreground: #b3ada1;
+    --accent: #1f241f;
+    --accent-foreground: #f4f1ea;
+    --destructive: #f0735e;
+    --border: #2c322c;
+    --input: #2c322c;
+    --ring: #3fd645;
+    --chart-1: #3fd645;
+    --chart-2: #5cc7cf;
+    --chart-3: #f5b031;
+    --chart-4: #f4f1ea;
+    --chart-5: #f0735e;
+    --sidebar: #161a16;
+    --sidebar-foreground: #f4f1ea;
+    --sidebar-primary: #3fd645;
+    --sidebar-primary-foreground: #0b0d0b;
+    --sidebar-accent: #1f241f;
+    --sidebar-accent-foreground: #f4f1ea;
+    --sidebar-border: #2c322c;
+    --sidebar-ring: #3fd645;
   }
   * {
     @apply border-border;
-    outline-color: rgba(18, 183, 106, 0.55);
+    outline-color: #0b7a10;
   }
   body {
     @apply bg-background text-foreground;

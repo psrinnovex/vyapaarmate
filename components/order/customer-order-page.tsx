@@ -100,7 +100,7 @@ function clearSelectionLabel(copy: BusinessConsoleCopy) {
   return copy.transactionSingular === "Order" ? "Clear cart" : "Clear";
 }
 
-const clearSelectionButtonClass = "h-8 px-2.5 text-xs border-berry/20 bg-berry-soft text-berry-deep hover:border-red-300 hover:bg-red-100";
+const clearSelectionButtonClass = "h-8 px-2.5 text-xs border-kumkum-600/20 bg-kumkum-50 text-kumkum-700 hover:border-kumkum-300 hover:bg-kumkum-100";
 const publicMenuPageSize = 28;
 
 function gstRateLabel(rateBps: number) {
@@ -721,24 +721,24 @@ export function CustomerOrderPage({
             src={confirmationAnimationPath}
             label={confirmationAnimationLabel}
             loop={!confirmedOrder.paymentQrImageUrl}
-            className="order-confirmation-lottie mx-auto size-24 rounded-2xl border border-emerald/20 bg-white text-emerald shadow-sm"
+            className="order-confirmation-lottie mx-auto size-24 rounded-2xl border border-brand/20 bg-white text-brand-text shadow-sm"
             animationClassName={confirmedOrder.paymentQrImageUrl ? "scan-pay-lottie" : "tracking-lottie"}
             fallback={<CheckCircle2 className="size-10" />}
           />
           <h1 className="mt-5 text-2xl font-bold text-ink">
             {copy.transactionSingular} received
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="mt-2 text-sm leading-6 text-ink-600">
             {confirmedOrder.message ??
               `Your ${copy.transactionSingular.toLowerCase()} ${confirmedOrder.orderNumber} is saved with ${business.name}.`}
           </p>
           {confirmedOrder.whatsappNotificationSent && (
-            <p className="mt-5 flex items-center justify-center gap-2 rounded-lg bg-emerald/5 p-3 text-sm font-semibold text-emerald">
+            <p className="mt-5 flex items-center justify-center gap-2 rounded-lg bg-brand/5 p-3 text-sm font-semibold text-brand-text">
               <MessageCircle className="size-4" /> Confirmation sent on WhatsApp
             </p>
           )}
           {confirmedOrder.paymentQrImageUrl && (
-            <div className="mt-6 rounded-lg border border-line bg-mist p-4">
+            <div className="mt-6 rounded-lg border border-ink-200 bg-ivory-100 p-4">
               <Image
                 src={confirmedOrder.paymentQrImageUrl}
                 alt={`UPI QR for ${confirmedOrder.orderNumber}`}
@@ -748,7 +748,7 @@ export function CustomerOrderPage({
                 className="mx-auto size-56 rounded-lg bg-white object-contain p-2"
               />
               {confirmedOrder.paymentQrExpiresAt && (
-                <p className="mt-3 text-xs font-semibold text-slate-500">
+                <p className="mt-3 text-xs font-semibold text-ink-500">
                   QR expires at {new Date(confirmedOrder.paymentQrExpiresAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
                 </p>
               )}
@@ -767,7 +767,7 @@ export function CustomerOrderPage({
             </a>
           )}
           {confirmedOrder.invoiceUrl && (
-            <a href={confirmedOrder.invoiceUrl} className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-semibold text-ink">
+            <a href={confirmedOrder.invoiceUrl} className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-ink-200 bg-white px-4 text-sm font-semibold text-ink">
               <ReceiptText className="size-4" /> View Invoice
             </a>
           )}
@@ -784,12 +784,12 @@ export function CustomerOrderPage({
       <div className="public-order-header-spacer">
         <header className="public-order-fixed-header fixed inset-x-0 top-0 z-40 px-3 pb-2 sm:px-5">
           <div className="glass mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[1.4rem] px-2 py-2">
-            <Link href="/" aria-label="Back" className="grid size-11 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-emerald focus:outline-none focus:ring-4 focus:ring-emerald/15">
+            <Link href="/" aria-label="Back" className="grid size-11 shrink-0 place-items-center rounded-xl border border-white bg-white text-ink shadow-clay-sm transition hover:-translate-y-0.5 hover:text-brand-text focus:outline-none focus:ring-4 focus:ring-brand/15">
               <ArrowLeft className="size-5" />
             </Link>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-extrabold text-ink sm:text-base">{business.name}</p>
-              <p className="truncate text-xs font-semibold text-slate-500 sm:text-sm">{business.city}, {business.state}</p>
+              <p className="truncate text-xs font-semibold text-ink-500 sm:text-sm">{business.city}, {business.state}</p>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -807,7 +807,7 @@ export function CustomerOrderPage({
         </header>
       </div>
 
-      <section className="public-order-hero px-4 py-7 text-white sm:py-9">
+      <section className="public-order-hero px-4 pb-7 pt-12 text-white sm:pb-9 sm:pt-14">
         {heroImageUrl && (
           <Image
             src={heroImageUrl}
@@ -819,8 +819,9 @@ export function CustomerOrderPage({
             priority
           />
         )}
-        <div className="absolute inset-0 z-0 bg-[linear-gradient(120deg,rgba(11,125,73,0.94)_0%,rgba(54,64,176,0.9)_58%,rgba(90,61,224,0.92)_100%)]" />
-        <div aria-hidden="true" className="vm-blob -right-16 -top-10 z-0 size-72 bg-white opacity-25" />
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(38rem_20rem_at_0%_0%,rgba(30,201,38,0.26),transparent_62%),radial-gradient(30rem_20rem_at_100%_100%,rgba(242,162,12,0.18),transparent_62%),linear-gradient(120deg,rgba(11,13,11,0.9),rgba(11,13,11,0.84))]" />
+        {/* The shop's own awning over its storefront. */}
+        <div aria-hidden="true" className="vm-awning absolute inset-x-0 top-0 z-10 [--awning-size:1.5rem]" />
         <div className="relative z-10 mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
             <div className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-x-3 gap-y-4 sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-x-5">
@@ -841,10 +842,10 @@ export function CustomerOrderPage({
               <div className="min-w-0 self-center sm:self-start">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex h-8 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 text-xs font-bold text-white/80 backdrop-blur">
-                    <BusinessIcon className="size-3.5 text-[#f4d58d]" />
+                    <BusinessIcon className="size-3.5 text-[#fbd98a]" />
                     {business.businessType}
                   </span>
-                  <Badge variant={acceptingImmediateRequests ? "emerald" : business.appointmentBookingEnabled ? "amber" : "red"} className={cn("border-white/20 bg-white/10 text-white", acceptingImmediateRequests && "border-emerald/30 bg-emerald/20 text-emerald-50")}>
+                  <Badge variant={acceptingImmediateRequests ? "success" : business.appointmentBookingEnabled ? "warning" : "danger"} className={cn("border-white/20 bg-white/10 text-white", acceptingImmediateRequests && "border-brand/30 bg-brand/20 text-green-50")}>
                     {acceptingImmediateRequests
                       ? "Open now"
                       : businessApproved && business.appointmentBookingEnabled
@@ -860,7 +861,7 @@ export function CustomerOrderPage({
               </div>
               <div className="col-span-2 min-w-0 sm:col-span-1 sm:col-start-2">
                 <p className="mt-3 flex max-w-4xl gap-2 text-sm leading-6 text-white/80 sm:text-base">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-[#f4d58d]" />
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-[#fbd98a]" />
                   <span>{business.address}</span>
                 </p>
                 <BusinessHoursDisclosure
@@ -870,12 +871,12 @@ export function CustomerOrderPage({
                   now={now}
                   showSummary={false}
                   variant="hero"
-                  leadingIcon={<Clock3 className="mt-0.5 size-4 shrink-0 text-emerald-200" />}
+                  leadingIcon={<Clock3 className="mt-0.5 size-4 shrink-0 text-green-200" />}
                   className="mt-2 max-w-4xl"
                 />
                 <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold text-white/80">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5">
-                    <TransactionIcon className="size-3.5 text-emerald-200" />
+                    <TransactionIcon className="size-3.5 text-green-200" />
                     {copy.minimumValueLabel} {formatINR(business.minimumOrder)}
                   </span>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5">
@@ -902,7 +903,7 @@ export function CustomerOrderPage({
                         : "Not accepting now"}
                   </p>
                 </div>
-                <span className="clay-orb size-11 rounded-2xl bg-clay-emerald text-white">
+                <span className="clay-orb size-11 rounded-2xl bg-clay-green text-ink">
                   <Sparkles className="size-5" />
                 </span>
               </div>
@@ -917,7 +918,7 @@ export function CustomerOrderPage({
                 </div>
                 <div className="flex items-center justify-between gap-3 text-white/70">
                   <span>Checkout</span>
-                  <span className="font-extrabold text-emerald-100">{onlinePaymentAvailable ? "Online pay" : cashPaymentAvailable ? "Cash pay" : "Pending"}</span>
+                  <span className="font-extrabold text-green-100">{onlinePaymentAvailable ? "Online pay" : cashPaymentAvailable ? "Cash pay" : "Pending"}</span>
                 </div>
               </div>
             </div>
@@ -933,15 +934,15 @@ export function CustomerOrderPage({
                 <div className={cn(
                   "mb-3 flex items-start gap-2 rounded-lg border p-3 text-sm",
                   business.appointmentBookingEnabled && businessApproved
-                    ? "border-ocean/15 bg-ocean-soft text-ocean-deep"
-                    : "border-berry/20 bg-berry-soft text-berry-deep"
+                    ? "border-ink-200 bg-ivory-100 text-ink-900"
+                    : "border-kumkum-600/20 bg-kumkum-50 text-kumkum-700"
                 )}>
                   <AlertCircle className="mt-0.5 size-4 shrink-0" />
                   <span>{unavailableMessage}</span>
                 </div>
               )}
               {businessOpen && profileNotice && (
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-marigold-500/30 bg-marigold-50 p-3 text-sm text-marigold-700">
                   <span className="flex min-w-0 items-start gap-2">
                     <LockKeyhole className="mt-0.5 size-4 shrink-0" />
                     <span>{profileNotice}</span>
@@ -954,12 +955,12 @@ export function CustomerOrderPage({
                 </div>
               )}
               <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-3.5 size-5 text-slate-400" />
+                <Search className="pointer-events-none absolute left-4 top-3.5 size-5 text-ink-500" />
                 <Input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder={copy.searchPlaceholder}
-                  className="h-12 border-white bg-white pl-12 text-base shadow-clay-inset focus:border-emerald focus:ring-emerald/20"
+                  className="h-12 border-white bg-white pl-12 text-base shadow-clay-inset focus:border-brand focus:ring-brand/20"
                 />
               </div>
               <div className="scrollbar-none mt-3 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible">
@@ -971,8 +972,8 @@ export function CustomerOrderPage({
                     className={cn(
                       "flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-extrabold transition hover:-translate-y-0.5",
                       category === activeCategory
-                        ? "border-transparent bg-clay-ink text-white shadow-clay-sm"
-                        : "border-white bg-white text-slate-600 shadow-clay-sm hover:text-ink"
+                        ? "border-transparent bg-clay-ink text-white shadow-clay-sm theme-dark"
+                        : "border-white bg-white text-ink-600 shadow-clay-sm hover:text-ink"
                     )}
                   >
                     <CategoryIcon className="size-3.5" />
@@ -988,7 +989,7 @@ export function CustomerOrderPage({
                 const showFoodMarker = item.foodType !== "NOT_APPLICABLE";
                 return (
                   <article key={item.id} className="public-service-card vm-reveal-on-scroll clay flex h-full min-w-0 flex-col overflow-hidden rounded-[1.6rem] p-2.5 sm:p-3">
-                    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-[1.2rem] bg-mist">
+                    <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-[1.2rem] bg-ivory-100">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}
@@ -998,44 +999,44 @@ export function CustomerOrderPage({
                           className="object-cover transition duration-300 hover:scale-[1.03]"
                         />
                       ) : (
-                        <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f3f0ff_45%,#e3f7ec_100%)]">
+                        <div className="grid h-full place-items-center bg-[radial-gradient(circle_at_30%_25%,#ffffff_0%,#f3eee2_45%,#d8f6d2_100%)]">
                           <ClayIllustration name={illustrationNameForBusinessType(business.businessType)} className="w-[62%]" />
                         </div>
                       )}
-                      {item.isBestSeller && <span className="sticker absolute left-1.5 top-1.5 max-w-[calc(100%-0.75rem)] -rotate-3 truncate bg-clay-mango px-2 py-0.5 text-[9px] text-ink sm:left-2 sm:top-2 sm:px-2.5 sm:py-1 sm:text-[10px]">Best seller</span>}
+                      {item.isBestSeller && <span className="sticker absolute left-1.5 top-1.5 max-w-[calc(100%-0.75rem)] -rotate-3 truncate bg-clay-marigold px-2 py-0.5 text-[9px] text-ink sm:left-2 sm:top-2 sm:px-2.5 sm:py-1 sm:text-[10px]">Best seller</span>}
                     </div>
                   <div className="flex min-w-0 flex-1 flex-col pt-2.5">
                     {(showFoodMarker || !item.isAvailable) && (
                       <div className="flex min-w-0 items-start justify-between gap-1.5">
                         <div className="min-w-0 flex-1">
                           {showFoodMarker && (
-                            <span className={cn("grid size-3.5 shrink-0 place-items-center rounded-sm border", item.foodType === "NON_VEG" ? "border-red-600" : item.foodType === "EGG" ? "border-amber-600" : "border-emerald")}>
-                              <span className={cn("size-1.5 rounded-full", item.foodType === "NON_VEG" ? "bg-red-600" : item.foodType === "EGG" ? "bg-amber-600" : "bg-emerald")} />
+                            <span className={cn("grid size-3.5 shrink-0 place-items-center rounded-sm border", item.foodType === "NON_VEG" ? "border-kumkum-600" : item.foodType === "EGG" ? "border-marigold-600" : "border-brand")}>
+                              <span className={cn("size-1.5 rounded-full", item.foodType === "NON_VEG" ? "bg-kumkum-600" : item.foodType === "EGG" ? "bg-marigold-600" : "bg-brand")} />
                             </span>
                           )}
                         </div>
-                        {!item.isAvailable && <Badge variant="red" className="px-2 py-0.5 text-[10px]">Unavailable</Badge>}
+                        {!item.isAvailable && <Badge variant="danger" className="px-2 py-0.5 text-[10px]">Unavailable</Badge>}
                       </div>
                     )}
                     <h2 className="mt-1 line-clamp-2 break-words text-[13px] font-extrabold leading-[1.18] text-ink sm:text-[15px]">{item.name}</h2>
                     <ServiceDescriptionPreview item={item} onReadMore={setDescriptionModalItem} />
                     <div className="grid gap-2 pt-2">
                       <div className="flex min-w-0 items-baseline justify-between gap-2">
-                        <p className="text-[11px] font-bold text-slate-400 sm:text-xs">Price</p>
+                        <p className="text-[11px] font-bold text-ink-500 sm:text-xs">Price</p>
                         <p className="min-w-0 truncate text-right text-base font-extrabold leading-tight text-ink sm:text-lg">{formatINR(item.price)}</p>
                       </div>
                       {quantity > 0 ? (
-                        <div className="grid h-9 grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] overflow-hidden rounded-xl bg-emerald-soft shadow-clay-inset">
-                          <button type="button" className="grid h-9 place-items-center text-emerald" onClick={() => decrement(item.id)} aria-label={`Remove one ${item.name}`}>
+                        <div className="grid h-9 grid-cols-[2.25rem_minmax(0,1fr)_2.25rem] overflow-hidden rounded-xl bg-green-50 shadow-clay-inset">
+                          <button type="button" className="grid h-9 place-items-center text-brand-text" onClick={() => decrement(item.id)} aria-label={`Remove one ${item.name}`}>
                             <Minus className="size-4" />
                           </button>
-                          <span className="grid min-w-0 place-items-center text-sm font-bold text-emerald">{quantity}</span>
-                          <button type="button" className="grid h-9 place-items-center text-emerald disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(item)} disabled={!bookingOpen || !item.isAvailable} aria-label={`Add one ${item.name}`}>
+                          <span className="grid min-w-0 place-items-center text-sm font-bold text-brand-text">{quantity}</span>
+                          <button type="button" className="grid h-9 place-items-center text-brand-text disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(item)} disabled={!bookingOpen || !item.isAvailable} aria-label={`Add one ${item.name}`}>
                             <Plus className="size-4" />
                           </button>
                         </div>
                       ) : (
-                        <Button size="sm" variant="emerald" className="h-9 w-full" icon={<Plus className="size-4" />} onClick={() => addItem(item)} disabled={!bookingOpen || !item.isAvailable}>
+                        <Button size="sm" variant="brand" className="h-9 w-full" icon={<Plus className="size-4" />} onClick={() => addItem(item)} disabled={!bookingOpen || !item.isAvailable}>
                           Add
                         </Button>
                       )}
@@ -1045,7 +1046,7 @@ export function CustomerOrderPage({
               );
             })}
             {filteredItems.length === 0 && (
-              <div className="public-order-panel col-span-full p-5 text-sm font-semibold text-slate-600">
+              <div className="public-order-panel col-span-full p-5 text-sm font-semibold text-ink-600">
                 No {copy.itemPlural.toLowerCase()} match this selection.
               </div>
             )}
@@ -1150,7 +1151,7 @@ export function CustomerOrderPage({
           <button
             type="button"
             onClick={() => setCartOpen(true)}
-            className="clay-press flex w-full items-center justify-between gap-3 rounded-[1.4rem] bg-clay-ink px-3 py-2.5 text-left text-white [--clay-shadow:rgba(13,10,34,0.6)] motion-safe:animate-pop"
+            className="clay-press flex w-full items-center justify-between gap-3 rounded-[1.4rem] bg-clay-ink px-3 py-2.5 text-left text-white [--clay-shadow:rgba(0,0,0,0.6)] motion-safe:animate-pop theme-dark"
           >
             <span className="flex min-w-0 items-center gap-2.5">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10">
@@ -1163,19 +1164,19 @@ export function CustomerOrderPage({
                 <span className="block text-base font-extrabold">{formatINR(statusTotal)}</span>
               </span>
             </span>
-            <span className="shrink-0 rounded-xl bg-clay-emerald px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">Continue</span>
+            <span className="shrink-0 rounded-xl bg-clay-green px-4 py-2.5 text-sm font-extrabold shadow-clay-sm">Continue</span>
           </button>
         </div>
       )}
 
       {cartOpen && (
         <div className="fixed inset-0 z-50 bg-ink/40 xl:hidden">
-          <div className="safe-bottom absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-[2rem] border-t border-white bg-white/95 p-4 shadow-[0_-24px_80px_rgba(29,26,57,0.22)] backdrop-blur-2xl motion-safe:animate-[vm-sheet-in_320ms_cubic-bezier(0.22,1,0.36,1)]">
-            <span aria-hidden="true" className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-slate-200" />
+          <div className="safe-bottom absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-[2rem] border-t border-white bg-white/95 p-4 shadow-[0_-24px_80px_rgba(11,13,11,0.22)] backdrop-blur-2xl motion-safe:animate-[vm-sheet-in_320ms_cubic-bezier(0.22,1,0.36,1)]">
+            <span aria-hidden="true" className="mx-auto mb-3 block h-1.5 w-12 rounded-full bg-ink-200" />
             <div className="mb-3 flex items-center justify-between">
               {checkoutStep === "selection" ? (
                 <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink text-white shadow-[0_14px_32px_rgba(29,26,57,0.18)]">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink text-white shadow-[0_14px_32px_rgba(11,13,11,0.18)] theme-dark">
                     <TransactionIcon className="size-4" />
                   </span>
                   <h2 className="truncate text-lg font-extrabold text-ink">
@@ -1202,7 +1203,7 @@ export function CustomerOrderPage({
                 type="button"
                 aria-label="Close selected services"
                 title="Close"
-                className="ml-2 grid size-11 shrink-0 place-items-center rounded-lg border border-red-100 bg-red-50 text-red-600 shadow-sm transition hover:border-red-200 hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+                className="ml-2 grid size-11 shrink-0 place-items-center rounded-lg border border-kumkum-100 bg-kumkum-50 text-kumkum-600 shadow-sm transition hover:border-kumkum-200 hover:bg-kumkum-100 hover:text-kumkum-700 focus:outline-none focus:ring-4 focus:ring-kumkum-100"
                 onClick={() => setCartOpen(false)}
               >
                 <X className="size-6 stroke-[2.4]" />
@@ -1282,23 +1283,23 @@ export function CustomerOrderPage({
           <div className="w-full max-w-md rounded-[1.75rem] border border-white bg-white p-5 shadow-clay-lg">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-bold text-emerald">{descriptionModalItem.category}</p>
+                <p className="text-xs font-bold text-brand-text">{descriptionModalItem.category}</p>
                 <h2 id="service-description-title" className="mt-1 text-lg font-extrabold leading-tight text-ink">
                   {descriptionModalItem.name}
                 </h2>
               </div>
               <button
                 type="button"
-                className="grid size-9 shrink-0 place-items-center rounded-lg bg-slate-100 text-ink transition hover:bg-slate-200"
+                className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink-100 text-ink transition hover:bg-ink-200"
                 onClick={() => setDescriptionModalItem(null)}
                 aria-label="Close description"
               >
                 <X className="size-5" />
               </button>
             </div>
-            <div className="mt-4 rounded-lg border border-line bg-[#f6faf8] p-4">
-              <p className="text-xs font-extrabold uppercase text-slate-400">Description details</p>
-              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">
+            <div className="mt-4 rounded-lg border border-ink-200 bg-[#faf7f0] p-4">
+              <p className="text-xs font-extrabold uppercase text-ink-500">Description details</p>
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-ink-700">
                 {descriptionModalItem.description}
               </p>
             </div>
@@ -1335,13 +1336,13 @@ function ServiceDescriptionPreview({
 
   return (
     <div className="mt-1 min-h-[2.35rem]">
-      <p ref={descriptionRef} className="line-clamp-2 break-words text-[11px] leading-[1.45] text-slate-600 sm:text-xs">
+      <p ref={descriptionRef} className="line-clamp-2 break-words text-[11px] leading-[1.45] text-ink-600 sm:text-xs">
         {item.description}
       </p>
       {descriptionOverflows && (
         <button
           type="button"
-          className="mt-0.5 text-[11px] font-extrabold text-emerald transition hover:text-ink"
+          className="mt-0.5 text-[11px] font-extrabold text-brand-text transition hover:text-ink"
           onClick={() => onReadMore(item)}
         >
           ...read more
@@ -1361,21 +1362,21 @@ function OrderBillingSummary({
   totalLabel: string;
 }) {
   return (
-    <div className="mt-5 grid gap-2 rounded-lg border border-white bg-[#f6faf8] p-4 text-sm shadow-sm">
-      <div className="flex justify-between text-slate-600"><span>Prices total</span><span>{formatINR(billing.subtotal)}</span></div>
+    <div className="mt-5 grid gap-2 rounded-lg border border-white bg-[#faf7f0] p-4 text-sm shadow-sm">
+      <div className="flex justify-between text-ink-600"><span>Prices total</span><span>{formatINR(billing.subtotal)}</span></div>
       {billing.serviceFee > 0 && (
-        <div className="flex justify-between text-slate-600"><span>{copy.serviceFeeLabel}</span><span>{formatINR(billing.serviceFee)}</span></div>
+        <div className="flex justify-between text-ink-600"><span>{copy.serviceFeeLabel}</span><span>{formatINR(billing.serviceFee)}</span></div>
       )}
       {billing.discount > 0 && (
-        <div className="flex justify-between text-emerald"><span>Coupon discount</span><span>-{formatINR(billing.discount)}</span></div>
+        <div className="flex justify-between text-brand-text"><span>Coupon discount</span><span>-{formatINR(billing.discount)}</span></div>
       )}
       {billing.gstAmount > 0 && (
         <>
-          <div className="flex justify-between border-t border-line/80 pt-3 text-slate-600"><span>Taxable amount</span><span>{formatINR(billing.taxableAmount)}</span></div>
-          <div className="flex justify-between text-slate-600"><span>GST {gstRateLabel(billing.gstRateBps)}</span><span>{formatINR(billing.gstAmount)}</span></div>
+          <div className="flex justify-between border-t border-ink-200/80 pt-3 text-ink-600"><span>Taxable amount</span><span>{formatINR(billing.taxableAmount)}</span></div>
+          <div className="flex justify-between text-ink-600"><span>GST {gstRateLabel(billing.gstRateBps)}</span><span>{formatINR(billing.gstAmount)}</span></div>
         </>
       )}
-      <div className="mt-1 flex justify-between border-t border-line/80 pt-3 text-lg font-extrabold text-ink"><span>{totalLabel}</span><span>{formatINR(billing.total)}</span></div>
+      <div className="mt-1 flex justify-between border-t border-ink-200/80 pt-3 text-lg font-extrabold text-ink"><span>{totalLabel}</span><span>{formatINR(billing.total)}</span></div>
     </div>
   );
 }
@@ -1384,9 +1385,9 @@ function SelectedItemsSummary({ subtotal }: { subtotal: number }) {
   const total = money(subtotal);
 
   return (
-    <div className="mt-5 grid gap-2 rounded-lg border border-white bg-[#f6faf8] p-4 text-sm shadow-sm">
-      <div className="flex justify-between text-slate-600"><span>Prices total</span><span>{formatINR(total)}</span></div>
-      <div className="mt-1 flex justify-between border-t border-line/80 pt-3 text-lg font-extrabold text-ink"><span>Selected total</span><span>{formatINR(total)}</span></div>
+    <div className="mt-5 grid gap-2 rounded-lg border border-white bg-[#faf7f0] p-4 text-sm shadow-sm">
+      <div className="flex justify-between text-ink-600"><span>Prices total</span><span>{formatINR(total)}</span></div>
+      <div className="mt-1 flex justify-between border-t border-ink-200/80 pt-3 text-lg font-extrabold text-ink"><span>Selected total</span><span>{formatINR(total)}</span></div>
     </div>
   );
 }
@@ -1456,31 +1457,31 @@ function SelectionPanel({
         </div>
       ) : null}
       {cartLines.length === 0 ? (
-        <p className={cn("flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(18,183,106,0.08),rgba(79,91,213,0.06))] p-4 text-sm leading-6 text-slate-600", showSelectionHeading ? "mt-5" : "mt-0")}>
-          <ItemIcon className="mt-0.5 size-5 shrink-0 text-emerald" />
+        <p className={cn("flex items-start gap-3 rounded-lg border border-brand/20 bg-[linear-gradient(135deg,rgba(30,201,38,0.08),rgba(11,122,16,0.06))] p-4 text-sm leading-6 text-ink-600", showSelectionHeading ? "mt-5" : "mt-0")}>
+          <ItemIcon className="mt-0.5 size-5 shrink-0 text-brand-text" />
           <span>
             Add {copy.itemPlural.toLowerCase()} to place a {copy.transactionSingular.toLowerCase()} on the website.
           </span>
         </p>
       ) : (
-        <div className={cn("divide-y divide-line/80", showSelectionHeading ? "mt-4" : "mt-3")}>
+        <div className={cn("divide-y divide-ink-200/80", showSelectionHeading ? "mt-4" : "mt-3")}>
           {cartLines.map((line) => (
             <div key={line.id} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-ink">{line.name}</p>
-                  <p className="mt-1 text-xs text-slate-500">{formatINR(line.price)} each</p>
+                  <p className="mt-1 text-xs text-ink-500">{formatINR(line.price)} each</p>
                 </div>
                 <p className="text-sm font-extrabold text-ink">{formatINR(line.price * line.quantity)}</p>
               </div>
               <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Quantity</span>
-                <div className="flex h-9 items-center rounded-lg border border-emerald/20 bg-emerald/5">
-                  <button type="button" className="grid size-9 place-items-center text-emerald" onClick={() => decrement(line.id)}>
+                <span className="text-xs font-semibold text-ink-500">Quantity</span>
+                <div className="flex h-9 items-center rounded-lg border border-brand/20 bg-brand/5">
+                  <button type="button" className="grid size-9 place-items-center text-brand-text" onClick={() => decrement(line.id)}>
                     <Minus className="size-4" />
                   </button>
-                  <span className="w-8 text-center text-sm font-bold text-emerald">{line.quantity}</span>
-                  <button type="button" className="grid size-9 place-items-center text-emerald disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(line)} disabled={!bookingOpen}>
+                  <span className="w-8 text-center text-sm font-bold text-brand-text">{line.quantity}</span>
+                  <button type="button" className="grid size-9 place-items-center text-brand-text disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(line)} disabled={!bookingOpen}>
                     <Plus className="size-4" />
                   </button>
                 </div>
@@ -1492,7 +1493,7 @@ function SelectionPanel({
 
       <SelectedItemsSummary subtotal={subtotal} />
 
-      <Button type="button" variant="emerald" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(18,183,106,0.28)] hover:bg-[#0f915f]" icon={<TransactionIcon className="size-4" />} disabled={continueDisabled} onClick={onContinue}>
+      <Button type="button" variant="brand" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(30,201,38,0.28)] hover:bg-[#3fd645]" icon={<TransactionIcon className="size-4" />} disabled={continueDisabled} onClick={onContinue}>
         {continueLabel}
       </Button>
     </section>
@@ -1548,7 +1549,7 @@ function BillingSelectedServicesPanel({
             type="button"
             size="sm"
             variant="secondary"
-            className="border-emerald/25 bg-emerald/10 text-emerald hover:border-emerald/40 hover:bg-emerald/20"
+            className="border-brand/25 bg-brand/10 text-brand-text hover:border-brand/40 hover:bg-brand/20"
             icon={<ChevronLeft className="size-3.5" />}
             onClick={onBack}
           >
@@ -1558,8 +1559,8 @@ function BillingSelectedServicesPanel({
       </div>
 
       {cartLines.length === 0 ? (
-        <p className="mt-5 flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(18,183,106,0.08),rgba(79,91,213,0.06))] p-4 text-sm leading-6 text-slate-600">
-          <ItemIcon className="mt-0.5 size-5 shrink-0 text-emerald" />
+        <p className="mt-5 flex items-start gap-3 rounded-lg border border-brand/20 bg-[linear-gradient(135deg,rgba(30,201,38,0.08),rgba(11,122,16,0.06))] p-4 text-sm leading-6 text-ink-600">
+          <ItemIcon className="mt-0.5 size-5 shrink-0 text-brand-text" />
           <span>
             Add {copy.itemPlural.toLowerCase()} to place a {copy.transactionSingular.toLowerCase()} on the website.
           </span>
@@ -1571,29 +1572,29 @@ function BillingSelectedServicesPanel({
 
             return (
               <article key={line.id} className="grid gap-3 rounded-lg border border-white bg-white/[0.78] p-3 shadow-sm sm:grid-cols-[104px_minmax(0,1fr)_156px] sm:items-center">
-                <div className="relative h-28 overflow-hidden rounded-md bg-slate-100 sm:h-24">
+                <div className="relative h-28 overflow-hidden rounded-md bg-ink-100 sm:h-24">
                   {line.imageUrl ? (
                     <Image src={line.imageUrl} alt={line.name} fill sizes="120px" className="object-cover" unoptimized={lineImageIsSvg} />
                   ) : (
-                    <div className="grid h-full place-items-center bg-[linear-gradient(135deg,rgba(18,183,106,0.14),rgba(79,91,213,0.12),rgba(244,213,141,0.16))] text-ocean">
+                    <div className="grid h-full place-items-center bg-[linear-gradient(135deg,rgba(30,201,38,0.14),rgba(11,122,16,0.12),rgba(251,217,138,0.16))] text-brand-text">
                       <ItemIcon className="size-7" />
                     </div>
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-emerald">{line.category}</p>
+                  <p className="text-xs font-bold text-brand-text">{line.category}</p>
                   <h3 className="mt-1 truncate text-base font-extrabold text-ink">{line.name}</h3>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">{formatINR(line.price)} each</p>
+                  <p className="mt-1 text-sm font-semibold text-ink-500">{formatINR(line.price)} each</p>
                   <p className="mt-2 text-sm font-extrabold text-ink sm:hidden">{formatINR(line.price * line.quantity)}</p>
                 </div>
                 <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
                   <p className="hidden text-sm font-extrabold text-ink sm:block">{formatINR(line.price * line.quantity)}</p>
-                  <div className="flex h-10 items-center rounded-lg border border-emerald/20 bg-emerald/5">
-                    <button type="button" className="grid size-10 place-items-center text-emerald" onClick={() => decrement(line.id)}>
+                  <div className="flex h-10 items-center rounded-lg border border-brand/20 bg-brand/5">
+                    <button type="button" className="grid size-10 place-items-center text-brand-text" onClick={() => decrement(line.id)}>
                       <Minus className="size-4" />
                     </button>
-                    <span className="w-8 text-center text-sm font-bold text-emerald">{line.quantity}</span>
-                    <button type="button" className="grid size-10 place-items-center text-emerald disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(line)} disabled={!bookingOpen}>
+                    <span className="w-8 text-center text-sm font-bold text-brand-text">{line.quantity}</span>
+                    <button type="button" className="grid size-10 place-items-center text-brand-text disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(line)} disabled={!bookingOpen}>
                       <Plus className="size-4" />
                     </button>
                   </div>
@@ -1763,33 +1764,33 @@ function BillingPanel({
     <form onSubmit={submitOrder} className="public-order-panel p-5 xl:sticky xl:top-24">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <button type="button" className="mb-3 inline-flex items-center gap-1 text-xs font-bold text-emerald" onClick={onBack}>
+          <button type="button" className="mb-3 inline-flex items-center gap-1 text-xs font-bold text-brand-text" onClick={onBack}>
             <ChevronLeft className="size-3.5" />
             {selectionTitle}
           </button>
           <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-lg bg-ink text-white shadow-[0_18px_40px_rgba(29,26,57,0.18)]">
+            <span className="grid size-10 place-items-center rounded-lg bg-ink text-white shadow-[0_18px_40px_rgba(11,13,11,0.18)] theme-dark">
               <ReceiptText className="size-5" />
             </span>
             <h2 className="text-lg font-extrabold text-ink">Billing details</h2>
           </div>
         </div>
-        <Badge variant="emerald" className="gap-1.5 border-emerald/25 bg-emerald/10">
+        <Badge variant="success" className="gap-1.5 border-brand/25 bg-brand/10">
           <ShieldCheck className="size-3.5" />
           Secure
         </Badge>
       </div>
       {showSelectedServices && (
         cartLines.length === 0 ? (
-          <p className="mt-5 flex items-start gap-3 rounded-lg border border-emerald/20 bg-[linear-gradient(135deg,rgba(18,183,106,0.08),rgba(79,91,213,0.06))] p-4 text-sm leading-6 text-slate-600">
-            <ItemIcon className="mt-0.5 size-5 shrink-0 text-emerald" />
+          <p className="mt-5 flex items-start gap-3 rounded-lg border border-brand/20 bg-[linear-gradient(135deg,rgba(30,201,38,0.08),rgba(11,122,16,0.06))] p-4 text-sm leading-6 text-ink-600">
+            <ItemIcon className="mt-0.5 size-5 shrink-0 text-brand-text" />
             <span>
               Add {copy.itemPlural.toLowerCase()} to place a {copy.transactionSingular.toLowerCase()} on the website.
             </span>
           </p>
         ) : (
-          <div className="mt-5 rounded-lg border border-white bg-[#f6faf8] p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-3 border-b border-line/80 pb-3">
+          <div className="mt-5 rounded-lg border border-white bg-[#faf7f0] p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-ink-200/80 pb-3">
               <p className="min-w-0 truncate text-sm font-extrabold text-ink">{selectionTitle}</p>
               <Button
                 type="button"
@@ -1804,16 +1805,16 @@ function BillingPanel({
               </Button>
             </div>
             {cartLines.map((line) => (
-              <div key={line.id} className="mt-3 flex items-center justify-between gap-3 border-t border-line/80 pt-3 first:border-t-0">
+              <div key={line.id} className="mt-3 flex items-center justify-between gap-3 border-t border-ink-200/80 pt-3 first:border-t-0">
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-ink">{line.name}</p>
                 </div>
-                <div className="flex h-9 items-center rounded-lg border border-emerald/20 bg-white">
-                  <button type="button" className="grid size-9 place-items-center text-emerald" onClick={() => decrement(line.id)}>
+                <div className="flex h-9 items-center rounded-lg border border-brand/20 bg-white">
+                  <button type="button" className="grid size-9 place-items-center text-brand-text" onClick={() => decrement(line.id)}>
                     <Minus className="size-4" />
                   </button>
-                  <span className="w-7 text-center text-sm font-bold text-emerald">{line.quantity}</span>
-                  <button type="button" className="grid size-9 place-items-center text-emerald disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(line)} disabled={!bookingOpen}>
+                  <span className="w-7 text-center text-sm font-bold text-brand-text">{line.quantity}</span>
+                  <button type="button" className="grid size-9 place-items-center text-brand-text disabled:cursor-not-allowed disabled:opacity-60" onClick={() => addItem(line)} disabled={!bookingOpen}>
                     <Plus className="size-4" />
                   </button>
                 </div>
@@ -1824,7 +1825,7 @@ function BillingPanel({
       )}
 
       {businessOpen && profileNotice && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-mango/30 bg-mango-soft p-3 text-sm text-mango-deep">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-marigold-500/30 bg-marigold-50 p-3 text-sm text-marigold-700">
           <span className="flex min-w-0 items-start gap-2">
             <LockKeyhole className="mt-0.5 size-4 shrink-0" />
             <span>{profileNotice}</span>
@@ -1838,7 +1839,7 @@ function BillingPanel({
       )}
 
       <div
-        className="mt-5 grid gap-2 rounded-lg bg-[#edf4f2] p-1 shadow-inner"
+        className="mt-5 grid gap-2 rounded-lg bg-[#f3eee2] p-1 shadow-inner"
         style={{ gridTemplateColumns: `repeat(${fulfillmentModes.length}, minmax(0, 1fr))` }}
       >
         {fulfillmentModes.map((type) => {
@@ -1847,7 +1848,7 @@ function BillingPanel({
               key={type}
               type="button"
               onClick={() => setOrderType(type)}
-              className={cn("flex h-10 items-center justify-center gap-1.5 rounded-md text-sm font-bold transition", orderType === type ? "bg-white text-ink shadow-[0_10px_24px_rgba(29,26,57,0.10)]" : "text-slate-600 hover:text-ink")}
+              className={cn("flex h-10 items-center justify-center gap-1.5 rounded-md text-sm font-bold transition", orderType === type ? "bg-white text-ink shadow-[0_10px_24px_rgba(11,13,11,0.10)]" : "text-ink-600 hover:text-ink")}
             >
               <FulfillmentModeIcon mode={type} />
               {fulfillmentLabelForBusinessType(business.businessType, type)}
@@ -1880,19 +1881,19 @@ function BillingPanel({
             placeholder={`${copy.customerSingular} name`}
             defaultValue={profileVerified ? bookingProfile.name : ""}
             readOnly={profileVerified}
-            className={cn("h-12 bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20", profileVerified && "bg-slate-50")}
+            className={cn("h-12 bg-white/[0.86] shadow-sm focus:border-brand focus:ring-brand/20", profileVerified && "bg-ink-50")}
             required
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="email">Email <span className="font-normal text-slate-400">(optional)</span></Label>
+          <Label htmlFor="email">Email <span className="font-normal text-ink-500">(optional)</span></Label>
           <EmailInput
             id="email"
             name="email"
             placeholder="you@example.com"
             defaultValue={profileVerified ? bookingProfile.email : ""}
             readOnly={profileVerified}
-            className={cn("h-12 bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20", profileVerified && "bg-slate-50")}
+            className={cn("h-12 bg-white/[0.86] shadow-sm focus:border-brand focus:ring-brand/20", profileVerified && "bg-ink-50")}
           />
         </div>
         <div className="grid gap-2">
@@ -1902,7 +1903,7 @@ function BillingPanel({
             name="phone"
             defaultValue={profileVerified ? bookingProfile.phone : ""}
             disabled={profileVerified}
-            className="h-12 bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20"
+            className="h-12 bg-white/[0.86] shadow-sm focus:border-brand focus:ring-brand/20"
             required
           />
         </div>
@@ -1916,14 +1917,14 @@ function BillingPanel({
               onFocus={(event) => {
                 event.currentTarget.min = localDateTimeInputValue(new Date(Date.now() + 15 * 60 * 1000));
               }}
-              className="h-12 bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20"
+              className="h-12 bg-white/[0.86] shadow-sm focus:border-brand focus:ring-brand/20"
               required
             />
-            <p className="text-xs leading-5 text-slate-500">The business will confirm availability after receiving your request.</p>
+            <p className="text-xs leading-5 text-ink-500">The business will confirm availability after receiving your request.</p>
           </div>
         )}
         {serviceAtLocation && (
-          <div className="grid gap-3 rounded-lg border border-white bg-[#f6faf8] p-3 shadow-sm">
+          <div className="grid gap-3 rounded-lg border border-white bg-[#faf7f0] p-3 shadow-sm">
             <div className="grid gap-2">
               <Label htmlFor="address">{addressLabel}</Label>
               <Textarea
@@ -1932,7 +1933,7 @@ function BillingPanel({
                 placeholder="House number, street, area, landmark"
                 value={serviceAddress}
                 onChange={(event) => setServiceAddress(event.currentTarget.value)}
-                className="bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20"
+                className="bg-white/[0.86] shadow-sm focus:border-brand focus:ring-brand/20"
                 required
               />
             </div>
@@ -1948,33 +1949,33 @@ function BillingPanel({
               suggestedQuery={[serviceAddress, business.city, business.state].filter(Boolean).join(", ")}
             />
             {customerLocation && distanceKm !== null && (
-              <Badge variant={outsideServiceRadius ? "red" : "emerald"} className="w-fit">
+              <Badge variant={outsideServiceRadius ? "danger" : "success"} className="w-fit">
                 {distanceKm.toFixed(1)} km away
               </Badge>
             )}
           </div>
         )}
         {!businessOpen && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div className="flex items-start gap-2 rounded-lg border border-kumkum-200 bg-kumkum-50 p-3 text-sm text-kumkum-700">
             <AlertCircle className="mt-0.5 size-4 shrink-0" />
             <span>{business.isApproved ? `${copy.transactionPlural} are paused until the business is open.` : "This business is pending PSHR admin approval."}</span>
           </div>
         )}
         <div className="grid gap-2">
           <Label htmlFor="notes">{copy.transactionSingular} notes</Label>
-          <Input id="notes" name="notes" placeholder="Timing, preferences, or special instructions" className="h-12 bg-white/[0.86] shadow-sm focus:border-emerald focus:ring-emerald/20" />
+          <Input id="notes" name="notes" placeholder="Timing, preferences, or special instructions" className="h-12 bg-white/[0.86] shadow-sm focus:border-brand focus:ring-brand/20" />
         </div>
       </div>
 
       {business.whatsappAvailable && (
-        <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#f7f5ff] p-3 text-sm text-slate-700 shadow-sm">
+        <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#faf7f0] p-3 text-sm text-ink-700 shadow-sm">
           <label className="flex items-start gap-3">
-            <input className="mt-1 size-4 accent-emerald" type="checkbox" checked={whatsappOptIn} onChange={(event) => setWhatsappOptIn(event.target.checked)} />
+            <input className="mt-1 size-4 accent-brand" type="checkbox" checked={whatsappOptIn} onChange={(event) => setWhatsappOptIn(event.target.checked)} />
             <span>Send {transactionLower} confirmation and business status updates on WhatsApp. Payment details stay on this website.</span>
           </label>
           <label className="flex items-start gap-3">
             <input
-              className="mt-1 size-4 accent-emerald"
+              className="mt-1 size-4 accent-brand"
               type="checkbox"
               checked={marketingOptIn}
               disabled={!whatsappOptIn}
@@ -1985,23 +1986,23 @@ function BillingPanel({
         </div>
       )}
 
-      <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#f7f5ff] p-3 shadow-sm">
+      <div className="mt-4 grid gap-3 rounded-lg border border-white bg-[#faf7f0] p-3 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-sm font-extrabold text-ink">
-            <TicketPercent className="size-4 text-emerald" />
+            <TicketPercent className="size-4 text-brand-text" />
             Coupon
           </p>
-          <Badge variant={appliedCoupon ? "emerald" : "neutral"}>{appliedCoupon ? "Applied" : "Optional"}</Badge>
+          <Badge variant={appliedCoupon ? "success" : "neutral"}>{appliedCoupon ? "Applied" : "Optional"}</Badge>
         </div>
         {appliedCoupon ? (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald/20 bg-emerald/5 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-brand/20 bg-brand/5 p-3">
             <div>
-              <p className="text-sm font-bold text-emerald">Coupon discount applied</p>
+              <p className="text-sm font-bold text-brand-text">Coupon discount applied</p>
               {billing.discount > 0 && (
-                <p className="mt-1 text-xs font-semibold text-slate-600">You saved {formatINR(billing.discount)} on this {transactionLower}.</p>
+                <p className="mt-1 text-xs font-semibold text-ink-600">You saved {formatINR(billing.discount)} on this {transactionLower}.</p>
               )}
               {couponChecking && (
-                <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-ink-500">
                   <LoaderCircle className="size-3 animate-spin" />
                   Rechecking discount
                 </p>
@@ -2023,13 +2024,13 @@ function BillingPanel({
                 void applyCoupon();
               }}
               placeholder="Enter coupon"
-              className="h-11 bg-white shadow-sm focus:border-emerald focus:ring-emerald/20"
+              className="h-11 bg-white shadow-sm focus:border-brand focus:ring-brand/20"
               autoComplete="off"
             />
             <Button
               type="button"
               variant="secondary"
-              className="h-11 border-emerald/25 bg-white text-emerald hover:border-emerald/40 hover:bg-emerald/10"
+              className="h-11 border-brand/25 bg-white text-brand-text hover:border-brand/40 hover:bg-brand/10"
               icon={couponChecking ? <LoaderCircle className="size-4 animate-spin" /> : <TicketPercent className="size-4" />}
               disabled={couponChecking || !cartLines.length}
               onClick={() => void applyCoupon()}
@@ -2039,10 +2040,10 @@ function BillingPanel({
           </div>
         )}
         {couponNotice && appliedCoupon && !couponChecking && (
-          <p className="rounded-lg bg-emerald/5 p-2 text-xs font-semibold text-emerald">{couponNotice}</p>
+          <p className="rounded-lg bg-brand/5 p-2 text-xs font-semibold text-brand-text">{couponNotice}</p>
         )}
         {couponError && (
-          <p className="rounded-lg bg-red-50 p-2 text-xs font-semibold text-red-700">{couponError}</p>
+          <p className="rounded-lg bg-kumkum-50 p-2 text-xs font-semibold text-kumkum-700">{couponError}</p>
         )}
       </div>
 
@@ -2052,29 +2053,29 @@ function BillingPanel({
           onClick={() => onlinePaymentAvailable && setPaymentMethod("UPI")}
           disabled={!onlinePaymentAvailable}
           className={cn(
-            "flex items-center justify-between rounded-lg border bg-white/[0.72] p-3 text-left shadow-sm transition hover:border-emerald/30 disabled:cursor-not-allowed disabled:opacity-60",
-            paymentMethod === "UPI" ? "border-emerald/30 bg-emerald/10" : "border-white"
+            "flex items-center justify-between rounded-lg border bg-white/[0.72] p-3 text-left shadow-sm transition hover:border-brand/30 disabled:cursor-not-allowed disabled:opacity-60",
+            paymentMethod === "UPI" ? "border-brand/30 bg-brand/10" : "border-white"
           )}
         >
           <span className="flex items-center gap-2 text-sm font-bold">
             <Wallet className="size-4" />
             Pay online
           </span>
-          {paymentMethod === "UPI" && <CheckCircle2 className="size-4 text-emerald" />}
+          {paymentMethod === "UPI" && <CheckCircle2 className="size-4 text-brand-text" />}
         </button>
         {!onlinePaymentAvailable && (
-          <p className="rounded-lg bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+          <p className="rounded-lg bg-marigold-50 p-3 text-xs font-semibold text-marigold-900">
             Automatic online payment is not configured yet.
           </p>
         )}
         {cashPaymentAvailable && (
-          <button type="button" onClick={() => setPaymentMethod("PAY_ON_PICKUP_OR_DELIVERY")} className={cn("flex items-center justify-between rounded-lg border bg-white/[0.72] p-3 text-left shadow-sm transition hover:border-ocean/30", paymentMethod === "PAY_ON_PICKUP_OR_DELIVERY" ? "border-ocean/30 bg-ocean/5" : "border-white")}>
+          <button type="button" onClick={() => setPaymentMethod("PAY_ON_PICKUP_OR_DELIVERY")} className={cn("flex items-center justify-between rounded-lg border bg-white/[0.72] p-3 text-left shadow-sm transition hover:border-green-700/30", paymentMethod === "PAY_ON_PICKUP_OR_DELIVERY" ? "border-green-700/30 bg-green-700/5" : "border-white")}>
             <span className="flex items-center gap-2 text-sm font-bold"><Banknote className="size-4" /> Pay in cash</span>
-            {paymentMethod === "PAY_ON_PICKUP_OR_DELIVERY" && <CheckCircle2 className="size-4 text-ocean" />}
+            {paymentMethod === "PAY_ON_PICKUP_OR_DELIVERY" && <CheckCircle2 className="size-4 text-brand-text" />}
           </button>
         )}
         {!onlinePaymentAvailable && !cashPaymentAvailable && (
-          <p className="rounded-lg bg-red-50 p-3 text-xs font-semibold text-red-700">
+          <p className="rounded-lg bg-kumkum-50 p-3 text-xs font-semibold text-kumkum-700">
             This business has not enabled a payment method yet.
           </p>
         )}
@@ -2083,13 +2084,13 @@ function BillingPanel({
       <OrderBillingSummary billing={billing} copy={copy} totalLabel="Total payable" />
 
       {submitError && (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="mt-4 flex items-start gap-2 rounded-lg border border-kumkum-200 bg-kumkum-50 p-3 text-sm text-kumkum-700">
           <AlertCircle className="mt-0.5 size-4 shrink-0" />
           <span>{submitError}</span>
         </div>
       )}
 
-      <Button type="submit" variant="emerald" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(18,183,106,0.28)] hover:bg-[#0f915f]" icon={<TransactionIcon className="size-4" />} disabled={submitDisabled}>
+      <Button type="submit" variant="brand" className="mt-5 h-12 w-full shadow-[0_18px_44px_rgba(30,201,38,0.28)] hover:bg-[#3fd645]" icon={<TransactionIcon className="size-4" />} disabled={submitDisabled}>
         {submitLabel}
       </Button>
     </form>

@@ -152,20 +152,20 @@ function PaymentCelebration({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="payment-celebration fixed inset-0 z-50 grid place-items-center overflow-hidden bg-ink/35 px-4 backdrop-blur-sm print:hidden" role="status" aria-live="polite">
-      <div className="payment-celebration-card relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/70 bg-white p-7 text-center shadow-[0_32px_100px_rgba(29,26,57,0.32)]">
+      <div className="payment-celebration-card relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/70 bg-white p-7 text-center shadow-[0_32px_100px_rgba(11,13,11,0.32)]">
         <OrderStepAnimation
           kind="paymentDone"
           icon={Check}
           label="Payment done"
           loop={false}
-          className="payment-success-icon mx-auto size-28 rounded-full border border-emerald/15 bg-white text-emerald shadow-glow"
+          className="payment-success-icon mx-auto size-28 rounded-full border border-brand/15 bg-white text-brand-text shadow-glow"
           iconClassName="size-12 stroke-[3]"
           lottieClassName="payment-success-lottie scale-[1.08]"
         />
-        <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.22em] text-emerald">Payment verified</p>
+        <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.22em] text-brand-text">Payment verified</p>
         <h2 className="mt-2 text-2xl font-extrabold text-ink">Payment done</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Your tracking and paid invoice are ready.</p>
-        <div className="mx-auto mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-slate-100"><span className="payment-celebration-progress block h-full rounded-full bg-emerald" /></div>
+        <p className="mt-2 text-sm leading-6 text-ink-600">Your tracking and paid invoice are ready.</p>
+        <div className="mx-auto mt-5 h-1.5 w-40 overflow-hidden rounded-full bg-ink-100"><span className="payment-celebration-progress block h-full rounded-full bg-brand" /></div>
       </div>
       {Array.from({ length: 14 }, (_, index) => <span key={index} className="payment-confetti" aria-hidden="true" />)}
     </div>
@@ -177,18 +177,18 @@ function PaymentQr({ order, retry }: { order: PublicOrderReceipt; retry: boolean
 
   return (
     <div className="mt-6 grid gap-6 sm:grid-cols-[260px_1fr] sm:items-center">
-      <div className="payment-qr-frame mx-auto w-fit rounded-[1.5rem] border border-line bg-white p-3 shadow-soft">
+      <div className="payment-qr-frame mx-auto w-fit rounded-[1.5rem] border border-ink-200 bg-white p-3 shadow-soft">
         <Image src={order.paymentQrImageUrl} alt={`UPI QR for ${order.orderNumber}`} width={240} height={240} unoptimized priority className="size-60 rounded-xl bg-white object-contain" />
         <span className="payment-qr-scanline" aria-hidden="true" />
       </div>
       <div className="text-center sm:text-left">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Amount to pay</p>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink-500">Amount to pay</p>
         <p className="mt-2 text-4xl font-extrabold tracking-tight text-ink">{formatINR(order.totalAmount)}</p>
-        <div className="mt-4 flex items-start gap-2 rounded-xl bg-mist p-3 text-left text-sm leading-6 text-slate-600">
-          <ScanLine className="mt-0.5 size-5 shrink-0 text-ocean" />
+        <div className="mt-4 flex items-start gap-2 rounded-xl bg-ivory-100 p-3 text-left text-sm leading-6 text-ink-600">
+          <ScanLine className="mt-0.5 size-5 shrink-0 text-brand-text" />
           <span>{retry ? "Scan this QR again to retry in your UPI app." : "Scan this QR using any UPI app and complete the payment there."}</span>
         </div>
-        {order.paymentExpiresAt && <p className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-slate-500 sm:justify-start"><Clock3 className="size-4" /> Expires {dateTime(order.paymentExpiresAt)}</p>}
+        {order.paymentExpiresAt && <p className="mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-ink-500 sm:justify-start"><Clock3 className="size-4" /> Expires {dateTime(order.paymentExpiresAt)}</p>}
       </div>
     </div>
   );
@@ -203,18 +203,18 @@ function TrackingTimeline({ order }: { order: PublicOrderReceipt }) {
 
   if (cancelled) {
     return (
-      <section id="tracking" className="order-tracker-enter mt-5 overflow-hidden rounded-[1.75rem] border border-red-200 bg-white p-6 shadow-soft print:hidden">
-        <div className="flex items-start gap-4 rounded-2xl bg-red-50 p-5 text-red-800">
+      <section id="tracking" className="order-tracker-enter mt-5 overflow-hidden rounded-[1.75rem] border border-kumkum-200 bg-white p-6 shadow-soft print:hidden">
+        <div className="flex items-start gap-4 rounded-2xl bg-kumkum-50 p-5 text-kumkum-800">
           <OrderStepAnimation
             kind="CANCELLED"
             icon={XCircle}
             label={tracking.cancelledTitle}
             loop={false}
-            className="payment-failure-icon size-14 rounded-2xl bg-red-100 text-red-700"
+            className="payment-failure-icon size-14 rounded-2xl bg-kumkum-100 text-kumkum-700"
             iconClassName="size-8"
             lottieClassName="tracking-lottie"
           />
-          <div><p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">Status update</p><h2 className="mt-1 text-xl font-extrabold">{tracking.cancelledTitle}</h2><p className="mt-2 text-sm leading-6 text-red-700">Contact {order.business.name} on {order.business.phone} if you need more information.</p></div>
+          <div><p className="text-xs font-extrabold uppercase tracking-[0.18em] text-kumkum-600">Status update</p><h2 className="mt-1 text-xl font-extrabold">{tracking.cancelledTitle}</h2><p className="mt-2 text-sm leading-6 text-kumkum-700">Contact {order.business.name} on {order.business.phone} if you need more information.</p></div>
         </div>
       </section>
     );
@@ -224,11 +224,11 @@ function TrackingTimeline({ order }: { order: PublicOrderReceipt }) {
     <section id="tracking" className="order-tracker-enter mt-5 overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/95 p-5 shadow-soft backdrop-blur-xl print:hidden sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-ocean">Progress</p>
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-text">Progress</p>
           <h2 className="mt-2 text-2xl font-extrabold text-ink">{tracking.progressTitle}</h2>
-          <p className="mt-1 text-sm text-slate-500">Only completed admin updates appear here. The next step unlocks when the business updates the status.</p>
+          <p className="mt-1 text-sm text-ink-500">Only completed admin updates appear here. The next step unlocks when the business updates the status.</p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-emerald/20 bg-emerald/5 px-3 py-2 text-xs font-bold text-emerald"><span className="payment-pulse-dot size-2.5 rounded-full bg-emerald" /> Tracking</div>
+        <div className="flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-3 py-2 text-xs font-bold text-brand-text"><span className="payment-pulse-dot size-2.5 rounded-full bg-brand" /> Tracking</div>
       </div>
 
       <div className="mt-6 grid gap-3 md:flex md:items-stretch md:overflow-x-auto md:pb-1 lg:overflow-visible">
@@ -239,20 +239,20 @@ function TrackingTimeline({ order }: { order: PublicOrderReceipt }) {
           const showCompleteIcon = complete && !active;
           return (
             <div key={stage.status} className="order-progress-card relative md:min-w-[190px] md:flex-1 lg:min-w-0" style={{ animationDelay: `${index * 90}ms` }} aria-current={active ? "step" : undefined}>
-              {index > 0 && <span className="absolute -top-3 left-7 h-3 w-0.5 rounded-full bg-emerald/70 md:-left-3 md:top-1/2 md:h-0.5 md:w-3" aria-hidden="true" />}
-              <div className={cn("relative z-10 flex items-center gap-4 rounded-2xl border p-4 transition-all duration-500 md:h-full md:flex-col md:items-start", active ? "order-stage-active border-ocean/25 bg-ocean/5 shadow-sm" : "border-emerald/25 bg-emerald/5")}>
+              {index > 0 && <span className="absolute -top-3 left-7 h-3 w-0.5 rounded-full bg-brand/70 md:-left-3 md:top-1/2 md:h-0.5 md:w-3" aria-hidden="true" />}
+              <div className={cn("relative z-10 flex items-center gap-4 rounded-2xl border p-4 transition-all duration-500 md:h-full md:flex-col md:items-start", active ? "order-stage-active border-green-700/25 bg-green-700/5 shadow-sm" : "border-brand/25 bg-brand/5")}>
                 <OrderStepAnimation
                   kind={showCompleteIcon ? null : stageVisual.animationKind}
                   icon={showCompleteIcon ? Check : stageVisual.icon}
                   label={stage.label}
-                  className={cn("border bg-white transition-all duration-500", complete ? "border-emerald/25 text-emerald" : "border-ocean/25 text-ocean shadow-[0_10px_30px_rgba(79,91,213,0.16)]")}
+                  className={cn("border bg-white transition-all duration-500", complete ? "border-brand/25 text-brand-text" : "border-green-700/25 text-brand-text shadow-[0_10px_30px_rgba(11,122,16,0.16)]")}
                   iconClassName={cn(showCompleteIcon && "stroke-[3]", stageVisual.spinIcon && active && "animate-spin")}
                   lottieClassName="tracking-lottie"
                 />
                 <div className="min-w-0">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">{complete ? "Completed" : "Current step"}</p>
-                  <p className={cn("text-sm font-extrabold", active ? "text-ocean" : complete ? "text-emerald" : "text-slate-500")}>{stage.label}</p>
-                  <p className={cn("mt-1 text-sm leading-6", active ? "text-slate-700" : "text-slate-500")}>{stage.description}</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-ink-500">{complete ? "Completed" : "Current step"}</p>
+                  <p className={cn("text-sm font-extrabold", active ? "text-brand-text" : complete ? "text-brand-text" : "text-ink-500")}>{stage.label}</p>
+                  <p className={cn("mt-1 text-sm leading-6", active ? "text-ink-700" : "text-ink-500")}>{stage.description}</p>
                 </div>
               </div>
             </div>
@@ -260,7 +260,7 @@ function TrackingTimeline({ order }: { order: PublicOrderReceipt }) {
         })}
       </div>
       {nextStage && (
-        <div className="mt-4 rounded-2xl border border-dashed border-line bg-mist/70 p-4 text-sm text-slate-600">
+        <div className="mt-4 rounded-2xl border border-dashed border-ink-200 bg-ivory-100/70 p-4 text-sm text-ink-600">
           <span className="font-bold text-ink">Next:</span> {nextStage.label} appears after the business updates this {tracking.transactionLabel}.
         </div>
       )}
@@ -296,27 +296,27 @@ function PaymentStatusPanel({
   const showPendingPaymentIntro = !cashfreeCheckout;
 
   return (
-    <section id="payment" className={cn("payment-state-enter print:hidden", focused ? "mx-auto mt-6 max-w-[calc(100vw-4.5rem)] sm:max-w-2xl" : "mt-5 rounded-[1.75rem] border border-line bg-white p-5 shadow-sm sm:p-7")}>
+    <section id="payment" className={cn("payment-state-enter print:hidden", focused ? "mx-auto mt-6 max-w-[calc(100vw-4.5rem)] sm:max-w-2xl" : "mt-5 rounded-[1.75rem] border border-ink-200 bg-white p-5 shadow-sm sm:p-7")}>
       {paymentFailed ? (
         <>
           {activePaymentQr ? (
             <>
               <PaymentQr order={order} retry />
-              <div className={cn("mt-5 flex items-center gap-3 rounded-xl border border-ocean/15 bg-ocean/5 p-3 text-sm text-ocean", focused && "justify-center text-center sm:justify-start sm:text-left")}><Loader2 className="size-5 animate-spin" /><span className="font-semibold">Watching for a payment status update</span></div>
+              <div className={cn("mt-5 flex items-center gap-3 rounded-xl border border-ink-200 bg-green-700/5 p-3 text-sm text-brand-text", focused && "justify-center text-center sm:justify-start sm:text-left")}><Loader2 className="size-5 animate-spin" /><span className="font-semibold">Watching for a payment status update</span></div>
             </>
           ) : activeHostedCheckout ? (
-            <div className={cn("mt-5 rounded-2xl border border-line bg-mist p-4", focused && "text-center sm:text-left")}>
-              <p className={cn("text-sm leading-6 text-slate-600", focused && "mx-auto max-w-[16.5rem] break-words sm:mx-0 sm:max-w-none")}>The Cashfree checkout is still active. Open it to complete the payment, or cancel this booking to stop the appointment.</p>
+            <div className={cn("mt-5 rounded-2xl border border-ink-200 bg-ivory-100 p-4", focused && "text-center sm:text-left")}>
+              <p className={cn("text-sm leading-6 text-ink-600", focused && "mx-auto max-w-[16.5rem] break-words sm:mx-0 sm:max-w-none")}>The Cashfree checkout is still active. Open it to complete the payment, or cancel this booking to stop the appointment.</p>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <ButtonLink href={order.paymentUrl!} variant="emerald" icon={<ExternalLink className="size-4" />}>Pay now</ButtonLink>
+                <ButtonLink href={order.paymentUrl!} variant="brand" icon={<ExternalLink className="size-4" />}>Pay now</ButtonLink>
                 <Button variant="danger" icon={cancellingPayment ? <Loader2 className="size-4 animate-spin" /> : <XCircle className="size-4" />} onClick={onCancelPayment} disabled={cancellingPayment}>
                   {cancellingPayment ? "Cancelling" : "Cancel booking"}
                 </Button>
               </div>
             </div>
           ) : (
-            <div className={cn("mt-5 rounded-2xl border border-line bg-mist p-4", focused && "text-center sm:text-left")}>
-              <p className={cn("text-sm leading-6 text-slate-600", focused && "mx-auto max-w-[16.5rem] break-words sm:mx-0 sm:max-w-none")}>This payment link can no longer be used. Place a fresh booking if you still need the service.</p>
+            <div className={cn("mt-5 rounded-2xl border border-ink-200 bg-ivory-100 p-4", focused && "text-center sm:text-left")}>
+              <p className={cn("text-sm leading-6 text-ink-600", focused && "mx-auto max-w-[16.5rem] break-words sm:mx-0 sm:max-w-none")}>This payment link can no longer be used. Place a fresh booking if you still need the service.</p>
             </div>
           )}
         </>
@@ -328,13 +328,13 @@ function PaymentStatusPanel({
                 kind={pendingPaymentAnimationKind}
                 icon={Wallet}
                 label={pendingPaymentLabel}
-                className="size-11 rounded-full bg-ocean/10 text-ocean"
+                className="size-11 rounded-full bg-green-700/10 text-brand-text"
                 iconClassName="size-5"
                 lottieClassName="scan-pay-lottie"
               />
               <div className={cn(focused && "min-w-0 max-w-[16.5rem] sm:max-w-xl")}>
                 <h2 className="text-lg font-bold text-ink">Scan and pay</h2>
-                <p className="mt-1 break-words text-sm leading-6 text-slate-600">
+                <p className="mt-1 break-words text-sm leading-6 text-ink-600">
                   {manualPlatformUpi
                     ? "Scan the UPI QR and complete payment in your UPI app. PSHR admin verifies the bank receipt before your paid invoice and status updates appear."
                     : "Complete the payment in your UPI app. This page detects verification automatically and then shows your paid invoice."}
@@ -345,11 +345,11 @@ function PaymentStatusPanel({
           {activePaymentQr ? (
             <>
               <PaymentQr order={order} retry={false} />
-              <div className={cn("mt-6 flex items-center gap-3 rounded-xl border border-emerald/20 bg-emerald/5 p-4 text-emerald", focused && "flex-col text-center sm:flex-row sm:text-left")} role="status">
-                <span className="payment-pulse-dot size-3 shrink-0 rounded-full bg-emerald" />
+              <div className={cn("mt-6 flex items-center gap-3 rounded-xl border border-brand/20 bg-brand/5 p-4 text-brand-text", focused && "flex-col text-center sm:flex-row sm:text-left")} role="status">
+                <span className="payment-pulse-dot size-3 shrink-0 rounded-full bg-brand" />
                 <div>
                   <p className="font-bold">Waiting for payment confirmation</p>
-                  <p className="mt-1 text-sm text-slate-600">{manualPlatformUpi ? "Checking for PSHR admin bank verification." : "Checking payment automatically every few seconds."}</p>
+                  <p className="mt-1 text-sm text-ink-600">{manualPlatformUpi ? "Checking for PSHR admin bank verification." : "Checking payment automatically every few seconds."}</p>
                 </div>
               </div>
               <Button className="mt-4 w-full" variant="danger" icon={cancellingPayment ? <Loader2 className="size-4 animate-spin" /> : <XCircle className="size-4" />} onClick={onCancelPayment} disabled={cancellingPayment}>
@@ -357,24 +357,24 @@ function PaymentStatusPanel({
               </Button>
             </>
           ) : activeHostedCheckout ? (
-            <div className={cn("rounded-2xl border border-line bg-mist p-5", showPendingPaymentIntro && "mt-6", focused && "text-center sm:text-left")}>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Amount to pay</p>
+            <div className={cn("rounded-2xl border border-ink-200 bg-ivory-100 p-5", showPendingPaymentIntro && "mt-6", focused && "text-center sm:text-left")}>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink-500">Amount to pay</p>
               <p className="mt-2 text-4xl font-extrabold tracking-tight text-ink">{formatINR(order.totalAmount)}</p>
               <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                <ButtonLink className="w-full" href={order.paymentUrl!} variant="emerald" icon={<ExternalLink className="size-4" />}>Pay now</ButtonLink>
+                <ButtonLink className="w-full" href={order.paymentUrl!} variant="brand" icon={<ExternalLink className="size-4" />}>Pay now</ButtonLink>
                 <Button className="w-full" variant="danger" icon={cancellingPayment ? <Loader2 className="size-4 animate-spin" /> : <XCircle className="size-4" />} onClick={onCancelPayment} disabled={cancellingPayment}>
                   {cancellingPayment ? "Cancelling" : "Cancel booking"}
                 </Button>
               </div>
             </div>
           ) : (
-            <div className={cn("mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900", focused && "text-center sm:text-left")}>
+            <div className={cn("mt-5 rounded-2xl border border-marigold-200 bg-marigold-50 p-4 text-marigold-900", focused && "text-center sm:text-left")}>
               <p className="text-sm font-semibold">The payment request is not available. This link cannot be reused for another payment.</p>
             </div>
           )}
         </>
       )}
-      {paymentError && <p className={cn("mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700", focused && "text-center sm:text-left")}>{paymentError}</p>}
+      {paymentError && <p className={cn("mt-4 rounded-xl bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700", focused && "text-center sm:text-left")}>{paymentError}</p>}
     </section>
   );
 }
@@ -415,11 +415,11 @@ function PaymentOnlyPage({
         <section className="payment-state-enter overflow-hidden rounded-[2rem] border border-white/80 bg-white/95 p-5 shadow-soft backdrop-blur-xl sm:p-8">
           <div className="flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
             <div className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-ocean">{order.business.type}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-text">{order.business.type}</p>
               <h1 className="mt-1 break-words text-xl font-extrabold text-ink">{order.business.name}</h1>
             </div>
-            <div className={cn("flex max-w-full items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-bold", paymentFailed ? "border-berry/20 bg-berry-soft text-berry-deep" : "border-emerald/20 bg-emerald/5 text-emerald")}>
-              <span className={cn("size-2 rounded-full", shouldPoll && !paymentFailed ? "payment-pulse-dot" : "", paymentFailed ? "bg-red-500" : "bg-emerald")} />
+            <div className={cn("flex max-w-full items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-bold", paymentFailed ? "border-kumkum-600/20 bg-kumkum-50 text-kumkum-700" : "border-brand/20 bg-brand/5 text-brand-text")}>
+              <span className={cn("size-2 rounded-full", shouldPoll && !paymentFailed ? "payment-pulse-dot" : "", paymentFailed ? "bg-kumkum-500" : "bg-brand")} />
               {shouldPoll ? `Checking · ${time(lastSyncedAt)}` : `Updated ${dateTime(order.updatedAt)}`}
             </div>
           </div>
@@ -429,22 +429,22 @@ function PaymentOnlyPage({
               kind={paymentAnimationKind}
               icon={paymentFailed ? XCircle : ScanLine}
               label={paymentAnimationLabel}
-              className={cn("size-36 rounded-[1.75rem] border", paymentFailed ? "border-berry/20 bg-berry-soft text-berry-deep" : "border-ocean/15 bg-white text-ocean shadow-sm")}
+              className={cn("size-36 rounded-[1.75rem] border", paymentFailed ? "border-kumkum-600/20 bg-kumkum-50 text-kumkum-700" : "border-ink-200 bg-white text-brand-text shadow-sm")}
               iconClassName="size-12"
               lottieClassName={paymentFailed ? "payment-failure-lottie" : "scan-pay-lottie"}
             />
             <div className="min-w-0 max-w-[calc(100vw-4.5rem)] sm:max-w-xl">
-              <Badge variant={paymentFailed ? "red" : "blue"}>{paymentFailed ? "Payment failed" : "Step 1"}</Badge>
+              <Badge variant={paymentFailed ? "danger" : "info"}>{paymentFailed ? "Payment failed" : "Step 1"}</Badge>
               <h2 className="mx-auto mt-3 max-w-[17rem] text-3xl font-extrabold text-ink sm:mx-0 sm:max-w-none">{paymentFailed ? "Payment needs attention" : cashfreeCheckout ? "Complete payment" : "Scan and pay"}</h2>
-              <p className="mx-auto mt-3 max-w-[16.5rem] break-words text-sm leading-6 text-slate-600 sm:mx-0 sm:max-w-xl">
+              <p className="mx-auto mt-3 max-w-[16.5rem] break-words text-sm leading-6 text-ink-600 sm:mx-0 sm:max-w-xl">
                 {paymentFailed
                   ? "This request failed, expired, or was cancelled. This payment link cannot be reused."
                   : "Only the payment step is shown now. Once payment is verified, your paid invoice downloads and progress will appear here."}
               </p>
               {paymentFailed && (order.paymentFailureReason || order.paymentFailedAt) && (
                 <div className="mx-auto mt-3 max-w-[16.5rem] space-y-1 break-words text-sm leading-6 sm:mx-0 sm:max-w-xl">
-                  {order.paymentFailureReason && <p className="font-semibold text-red-700">{order.paymentFailureReason}</p>}
-                  {order.paymentFailedAt && <p className="text-xs font-bold uppercase tracking-[0.12em] text-red-500">Updated {dateTime(order.paymentFailedAt)}</p>}
+                  {order.paymentFailureReason && <p className="font-semibold text-kumkum-700">{order.paymentFailureReason}</p>}
+                  {order.paymentFailedAt && <p className="text-xs font-bold uppercase tracking-[0.12em] text-kumkum-500">Updated {dateTime(order.paymentFailedAt)}</p>}
                 </div>
               )}
             </div>
@@ -464,11 +464,11 @@ function PaymentOnlyPage({
           />
         </section>
 
-        <div className="mt-5 rounded-[1.5rem] border border-line bg-white p-5 text-center shadow-sm sm:text-left">
+        <div className="mt-5 rounded-[1.5rem] border border-ink-200 bg-white p-5 text-center shadow-sm sm:text-left">
           <h2 className="font-extrabold text-ink">Need help?</h2>
-          <p className="mx-auto mt-2 max-w-[18rem] break-words text-sm leading-6 text-slate-600 sm:mx-0 sm:max-w-none">Contact {order.business.name} if the payment is not updating.</p>
+          <p className="mx-auto mt-2 max-w-[18rem] break-words text-sm leading-6 text-ink-600 sm:mx-0 sm:max-w-none">Contact {order.business.name} if the payment is not updating.</p>
           <div className="mx-auto mt-4 grid w-full max-w-[17rem] gap-2 sm:mx-0 sm:max-w-none sm:grid-cols-2">
-            <a href={`tel:${order.business.phone}`} className="clay-press inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-bold text-white [--clay-shadow:rgba(13,10,34,0.6)]"><Phone className="size-4" /> Call {order.business.phone}</a>
+            <a href={`tel:${order.business.phone}`} className="clay-press inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-bold text-white [--clay-shadow:rgba(0,0,0,0.6)] theme-dark"><Phone className="size-4" /> Call {order.business.phone}</a>
             <ButtonLink href={businessHref} variant="secondary" icon={<CalendarCheck2 className="size-4" />} className="w-full">
               {helpActionLabel}
             </ButtonLink>
@@ -667,11 +667,11 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
     <main className="min-h-screen px-4 py-6 print:bg-white print:p-0 sm:py-9">
       {showCelebration && <PaymentCelebration onDone={dismissCelebration} />}
       <div className="mx-auto max-w-5xl">
-        <section className={cn("order-hero-enter relative overflow-hidden rounded-[2rem] p-6 text-white shadow-[0_28px_90px_rgba(29,26,57,0.28)] print:hidden sm:p-8", heroCancelled ? "bg-[linear-gradient(135deg,#ff5c8a_0%,#d1335f_55%,#8f1d45_100%)]" : heroCompleted ? "bg-[linear-gradient(135deg,#12b76a_0%,#0b7d49_50%,#1d1a39_100%)]" : "bg-[linear-gradient(135deg,#1d1a39_0%,#3640b0_60%,#7c5cff_100%)]")}>
+        <section className={cn("order-hero-enter relative overflow-hidden rounded-[2rem] p-6 text-white shadow-[0_28px_90px_rgba(11,13,11,0.28)] print:hidden sm:p-8", heroCancelled ? "bg-[linear-gradient(135deg,#b3311d_0%,#8a2517_100%)]" : heroCompleted ? "theme-dark bg-[radial-gradient(44rem_26rem_at_8%_0%,rgba(30,201,38,0.5),transparent_64%),linear-gradient(135deg,#151815,#0b0d0b)]" : "vm-band")}>
           <div className="order-hero-orb order-hero-orb-one" aria-hidden="true" /><div className="order-hero-orb order-hero-orb-two" aria-hidden="true" />
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-white/10 backdrop-blur-md"><Sparkles className="size-5 text-emerald-200" /></div><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">{order.business.type}</p><p className="font-bold">{order.business.name}</p></div></div>
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold backdrop-blur-md"><span className={cn("size-2 rounded-full", shouldPoll ? "payment-pulse-dot bg-emerald-300" : "bg-white/55")} />{shouldPoll ? `Updated ${time(lastSyncedAt)}` : `Updated ${dateTime(order.updatedAt)}`}</div>
+            <div className="flex items-center gap-3"><div className="grid size-11 place-items-center rounded-2xl bg-white/10 backdrop-blur-md"><Sparkles className="size-5 text-green-200" /></div><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-white/55">{order.business.type}</p><p className="font-bold">{order.business.name}</p></div></div>
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold backdrop-blur-md"><span className={cn("size-2 rounded-full", shouldPoll ? "payment-pulse-dot bg-green-300" : "bg-white/55")} />{shouldPoll ? `Updated ${time(lastSyncedAt)}` : `Updated ${dateTime(order.updatedAt)}`}</div>
           </div>
 
           <div key={order.status} className="relative z-10 mt-9">
@@ -700,15 +700,15 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
               </div>
             </div>
           </div>
-          {order.customer.whatsappUpdates && <p className="relative z-10 mt-6 flex items-center gap-2 rounded-xl bg-white/10 p-3 text-sm text-white/75 backdrop-blur-sm"><MessageCircle className="size-4 text-emerald-200" /> Status updates are also sent to your WhatsApp.</p>}
+          {order.customer.whatsappUpdates && <p className="relative z-10 mt-6 flex items-center gap-2 rounded-xl bg-white/10 p-3 text-sm text-white/75 backdrop-blur-sm"><MessageCircle className="size-4 text-green-200" /> Status updates are also sent to your WhatsApp.</p>}
         </section>
 
         {paid && (
-          <section id="invoice" className="payment-state-enter mt-5 flex flex-col items-stretch justify-between gap-4 rounded-2xl border border-emerald/25 bg-emerald/5 p-5 print:hidden sm:flex-row sm:items-center">
-            <div className="flex items-center gap-4"><OrderStepAnimation kind="paymentDone" icon={BadgeCheck} label="Payment successful and verified" loop={false} className="payment-success-icon size-16 rounded-2xl border border-emerald/20 bg-white text-emerald shadow-sm" iconClassName="size-7" lottieClassName="payment-success-lottie scale-[1.1]" /><div><h2 className="font-extrabold text-ink">Payment successful and verified</h2><p className="mt-1 text-sm text-slate-600">{paymentMethodLabel}{order.paidAt ? ` · ${dateTime(order.paidAt)}` : ""}</p></div></div>
+          <section id="invoice" className="payment-state-enter mt-5 flex flex-col items-stretch justify-between gap-4 rounded-2xl border border-brand/25 bg-brand/5 p-5 print:hidden sm:flex-row sm:items-center">
+            <div className="flex items-center gap-4"><OrderStepAnimation kind="paymentDone" icon={BadgeCheck} label="Payment successful and verified" loop={false} className="payment-success-icon size-16 rounded-2xl border border-brand/20 bg-white text-brand-text shadow-sm" iconClassName="size-7" lottieClassName="payment-success-lottie scale-[1.1]" /><div><h2 className="font-extrabold text-ink">Payment successful and verified</h2><p className="mt-1 text-sm text-ink-600">{paymentMethodLabel}{order.paidAt ? ` · ${dateTime(order.paidAt)}` : ""}</p></div></div>
             <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
-              <a href={invoiceDownloadUrl} download className="clay-press inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-clay-emerald px-3 text-xs font-bold text-white [--clay-shadow:rgba(8,128,74,0.6)] sm:w-auto"><Download className="size-4" /> Download invoice</a>
-              <div className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-emerald shadow-sm sm:w-auto"><ShieldCheck className="size-4" /> Secure payment</div>
+              <a href={invoiceDownloadUrl} download className="clay-press inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-clay-green px-3 text-xs font-bold text-ink [--clay-shadow:rgba(11,122,16,0.6)] sm:w-auto"><Download className="size-4" /> Download invoice</a>
+              <div className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-brand-text shadow-sm sm:w-auto"><ShieldCheck className="size-4" /> Secure payment</div>
             </div>
           </section>
         )}
@@ -716,42 +716,42 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
         <TrackingTimeline order={order} />
 
         {order.appointment && (
-          <section className="order-tracker-enter mt-5 overflow-hidden rounded-[1.75rem] border border-emerald/20 bg-[linear-gradient(145deg,rgba(236,253,245,0.96),rgba(239,246,255,0.94))] p-5 shadow-soft print:border-line print:bg-white sm:p-6">
+          <section className="order-tracker-enter mt-5 overflow-hidden rounded-[1.75rem] border border-brand/20 bg-[linear-gradient(145deg,rgba(239,251,236,0.96),rgba(236,247,247,0.94))] p-5 shadow-soft print:border-ink-200 print:bg-white sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-start gap-4">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-emerald text-white shadow-sm">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand text-ink shadow-sm">
                   <CalendarCheck2 className="size-6" />
                 </span>
                 <div>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-emerald">Scheduled time</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-text">Scheduled time</p>
                   <h2 className="mt-1 text-xl font-extrabold text-ink">{dateTime(order.appointment.startsAt)}</h2>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="mt-1 text-sm text-ink-600">
                     {order.appointment.providerName} · {order.appointment.providerTitle}
                   </p>
                 </div>
               </div>
-              <Badge variant={["CANCELLED", "NO_SHOW"].includes(order.appointment.status) ? "red" : order.appointment.status === "REQUESTED" ? "amber" : "emerald"}>
+              <Badge variant={["CANCELLED", "NO_SHOW"].includes(order.appointment.status) ? "danger" : order.appointment.status === "REQUESTED" ? "warning" : "success"}>
                 {label(order.appointment.status)}
               </Badge>
             </div>
             <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
               <div className="rounded-xl bg-white/85 p-3 shadow-sm">
-                <p className="text-xs font-semibold text-slate-500">Starts</p>
+                <p className="text-xs font-semibold text-ink-500">Starts</p>
                 <p className="mt-1 font-extrabold text-ink">{dateTime(order.appointment.startsAt)}</p>
               </div>
               <div className="rounded-xl bg-white/85 p-3 shadow-sm">
-                <p className="text-xs font-semibold text-slate-500">Estimated finish</p>
+                <p className="text-xs font-semibold text-ink-500">Estimated finish</p>
                 <p className="mt-1 font-extrabold text-ink">{dateTime(order.appointment.endsAt)}</p>
               </div>
               <div className="rounded-xl bg-white/85 p-3 shadow-sm">
-                <p className="text-xs font-semibold text-slate-500">Confirmation</p>
+                <p className="text-xs font-semibold text-ink-500">Confirmation</p>
                 <p className="mt-1 font-extrabold text-ink">{order.appointment.autoConfirmed ? "Confirmed automatically" : "Waiting for business"}</p>
               </div>
             </div>
-            {appointmentError && <p className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{appointmentError}</p>}
+            {appointmentError && <p className="mt-4 rounded-xl border border-kumkum-200 bg-kumkum-50 p-3 text-sm font-semibold text-kumkum-700">{appointmentError}</p>}
             {order.appointment.canCancelOnline && (
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-emerald/15 pt-4">
-                <p className="text-xs text-slate-500">Cancel online before {dateTime(order.appointment.cancellationCutoffAt)}.</p>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-brand/15 pt-4">
+                <p className="text-xs text-ink-500">Cancel online before {dateTime(order.appointment.cancellationCutoffAt)}.</p>
                 <Button variant="secondary" disabled={cancellingAppointment} onClick={cancelAppointment}>
                   {cancellingAppointment ? "Cancelling…" : "Cancel appointment"}
                 </Button>
@@ -764,47 +764,47 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
           <div className="rounded-[1.75rem] border border-white/80 bg-white p-5 shadow-clay sm:p-6">
             <h2 className="font-extrabold text-ink">{transactionTitle} details</h2>
             <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-              <div className="flex items-start gap-3 rounded-2xl bg-mist/70 p-4">
-                <Wallet className="mt-0.5 size-5 shrink-0 text-emerald" />
+              <div className="flex items-start gap-3 rounded-2xl bg-ivory-100/70 p-4">
+                <Wallet className="mt-0.5 size-5 shrink-0 text-brand-text" />
                 <div className="min-w-0">
                   <p className="text-lg font-extrabold text-ink">{formatINR(order.totalAmount)}</p>
-                  <p className="mt-1 text-slate-500">Total</p>
+                  <p className="mt-1 text-ink-500">Total</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl bg-mist/70 p-4">
-                <CalendarCheck2 className="mt-0.5 size-5 shrink-0 text-ocean" />
+              <div className="flex items-start gap-3 rounded-2xl bg-ivory-100/70 p-4">
+                <CalendarCheck2 className="mt-0.5 size-5 shrink-0 text-brand-text" />
                 <div className="min-w-0">
                   <p className="font-bold leading-6 text-ink">{dateTime(order.createdAt)}</p>
-                  <p className="mt-1 text-slate-500">Placed</p>
+                  <p className="mt-1 text-ink-500">Placed</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl bg-mist/70 p-4">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center text-ocean"><FulfillmentIcon orderType={order.orderType} /></span>
+              <div className="flex items-start gap-3 rounded-2xl bg-ivory-100/70 p-4">
+                <span className="mt-0.5 grid size-5 shrink-0 place-items-center text-brand-text"><FulfillmentIcon orderType={order.orderType} /></span>
                 <div className="min-w-0">
                   <p className="font-bold text-ink">{fulfillmentLabel(order)}</p>
-                  <p className="mt-1 text-slate-500">Fulfillment method</p>
+                  <p className="mt-1 text-ink-500">Fulfillment method</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-2xl bg-mist/70 p-4">
-                <CircleDot className="mt-0.5 size-5 shrink-0 text-emerald" />
+              <div className="flex items-start gap-3 rounded-2xl bg-ivory-100/70 p-4">
+                <CircleDot className="mt-0.5 size-5 shrink-0 text-brand-text" />
                 <div className="min-w-0">
                   <p className="font-bold leading-6 text-ink">{dateTime(order.updatedAt)}</p>
-                  <p className="mt-1 text-slate-500">Last status update</p>
+                  <p className="mt-1 text-ink-500">Last status update</p>
                 </div>
               </div>
               {order.customer.address && (
-                <div className="flex items-start gap-3 rounded-2xl bg-mist/70 p-4 sm:col-span-2">
-                  <MapPin className="mt-0.5 size-5 shrink-0 text-ocean" />
+                <div className="flex items-start gap-3 rounded-2xl bg-ivory-100/70 p-4 sm:col-span-2">
+                  <MapPin className="mt-0.5 size-5 shrink-0 text-brand-text" />
                   <div className="min-w-0">
                     <p className="font-bold text-ink">{customerAddressLabel}</p>
-                    <p className="mt-1 break-words leading-6 text-slate-500">{order.customer.address}</p>
+                    <p className="mt-1 break-words leading-6 text-ink-500">{order.customer.address}</p>
                   </div>
                 </div>
               )}
               {order.notes && (
-                <div className="rounded-2xl bg-mist/70 p-4 sm:col-span-2">
+                <div className="rounded-2xl bg-ivory-100/70 p-4 sm:col-span-2">
                   <p className="font-bold text-ink">Notes</p>
-                  <p className="mt-1 break-words leading-6 text-slate-500">{order.notes}</p>
+                  <p className="mt-1 break-words leading-6 text-ink-500">{order.notes}</p>
                 </div>
               )}
             </div>
@@ -824,9 +824,9 @@ export function OrderStatusPage({ publicToken, initialOrder }: { publicToken: st
             )}
             <div className="rounded-[1.5rem] border border-white/80 bg-white p-5 shadow-clay">
               <h2 className="font-extrabold text-ink">Need help?</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Contact {order.business.name} about this {tracking.transactionLabel}.</p>
+              <p className="mt-2 text-sm leading-6 text-ink-600">Contact {order.business.name} about this {tracking.transactionLabel}.</p>
               <div className="mt-4 grid gap-2">
-                <a href={`tel:${order.business.phone}`} className="clay-press inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-bold text-white [--clay-shadow:rgba(13,10,34,0.6)]"><Phone className="size-4" /> Call {order.business.phone}</a>
+                <a href={`tel:${order.business.phone}`} className="clay-press inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-clay-ink px-4 text-sm font-bold text-white [--clay-shadow:rgba(0,0,0,0.6)] theme-dark"><Phone className="size-4" /> Call {order.business.phone}</a>
                 <ButtonLink href={businessHref} variant="secondary" icon={<CalendarCheck2 className="size-4" />} className="w-full">
                   {customerReturnLabel}
                 </ButtonLink>

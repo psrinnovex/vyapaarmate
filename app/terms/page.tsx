@@ -128,7 +128,7 @@ export default function TermsPage() {
       <PublicPage>
         <PageHeroBanner
           eyebrow="Terms"
-          eyebrowTone="ocean"
+          eyebrowTone="ink"
           title="VyapaarMate"
           highlight="Terms of Service"
           body="The rules for using VyapaarMate, in plain sections."

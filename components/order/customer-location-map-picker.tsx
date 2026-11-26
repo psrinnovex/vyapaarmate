@@ -238,10 +238,10 @@ export function CustomerLocationMapPicker({
             map,
             center: toGoogleCoordinates(businessCenter),
             radius: serviceRadiusKm * 1000,
-            strokeColor: "#059669",
+            strokeColor: "#0b7a10",
             strokeOpacity: 0.35,
             strokeWeight: 2,
-            fillColor: "#10b981",
+            fillColor: "#1ec926",
             fillOpacity: 0.08,
             clickable: false
           });
@@ -369,7 +369,7 @@ export function CustomerLocationMapPicker({
     <div className={cn("grid gap-3", className)}>
       <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-500" />
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.currentTarget.value)}
@@ -396,36 +396,36 @@ export function CustomerLocationMapPicker({
         </Button>
       </div>
       {searchResults.length > 0 && (
-        <div className="grid max-h-52 gap-1 overflow-y-auto rounded-lg border border-line bg-white p-2 shadow-sm">
+        <div className="grid max-h-52 gap-1 overflow-y-auto rounded-lg border border-ink-200 bg-white p-2 shadow-sm">
           {searchResults.map((result) => (
             <button
               key={`${result.place_id}-${result.lat}-${result.lon}`}
               type="button"
-              className="flex items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-mist focus:outline-none focus:ring-4 focus:ring-ocean/10"
+              className="flex items-start gap-2 rounded-md px-3 py-2 text-left text-sm text-ink-700 transition hover:bg-ivory-100 focus:outline-none focus:ring-4 focus:ring-green-700/10"
               onClick={() => chooseSearchResult(result)}
             >
-              <MapPin className="mt-0.5 size-4 shrink-0 text-ocean" />
+              <MapPin className="mt-0.5 size-4 shrink-0 text-brand-text" />
               <span>{result.display_name}</span>
             </button>
           ))}
         </div>
       )}
-      {searchError && <p className="text-xs font-semibold text-red-700">{searchError}</p>}
-      {locationError && <p className="text-xs font-semibold text-red-700">{locationError}</p>}
+      {searchError && <p className="text-xs font-semibold text-kumkum-700">{searchError}</p>}
+      {locationError && <p className="text-xs font-semibold text-kumkum-700">{locationError}</p>}
 
       <div
         role="application"
         aria-label="Google service location map"
-        className="relative h-72 overflow-hidden rounded-lg border border-line bg-slate-100 shadow-inner"
+        className="relative h-72 overflow-hidden rounded-lg border border-ink-200 bg-ink-100 shadow-inner"
       >
         <div ref={mapElementRef} className="absolute inset-0" />
         {mapStatus !== "ready" && (
-          <div className="absolute inset-0 z-10 grid place-items-center bg-slate-100/95 p-5 text-center">
+          <div className="absolute inset-0 z-10 grid place-items-center bg-ink-100/95 p-5 text-center">
             <div>
               {mapStatus === "loading" ? (
-                <Loader2 className="mx-auto size-8 animate-spin text-ocean" />
+                <Loader2 className="mx-auto size-8 animate-spin text-brand-text" />
               ) : (
-                <MapPin className="mx-auto size-8 text-ocean" />
+                <MapPin className="mx-auto size-8 text-brand-text" />
               )}
               <p className="mt-3 text-sm font-semibold text-ink">
                 {mapStatus === "loading" ? "Loading Google Maps" : mapError ?? "Google Maps is not ready."}
@@ -434,7 +434,7 @@ export function CustomerLocationMapPicker({
           </div>
         )}
         {value && (
-          <div className="pointer-events-none absolute left-3 top-3 z-20 rounded-full border border-emerald/20 bg-white/95 px-3 py-1 text-xs font-bold text-emerald shadow-sm">
+          <div className="pointer-events-none absolute left-3 top-3 z-20 rounded-full border border-brand/20 bg-white/95 px-3 py-1 text-xs font-bold text-brand-text shadow-sm">
             {dragging ? "Moving pin" : "Location pinned"}
           </div>
         )}
@@ -444,7 +444,7 @@ export function CustomerLocationMapPicker({
             aria-label="Use current location"
             title="Use current location"
             disabled={locationStatus === "loading"}
-            className="grid size-9 place-items-center rounded-lg border border-line bg-white text-ink shadow-sm transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="grid size-9 place-items-center rounded-lg border border-ink-200 bg-white text-ink shadow-sm transition hover:border-green-700/30 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={useBrowserLocation}
           >
             {locationStatus === "loading" ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
@@ -454,7 +454,7 @@ export function CustomerLocationMapPicker({
             aria-label="Center on selected pin"
             title="Center pin"
             disabled={!value || mapStatus !== "ready"}
-            className="grid size-9 place-items-center rounded-lg border border-line bg-white text-ink shadow-sm transition hover:border-ocean/30 disabled:cursor-not-allowed disabled:opacity-50"
+            className="grid size-9 place-items-center rounded-lg border border-ink-200 bg-white text-ink shadow-sm transition hover:border-green-700/30 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => {
               if (value) focusMapOnLocation(value);
             }}
@@ -465,12 +465,12 @@ export function CustomerLocationMapPicker({
       </div>
 
       <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-stretch">
-        <div className="rounded-lg border border-line bg-mist p-3">
-          <p className="text-xs font-semibold uppercase text-slate-500">Latitude</p>
+        <div className="rounded-lg border border-ink-200 bg-ivory-100 p-3">
+          <p className="text-xs font-semibold uppercase text-ink-500">Latitude</p>
           <p className="mt-1 font-mono text-sm font-semibold text-ink">{value ? formatMapCoordinate(value.latitude) : "Not set"}</p>
         </div>
-        <div className="rounded-lg border border-line bg-mist p-3">
-          <p className="text-xs font-semibold uppercase text-slate-500">Longitude</p>
+        <div className="rounded-lg border border-ink-200 bg-ivory-100 p-3">
+          <p className="text-xs font-semibold uppercase text-ink-500">Longitude</p>
           <p className="mt-1 font-mono text-sm font-semibold text-ink">{value ? formatMapCoordinate(value.longitude) : "Not set"}</p>
         </div>
         <Button

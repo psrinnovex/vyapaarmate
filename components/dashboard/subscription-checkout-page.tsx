@@ -449,14 +449,14 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
   return (
     <>
       <div className="mb-5">
-        <Link href="/dashboard/billing" className="inline-flex items-center gap-2 text-sm font-bold text-ocean">
+        <Link href="/dashboard/billing" className="inline-flex items-center gap-2 text-sm font-bold text-brand-text">
           <ArrowLeft className="size-4" /> Back to billing
         </Link>
       </div>
       <PageHeader
         title="Subscription checkout"
         body="Review the plan, apply an eligible coupon, and confirm the final payable amount."
-        action={<Badge variant="blue">Secure checkout</Badge>}
+        action={<Badge variant="info">Secure checkout</Badge>}
       />
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
@@ -464,37 +464,37 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-lg font-extrabold text-ink">Selected plan</h2>
-              <Badge variant="purple">{selectedPlanDetails.name} selected</Badge>
+              <Badge variant="dark">{selectedPlanDetails.name} selected</Badge>
             </div>
-            <div className="rounded-lg border border-emerald bg-white p-4 shadow-clay ring-4 ring-emerald/10 transition-all duration-300 ease-out">
+            <div className="rounded-lg border border-brand bg-white p-4 shadow-clay ring-4 ring-brand/10 transition-all duration-300 ease-out">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-xl font-bold text-ink">{selectedPlanDetails.name}</h3>
-                    <Badge variant="emerald">Selected</Badge>
+                    <Badge variant="success">Selected</Badge>
                   </div>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{selectedPlanDetails.bestFor}</p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-ink-600">{selectedPlanDetails.bestFor}</p>
                 </div>
                 <button
                   type="button"
                   aria-label={planPickerOpen ? "Close plan selector" : "Edit selected plan"}
                   title={planPickerOpen ? "Close plan selector" : "Edit selected plan"}
-                  className="grid size-10 shrink-0 place-items-center rounded-2xl bg-mist/80 text-slate-700 transition hover:border-ocean/30 hover:bg-white hover:text-ocean focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean/15"
+                  className="grid size-10 shrink-0 place-items-center rounded-2xl bg-ivory-100/80 text-ink-700 transition hover:border-green-700/30 hover:bg-white hover:text-brand-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-700/15"
                   onClick={() => setPlanPickerOpen((open) => !open)}
                 >
                   {planPickerOpen ? <X className="size-4" /> : <Pencil className="size-4" />}
                 </button>
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl bg-mist/80 p-3">
-                  <p className="text-xs font-semibold uppercase text-slate-500">Monthly amount</p>
+                <div className="rounded-2xl bg-ivory-100/80 p-3">
+                  <p className="text-xs font-semibold uppercase text-ink-500">Monthly amount</p>
                   <p className="mt-1 text-2xl font-extrabold text-ink">
-                    {formatINR(selectedPlanDetails.price)}<span className="text-sm font-medium text-slate-500">/month</span>
+                    {formatINR(selectedPlanDetails.price)}<span className="text-sm font-medium text-ink-500">/month</span>
                   </p>
                 </div>
-                <div className="rounded-2xl bg-mist/80 p-3 sm:col-span-2">
-                  <p className="text-xs font-semibold uppercase text-slate-500">Included</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">{selectedPlanDetails.features.slice(0, 2).join(" · ")}</p>
+                <div className="rounded-2xl bg-ivory-100/80 p-3 sm:col-span-2">
+                  <p className="text-xs font-semibold uppercase text-ink-500">Included</p>
+                  <p className="mt-1 text-sm leading-6 text-ink-600">{selectedPlanDetails.features.slice(0, 2).join(" · ")}</p>
                 </div>
               </div>
               <div
@@ -516,34 +516,34 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                           aria-pressed={selected}
                           disabled={blockStarter}
                           className={cn(
-                            "flex min-h-[320px] transform-gpu flex-col overflow-hidden rounded-lg border bg-white p-5 text-left shadow-clay-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-ocean/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean/20",
-                            selected && "border-emerald bg-emerald/5 shadow-clay ring-4 ring-emerald/10",
-                            !selected && "border-line",
-                            blockStarter && "opacity-75 grayscale cursor-not-allowed hover:-translate-y-0 hover:border-line"
+                            "flex min-h-[320px] transform-gpu flex-col overflow-hidden rounded-lg border bg-white p-5 text-left shadow-clay-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-green-700/30 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-700/20",
+                            selected && "border-brand bg-brand/5 shadow-clay ring-4 ring-brand/10",
+                            !selected && "border-ink-200",
+                            blockStarter && "opacity-75 grayscale cursor-not-allowed hover:-translate-y-0 hover:border-ink-200"
                           )}
                           onClick={() => !blockStarter && choosePlan(plan.id)}
                         >
                           <span className="flex items-center justify-between gap-3">
                             <span className="text-xl font-bold text-ink">{plan.name}</span>
-                            <Badge variant={selected ? "emerald" : blockStarter ? "secondary" : "blue"}>
+                            <Badge variant={selected ? "success" : blockStarter ? "secondary" : "info"}>
                               {selected ? "Selected" : blockStarter ? "Unavailable" : "Choose"}
                             </Badge>
                           </span>
-                          <span className="mt-3 text-sm leading-6 text-slate-600">{plan.description}</span>
+                          <span className="mt-3 text-sm leading-6 text-ink-600">{plan.description}</span>
                           <span className="mt-4 text-3xl font-extrabold text-ink">
-                            {formatINR(plan.price)}<span className="text-sm font-medium text-slate-500">/month</span>
+                            {formatINR(plan.price)}<span className="text-sm font-medium text-ink-500">/month</span>
                           </span>
                           {launchOffer.publiclyAdvertised && (
-                            <span className="mt-1 text-xs font-semibold text-slate-500">
+                            <span className="mt-1 text-xs font-semibold text-ink-500">
                               <span className="line-through">{formatINR(plan.listPrice)}</span>{" "}
-                              <span className="text-emerald">{launchOffer.discountLabel} for the Bengaluru launch</span>
+                              <span className="text-brand-text">{launchOffer.discountLabel} for the Bengaluru launch</span>
                             </span>
                           )}
-                          <span className="mt-2 text-sm font-semibold text-slate-600">{plan.bestFor}</span>
+                          <span className="mt-2 text-sm font-semibold text-ink-600">{plan.bestFor}</span>
                           <span className="mt-4 grid flex-1 gap-2">
                             {plan.features.slice(0, 5).map((feature) => (
-                              <span key={feature} className="flex gap-2 text-sm leading-5 text-slate-700">
-                                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald" />
+                              <span key={feature} className="flex gap-2 text-sm leading-5 text-ink-700">
+                                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand-text" />
                                 <span>{feature}</span>
                               </span>
                             ))}
@@ -562,44 +562,44 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
               <div>
                 <h2 className="font-bold text-ink">Billing details</h2>
               </div>
-              <Badge variant={appliedCouponCode ? "emerald" : "amber"}>{appliedCouponCode ? "Coupon applied" : "Coupon optional"}</Badge>
+              <Badge variant={appliedCouponCode ? "success" : "warning"}>{appliedCouponCode ? "Coupon applied" : "Coupon optional"}</Badge>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl bg-mist/80 p-3">
+              <div className="rounded-2xl bg-ivory-100/80 p-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-ink">
-                  <Building2 className="size-4 text-ocean" /> Bill to
+                  <Building2 className="size-4 text-brand-text" /> Bill to
                 </div>
                 <p className="mt-2 text-sm font-semibold text-ink">{business.name}</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">{business.ownerName}</p>
+                <p className="mt-1 text-sm leading-6 text-ink-600">{business.ownerName}</p>
               </div>
-              <div className="rounded-2xl bg-mist/80 p-3">
+              <div className="rounded-2xl bg-ivory-100/80 p-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-ink">
-                  <Mail className="size-4 text-violet" /> Contact
+                  <Mail className="size-4 text-peacock-600" /> Contact
                 </div>
-                <p className="mt-2 break-words text-sm leading-6 text-slate-600">{business.email}</p>
-                <p className="text-sm leading-6 text-slate-600">{business.phone}</p>
+                <p className="mt-2 break-words text-sm leading-6 text-ink-600">{business.email}</p>
+                <p className="text-sm leading-6 text-ink-600">{business.phone}</p>
               </div>
-              <div className="rounded-2xl bg-mist/80 p-3">
+              <div className="rounded-2xl bg-ivory-100/80 p-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-ink">
-                  <ReceiptText className="size-4 text-ocean" /> Subscription
+                  <ReceiptText className="size-4 text-brand-text" /> Subscription
                 </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{selectedPlanDetails.name} monthly plan for the business account.</p>
+                <p className="mt-2 text-sm leading-6 text-ink-600">{selectedPlanDetails.name} monthly plan for the business account.</p>
               </div>
-              <div className="rounded-2xl bg-mist/80 p-3">
+              <div className="rounded-2xl bg-ivory-100/80 p-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-ink">
-                  <TicketPercent className="size-4 text-amber-600" /> Coupon
+                  <TicketPercent className="size-4 text-marigold-600" /> Coupon
                 </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Apply one valid subscription coupon before continuing.</p>
+                <p className="mt-2 text-sm leading-6 text-ink-600">Apply one valid subscription coupon before continuing.</p>
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl bg-mist/80 p-3">
+            <div className="mt-4 rounded-2xl bg-ivory-100/80 p-3">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2 text-sm font-bold text-ink">
-                    <MapPin className="size-4 text-ocean" /> Business address
+                    <MapPin className="size-4 text-brand-text" /> Business address
                   </div>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                  <p className="mt-1 text-xs font-semibold text-ink-500">
                     Required for subscription invoices and payment records.
                   </p>
                 </div>
@@ -608,7 +608,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                     type="button"
                     aria-label={businessAddressFormOpen ? "Close address editor" : "Edit business address"}
                     title={businessAddressFormOpen ? "Close address editor" : "Edit business address"}
-                    className="grid size-9 shrink-0 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-slate-700 transition hover:border-ocean/30 hover:text-ocean focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean/15"
+                    className="grid size-9 shrink-0 place-items-center rounded-2xl border border-white/80 bg-white shadow-clay-sm text-ink-700 transition hover:border-green-700/30 hover:text-brand-text focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-700/15"
                     onClick={() => setBusinessAddressEditorOpen((open) => !open)}
                   >
                     {businessAddressFormOpen ? <X className="size-4" /> : <Pencil className="size-4" />}
@@ -675,17 +675,17 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                     </div>
                   </div>
                   {launchSingleCityRestricted && (
-                    <p className="text-xs font-semibold text-emerald">
+                    <p className="text-xs font-semibold text-brand-text">
                       Business onboarding is currently limited to {launchMarket.displayName}, {launchMarket.state}.
                     </p>
                   )}
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     {!savedBusinessAddressComplete && (
-                      <p className="text-xs font-semibold text-amber-700">Save this address before opening payment.</p>
+                      <p className="text-xs font-semibold text-marigold-700">Save this address before opening payment.</p>
                     )}
                     <Button
                       type="submit"
-                      variant="emerald"
+                      variant="brand"
                       className="w-full sm:ml-auto sm:w-auto"
                       disabled={savingBusinessAddress || !editedBusinessAddressComplete}
                       icon={savingBusinessAddress ? <LoaderCircle className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
@@ -717,26 +717,26 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                   />
                   {verifyingGstin && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <LoaderCircle className="size-4 animate-spin text-slate-400" />
+                      <LoaderCircle className="size-4 animate-spin text-ink-500" />
                     </div>
                   )}
                 </div>
                 {billingGstinIsInvalid ? (
-                  <p className="mt-2 text-xs font-semibold text-berry-deep">Enter a valid GSTIN with the correct check digit.</p>
+                  <p className="mt-2 text-xs font-semibold text-kumkum-700">Enter a valid GSTIN with the correct check digit.</p>
                 ) : gstinVerification?.status === "provider_verified" ? (
-                  <p className="mt-2 text-xs font-semibold text-emerald">
+                  <p className="mt-2 text-xs font-semibold text-brand-text">
                     Provider verified: {gstinVerification.businessName}
                   </p>
                 ) : normalizedBillingGstin && !verifyingGstin ? (
-                  <p className="mt-2 text-xs font-semibold leading-5 text-amber-700">
+                  <p className="mt-2 text-xs font-semibold leading-5 text-marigold-700">
                     Format valid; provider verification is not confirmed. The GSTIN can still be applied to this invoice.
                   </p>
                 ) : null}
               </div>
               {basePreview?.promotion ? (
-                <div className="rounded-lg border border-emerald/20 bg-emerald/10 p-3">
-                  <p className="text-sm font-bold text-emerald">{basePreview.promotion.name} applied automatically</p>
-                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                <div className="rounded-lg border border-brand/20 bg-brand/10 p-3">
+                  <p className="text-sm font-bold text-brand-text">{basePreview.promotion.name} applied automatically</p>
+                  <p className="mt-1 text-xs leading-5 text-ink-600">
                     {basePreview.promotion.discountPercent}% is deducted before GST. Coupons cannot be combined with this launch price.
                   </p>
                 </div>
@@ -766,7 +766,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                     </Button>
                   </div>
                   {appliedCouponCode && (
-                    <p className="mt-2 text-xs font-semibold text-emerald">
+                    <p className="mt-2 text-xs font-semibold text-brand-text">
                       Coupon {appliedCouponCode} applied{couponPreview?.coupon?.description ? `: ${couponPreview.coupon.description}` : "."}
                     </p>
                   )}
@@ -780,19 +780,19 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="font-bold text-ink">Payment summary</h2>
-              <p className="mt-1 text-sm text-slate-600">{selectedPlanDetails.name} subscription</p>
+              <p className="mt-1 text-sm text-ink-600">{selectedPlanDetails.name} subscription</p>
             </div>
-            <Badge variant={loadingPreview ? "amber" : "blue"}>{loadingPreview ? "Updating" : "Ready"}</Badge>
+            <Badge variant={loadingPreview ? "warning" : "info"}>{loadingPreview ? "Updating" : "Ready"}</Badge>
           </div>
 
           {billingPreview ? (
             <div className="mt-5 grid gap-2 text-sm">
-              <div className="flex justify-between gap-3 text-slate-600">
+              <div className="flex justify-between gap-3 text-ink-600">
                 <span>Subscription amount</span>
                 <span>{formatINR(billingPreview.breakdown.subtotal)}</span>
               </div>
               {billingPreview.breakdown.discount > 0 && (
-                <div className="flex justify-between gap-3 text-emerald">
+                <div className="flex justify-between gap-3 text-brand-text">
                   <span>
                     {billingPreview.promotion?.name ?? "Coupon"}{billingPreview.coupon?.code ? ` (${billingPreview.coupon.code})` : ""}
                   </span>
@@ -800,7 +800,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                 </div>
               )}
               {billingPreview.breakdown.upgradeCredit > 0 && (
-                <div className="flex justify-between gap-3 text-emerald">
+                <div className="flex justify-between gap-3 text-brand-text">
                   <span>
                     Current {billingPreview.upgradeCredit?.plan === "STARTER" ? "Starter" : "subscription"} credit
                   </span>
@@ -808,22 +808,22 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
                 </div>
               )}
 
-              <div className="flex justify-between gap-3 text-slate-600">
+              <div className="flex justify-between gap-3 text-ink-600">
                 <span>GST {gstRateLabel(billingPreview.breakdown.gstRateBps)}</span>
                 <span>{formatINR(billingPreview.breakdown.gstAmount)}</span>
               </div>
               {normalizedBillingGstin && !billingGstinIsInvalid && (
-                <p className="pt-1 text-xs font-semibold text-slate-600">
+                <p className="pt-1 text-xs font-semibold text-ink-600">
                   GSTIN entered for B2B billing{gstinVerification?.status === "provider_verified" ? " and provider verified" : "; provider verification is not confirmed"}.
                 </p>
               )}
-              <div className="mt-3 flex justify-between gap-3 border-t border-line pt-3 text-base font-bold text-ink">
+              <div className="mt-3 flex justify-between gap-3 border-t border-ink-200 pt-3 text-base font-bold text-ink">
                 <span>Total payable</span>
                 <span>{formatINR(billingPreview.breakdown.total)}</span>
               </div>
             </div>
           ) : (
-            <div className="mt-5 flex min-h-40 items-center justify-center gap-2 rounded-2xl bg-mist/80 text-sm font-semibold text-slate-500">
+            <div className="mt-5 flex min-h-40 items-center justify-center gap-2 rounded-2xl bg-ivory-100/80 text-sm font-semibold text-ink-500">
               {loadingPreview && <LoaderCircle className="size-4 animate-spin" />}
               {loadingPreview ? "Loading billing details" : "Billing details are unavailable"}
             </div>
@@ -831,7 +831,7 @@ export function SubscriptionCheckoutPage({ initialPlan }: { initialPlan: Subscri
 
           <Button
             className="mt-5 w-full"
-            variant="emerald"
+            variant="brand"
             icon={creatingCheckout ? <LoaderCircle className="size-4 animate-spin" /> : <Wallet className="size-4" />}
             disabled={creatingCheckout || loadingPreview || !billingPreview || !savedBusinessAddressComplete}
             onClick={continueToPayment}

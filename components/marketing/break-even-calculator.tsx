@@ -28,19 +28,19 @@ export function BreakEvenCalculator() {
         step={5}
         value={margin}
         onChange={(event) => setMargin(Number(event.target.value))}
-        className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-emerald-400"
+        className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-green-400"
       />
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {pricingPlans.map((plan) => {
           const perMonth = Math.ceil(plan.price / margin);
           const perDay = Math.max(1, Math.ceil(perMonth / 30));
           return (
-            <div key={plan.id} className={cn("rounded-[1.4rem] p-4", plan.id === "PRO" ? "bg-emerald text-white" : "bg-white text-ink")}>
-              <p className={cn("text-xs font-extrabold uppercase tracking-[0.08em]", plan.id === "PRO" ? "text-white/75" : "text-slate-500")}>{plan.name}</p>
+            <div key={plan.id} className={cn("rounded-[1.4rem] p-4", plan.id === "PRO" ? "bg-brand text-ink" : "bg-white text-ink")}>
+              <p className={cn("text-xs font-extrabold uppercase tracking-[0.08em]", plan.id === "PRO" ? "text-white/75" : "text-ink-500")}>{plan.name}</p>
               <p className="mt-1 text-3xl font-extrabold tracking-[-0.04em]" aria-live="polite">
                 {perMonth} <span className="text-base font-bold">orders / month</span>
               </p>
-              <p className={cn("mt-0.5 text-sm font-bold", plan.id === "PRO" ? "text-white/80" : "text-slate-500")}>
+              <p className={cn("mt-0.5 text-sm font-bold", plan.id === "PRO" ? "text-white/80" : "text-ink-500")}>
                 about {perDay} a day covers {rupees(plan.price)}
               </p>
             </div>

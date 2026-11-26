@@ -37,40 +37,40 @@ const layers = [
     body: "Collects tenant-scoped orders, bookings, catalog items, customer history, payment status, WhatsApp consent, and business settings.",
     icon: <Database className="size-5" />,
     art: "bag" as const,
-    tint: "ocean" as const,
-    tone: "ocean" as const
+    tint: "ivory" as const,
+    tone: "ink" as const
   },
   {
     title: "Intelligence Engine",
     body: "Runs low-cost rules, weighted moving averages, RFM scoring, payment priority formulas, and health-score calculations without mandatory paid AI calls.",
     icon: <BrainCircuit className="size-5" />,
     art: "chart" as const,
-    tint: "violet" as const,
-    tone: "violet" as const
+    tint: "peacock" as const,
+    tone: "peacock" as const
   },
   {
     title: "Owner Action Layer",
     body: "Converts signals into plain actions such as prepare more stock, message opted-in customers, follow up payments, or promote top repeat items.",
     icon: <Workflow className="size-5" />,
     art: "bell" as const,
-    tint: "emerald" as const,
-    tone: "emerald" as const
+    tint: "green" as const,
+    tone: "green" as const
   },
   {
     title: "Consent & Privacy Layer",
     body: "Keeps each business isolated by businessId and treats WhatsApp marketing consent separately from order-status communication.",
     icon: <LockKeyhole className="size-5" />,
     art: "shield" as const,
-    tint: "berry" as const,
-    tone: "berry" as const
+    tint: "kumkum" as const,
+    tone: "kumkum" as const
   },
   {
     title: "Future ML Extension Layer",
     body: "Keeps the deterministic engine ML-ready so future prediction models or optional LLM summaries can be enabled behind feature flags.",
     icon: <Rocket className="size-5" />,
     art: "rocket" as const,
-    tint: "mango" as const,
-    tone: "mango" as const
+    tint: "marigold" as const,
+    tone: "marigold" as const
   }
 ];
 
@@ -110,7 +110,7 @@ export default function TechnologyInnovationPage() {
       <PublicPage>
         <PageHeroBanner
           eyebrow="Product architecture and development"
-          eyebrowTone="emerald"
+          eyebrowTone="green"
           title="Technology &"
           highlight="Innovation"
           body="VyapaarMate is developing a business-intelligence layer for Indian MSMEs that converts fragmented order, payment, customer, and booking data into actionable recommendations."
@@ -146,15 +146,15 @@ export default function TechnologyInnovationPage() {
         >
           {architectureSteps.map((step, index) => (
             <div key={step.label} className="flex shrink-0 snap-start items-center gap-4">
-              <article className={cn("clay flex h-[19rem] w-[15rem] flex-col rounded-[2rem] p-5 sm:w-[16.5rem]", index === 5 && "bg-clay-ink text-white shadow-clay-lg")}>
-                <span className={cn("text-xs font-extrabold uppercase tracking-[0.12em]", index === 5 ? "text-emerald-200" : "text-slate-400")}>Step {index + 1}</span>
+              <article className={cn("clay flex h-[19rem] w-[15rem] flex-col rounded-[2rem] p-5 sm:w-[16.5rem]", index === 5 && "bg-clay-ink text-white shadow-clay-lg theme-dark")}>
+                <span className={cn("text-xs font-extrabold uppercase tracking-[0.12em]", index === 5 ? "text-green-200" : "text-ink-500")}>Step {index + 1}</span>
                 <div className="grid flex-1 place-items-center">
                   <ClayIllustration name={step.art} className="h-32 w-32" />
                 </div>
                 <h3 className="text-lg font-extrabold leading-6 tracking-[-0.02em]">{step.label}</h3>
               </article>
               {index < architectureSteps.length - 1 && (
-                <span aria-hidden="true" className="clay-orb size-10 shrink-0 rounded-full bg-white text-slate-400">
+                <span aria-hidden="true" className="clay-orb size-10 shrink-0 rounded-full bg-white text-ink-500">
                   <ArrowRight className="size-4" />
                 </span>
               )}
@@ -173,8 +173,8 @@ export default function TechnologyInnovationPage() {
           <SectionTitle eyebrow="Pilot validation" title="Decisions owners can" highlight="explain and evaluate" />
           <div className="mt-10 grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
             <ScrollReveal direction="right" className="h-full">
-              <blockquote className="clay relative h-full rounded-[2rem] p-7 text-base font-medium leading-7 text-slate-700 sm:p-9">
-                <span aria-hidden="true" className="absolute -top-5 left-7 grid size-12 place-items-center rounded-2xl bg-clay-violet text-white shadow-clay-sm">
+              <blockquote className="clay relative h-full rounded-[2rem] p-7 text-base font-medium leading-7 text-ink-700 sm:p-9">
+                <span aria-hidden="true" className="absolute -top-5 left-7 grid size-12 place-items-center rounded-2xl bg-clay-peacock text-white shadow-clay-sm">
                   <Quote className="size-5" />
                 </span>
                 The innovation is not only in digitising orders but in creating an MSME-specific decision engine that
@@ -185,9 +185,9 @@ export default function TechnologyInnovationPage() {
               </blockquote>
             </ScrollReveal>
             <ScrollReveal direction="left" delay={90} className="h-full">
-              <div className="relative h-full overflow-hidden rounded-[2rem] bg-[linear-gradient(160deg,#1d1a39_0%,#2b2160_60%,#3a2a8a_100%)] p-7 text-white shadow-clay-lg sm:p-9">
-                <div aria-hidden="true" className="vm-blob -bottom-16 -right-16 size-64 bg-emerald opacity-25" />
-                <span className="clay-orb relative size-12 rounded-2xl bg-clay-emerald text-white">
+              <div className="relative h-full overflow-hidden rounded-[2rem] vm-band p-7 text-white shadow-clay-lg sm:p-9">
+                <div aria-hidden="true" className="vm-blob -bottom-16 -right-16 size-64 bg-brand opacity-25" />
+                <span className="clay-orb relative size-12 rounded-2xl bg-clay-green text-ink">
                   <MessageCircle className="size-6" />
                 </span>
                 <h2 className="relative mt-5 text-2xl font-extrabold tracking-[-0.03em]">Practical MSME intelligence</h2>
@@ -202,7 +202,7 @@ export default function TechnologyInnovationPage() {
         </section>
 
         <CtaBand title="See the suggestions on live demo data." body="Log in as the demo owner and open AI Suggestions." art="chart">
-          <ButtonLink href="/demo" size="lg" variant="secondary" icon={<ArrowRight className="size-5" />} iconPosition="end">
+          <ButtonLink href="/demo" size="lg" variant="dark" icon={<ArrowRight className="size-5" />} iconPosition="end">
             Open the live demo
           </ButtonLink>
         </CtaBand>

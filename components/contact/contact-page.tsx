@@ -95,16 +95,16 @@ export function ContactPageContent() {
   return (
     <section id="demo-request" className="mx-auto grid max-w-7xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
       <ScrollReveal className="h-full" direction="right">
-        <div className="relative flex h-full flex-col overflow-hidden rounded-[2.25rem] bg-[linear-gradient(160deg,#1d1a39_0%,#2b2160_60%,#3a2a8a_100%)] p-6 text-white shadow-clay-lg sm:p-8">
-          <div aria-hidden="true" className="vm-blob -right-20 -top-20 size-72 bg-emerald opacity-25" />
+        <div className="relative flex h-full flex-col overflow-hidden rounded-[2.25rem] vm-band p-6 text-white shadow-clay-lg sm:p-8">
+          <div aria-hidden="true" className="vm-blob -right-20 -top-20 size-72 bg-brand opacity-25" />
           <h2 className="relative text-2xl font-extrabold tracking-[-0.03em]">{company.name}</h2>
           <div className="relative mt-5 grid gap-3 text-sm font-semibold text-white/80">
             <a href={`mailto:${company.supportEmail}`} className="flex items-center gap-3 rounded-2xl bg-white/10 p-3 ring-1 ring-white/10 transition hover:bg-white/15">
-              <span className="clay-orb size-10 shrink-0 rounded-xl bg-clay-emerald text-white"><Sms className="size-5" variant="Bulk" /></span>
+              <span className="clay-orb size-10 shrink-0 rounded-xl bg-clay-green text-ink"><Sms className="size-5" variant="Bulk" /></span>
               <span className="min-w-0 break-words">{company.supportEmail}</span>
             </a>
             <p className="flex items-center gap-3 rounded-2xl bg-white/10 p-3 ring-1 ring-white/10">
-              <span className="clay-orb size-10 shrink-0 rounded-xl bg-clay-violet text-white"><Location className="size-5" variant="Bulk" /></span>
+              <span className="clay-orb size-10 shrink-0 rounded-xl bg-clay-peacock text-white"><Location className="size-5" variant="Bulk" /></span>
               <span className="min-w-0 break-words">{company.address}</span>
             </p>
           </div>
@@ -115,7 +115,7 @@ export function ContactPageContent() {
                   <ClayIllustration name={step.art} />
                 </span>
                 <span>
-                  <span className="block text-xs font-extrabold uppercase tracking-[0.1em] text-emerald-200">Step {index + 1}</span>
+                  <span className="block text-xs font-extrabold uppercase tracking-[0.1em] text-green-200">Step {index + 1}</span>
                   <span className="block text-base font-extrabold">{step.title}</span>
                 </span>
               </li>
@@ -144,7 +144,7 @@ export function ContactPageContent() {
                     aria-pressed={business === pick.label}
                     className={cn(
                       "flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 text-sm font-bold transition",
-                      business === pick.label ? "bg-clay-ink text-white shadow-clay-sm" : "bg-mist/80 text-slate-600 hover:bg-white hover:shadow-clay-sm"
+                      business === pick.label ? "bg-clay-ink text-white shadow-clay-sm theme-dark" : "bg-ivory-100/80 text-ink-600 hover:bg-white hover:shadow-clay-sm"
                     )}
                   >
                     <span className="size-7 rounded-full bg-white p-0.5"><ClayIllustration name={pick.art} /></span>
@@ -164,7 +164,7 @@ export function ContactPageContent() {
                 <Input id="city" name="city" defaultValue={launchSingleCityRestricted ? launchMarket.city : ""} readOnly={launchSingleCityRestricted} required />
               </div>
             </div>
-            <p className="-mt-2 text-xs font-semibold leading-5 text-slate-500">
+            <p className="-mt-2 text-xs font-semibold leading-5 text-ink-500">
               {launchMarketRestricted
                 ? `Demo onboarding is currently available only for ${launchMarket.displayName} businesses.`
                 : "Enter the city where your business operates."}
@@ -177,10 +177,10 @@ export function ContactPageContent() {
               <Label htmlFor="website">Website</Label>
               <Input id="website" name="website" tabIndex={-1} autoComplete="off" />
             </div>
-            <p className="text-xs leading-5 text-slate-500">
+            <p className="text-xs leading-5 text-ink-500">
               By submitting, you agree that our launch team may contact you about this request. See our{" "}
-              <Link href="/privacy" className="font-semibold text-ocean">Privacy Policy</Link> and{" "}
-              <Link href="/terms" className="font-semibold text-ocean">Terms</Link>.
+              <Link href="/privacy" className="font-semibold text-brand-text">Privacy Policy</Link> and{" "}
+              <Link href="/terms" className="font-semibold text-brand-text">Terms</Link>.
             </p>
             {notice && (
               <p
@@ -188,14 +188,14 @@ export function ContactPageContent() {
                 aria-live="polite"
                 className={cn(
                   "flex items-center gap-3 rounded-2xl p-3 text-sm font-semibold",
-                  notice.tone === "success" ? "bg-emerald-soft text-emerald-deep" : "bg-berry-soft text-berry-deep"
+                  notice.tone === "success" ? "bg-green-50 text-green-700" : "bg-kumkum-50 text-kumkum-700"
                 )}
               >
                 {notice.tone === "success" && <span className="size-9 shrink-0"><ClayIllustration name="success" /></span>}
                 {notice.message}
               </p>
             )}
-            <Button type="submit" size="lg" variant="emerald" disabled={submitting} icon={<Send2 className="size-5" variant="Bold" />}>
+            <Button type="submit" size="lg" variant="brand" disabled={submitting} icon={<Send2 className="size-5" variant="Bold" />}>
               {submitting ? "Sending Demo Request" : "Submit Demo Request"}
             </Button>
           </form>

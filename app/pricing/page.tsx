@@ -84,7 +84,7 @@ export default function PricingPage() {
     {
       title: "Subscription",
       art: "upi" as const,
-      tint: "violet" as const,
+      tint: "peacock" as const,
       body: launchOffer.publiclyAdvertised
         ? `Starter is ${formatINR(pricingPlans[0].price)}/month and Pro is ${formatINR(pricingPlans[1].price)}/month during the enabled launch offer; list prices remain ${formatINR(pricingPlans[0].listPrice)} and ${formatINR(pricingPlans[1].listPrice)}. GST is additional.`
         : `Starter is ${formatINR(pricingPlans[0].listPrice)}/month and Pro is ${formatINR(pricingPlans[1].listPrice)}/month, plus GST.`
@@ -92,13 +92,13 @@ export default function PricingPage() {
     {
       title: "Setup",
       art: "rocket" as const,
-      tint: "mango" as const,
+      tint: "marigold" as const,
       body: `${pricingPolicy.setupFeeRange} one time for catalog import, service areas, WhatsApp templates, payment setup, and launch support. It is separate from the subscription.`
     },
     {
       title: "Usage",
       art: "phone" as const,
-      tint: "emerald" as const,
+      tint: "green" as const,
       body: "Payment-gateway fees, WhatsApp charges, and any other provider usage costs are billed separately from the subscription and setup fee."
     }
   ];
@@ -128,10 +128,10 @@ export default function PricingPage() {
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
               <div className="glass flex flex-col gap-3 rounded-[1.75rem] p-5 sm:flex-row sm:items-center sm:gap-5">
-                <Sticker tone="emerald" tilt={-4}>
+                <Sticker tone="green" tilt={-4}>
                   {launchOffer.discountPercent}% {launchMarket.city} launch discount
                 </Sticker>
-                <p className="text-sm font-semibold leading-6 text-slate-600">
+                <p className="text-sm font-semibold leading-6 text-ink-600">
                   Applied automatically to every monthly subscription while enabled. Coupons do not stack with this offer. Standard list prices stay at {formatINR(pricingPlans[0].listPrice)} for Starter and {formatINR(pricingPlans[1].listPrice)} for Pro. GST, one-time setup, payment-gateway fees, WhatsApp charges, and other provider usage are separate.
                 </p>
               </div>
@@ -154,7 +154,7 @@ export default function PricingPage() {
                   </div>
                   <div className="p-6">
                     <h2 className="text-xl font-extrabold tracking-[-0.02em] text-ink">{cost.title}</h2>
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{cost.body}</p>
+                    <p className="mt-2 text-sm font-medium leading-6 text-ink-600">{cost.body}</p>
                   </div>
                 </article>
               </ScrollReveal>
@@ -164,11 +164,11 @@ export default function PricingPage() {
 
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <ScrollReveal>
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-[linear-gradient(160deg,#1d1a39_0%,#2b2160_55%,#3a2a8a_100%)] p-6 text-white shadow-clay-lg sm:p-10">
-              <div aria-hidden="true" className="vm-blob -left-20 -top-24 size-80 bg-violet opacity-30" />
+            <div className="relative overflow-hidden rounded-[2.5rem] vm-band p-6 text-white shadow-clay-lg sm:p-10">
+              <div aria-hidden="true" className="vm-blob -left-20 -top-24 size-80 bg-marigold-400 opacity-30" />
               <div className="relative grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
                 <div>
-                  <span className="clay-orb size-14 rounded-2xl bg-clay-emerald text-white">
+                  <span className="clay-orb size-14 rounded-2xl bg-clay-green text-ink">
                     <Calculator className="size-6" />
                   </span>
                   <h2 className="mt-5 text-[clamp(1.8rem,4vw,2.8rem)] font-extrabold leading-[1.05] tracking-[-0.04em]">Simple break-even check</h2>
@@ -193,8 +193,8 @@ export default function PricingPage() {
           </ScrollReveal>
         </section>
 
-        <CtaBand title="Try it before you pay." body="Run a full order and Demo UPI payment in the live demo." art="success">
-          <ButtonLink href="/demo" size="lg" variant="secondary" icon={<ArrowRight className="size-5" />} iconPosition="end">
+        <CtaBand title="Try it before you pay." body="Run a full order and Demo UPI payment in the live demo." art="upi">
+          <ButtonLink href="/demo" size="lg" variant="dark" icon={<ArrowRight className="size-5" />} iconPosition="end">
             Try the live demo
           </ButtonLink>
         </CtaBand>

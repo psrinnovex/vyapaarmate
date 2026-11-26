@@ -313,10 +313,10 @@ export function DashboardBookingAlert({
 
   return (
     <>
-      <section className="business-order-alert relative mb-5 overflow-hidden rounded-lg border border-amber-200 bg-white p-4 shadow-clay" role="alert" aria-live="assertive">
+      <section className="business-order-alert relative mb-5 overflow-hidden rounded-lg border border-marigold-200 bg-white p-4 shadow-clay" role="alert" aria-live="assertive">
         <span className="business-order-alert-sweep" aria-hidden="true" />
         <div className="relative grid gap-4 lg:grid-cols-[116px_minmax(0,1fr)_minmax(220px,256px)] lg:items-center">
-          <div className="business-order-alert-visual relative mx-auto grid size-28 place-items-center rounded-lg border border-mango/30 bg-mango-soft text-amber-700 lg:mx-0">
+          <div className="business-order-alert-visual relative mx-auto grid size-28 place-items-center rounded-lg border border-marigold-500/30 bg-marigold-50 text-marigold-700 lg:mx-0">
             <LazyLottieAnimation
               src={orderAnimationPaths.businessOrderAlert}
               label={`New ${copy.transactionSingular.toLowerCase()} alert`}
@@ -329,21 +329,21 @@ export function DashboardBookingAlert({
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="amber" className="whitespace-normal">
+              <Badge variant="warning" className="whitespace-normal">
                 {pendingOrders.length} new {pendingOrders.length === 1 ? copy.transactionSingular.toLowerCase() : copy.transactionPlural.toLowerCase()}
               </Badge>
-              <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
+              <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.16em] text-marigold-700">
                 <Clock3 className="size-3.5 shrink-0" />
                 {primaryOrder.time}
               </span>
             </div>
             <h2 className="mt-2 break-words text-xl font-extrabold text-ink">New {copy.transactionSingular.toLowerCase()} needs a decision</h2>
-            <p className="mt-2 break-words text-sm leading-6 text-slate-600">
+            <p className="mt-2 break-words text-sm leading-6 text-ink-600">
               <span className="font-bold text-ink">{primaryOrder.orderNumber}</span> from <span className="font-bold text-ink">{primaryOrder.customer}</span> for {formatINR(primaryOrder.amount)}
             </p>
-            <p className="mt-1 break-words text-sm text-slate-500">{primaryOrder.items}</p>
+            <p className="mt-1 break-words text-sm text-ink-500">{primaryOrder.items}</p>
             {alertSound.soundBlocked && (
-              <p className="mt-3 rounded-lg border border-mango/30 bg-mango-soft px-3 py-2 text-sm font-semibold text-mango-deep">
+              <p className="mt-3 rounded-lg border border-marigold-500/30 bg-marigold-50 px-3 py-2 text-sm font-semibold text-marigold-700">
                 Click Enable sound to start the alert chime in this browser.
               </p>
             )}
@@ -351,7 +351,7 @@ export function DashboardBookingAlert({
 
           <div className="grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-1">
             <Button
-              variant="emerald"
+              variant="brand"
               icon={accepting ? <LoaderCircle className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
               disabled={locked || !canUpdateOrders}
               onClick={() => void updateOrderStatus(primaryOrder, "ACCEPTED")}
@@ -374,7 +374,7 @@ export function DashboardBookingAlert({
               Review
             </Button>
             <Button
-              variant={alertSound.soundEnabled ? "secondary" : "primary"}
+              variant={alertSound.soundEnabled ? "secondary" : "dark"}
               icon={alertSound.soundEnabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
               onClick={alertSound.soundEnabled ? alertSound.disableSound : () => void alertSound.enableSound()}
             >
@@ -384,16 +384,16 @@ export function DashboardBookingAlert({
         </div>
 
         {extraOrders.length > 0 && (
-          <div className="relative mt-4 grid gap-2 border-t border-amber-100 pt-4 sm:grid-cols-3">
+          <div className="relative mt-4 grid gap-2 border-t border-marigold-100 pt-4 sm:grid-cols-3">
             {extraOrders.map((order) => (
               <button
                 key={order.id}
                 type="button"
-                className="min-w-0 rounded-lg border border-amber-100 bg-amber-50/60 p-3 text-left transition hover:border-amber-300 hover:bg-amber-50"
+                className="min-w-0 rounded-lg border border-marigold-100 bg-marigold-50/60 p-3 text-left transition hover:border-marigold-300 hover:bg-marigold-50"
                 onClick={() => router.push(`/dashboard/orders?booking=${encodeURIComponent(order.id)}`)}
               >
                 <p className="break-words text-sm font-bold text-ink [overflow-wrap:anywhere]" title={order.orderNumber}>{order.orderNumber}</p>
-                <p className="mt-1 break-words text-xs text-slate-600">{order.customer} - {formatINR(order.amount)}</p>
+                <p className="mt-1 break-words text-xs text-ink-600">{order.customer} - {formatINR(order.amount)}</p>
               </button>
             ))}
           </div>

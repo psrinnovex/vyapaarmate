@@ -48,14 +48,14 @@ function leadEmail(input: {
   return {
     subject: `New VyapaarMate demo request - ${input.city}`,
     html: `
-      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0b0d0b">
         <h1 style="font-size:22px;margin:0 0 16px">New ${escapeHtml(input.city)} demo request</h1>
         <table style="border-collapse:collapse;width:100%;max-width:640px">
           <tbody>
-            <tr><td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:700">Name</td><td style="padding:8px 12px;border:1px solid #e2e8f0">${escapeHtml(input.name)}</td></tr>
-            <tr><td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:700">Phone</td><td style="padding:8px 12px;border:1px solid #e2e8f0">${escapeHtml(input.phone)}</td></tr>
-            <tr><td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:700">Business type</td><td style="padding:8px 12px;border:1px solid #e2e8f0">${escapeHtml(input.business)}</td></tr>
-            <tr><td style="padding:8px 12px;border:1px solid #e2e8f0;font-weight:700">City</td><td style="padding:8px 12px;border:1px solid #e2e8f0">${escapeHtml(input.city)}</td></tr>
+            <tr><td style="padding:8px 12px;border:1px solid #e6dfcf;font-weight:700">Name</td><td style="padding:8px 12px;border:1px solid #e6dfcf">${escapeHtml(input.name)}</td></tr>
+            <tr><td style="padding:8px 12px;border:1px solid #e6dfcf;font-weight:700">Phone</td><td style="padding:8px 12px;border:1px solid #e6dfcf">${escapeHtml(input.phone)}</td></tr>
+            <tr><td style="padding:8px 12px;border:1px solid #e6dfcf;font-weight:700">Business type</td><td style="padding:8px 12px;border:1px solid #e6dfcf">${escapeHtml(input.business)}</td></tr>
+            <tr><td style="padding:8px 12px;border:1px solid #e6dfcf;font-weight:700">City</td><td style="padding:8px 12px;border:1px solid #e6dfcf">${escapeHtml(input.city)}</td></tr>
           </tbody>
         </table>
         <h2 style="font-size:17px;margin:20px 0 8px">Business workflow</h2>

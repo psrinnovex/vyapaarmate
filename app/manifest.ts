@@ -18,7 +18,7 @@ export default function manifest(): MetadataRoute.Manifest {
       client_mode: "navigate-existing"
     },
     prefer_related_applications: false,
-    background_color: "#eef4f8",
+    background_color: "#faf7f0",
     theme_color: siteConfig.themeColor,
     categories: ["business", "productivity", "shopping"],
     icons: [

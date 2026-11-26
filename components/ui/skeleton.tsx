@@ -44,7 +44,7 @@ export function PageHeaderSkeleton({
     <div
       className={cn(
         "mb-6 flex min-w-0 flex-col gap-4 rounded-[2rem] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6",
-        dark ? "bg-[linear-gradient(135deg,#1d1a39_0%,#2b2160_60%,#3a2a8a_100%)]" : "border border-white/80 bg-white/70 shadow-clay"
+        dark ? "vm-band" : "border border-white/80 bg-white/70 shadow-clay"
       )}
     >
       <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ export function TableSkeleton({
     <Card className="overflow-hidden p-0">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" style={{ minWidth }}>
-          <thead className="bg-mist">
+          <thead className="bg-ivory-100">
             <tr>
               {Array.from({ length: columns }, (_, index) => (
                 <th key={index} className="px-4 py-3">
@@ -102,7 +102,7 @@ export function TableSkeleton({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-ink-200">
             {Array.from({ length: rows }, (_, rowIndex) => (
               <tr key={rowIndex}>
                 {Array.from({ length: columns }, (_, columnIndex) => (
@@ -166,7 +166,7 @@ export function DashboardPageSkeleton({
               </div>
               <div className="mt-4 grid gap-3">
                 {Array.from({ length: 3 }, (_, row) => (
-                  <div key={row} className="rounded-lg border border-line bg-mist p-3">
+                  <div key={row} className="rounded-lg border border-ink-200 bg-ivory-100 p-3">
                     <div className="flex items-center justify-between gap-3">
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-7 w-20 rounded-full" />
@@ -354,7 +354,7 @@ export function DashboardPageSkeleton({
 export function PublicHeaderSkeleton() {
   return (
     <div className="h-16">
-      <nav className="fixed inset-x-0 top-0 z-40 w-full border-b border-line bg-white/95 px-3 backdrop-blur sm:px-6 lg:px-8">
+      <nav className="fixed inset-x-0 top-0 z-40 w-full border-b border-ink-200 bg-white/95 px-3 backdrop-blur sm:px-6 lg:px-8">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Skeleton className="size-9 rounded-lg" />
@@ -445,9 +445,9 @@ export function AuthPageSkeleton() {
 
 export function PortalPageSkeleton({ includeHeader = true }: { includeHeader?: boolean }) {
   return (
-    <main className="min-h-screen bg-mist text-ink">
+    <main className="min-h-screen bg-ivory-100 text-ink">
       {includeHeader && <PublicHeaderSkeleton />}
-      <section className="border-b border-line bg-white px-4 py-6 sm:px-6 lg:px-8">
+      <section className="border-b border-ink-200 bg-white px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <Skeleton className="h-7 w-24 rounded-full" />
@@ -471,7 +471,7 @@ export function PortalPageSkeleton({ includeHeader = true }: { includeHeader?: b
 
 export function PublicPageSkeleton() {
   return (
-    <main className="min-h-screen bg-mist text-ink">
+    <main className="min-h-screen bg-ivory-100 text-ink">
       <PublicHeaderSkeleton />
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -491,7 +491,7 @@ export function PublicPageSkeleton() {
 export function StorefrontPageSkeleton() {
   return (
     <main className="min-h-screen bg-mesh-light text-ink">
-      <section className="border-b border-line bg-white/90 px-4 py-6 sm:px-6 lg:px-8">
+      <section className="border-b border-ink-200 bg-white/90 px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[1fr_360px] lg:items-end">
           <div>
             <Skeleton className="h-10 w-64" />

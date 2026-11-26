@@ -108,7 +108,7 @@ export function UserPortalTabs({ className }: { className?: string }) {
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex flex-1 items-center justify-center gap-1.5 rounded-2xl px-2 py-2.5 text-xs font-extrabold transition sm:gap-2 sm:text-sm",
-              active ? "bg-clay-ink text-white shadow-clay-sm" : "text-slate-500 hover:bg-white hover:text-ink"
+              active ? "bg-clay-ink text-white shadow-clay-sm theme-dark" : "text-ink-500 hover:bg-white hover:text-ink"
             )}
           >
             <tab.icon className="size-4 shrink-0" />
@@ -140,13 +140,13 @@ function PortalPageShell({
       <section className="px-4 pt-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl min-w-0">
           <UserPortalTabs />
-          <div className="relative mt-4 overflow-hidden rounded-[2.25rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95)_0%,rgba(244,240,255,0.9)_55%,rgba(226,245,254,0.85)_100%)] p-5 shadow-clay sm:p-8">
-            <div aria-hidden="true" className="vm-blob -right-12 -top-16 size-64 bg-violet opacity-35" />
+          <div className="relative mt-4 overflow-hidden rounded-[2.25rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95)_0%,rgba(243,238,226,0.9)_55%,rgba(212,238,239,0.85)_100%)] p-5 shadow-clay sm:p-8">
+            <div aria-hidden="true" className="vm-blob -right-12 -top-16 size-64 bg-marigold-400 opacity-35" />
             <div className="relative grid items-center gap-5 sm:grid-cols-[minmax(0,1fr)_auto]">
               <div className="min-w-0">
-                <Sticker tone="sky" tilt={-3}>{eyebrow}</Sticker>
+                <Sticker tone="peacock" tilt={-3}>{eyebrow}</Sticker>
                 <h1 className="mt-3 break-words text-[clamp(1.8rem,4.2vw,2.9rem)] font-extrabold leading-[1.05] tracking-[-0.04em]">{title}</h1>
-                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600 sm:text-base">{body}</p>
+                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-ink-600 sm:text-base">{body}</p>
                 {action && <div className="mt-5">{action}</div>}
               </div>
               <div aria-hidden="true" className="hidden w-32 sm:block lg:w-40">
@@ -164,10 +164,10 @@ function PortalPageShell({
 }
 
 const statTones = {
-  ink: "bg-clay-ink text-white",
-  emerald: "bg-clay-emerald text-white",
-  ocean: "bg-clay-ocean text-white",
-  mango: "bg-clay-mango text-ink"
+  ink: "bg-clay-ink text-brand theme-dark",
+  green: "bg-clay-green text-ink",
+  peacock: "bg-clay-peacock text-white",
+  marigold: "bg-clay-marigold text-ink"
 } as const;
 
 type StatTone = keyof typeof statTones;
@@ -192,9 +192,9 @@ function PortalStat({
       <div className="clay flex h-full min-w-0 items-start gap-4 rounded-[1.75rem] p-5">
         <span className={cn("clay-orb size-12 shrink-0 rounded-2xl", statTones[tone])}>{icon}</span>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-500">{label}</p>
+          <p className="text-sm font-bold text-ink-500">{label}</p>
           <p className="mt-1 text-2xl font-extrabold leading-tight tracking-[-0.03em] [overflow-wrap:anywhere]">{value}</p>
-          <p className="mt-1 text-xs font-semibold text-slate-400">{detail}</p>
+          <p className="mt-1 text-xs font-semibold text-ink-500">{detail}</p>
         </div>
       </div>
     </ScrollReveal>
@@ -232,40 +232,40 @@ function BookingTicket({ order, index }: { order: PortalOrder; index: number }) 
     <ScrollReveal delay={Math.min(index, 6) * 40}>
       <article className="clay relative grid min-w-0 overflow-hidden rounded-[2rem] md:grid-cols-[minmax(0,1fr)_16rem]">
         <div className="flex min-w-0 gap-4 p-5 sm:p-6">
-          <span className="size-16 shrink-0 rounded-2xl bg-mist p-1.5 shadow-clay-inset">
+          <span className="size-16 shrink-0 rounded-2xl bg-ivory-100 p-1.5 shadow-clay-inset">
             <ClayIllustration name={art} />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-clay-ink px-2.5 py-0.5 text-xs font-extrabold text-white">{order.orderNumber}</span>
-              <span className="text-xs font-bold text-slate-500">{formatDate(order.createdAt)}</span>
+              <span className="rounded-full bg-clay-ink px-2.5 py-0.5 text-xs font-extrabold text-white theme-dark">{order.orderNumber}</span>
+              <span className="text-xs font-bold text-ink-500">{formatDate(order.createdAt)}</span>
             </div>
-            <Link href={`/b/${order.business.slug}`} className="mt-2 block truncate text-lg font-extrabold tracking-[-0.02em] text-ink transition hover:text-ocean">
+            <Link href={`/b/${order.business.slug}`} className="mt-2 block truncate text-lg font-extrabold tracking-[-0.02em] text-ink transition hover:text-brand-text">
               {order.business.name}
             </Link>
-            <p className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+            <p className="flex items-center gap-1 text-xs font-semibold text-ink-500">
               <MapPin className="size-3.5" />
               {[order.business.city, order.business.state].filter(Boolean).join(", ") || "Local area"}
             </p>
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{orderItemsSummary(order)}</p>
-            {order.notes && <p className="mt-1 line-clamp-1 text-xs text-slate-500">Note: {order.notes}</p>}
+            <p className="mt-2 line-clamp-2 text-sm leading-6 text-ink-600">{orderItemsSummary(order)}</p>
+            {order.notes && <p className="mt-1 line-clamp-1 text-xs text-ink-500">Note: {order.notes}</p>}
             <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold">
-              {orderTypeLabel(order) && <span className="rounded-full bg-mist px-2.5 py-1 text-slate-600">{orderTypeLabel(order)}</span>}
+              {orderTypeLabel(order) && <span className="rounded-full bg-ivory-100 px-2.5 py-1 text-ink-600">{orderTypeLabel(order)}</span>}
               {order.appointment ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet/10 px-2.5 py-1 text-violet-deep">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-peacock-600/10 px-2.5 py-1 text-peacock-700">
                   <CalendarCheck2 className="size-3.5" />
                   {formatScheduledAppointment(order)} · {order.appointment.provider.name} · {order.appointment.status.toLowerCase().replace("_", " ")}
                 </span>
               ) : (
-                <span className="rounded-full bg-mist px-2.5 py-1 text-slate-400">No reserved time</span>
+                <span className="rounded-full bg-ivory-100 px-2.5 py-1 text-ink-500">No reserved time</span>
               )}
             </div>
           </div>
         </div>
 
-        <div className="relative border-t-2 border-dashed border-line md:border-l-2 md:border-t-0">
-          <span aria-hidden="true" className="absolute -left-3 -top-3 size-6 rounded-full bg-mist shadow-clay-inset md:-left-3 md:-top-3" />
-          <span aria-hidden="true" className="absolute -right-3 -top-3 size-6 rounded-full bg-mist shadow-clay-inset md:-bottom-3 md:-left-3 md:right-auto md:top-auto" />
+        <div className="relative border-t-2 border-dashed border-ink-200 md:border-l-2 md:border-t-0">
+          <span aria-hidden="true" className="absolute -left-3 -top-3 size-6 rounded-full bg-ivory-100 shadow-clay-inset md:-left-3 md:-top-3" />
+          <span aria-hidden="true" className="absolute -right-3 -top-3 size-6 rounded-full bg-ivory-100 shadow-clay-inset md:-bottom-3 md:-left-3 md:right-auto md:top-auto" />
           <div className="flex h-full flex-col gap-3 p-5 sm:p-6">
             <p className="text-3xl font-extrabold tracking-[-0.04em]">{formatINR(order.totalAmount)}</p>
             <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ function BookingTicket({ order, index }: { order: PortalOrder; index: number }) 
             <div className="flex items-center gap-2">
               <PaymentStatusAnimation status={order.paymentStatus} provider={order.payment?.provider ?? "CASH"} label={`${order.paymentStatus.toLowerCase()} payment`} />
               <StatusPill status={order.paymentStatus} />
-              <span className="text-xs font-bold text-slate-500">{order.payment?.provider ?? "CASH"}</span>
+              <span className="text-xs font-bold text-ink-500">{order.payment?.provider ?? "CASH"}</span>
             </div>
             <ButtonLink href={`/order/${order.publicToken}`} variant="dark" className="mt-auto w-full" icon={<ArrowUpRight className="size-4" />} iconPosition="end">
               View
@@ -306,15 +306,15 @@ export function UserBookingsPage({ user, orders }: { user: PortalUser; orders: P
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <PortalStat icon={<CalendarCheck2 className="size-5" />} label="Total bookings" value={String(orders.length)} detail="Latest 100 records" tone="ink" />
-        <PortalStat icon={<ReceiptText className="size-5" />} label="Active" value={String(activeBookings)} detail="Open status updates" tone="ocean" delay={60} />
-        <PortalStat icon={<WalletCards className="size-5" />} label="Pending payments" value={String(pendingPayments)} detail="Awaiting payment confirmation" tone="mango" delay={120} />
-        <PortalStat icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across matched bookings" tone="emerald" delay={180} />
+        <PortalStat icon={<ReceiptText className="size-5" />} label="Active" value={String(activeBookings)} detail="Open status updates" tone="peacock" delay={60} />
+        <PortalStat icon={<WalletCards className="size-5" />} label="Pending payments" value={String(pendingPayments)} detail="Awaiting payment confirmation" tone="marigold" delay={120} />
+        <PortalStat icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across matched bookings" tone="green" delay={180} />
       </div>
 
       <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Booking history</h2>
-          <p className="mt-1 text-sm font-medium text-slate-500">Sorted by most recent activity.</p>
+          <p className="mt-1 text-sm font-medium text-ink-500">Sorted by most recent activity.</p>
         </div>
       </div>
 
@@ -374,18 +374,18 @@ export function UserProfilePage({
     >
       <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
         <ScrollReveal direction="right" className="min-w-0">
-          <div className="relative min-w-0 overflow-hidden rounded-[2.25rem] bg-[linear-gradient(150deg,#1d1a39_0%,#2b2160_55%,#4f3bb8_100%)] p-6 text-white shadow-clay-lg sm:p-7">
-            <div aria-hidden="true" className="vm-blob -right-16 -top-20 size-64 bg-emerald opacity-30" />
+          <div className="relative min-w-0 overflow-hidden rounded-[2.25rem] vm-band p-6 text-white shadow-clay-lg sm:p-7">
+            <div aria-hidden="true" className="vm-blob -right-16 -top-20 size-64 bg-brand opacity-30" />
             <div aria-hidden="true" className="absolute inset-0 opacity-20 [background-image:radial-gradient(rgba(255,255,255,0.45)_1px,transparent_1px)] [background-size:16px_16px]" />
             <div className="relative flex min-w-0 items-center gap-4">
-              <div className="clay-orb size-16 shrink-0 rounded-[1.4rem] bg-clay-emerald text-xl font-extrabold text-white">{initials(user.name)}</div>
+              <div className="clay-orb size-16 shrink-0 rounded-[1.4rem] bg-clay-green text-xl font-extrabold text-ink">{initials(user.name)}</div>
               <div className="min-w-0">
                 <h2 className="truncate text-2xl font-extrabold tracking-[-0.03em]">{user.name}</h2>
                 <p className="mt-0.5 text-sm font-semibold text-white/60">VyapaarMate account</p>
               </div>
             </div>
             <div className="relative mt-2 flex justify-end">
-              <Sticker tone="mango" tilt={4}>Customer</Sticker>
+              <Sticker tone="marigold" tilt={4}>Customer</Sticker>
             </div>
             <div className="relative mt-4 grid gap-2.5 text-sm">
               <ProfileLine icon={<Mail className="size-4" />} label="Email" value={user.email} />
@@ -401,15 +401,15 @@ export function UserProfilePage({
         <div className="grid min-w-0 content-start gap-4">
           <div className="grid min-w-0 gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             <PortalStat icon={<ReceiptText className="size-5" />} label="Bookings" value={String(orders.length)} detail="Matched to this account" tone="ink" />
-            <PortalStat icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across booking history" tone="emerald" delay={60} />
-            <PortalStat icon={<CalendarCheck2 className="size-5" />} label="Last booking" value={lastBooking ? formatShortDate(lastBooking) : "None"} detail="Most recent record" tone="ocean" delay={120} />
+            <PortalStat icon={<WalletCards className="size-5" />} label="Total value" value={formatINR(totalSpent)} detail="Across booking history" tone="green" delay={60} />
+            <PortalStat icon={<CalendarCheck2 className="size-5" />} label="Last booking" value={lastBooking ? formatShortDate(lastBooking) : "None"} detail="Most recent record" tone="peacock" delay={120} />
           </div>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
               <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Business profiles</h2>
-              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">Customer records created when you booked with each business.</p>
+              <p className="mt-1 text-sm font-medium leading-6 text-ink-500">Customer records created when you booked with each business.</p>
             </div>
-            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-slate-600 shadow-clay-sm">{linkedCountLabel}</span>
+            <span className="rounded-full bg-white px-3 py-1.5 text-xs font-extrabold text-ink-600 shadow-clay-sm">{linkedCountLabel}</span>
           </div>
           {businessProfiles.length > 0 ? (
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -418,22 +418,22 @@ export function UserProfilePage({
                 return (
                   <ScrollReveal key={profile.id} delay={Math.min(index, 6) * 40} className="h-full min-w-0">
                     <article className="clay flex h-full min-w-0 flex-col rounded-[1.75rem] p-5">
-                      <Link href={`/b/${profile.business.slug}`} className="inline-flex max-w-full items-center gap-1 text-base font-extrabold text-ink transition hover:text-ocean">
+                      <Link href={`/b/${profile.business.slug}`} className="inline-flex max-w-full items-center gap-1 text-base font-extrabold text-ink transition hover:text-brand-text">
                         <span className="min-w-0 truncate">{profile.business.name}</span>
                         <ArrowUpRight className="size-3.5 shrink-0" />
                       </Link>
                       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                        <span className="rounded-2xl bg-mist/80 px-2 py-2">
+                        <span className="rounded-2xl bg-ivory-100/80 px-2 py-2">
                           <span className="block text-lg font-extrabold leading-6">{profile.totalOrders}</span>
-                          <span className="text-[11px] font-bold text-slate-500">{bookingLabel}</span>
+                          <span className="text-[11px] font-bold text-ink-500">{bookingLabel}</span>
                         </span>
-                        <span className="rounded-2xl bg-mist/80 px-2 py-2">
+                        <span className="rounded-2xl bg-ivory-100/80 px-2 py-2">
                           <span className="block truncate text-lg font-extrabold leading-6">{formatINR(profile.totalSpent)}</span>
-                          <span className="text-[11px] font-bold text-slate-500">spent</span>
+                          <span className="text-[11px] font-bold text-ink-500">spent</span>
                         </span>
-                        <span className="rounded-2xl bg-mist/80 px-2 py-2">
+                        <span className="rounded-2xl bg-ivory-100/80 px-2 py-2">
                           <span className="block truncate text-sm font-extrabold leading-6">{formatShortDate(profile.lastOrderAt)}</span>
-                          <span className="text-[11px] font-bold text-slate-500">last order</span>
+                          <span className="text-[11px] font-bold text-ink-500">last order</span>
                         </span>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
@@ -471,8 +471,8 @@ export function UserProfilePage({
 
 function FlagChip({ on, label }: { on: boolean; label: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold", on ? "bg-emerald-soft text-emerald-deep" : "bg-slate-100 text-slate-500")}>
-      <span className={cn("size-1.5 rounded-full", on ? "bg-emerald" : "bg-slate-400")} />
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold", on ? "bg-green-50 text-green-700" : "bg-ink-100 text-ink-500")}>
+      <span className={cn("size-1.5 rounded-full", on ? "bg-brand" : "bg-ink-400")} />
       {label}
     </span>
   );
@@ -508,14 +508,14 @@ export function UserSettingsPage({
           </div>
         </SettingsCard>
 
-        <SettingsCard icon={<Settings className="size-5" />} tone="ocean" title="Communication status" body="Current booking communication flags.">
+        <SettingsCard icon={<Settings className="size-5" />} tone="peacock" title="Communication status" body="Current booking communication flags.">
           <div className="mt-5 grid gap-3">
             {businessProfiles.length > 0 ? (
               communicationPagination.pageItems.map((profile) => (
-                <div key={profile.id} className="rounded-2xl bg-mist/80 p-4">
+                <div key={profile.id} className="rounded-2xl bg-ivory-100/80 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-extrabold">{profile.business.name}</p>
-                    <p className="text-xs font-semibold text-slate-500">{profile.totalOrders} bookings</p>
+                    <p className="text-xs font-semibold text-ink-500">{profile.totalOrders} bookings</p>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <FlagChip on={profile.whatsappOptIn} label={`WhatsApp ${profile.whatsappOptIn ? "enabled" : "disabled"}`} />
@@ -524,7 +524,7 @@ export function UserSettingsPage({
                 </div>
               ))
             ) : (
-              <p className="rounded-2xl bg-mist/80 p-4 text-sm font-semibold text-slate-600">No communication settings are linked yet.</p>
+              <p className="rounded-2xl bg-ivory-100/80 p-4 text-sm font-semibold text-ink-600">No communication settings are linked yet.</p>
             )}
           </div>
           <PaginationControls
@@ -560,20 +560,20 @@ function SettingsCard({
   children
 }: {
   icon: React.ReactNode;
-  tone: StatTone | "berry";
+  tone: StatTone | "kumkum";
   title: string;
   body: React.ReactNode;
   className?: string;
   children?: React.ReactNode;
 }) {
-  const orb = tone === "berry" ? "bg-clay-berry text-white" : statTones[tone];
+  const orb = tone === "kumkum" ? "bg-clay-kumkum text-white" : statTones[tone];
   return (
     <section className={cn("clay min-w-0 rounded-[2rem] p-5 sm:p-6", className)}>
       <div className="flex items-start gap-3">
         <span className={cn("clay-orb size-12 shrink-0 rounded-2xl", orb)}>{icon}</span>
         <div className="min-w-0">
           <h2 className="text-lg font-extrabold text-ink">{title}</h2>
-          <div className="mt-1 text-sm leading-6 text-slate-500">{body}</div>
+          <div className="mt-1 text-sm leading-6 text-ink-500">{body}</div>
         </div>
       </div>
       {children}
@@ -656,7 +656,7 @@ function CustomerAccountDataControls() {
       <SettingsCard
         className="self-start"
         icon={<Download className="size-5" />}
-        tone="ocean"
+        tone="ink"
         title="Download your data"
         body="Download a JSON copy of your account profile, linked customer records, bookings, payments, and support requests."
       >
@@ -672,18 +672,18 @@ function CustomerAccountDataControls() {
           {exporting ? "Preparing download" : "Download my data"}
         </Button>
         {exportError && (
-          <p className="mt-3 rounded-2xl bg-berry-soft p-3 text-sm leading-6 text-berry-deep" role="alert">
+          <p className="mt-3 rounded-2xl bg-kumkum-50 p-3 text-sm leading-6 text-kumkum-700" role="alert">
             {exportError}
           </p>
         )}
       </SettingsCard>
 
       <SettingsCard
-        className="border-2 border-berry/20 bg-[linear-gradient(180deg,#fff6f9_0%,#ffe8ef_100%)] lg:col-span-2"
+        className="border-2 border-kumkum-600/20 bg-[linear-gradient(180deg,#fdf2ef_0%,#fbe1db_100%)] lg:col-span-2"
         icon={<Trash2 className="size-5" />}
-        tone="berry"
+        tone="kumkum"
         title="Delete sign-in account"
-        body={<span id="customer-account-retention" className="text-slate-600">{CUSTOMER_ACCOUNT_RETENTION_NOTICE}</span>}
+        body={<span id="customer-account-retention" className="text-ink-600">{CUSTOMER_ACCOUNT_RETENTION_NOTICE}</span>}
       >
         <form className="mt-5 grid gap-4" onSubmit={deleteAccount}>
           <div className="grid gap-4 md:grid-cols-2">
@@ -702,7 +702,7 @@ function CustomerAccountDataControls() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="delete-account-confirmation">
-                Type <span className="font-extrabold text-berry-deep">{CUSTOMER_ACCOUNT_DELETE_CONFIRMATION}</span> to confirm
+                Type <span className="font-extrabold text-kumkum-700">{CUSTOMER_ACCOUNT_DELETE_CONFIRMATION}</span> to confirm
               </Label>
               <Input
                 id="delete-account-confirmation"
@@ -717,12 +717,12 @@ function CustomerAccountDataControls() {
               />
             </div>
           </div>
-          <p className="text-xs leading-5 text-slate-500" id="delete-account-confirmation-help">
+          <p className="text-xs leading-5 text-ink-500" id="delete-account-confirmation-help">
             This is permanent for the VyapaarMate login and account profile. The retained records described above are not erased.
           </p>
 
           {deleteError && (
-            <p className="rounded-2xl bg-berry-soft p-3 text-sm leading-6 text-berry-deep" role="alert">
+            <p className="rounded-2xl bg-kumkum-50 p-3 text-sm leading-6 text-kumkum-700" role="alert">
               {deleteError}
             </p>
           )}
@@ -750,7 +750,7 @@ function CustomerAccountDataControls() {
 function ProfileLine({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="grid grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-3 rounded-2xl bg-white/10 px-3 py-2.5 ring-1 ring-white/10">
-      <span className="grid size-9 place-items-center rounded-xl bg-white/15 text-emerald-200">{icon}</span>
+      <span className="grid size-9 place-items-center rounded-xl bg-white/15 text-green-200">{icon}</span>
       <div className="min-w-0">
         <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-white/50">{label}</p>
         <p className="font-semibold leading-5 text-white [overflow-wrap:anywhere]">{value}</p>
@@ -761,9 +761,9 @@ function ProfileLine({ icon, label, value }: { icon: React.ReactNode; label: str
 
 function SettingsLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 rounded-2xl bg-mist/80 px-4 py-3 sm:grid-cols-[8rem_1fr] sm:items-center">
-      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="min-w-0 truncate text-sm font-bold text-slate-700">{value}</p>
+    <div className="grid gap-1 rounded-2xl bg-ivory-100/80 px-4 py-3 sm:grid-cols-[8rem_1fr] sm:items-center">
+      <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-ink-500">{label}</p>
+      <p className="min-w-0 truncate text-sm font-bold text-ink-700">{value}</p>
     </div>
   );
 }

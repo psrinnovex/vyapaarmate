@@ -30,17 +30,17 @@ import {
 import type { Icon } from "@/components/ui/iconsax";
 
 const metrics = [
-  { label: "Today value", value: "INR 18,400.00", Icon: WalletMoney, tone: "bg-emerald/10 text-emerald" },
-  { label: "Open orders", value: "27", Icon: ShoppingBag, tone: "bg-ocean/10 text-ocean" },
-  { label: "Bookings", value: "14", Icon: CalendarTick, tone: "bg-violet/10 text-violet" },
-  { label: "Repeat rate", value: "42%", Icon: Profile2User, tone: "bg-amber-100 text-amber-800" }
+  { label: "Today value", value: "INR 18,400.00", Icon: WalletMoney, tone: "bg-brand/10 text-brand-text" },
+  { label: "Open orders", value: "27", Icon: ShoppingBag, tone: "bg-green-700/10 text-brand-text" },
+  { label: "Bookings", value: "14", Icon: CalendarTick, tone: "bg-peacock-600/10 text-peacock-600" },
+  { label: "Repeat rate", value: "42%", Icon: Profile2User, tone: "bg-marigold-100 text-marigold-800" }
 ];
 
 const lanes = [
   {
     title: "New",
     count: "8",
-    accent: "bg-ocean",
+    accent: "bg-ink",
     items: [
       ["VM-2048", "Meals combo x4", "UPI pending"],
       ["VM-2049", "Hair spa booking", "10:30 AM"]
@@ -49,7 +49,7 @@ const lanes = [
   {
     title: "Active",
     count: "12",
-    accent: "bg-violet",
+    accent: "bg-peacock-600",
     items: [
       ["VM-2050", "Grocery essentials", "Packing"],
       ["VM-2051", "AC service visit", "Assigned"]
@@ -58,7 +58,7 @@ const lanes = [
   {
     title: "Ready",
     count: "7",
-    accent: "bg-emerald",
+    accent: "bg-brand",
     items: [
       ["VM-2052", "Filter coffee x3", "Paid"],
       ["VM-2053", "Laundry pickup", "Route set"]
@@ -79,10 +79,10 @@ const sidebarItems: {
   iconTone: string;
   activeClassName?: string;
 }[] = [
-  { label: "Operations", Icon: ShoppingBag, iconTone: "text-ocean", activeClassName: "bg-white text-ink shadow-sm" },
-  { label: "Payments", Icon: Card, iconTone: "text-slate-400" },
-  { label: "Customers", Icon: Profile2User, iconTone: "text-slate-400" },
-  { label: "Reports", Icon: Chart2, iconTone: "text-slate-400" }
+  { label: "Operations", Icon: ShoppingBag, iconTone: "text-brand-text", activeClassName: "bg-white text-ink shadow-sm" },
+  { label: "Payments", Icon: Card, iconTone: "text-ink-500" },
+  { label: "Customers", Icon: Profile2User, iconTone: "text-ink-500" },
+  { label: "Reports", Icon: Chart2, iconTone: "text-ink-500" }
 ];
 
 const automationSteps = [
@@ -196,10 +196,10 @@ export default function HeroScene() {
 
   return (
     <div ref={rootRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <div className="absolute inset-0 bg-[linear-gradient(116deg,#f1eefc_0%,#f7f5ff_42%,#ecf7f1_100%)]" />
-      <div className="absolute inset-0 opacity-[0.34] [background-image:linear-gradient(rgba(29,26,57,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(29,26,57,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
-      <div className="absolute inset-y-0 left-0 z-[1] hidden w-full bg-[linear-gradient(90deg,#f1eefc_0%,rgba(238,244,248,0.98)_34%,rgba(238,244,248,0.72)_48%,rgba(238,244,248,0)_67%)] lg:block" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(0deg,#f1eefc_0%,rgba(238,244,248,0)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(116deg,#f3eee2_0%,#faf7f0_42%,#effbec_100%)]" />
+      <div className="absolute inset-0 opacity-[0.34] [background-image:linear-gradient(rgba(11,13,11,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(11,13,11,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
+      <div className="absolute inset-y-0 left-0 z-[1] hidden w-full bg-[linear-gradient(90deg,#f3eee2_0%,rgba(243,238,226,0.98)_34%,rgba(243,238,226,0.72)_48%,rgba(243,238,226,0)_67%)] lg:block" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(0deg,#f3eee2_0%,rgba(243,238,226,0)_100%)]" />
 
       <div className="absolute right-4 top-20 z-[1] w-[210px] opacity-35 sm:right-10 sm:w-[260px] lg:hidden">
         <AnimatedFlowMark />
@@ -226,30 +226,30 @@ export default function HeroScene() {
 
 function DashboardWindow() {
   return (
-    <div data-hero-intro data-float className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_34px_100px_rgba(79,91,213,0.2)] backdrop-blur">
-      <div className="flex items-center justify-between border-b border-line bg-slate-50/90 px-4 py-3">
+    <div data-hero-intro data-float className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_34px_100px_rgba(11,122,16,0.2)] backdrop-blur">
+      <div className="flex items-center justify-between border-b border-ink-200 bg-ink-50/90 px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-red-400" />
-          <span className="size-2 rounded-full bg-amber-400" />
-          <span className="size-2 rounded-full bg-emerald" />
+          <span className="size-2 rounded-full bg-kumkum-400" />
+          <span className="size-2 rounded-full bg-marigold-400" />
+          <span className="size-2 rounded-full bg-brand" />
         </div>
-        <span className="inline-flex items-center gap-2 rounded-lg border border-line bg-white px-3 py-1 text-xs font-bold text-slate-600">
-          <Monitor className="size-5 text-ocean" variant="Bulk" />
+        <span className="inline-flex items-center gap-2 rounded-lg border border-ink-200 bg-white px-3 py-1 text-xs font-bold text-ink-600">
+          <Monitor className="size-5 text-brand-text" variant="Bulk" />
           Owner dashboard
         </span>
       </div>
 
       <div className="grid lg:grid-cols-[190px_1fr]">
-        <aside className="hidden border-r border-line bg-mist p-4 lg:block">
-          <div className="rounded-lg bg-ink p-4 text-white">
+        <aside className="hidden border-r border-ink-200 bg-ivory-100 p-4 lg:block">
+          <div className="rounded-lg bg-ink p-4 text-white theme-dark">
             <p className="text-xs font-semibold text-white/60">Business</p>
             <p className="mt-1 font-bold">Sri Sai Local</p>
-            <p data-pulse className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald/20 px-2.5 py-1 text-xs font-bold text-emerald">
+            <p data-pulse className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand/20 px-2.5 py-1 text-xs font-bold text-brand-text">
               <TickCircle className="size-4" variant="Bold" />
               Open now
             </p>
           </div>
-          <div className="mt-4 space-y-2 text-sm font-semibold text-slate-600">
+          <div className="mt-4 space-y-2 text-sm font-semibold text-ink-600">
             {sidebarItems.map(({ label, Icon, iconTone, activeClassName = "" }) => (
               <div key={label} data-flow-card className={`flex items-center gap-2 rounded-lg px-3 py-2 ${activeClassName}`}>
                 <Icon className={`size-5 ${iconTone}`} variant="Bulk" />
@@ -262,10 +262,10 @@ function DashboardWindow() {
         <div className="p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-emerald">Operations workspace</p>
+              <p className="text-xs font-bold uppercase text-brand-text">Operations workspace</p>
               <h3 className="mt-1 text-xl font-extrabold text-ink">Orders, bookings, payments, and CRM</h3>
             </div>
-            <span data-pulse className="inline-flex w-fit items-center gap-2 rounded-lg bg-emerald/10 px-3 py-2 text-xs font-bold text-emerald">
+            <span data-pulse className="inline-flex w-fit items-center gap-2 rounded-lg bg-brand/10 px-3 py-2 text-xs font-bold text-brand-text">
               <Whatsapp className="size-5" variant="Bulk" />
               WhatsApp ready
             </span>
@@ -273,14 +273,14 @@ function DashboardWindow() {
 
           <div className="mt-5 grid gap-3 sm:grid-cols-4">
             {metrics.map(({ label, value, tone, Icon }) => (
-              <div key={label} data-hero-intro className="rounded-lg border border-line bg-white p-4 shadow-sm">
+              <div key={label} data-hero-intro className="rounded-lg border border-ink-200 bg-white p-4 shadow-sm">
                 <div className={`mb-3 grid size-10 place-items-center rounded-lg ${tone}`}>
                   <Icon className="size-5" variant="Bulk" />
                 </div>
                 <p className="text-lg font-extrabold text-ink">{value}</p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">{label}</p>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                  <span data-progress data-hero-line className="block h-full origin-left rounded-full bg-current text-emerald" />
+                <p className="mt-1 text-xs font-semibold text-ink-500">{label}</p>
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-100">
+                  <span data-progress data-hero-line className="block h-full origin-left rounded-full bg-current text-brand-text" />
                 </div>
               </div>
             ))}
@@ -289,22 +289,22 @@ function DashboardWindow() {
           <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_260px]">
             <div className="grid gap-3 md:grid-cols-3">
               {lanes.map((lane) => (
-                <div key={lane.title} data-hero-intro className="rounded-lg border border-line bg-white p-3 shadow-sm">
+                <div key={lane.title} data-hero-intro className="rounded-lg border border-ink-200 bg-white p-3 shadow-sm">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={`size-2 rounded-full ${lane.accent}`} />
                       <h4 className="font-bold text-ink">{lane.title}</h4>
                     </div>
-                    <span className="rounded-full bg-mist px-2 py-1 text-xs font-bold text-slate-600">{lane.count}</span>
+                    <span className="rounded-full bg-ivory-100 px-2 py-1 text-xs font-bold text-ink-600">{lane.count}</span>
                   </div>
                   <div className="space-y-2">
                     {lane.items.map(([id, item, status], index) => (
-                      <div key={id} data-flow-card className="rounded-lg bg-mist p-3 text-xs">
+                      <div key={id} data-flow-card className="rounded-lg bg-ivory-100 p-3 text-xs">
                         <div className="flex items-center justify-between gap-3">
                           <span className="font-bold text-ink">{id}</span>
-                          <span className="rounded-full bg-white px-2 py-1 font-bold text-ocean">{status}</span>
+                          <span className="rounded-full bg-white px-2 py-1 font-bold text-brand-text">{status}</span>
                         </div>
-                        <p className="mt-2 truncate font-semibold text-slate-600">{item}</p>
+                        <p className="mt-2 truncate font-semibold text-ink-600">{item}</p>
                         {index === 0 && (
                           <div className="mt-3 h-1 overflow-hidden rounded-full bg-white">
                             <span data-progress data-hero-line className={`block h-full origin-left rounded-full ${lane.accent}`} />
@@ -317,18 +317,18 @@ function DashboardWindow() {
               ))}
             </div>
 
-            <div data-hero-intro className="rounded-lg border border-line bg-mist p-4 shadow-sm">
+            <div data-hero-intro className="rounded-lg border border-ink-200 bg-ivory-100 p-4 shadow-sm">
               <div className="flex items-center gap-2">
-                <MagicStar className="size-6 text-ocean" variant="Bulk" />
+                <MagicStar className="size-6 text-brand-text" variant="Bulk" />
                 <h4 className="font-bold text-ink">Next best action</h4>
               </div>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 text-sm leading-6 text-ink-600">
                 Send a lunch reminder to 124 opted-in customers who ordered in the last 30 days.
               </p>
               <div className="mt-4 grid gap-2">
                 {automationSteps.map(({ label, Icon }) => (
                   <div key={label} data-flow-card className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-bold text-ink">
-                    <Icon className="size-5 text-emerald" variant="Bulk" />
+                    <Icon className="size-5 text-brand-text" variant="Bulk" />
                     {label}
                   </div>
                 ))}
@@ -343,15 +343,15 @@ function DashboardWindow() {
 
 function CustomerPhone() {
   return (
-    <div data-hero-intro data-float className="rounded-[2rem] border border-ink/10 bg-ink p-2 shadow-[0_28px_90px_rgba(29,26,57,0.3)]">
+    <div data-hero-intro data-float className="rounded-[2rem] border border-ink/10 bg-ink p-2 shadow-[0_28px_90px_rgba(11,13,11,0.3)] theme-dark">
       <div className="overflow-hidden rounded-[1.55rem] bg-white">
-        <div className="bg-ink px-4 py-5 text-white">
+        <div className="bg-ink px-4 py-5 text-white theme-dark">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-white/60">Customer flow</p>
               <p className="mt-1 font-bold">Fresh Bowl</p>
             </div>
-            <span data-pulse className="inline-flex items-center gap-1 rounded-full bg-emerald px-2.5 py-1 text-xs font-bold">
+            <span data-pulse className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-xs font-bold">
               <Whatsapp className="size-4" variant="Bold" />
               Open
             </span>
@@ -364,26 +364,26 @@ function CustomerPhone() {
         </div>
         <div className="space-y-3 p-4">
           {phoneItems.map(({ item, price, Icon }) => (
-            <div key={item} data-flow-card className="flex items-center justify-between gap-3 rounded-lg border border-line p-3">
+            <div key={item} data-flow-card className="flex items-center justify-between gap-3 rounded-lg border border-ink-200 p-3">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-mist text-ocean">
+                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-ivory-100 text-brand-text">
                   <Icon className="size-5" variant="Bulk" />
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold text-ink">{item}</p>
-                  <p className="text-xs text-slate-500">Ready today</p>
+                  <p className="text-xs text-ink-500">Ready today</p>
                 </div>
               </div>
               <span className="text-sm font-extrabold text-ink">INR {price}</span>
             </div>
           ))}
-          <button className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-bold text-white" tabIndex={-1}>
+          <button className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink text-sm font-bold text-white theme-dark" tabIndex={-1}>
             <Send2 className="size-5" variant="Bold" />
             Send on WhatsApp
           </button>
           <div className="grid grid-cols-3 gap-2">
             {["Paid", "Accepted", "Ready"].map((label) => (
-              <div key={label} data-pulse className="rounded-lg bg-emerald/10 px-2 py-2 text-center text-[11px] font-bold text-emerald">
+              <div key={label} data-pulse className="rounded-lg bg-brand/10 px-2 py-2 text-center text-[11px] font-bold text-brand-text">
                 {label}
               </div>
             ))}
@@ -396,19 +396,19 @@ function CustomerPhone() {
 
 function BusinessModePanel() {
   return (
-    <div data-hero-intro data-float className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_24px_80px_rgba(79,91,213,0.18)] backdrop-blur">
+    <div data-hero-intro data-float className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_24px_80px_rgba(11,122,16,0.18)] backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Location className="size-6 text-emerald" variant="Bulk" />
+          <Location className="size-6 text-brand-text" variant="Bulk" />
           <p className="font-bold text-ink">Setup adapts</p>
         </div>
-        <span className="rounded-full bg-mist px-2 py-1 text-xs font-bold text-slate-600">Multi-category</span>
+        <span className="rounded-full bg-ivory-100 px-2 py-1 text-xs font-bold text-ink-600">Multi-category</span>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         {businessModes.map(({ label, Icon }) => (
-          <div key={label} data-flow-card className="rounded-lg border border-line bg-mist p-3">
-            <Icon className="size-5 text-ocean" variant="Bulk" />
-            <p className="mt-2 text-xs font-bold text-slate-700">{label}</p>
+          <div key={label} data-flow-card className="rounded-lg border border-ink-200 bg-ivory-100 p-3">
+            <Icon className="size-5 text-brand-text" variant="Bulk" />
+            <p className="mt-2 text-xs font-bold text-ink-700">{label}</p>
           </div>
         ))}
       </div>
@@ -422,12 +422,12 @@ function AnimatedFlowMark() {
       <svg viewBox="0 0 420 360" role="img" className="size-full overflow-visible">
         <defs>
           <linearGradient id="flowStroke" x1="44" x2="370" y1="60" y2="300" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#4f5bd5" />
-            <stop offset="0.52" stopColor="#7c5cff" />
-            <stop offset="1" stopColor="#12b76a" />
+            <stop stopColor="#0e7c86" />
+            <stop offset="0.52" stopColor="#119aa5" />
+            <stop offset="1" stopColor="#1ec926" />
           </linearGradient>
           <filter id="flowShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="16" floodColor="#4f5bd5" floodOpacity="0.18" stdDeviation="16" />
+            <feDropShadow dx="0" dy="16" floodColor="#0e7c86" floodOpacity="0.18" stdDeviation="16" />
           </filter>
         </defs>
         <path data-flow-path d="M54 172C92 74 173 65 211 143C250 223 322 219 369 118" fill="none" stroke="url(#flowStroke)" strokeLinecap="round" strokeWidth="8" />
@@ -446,7 +446,7 @@ function AnimatedFlowMark() {
 function FlowNode({ x, y, icon }: { x: number; y: number; icon: ReactNode }) {
   return (
     <foreignObject x={x - 30} y={y - 30} width="60" height="60">
-      <div data-flow-node className="grid size-[60px] place-items-center rounded-lg border border-white/80 bg-white text-ocean shadow-[0_18px_50px_rgba(79,91,213,0.18)]">
+      <div data-flow-node className="grid size-[60px] place-items-center rounded-lg border border-white/80 bg-white text-brand-text shadow-[0_18px_50px_rgba(11,122,16,0.18)]">
         {icon}
       </div>
     </foreignObject>
